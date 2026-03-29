@@ -3,6 +3,7 @@ import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { trackProductClick } from "@/lib/track-click";
 import type { Product } from "@/lib/supabase-queries";
 
 interface ProductCardProps {
@@ -11,6 +12,10 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, featured }: ProductCardProps) {
+  const handleBuyClick = () => {
+    trackProductClick(product.id);
+  };
+
   return (
     <motion.div
       layout
@@ -66,7 +71,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
 
         <div className="mt-auto flex items-center justify-between pt-2">
           <span className="font-heading text-xl font-bold text-primary">{product.price}</span>
-          <Button asChild size="sm" className="gap-1.5">
+          <Button asChild size="sm" className="gap-1.5" onClick={handleBuyClick}>
             <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
               Buy Now <ExternalLink className="h-3.5 w-3.5" />
             </a>

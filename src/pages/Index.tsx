@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useSEO } from "@/hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { getProducts, getProductOfTheDay, getRandomProduct } from "@/lib/supabase-queries";
 
 export default function Index() {
+  useSEO({ title: "Home", description: "Discover interesting products you never knew you needed. New surprise every day on Bored Shopper." });
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => getProducts({ activeOnly: true }),
