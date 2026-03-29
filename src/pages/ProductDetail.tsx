@@ -5,6 +5,8 @@ import { ExternalLink, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getProduct, getProducts, getRandomProduct } from "@/lib/supabase-queries";
+import { trackProductClick } from "@/lib/track-click";
+import { useSEO } from "@/hooks/useSEO";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -21,9 +23,20 @@ export default function ProductDetail() {
     queryFn: () => getProducts({ activeOnly: true }),
   });
 
+  useSEO({
+    title: product?.name,
+    description: product?.description || `Check out ${product?.name} on Bored Shopper.`,
+    image: product?.image_url || undefined,
+    url: product ? `${window.location.origin}/product/${product.id}` : undefined,
+  });
+
   const handleAnother = () => {
     const next = getRandomProduct(allProducts, id);
     if (next) navigate(`/product/${next.id}`);
+  };
+
+  const handleBuyClick = () => {
+    if (product) trackProductClick(product.id);
   };
 
   if (isLoading) {
@@ -74,7 +87,7 @@ export default function ProductDetail() {
           <p className="font-heading text-3xl font-bold text-primary">{product.price}</p>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <Button asChild size="lg" className="gap-2">
+            <Button asChild size="lg" className="gap-2" onClick={handleBuyClick}>
               <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
                 Buy Now <ExternalLink className="h-4 w-4" />
               </a>
