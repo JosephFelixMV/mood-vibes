@@ -74,83 +74,101 @@ export default function ProductDetail() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-4xl overflow-hidden rounded-2xl border bg-card md:flex"
+        className="mx-auto max-w-5xl overflow-hidden rounded-2xl border bg-card"
       >
-        <div className="relative bg-muted md:w-1/2">
-          {allImages.length > 0 ? (
-            <>
-              <img
-                src={allImages[currentImage]}
-                alt={product.name}
-                className="h-full w-full object-cover"
-              />
-              {allImages.length > 1 && (
+        {/* Top section: images + key info side by side */}
+        <div className="md:flex">
+          {/* Image gallery - fixed aspect ratio so descriptions can't break it */}
+          <div className="relative md:w-1/2">
+            <div className="relative aspect-square w-full overflow-hidden bg-muted">
+              {allImages.length > 0 ? (
                 <>
-                  <button
-                    onClick={() => setCurrentImage((i) => (i - 1 + allImages.length) % allImages.length)}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => setCurrentImage((i) => (i + 1) % allImages.length)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
-                  <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
-                    {allImages.map((_, i) => (
+                  <img
+                    src={allImages[currentImage]}
+                    alt={product.name}
+                    className="h-full w-full object-contain"
+                  />
+                  {allImages.length > 1 && (
+                    <>
                       <button
-                        key={i}
-                        onClick={() => setCurrentImage(i)}
-                        className={`h-2 w-2 rounded-full transition-colors ${
-                          i === currentImage ? "bg-primary" : "bg-card/60"
-                        }`}
-                      />
-                    ))}
-                  </div>
+                        onClick={() => setCurrentImage((i) => (i - 1 + allImages.length) % allImages.length)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => setCurrentImage((i) => (i + 1) % allImages.length)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </>
+                  )}
                 </>
+              ) : (
+                <div className="flex h-full items-center justify-center text-6xl text-muted-foreground">
+                  🛍️
+                </div>
               )}
-            </>
-          ) : (
-            <div className="flex min-h-[300px] items-center justify-center text-6xl text-muted-foreground">
-              🛍️
             </div>
-          )}
-        </div>
-        <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
-          <div className="flex flex-wrap gap-2">
-            <Badge>{product.category}</Badge>
-            {product.vibe_category && (
-              <Badge variant="secondary">{product.vibe_category}</Badge>
+            {/* Thumbnail strip */}
+            {allImages.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto p-3">
+                {allImages.map((url, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentImage(i)}
+                    className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
+                      i === currentImage ? "border-primary" : "border-transparent"
+                    }`}
+                  >
+                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
             )}
           </div>
-          <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
-          {product.company_name && (
-            <p className="text-sm text-muted-foreground">by {product.company_name}</p>
-          )}
-          {product.description && (
-            <p className="text-muted-foreground">{product.description}</p>
-          )}
-          <p className="font-heading text-3xl font-bold text-primary">{product.price}</p>
 
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Button asChild size="lg" className="gap-2 rounded-full" onClick={handleBuyClick}>
-              <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
-                Buy Now <ExternalLink className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={handleAnother}
-              disabled={allProducts.length <= 1}
-              className="gap-2 rounded-full"
-            >
-              Show me another <ArrowRight className="h-4 w-4" />
-            </Button>
+          {/* Product info */}
+          <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
+            <div className="flex flex-wrap gap-2">
+              <Badge>{product.category}</Badge>
+              {product.vibe_category && (
+                <Badge variant="secondary">{product.vibe_category}</Badge>
+              )}
+            </div>
+            <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
+            {product.company_name && (
+              <p className="text-sm text-muted-foreground">by {product.company_name}</p>
+            )}
+            <p className="font-heading text-3xl font-bold text-primary">{product.price}</p>
+
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Button asChild size="lg" className="gap-2 rounded-full" onClick={handleBuyClick}>
+                <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
+                  Buy Now <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleAnother}
+                disabled={allProducts.length <= 1}
+                className="gap-2 rounded-full"
+              >
+                Show me another <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* Description below, full width, with proper whitespace rendering */}
+        {product.description && (
+          <div className="border-t px-8 py-6">
+            <h2 className="mb-3 font-heading text-lg font-semibold">About this product</h2>
+            <p className="whitespace-pre-line text-muted-foreground leading-relaxed">{product.description}</p>
+          </div>
+        )}
       </motion.div>
     </div>
   );
