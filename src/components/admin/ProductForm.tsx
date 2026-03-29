@@ -104,10 +104,16 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const { additional_images, ...productData } = form;
       const payload = {
-        ...productData,
-        vibe_category: productData.vibe_category || null,
+        name: form.name,
+        description: form.description,
+        price: form.price,
+        image_url: form.image_url,
+        affiliate_url: form.affiliate_url,
+        category: form.category,
+        company_name: form.company_name,
+        is_active: form.is_active,
+        vibe_category: form.vibe_category || null,
       };
 
       let productId = editId;
