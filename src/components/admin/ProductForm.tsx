@@ -115,10 +115,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       if (editId) {
         const { error } = await supabase.from("products").update(payload).eq("id", editId);
         if (error) throw error;
-        // Delete old additional images
         await supabase.from("product_images").delete().eq("product_id", editId);
       } else {
-        const { data, error } = await supabase.from("products").insert(payload).select("id").single();
+        const { data, error } = await supabase.from("products").insert([payload]).select("id").single();
         if (error) throw error;
         productId = data.id;
       }
