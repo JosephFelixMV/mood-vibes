@@ -8,6 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { getProducts, getProductOfTheDay, getRandomProduct } from "@/lib/supabase-queries";
 
 export default function Index() {
+  useSEO({ title: "Home", description: "Discover interesting products you never knew you needed. New surprise every day on Bored Shopper." });
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => getProducts({ activeOnly: true }),
