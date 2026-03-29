@@ -57,7 +57,14 @@ export default function ProductList({ onEdit }: Props) {
             <tr key={p.id} className="border-b last:border-0">
               <td className="px-4 py-3">
                 <div>
-                  <span className="font-medium">{p.name}</span>
+                  <a
+                    href={`/product/${p.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-foreground underline-offset-2 hover:text-primary hover:underline"
+                  >
+                    {p.name}
+                  </a>
                   {p.company_name && (
                     <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
                   )}
