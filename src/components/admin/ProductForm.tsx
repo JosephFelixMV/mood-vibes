@@ -228,7 +228,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              {coreCategories.map((c) => (
+              {coreCategories.filter((c) => !!c.parent_slug).map((c) => (
                 <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
               ))}
             </SelectContent>
