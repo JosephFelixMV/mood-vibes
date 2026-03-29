@@ -38,6 +38,32 @@ export type Database = {
         }
         Relationships: []
       }
+      product_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          product_id: string
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          product_id: string
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_clicks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           affiliate_url: string
