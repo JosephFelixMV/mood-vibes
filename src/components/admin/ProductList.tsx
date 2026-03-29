@@ -40,12 +40,13 @@ export default function ProductList({ onEdit }: Props) {
   if (isLoading) return <div className="py-10 text-center text-muted-foreground">Loading…</div>;
 
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-xl border">
       <table className="w-full text-sm">
         <thead className="border-b bg-muted/50 text-left">
           <tr>
             <th className="px-4 py-3 font-medium">Product</th>
             <th className="px-4 py-3 font-medium">Category</th>
+            <th className="px-4 py-3 font-medium">Vibe</th>
             <th className="px-4 py-3 font-medium">Price</th>
             <th className="px-4 py-3 font-medium">Status</th>
             <th className="px-4 py-3 font-medium">Actions</th>
@@ -64,6 +65,13 @@ export default function ProductList({ onEdit }: Props) {
               </td>
               <td className="px-4 py-3">
                 <Badge variant="secondary">{p.category}</Badge>
+              </td>
+              <td className="px-4 py-3">
+                {p.vibe_category ? (
+                  <Badge variant="outline">{p.vibe_category}</Badge>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
               </td>
               <td className="px-4 py-3">{p.price}</td>
               <td className="px-4 py-3">
@@ -95,7 +103,7 @@ export default function ProductList({ onEdit }: Props) {
           ))}
           {products.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+              <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
                 No products yet
               </td>
             </tr>
