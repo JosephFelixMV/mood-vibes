@@ -23,7 +23,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.35 }}
-      className={`group overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-lg ${
+      className={`group overflow-hidden rounded-2xl border bg-card transition-shadow hover:shadow-lg ${
         featured ? "md:flex md:items-stretch" : ""
       }`}
     >
@@ -64,14 +64,14 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
         </div>
 
         {product.description && (
-          <p className={`text-sm text-muted-foreground ${featured ? "" : "line-clamp-2"}`}>
+          <p className={`text-sm text-muted-foreground ${featured ? "line-clamp-3" : "line-clamp-2"}`}>
             {product.description}
           </p>
         )}
 
         <div className="mt-auto flex items-center justify-between pt-2">
           <span className="font-heading text-xl font-bold text-primary">{product.price}</span>
-          <Button asChild size="sm" className="gap-1.5" onClick={handleBuyClick}>
+          <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
             <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
               Buy Now <ExternalLink className="h-3.5 w-3.5" />
             </a>

@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
+import Vibes from "./pages/Vibes";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Admin from "./pages/Admin";
@@ -26,6 +27,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/categories" element={<Categories />} />
+              <Route path="/vibes" element={<Vibes />} />
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/admin" element={<Admin />} />

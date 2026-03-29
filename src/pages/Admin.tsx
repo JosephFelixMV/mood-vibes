@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Lock } from "lucide-react";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 
-const ADMIN_PASSWORD = "boredshopper2024";
+const ADMIN_PASSWORD = "surpriseshopper2024";
 
 export default function Admin() {
   const [authed, setAuthed] = useState(false);
@@ -24,7 +24,7 @@ export default function Admin() {
   if (!authed) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
-        <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4 rounded-xl border bg-card p-8 shadow-sm">
+        <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4 rounded-2xl border bg-card p-8">
           <div className="flex items-center gap-2 font-heading text-lg font-semibold">
             <Lock className="h-5 w-5 text-primary" /> Admin Access
           </div>
@@ -35,7 +35,7 @@ export default function Admin() {
             onChange={(e) => setPw(e.target.value)}
           />
           {error && <p className="text-sm text-destructive">Incorrect password</p>}
-          <Button type="submit" className="w-full">Login</Button>
+          <Button type="submit" className="w-full rounded-full">Login</Button>
         </form>
       </div>
     );

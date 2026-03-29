@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductForm from "./ProductForm";
 import ProductList from "./ProductList";
@@ -6,13 +6,16 @@ import ProductList from "./ProductList";
 export default function AdminDashboard() {
   const [tab, setTab] = useState("list");
   const [editId, setEditId] = useState<string | null>(null);
+  const formStateRef = useRef<Record<string, any> | null>(null);
 
   const handleEdit = (id: string) => {
+    formStateRef.current = null; // Clear saved state when editing a different product
     setEditId(id);
     setTab("form");
   };
 
   const handleDone = () => {
+    formStateRef.current = null;
     setEditId(null);
     setTab("list");
   };
@@ -25,11 +28,11 @@ export default function AdminDashboard() {
           <TabsTrigger value="list">Products</TabsTrigger>
           <TabsTrigger value="form">{editId ? "Edit Product" : "Add Product"}</TabsTrigger>
         </TabsList>
-        <TabsContent value="list">
+        <TabsContent value="list" forceMount className={tab !== "list" ? "hidden" : ""}>
           <ProductList onEdit={handleEdit} />
         </TabsContent>
-        <TabsContent value="form">
-          <ProductForm editId={editId} onDone={handleDone} />
+        <TabsContent value="form" forceMount className={tab !== "form" ? "hidden" : ""}>
+          <ProductForm editId={editId} onDone={handleDone} savedState={formStateRef} />
         </TabsContent>
       </Tabs>
     </div>
