@@ -129,7 +129,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       }
 
       // Insert additional images
-      const validImages = additional_images.filter((url) => url.trim());
+      const validImages = form.additional_images.filter((url) => url.trim());
       if (validImages.length > 0 && productId) {
         const { error } = await supabase.from("product_images").insert(
           validImages.map((url, i) => ({
