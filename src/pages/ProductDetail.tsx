@@ -87,11 +87,15 @@ export default function ProductDetail() {
                 <>
                   {allMedia[currentImage].type === "video" ? (
                     <video
-                      src={allMedia[currentImage].url}
+                      key={allMedia[currentImage].url}
                       controls
                       autoPlay
                       className="h-full w-full object-contain"
-                    />
+                    >
+                      <source src={allMedia[currentImage].url} type="video/mp4" />
+                      <source src={`${allMedia[currentImage].url}.mp4`} />
+                      Your browser does not support the video tag.
+                    </video>
                   ) : (
                     <img
                       src={allMedia[currentImage].url}
