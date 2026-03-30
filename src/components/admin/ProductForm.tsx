@@ -250,7 +250,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     id: "preview",
     name: form.name || "Product Name",
     description: form.description || "Product description will appear here",
-    price: form.price || "$0.00",
+    price: Number(form.price) || 0,
     image_url: form.image_url || null,
     affiliate_url: form.affiliate_url || "#",
     category: form.category || "Category",
