@@ -105,6 +105,41 @@ export type Database = {
           },
         ]
       }
+      product_specifications: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          item_detail: string
+          product_id: string
+          specification: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          item_detail: string
+          product_id: string
+          specification: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          item_detail?: string
+          product_id?: string
+          specification?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_specifications_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           affiliate_url: string
