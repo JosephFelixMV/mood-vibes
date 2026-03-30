@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trackProductClick } from "@/lib/track-click";
+import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 
 interface ProductCardProps {
@@ -69,7 +70,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
         )}
 
         <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="font-heading text-xl font-bold text-primary">{product.price}</span>
+          <span className="font-heading text-xl font-bold text-primary">{formatPrice(product.price)}</span>
           <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
             <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
               Buy Now <ExternalLink className="h-3.5 w-3.5" />

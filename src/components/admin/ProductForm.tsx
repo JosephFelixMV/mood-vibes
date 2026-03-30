@@ -12,6 +12,7 @@ import { X, Plus, Upload, Download } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
+import { formatPrice } from "@/lib/supabase-queries";
 
 interface Props {
   editId: string | null;
@@ -27,7 +28,7 @@ interface SpecRow {
 const empty = {
   name: "",
   description: "",
-  price: "",
+  price: "" as string | number,
   image_url: "",
   affiliate_url: "",
   category: "",
@@ -181,7 +182,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       const payload = {
         name: form.name,
         description: form.description,
-        price: form.price,
+        price: Number(form.price) || 0,
         image_url: form.image_url,
         affiliate_url: form.affiliate_url,
         category: form.category,
@@ -249,7 +250,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     id: "preview",
     name: form.name || "Product Name",
     description: form.description || "Product description will appear here",
-    price: form.price || "$0.00",
+    price: Number(form.price) || 0,
     image_url: form.image_url || null,
     affiliate_url: form.affiliate_url || "#",
     category: form.category || "Category",
@@ -335,7 +336,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
         <div>
           <Label>Price</Label>
-          <Input value={form.price} onChange={(e) => set("price", e.target.value)} required placeholder="$29.99" />
+          <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => set("price", e.target.value)} required placeholder="29.99" />
         </div>
         <div>
           <Label>Description</Label>

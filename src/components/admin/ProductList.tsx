@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { getProducts, getCategories } from "@/lib/supabase-queries";
+import { getProducts, getCategories, formatPrice } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -165,7 +165,7 @@ export default function ProductList({ onEdit }: Props) {
                     <span className="text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="px-4 py-3">{p.price}</td>
+                <td className="px-4 py-3">{formatPrice(p.price)}</td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={p.is_active}

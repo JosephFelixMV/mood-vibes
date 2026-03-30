@@ -5,7 +5,7 @@ import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-reac
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications } from "@/lib/supabase-queries";
+import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, formatPrice } from "@/lib/supabase-queries";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -147,7 +147,7 @@ export default function ProductDetail() {
             {product.company_name && (
               <p className="text-sm text-muted-foreground">by {product.company_name}</p>
             )}
-            <p className="font-heading text-3xl font-bold text-primary">{product.price}</p>
+            <p className="font-heading text-3xl font-bold text-primary">{formatPrice(product.price)}</p>
 
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 rounded-full" onClick={handleBuyClick}>

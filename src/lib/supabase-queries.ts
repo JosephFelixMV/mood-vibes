@@ -134,6 +134,13 @@ export function getProductOfTheDay(products: Product[]): Product | null {
   return shuffled[dayInWindow % shuffled.length];
 }
 
+export function formatPrice(price: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(price);
+}
+
 function simpleHash(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
