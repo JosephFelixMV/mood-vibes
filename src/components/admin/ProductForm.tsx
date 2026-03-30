@@ -272,6 +272,18 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         }}
         className="space-y-4"
       >
+        {/* Template upload/download */}
+        <div className="flex items-center gap-2 pb-2 border-b border-border mb-2">
+          <Button type="button" variant="outline" size="sm" onClick={downloadTemplate} className="gap-1.5">
+            <Download className="h-3.5 w-3.5" /> Download Template
+          </Button>
+          <label>
+            <input type="file" accept=".json" onChange={handleTemplateUpload} className="hidden" />
+            <Button type="button" variant="outline" size="sm" className="gap-1.5 cursor-pointer" asChild>
+              <span><Upload className="h-3.5 w-3.5" /> Upload Template</span>
+            </Button>
+          </label>
+        </div>
         <div>
           <Label>Product Name</Label>
           <Input value={form.name} onChange={(e) => set("name", e.target.value)} required />
