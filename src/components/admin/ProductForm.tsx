@@ -28,6 +28,7 @@ const empty = {
   category: "",
   vibe_category: "",
   company_name: "",
+  video_url: "",
   is_active: true,
   additional_images: [] as string[],
 };
