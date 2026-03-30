@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,10 +38,12 @@ export default function ProductDetail() {
     url: product ? `${window.location.origin}/product/${product.id}` : undefined,
   });
 
-  // Combine main image + additional images
-  const allImages = product ? [
-    ...(product.image_url ? [product.image_url] : []),
-    ...images.map((img) => img.image_url),
+  // Combine main image + additional images + video
+  type MediaItem = { type: "image"; url: string } | { type: "video"; url: string };
+  const allMedia: MediaItem[] = product ? [
+    ...(product.image_url ? [{ type: "image" as const, url: product.image_url }] : []),
+    ...images.map((img) => ({ type: "image" as const, url: img.image_url })),
+    ...(product.video_url ? [{ type: "video" as const, url: product.video_url }] : []),
   ] : [];
 
   const handleAnother = () => {
@@ -81,23 +83,32 @@ export default function ProductDetail() {
           {/* Image gallery - fixed aspect ratio so descriptions can't break it */}
           <div className="relative md:w-1/2">
             <div className="relative aspect-square w-full overflow-hidden bg-muted">
-              {allImages.length > 0 ? (
+              {allMedia.length > 0 ? (
                 <>
-                  <img
-                    src={allImages[currentImage]}
-                    alt={product.name}
-                    className="h-full w-full object-contain"
-                  />
-                  {allImages.length > 1 && (
+                  {allMedia[currentImage].type === "video" ? (
+                    <video
+                      src={allMedia[currentImage].url}
+                      controls
+                      autoPlay
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <img
+                      src={allMedia[currentImage].url}
+                      alt={product.name}
+                      className="h-full w-full object-contain"
+                    />
+                  )}
+                  {allMedia.length > 1 && (
                     <>
                       <button
-                        onClick={() => setCurrentImage((i) => (i - 1 + allImages.length) % allImages.length)}
+                        onClick={() => setCurrentImage((i) => (i - 1 + allMedia.length) % allMedia.length)}
                         className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </button>
                       <button
-                        onClick={() => setCurrentImage((i) => (i + 1) % allImages.length)}
+                        onClick={() => setCurrentImage((i) => (i + 1) % allMedia.length)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
                       >
                         <ChevronRight className="h-5 w-5" />
@@ -112,17 +123,23 @@ export default function ProductDetail() {
               )}
             </div>
             {/* Thumbnail strip */}
-            {allImages.length > 1 && (
+            {allMedia.length > 1 && (
               <div className="flex gap-2 overflow-x-auto p-3">
-                {allImages.map((url, i) => (
+                {allMedia.map((item, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentImage(i)}
-                    className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
+                    className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
                       i === currentImage ? "border-primary" : "border-transparent"
                     }`}
                   >
-                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                    {item.type === "video" ? (
+                      <div className="flex h-full w-full items-center justify-center bg-muted">
+                        <Play className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <img src={item.url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                    )}
                   </button>
                 ))}
               </div>

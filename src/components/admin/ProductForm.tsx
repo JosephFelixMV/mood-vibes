@@ -28,6 +28,7 @@ const empty = {
   category: "",
   vibe_category: "",
   company_name: "",
+  video_url: "",
   is_active: true,
   additional_images: [] as string[],
 };
@@ -75,6 +76,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             category: existing.category,
             vibe_category: existing.vibe_category || "",
             company_name: existing.company_name || "",
+            video_url: existing.video_url || "",
             is_active: existing.is_active,
             additional_images: data?.map((d) => d.image_url) || [],
           });
@@ -114,6 +116,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         company_name: form.company_name,
         is_active: form.is_active,
         vibe_category: form.vibe_category || null,
+        video_url: form.video_url || null,
       };
 
       let productId = editId;
@@ -161,6 +164,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     vibe_category: form.vibe_category || null,
     company_name: form.company_name || null,
     is_active: form.is_active,
+    video_url: form.video_url || null,
     date_added: new Date().toISOString(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -251,6 +255,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         <div>
           <Label>Company Name</Label>
           <Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
+        </div>
+        <div>
+          <Label>Video URL (optional)</Label>
+          <Input value={form.video_url} onChange={(e) => set("video_url", e.target.value)} placeholder="https://..." />
+          <p className="mt-1 text-xs text-muted-foreground">Direct link to an MP4 video file</p>
         </div>
         <div className="flex items-center gap-3">
           <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
