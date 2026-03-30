@@ -1,0 +1,16 @@
+{
+  "name": "",
+  "company_name": "",
+  "affiliate_url": "",
+  "image_url": "",
+  "additional_images": [],
+  "video_url": "",
+  "price": "",
+  "description": "",
+  "category": "",
+  "vibe_category": "",
+  "specifications": [
+    { "item_detail": "", "specification": "" }
+  ],
+  "is_active": true
+}
