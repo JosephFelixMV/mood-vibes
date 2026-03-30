@@ -38,10 +38,12 @@ export default function ProductDetail() {
     url: product ? `${window.location.origin}/product/${product.id}` : undefined,
   });
 
-  // Combine main image + additional images
-  const allImages = product ? [
-    ...(product.image_url ? [product.image_url] : []),
-    ...images.map((img) => img.image_url),
+  // Combine main image + additional images + video
+  type MediaItem = { type: "image"; url: string } | { type: "video"; url: string };
+  const allMedia: MediaItem[] = product ? [
+    ...(product.image_url ? [{ type: "image" as const, url: product.image_url }] : []),
+    ...images.map((img) => ({ type: "image" as const, url: img.image_url })),
+    ...(product.video_url ? [{ type: "video" as const, url: product.video_url }] : []),
   ] : [];
 
   const handleAnother = () => {
