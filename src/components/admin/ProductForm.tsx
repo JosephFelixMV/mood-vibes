@@ -343,17 +343,31 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <RichTextEditor value={form.description} onChange={(html) => set("description", html)} />
         </div>
         <div>
-          <Label>Category (Core Lifestyle)</Label>
-          <Select value={form.category} onValueChange={(v) => set("category", v)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {coreCategories.filter((c) => !!c.parent_slug).map((c) => (
-                <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>Category (Core Lifestyle — up to 3)</Label>
+          <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
+            {coreCategories.filter((c) => !!c.parent_slug).map((c) => {
+              const selected = (form.category || "").split(",").filter(Boolean);
+              const isChecked = selected.includes(c.name);
+              const atLimit = selected.length >= 3 && !isChecked;
+              return (
+                <label key={c.id} className={`flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 ${atLimit ? "opacity-50 cursor-not-allowed" : ""}`}>
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    disabled={atLimit}
+                    onChange={() => {
+                      const updated = isChecked
+                        ? selected.filter((v: string) => v !== c.name)
+                        : [...selected, c.name];
+                      set("category", updated.join(","));
+                    }}
+                    className="rounded"
+                  />
+                  {c.icon} {c.name}
+                </label>
+              );
+            })}
+          </div>
         </div>
         <div>
           <Label>Vibes (Optional — select multiple)</Label>
