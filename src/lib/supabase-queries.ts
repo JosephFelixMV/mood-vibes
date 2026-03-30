@@ -94,7 +94,10 @@ export async function getProductCountByVibe() {
   const counts: Record<string, number> = {};
   data.forEach((p) => {
     if (p.vibe_category) {
-      counts[p.vibe_category] = (counts[p.vibe_category] || 0) + 1;
+      p.vibe_category.split(",").forEach((v) => {
+        const trimmed = v.trim();
+        if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
+      });
     }
   });
   return counts;

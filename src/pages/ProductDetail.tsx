@@ -139,9 +139,9 @@ export default function ProductDetail() {
           <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
             <div className="flex flex-wrap gap-2">
               <Badge>{product.category}</Badge>
-              {product.vibe_category && (
-                <Badge variant="secondary">{product.vibe_category}</Badge>
-              )}
+              {product.vibe_category && product.vibe_category.split(",").map((v) => (
+                <Badge key={v} variant="secondary">{v.trim()}</Badge>
+              ))}
             </div>
             <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
             {product.company_name && (
