@@ -1,11 +1,32 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shuffle, Sparkles } from "lucide-react";
+import { Shuffle, Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { getProducts, getProductOfTheDay, getRandomProduct } from "@/lib/supabase-queries";
+
+function useCountdownToMidnightUTC() {
+  const getRemaining = () => {
+    const now = new Date();
+    const tomorrow = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+    return Math.max(0, Math.floor((tomorrow.getTime() - now.getTime()) / 1000));
+  };
+
+  const [seconds, setSeconds] = useState(getRemaining);
+
+  useEffect(() => {
+    const id = setInterval(() => setSeconds(getRemaining()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+  const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+  const s = String(seconds % 60).padStart(2, "0");
+
+  return { h, m, s, expired: seconds === 0 };
+}
 
 export default function Index() {
   useSEO({ title: "Home", description: "Discover interesting products you never knew you needed. New surprise every day on Surprise Shopper." });
@@ -17,6 +38,20 @@ export default function Index() {
   const productOfDay = getProductOfTheDay(products);
   const [surprise, setSurprise] = useState<typeof productOfDay>(null);
   const [key, setKey] = useState(0);
+  const countdown = useCountdownToMidnightUTC();
+
+  // When countdown expires, pick a new random product of the day
+  const [refreshKey, setRefreshKey] = useState(0);
+  useEffect(() => {
+    if (countdown.expired) {
+      const t = setTimeout(() => setRefreshKey((k) => k + 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [countdown.expired]);
+
+  const displayedProduct = countdown.expired
+    ? getRandomProduct(products, productOfDay?.id) ?? productOfDay
+    : productOfDay;
 
   const handleSurprise = () => {
     const next = getRandomProduct(products, surprise?.id);
@@ -89,16 +124,25 @@ export default function Index() {
 
       {/* Product of the Day */}
       <section className="container py-16">
-        <h2 className="mb-8 text-center font-heading text-2xl font-bold tracking-tight md:text-3xl">
-          🎁 Today's Pick
-        </h2>
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <h2 className="text-center font-heading text-2xl font-bold tracking-tight md:text-3xl">
+            🎁 Today's Pick
+          </h2>
+          <div className="flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-medium text-muted-foreground shadow-sm">
+            <Clock className="h-4 w-4 text-primary" />
+            <span>Next pick in</span>
+            <span className="font-mono font-bold tracking-wider text-foreground">
+              {countdown.h}:{countdown.m}:{countdown.s}
+            </span>
+          </div>
+        </div>
         {isLoading ? (
           <div className="flex justify-center">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
-        ) : productOfDay ? (
+        ) : displayedProduct ? (
           <div className="mx-auto max-w-3xl">
-            <ProductCard product={productOfDay} featured />
+            <ProductCard product={displayedProduct} featured />
           </div>
         ) : (
           <p className="text-center text-muted-foreground">
