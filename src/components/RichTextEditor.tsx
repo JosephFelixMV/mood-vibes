@@ -14,7 +14,7 @@ interface Props {
 
 export default function RichTextEditor({ value, onChange }: Props) {
   const editor = useEditor({
-    extensions: [StarterKit, Underline],
+    extensions: [StarterKit.configure({ bulletList: false, listItem: false }), Underline, BulletList, ListItem],
     content: value,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
