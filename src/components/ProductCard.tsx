@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trackProductClick } from "@/lib/track-click";
+import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 
 interface ProductCardProps {

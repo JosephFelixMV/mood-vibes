@@ -5,7 +5,7 @@ import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-reac
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications } from "@/lib/supabase-queries";
+import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, formatPrice } from "@/lib/supabase-queries";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 
