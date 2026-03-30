@@ -255,6 +255,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Label>Company Name</Label>
           <Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
         </div>
+        <div>
+          <Label>Video URL (optional)</Label>
+          <Input value={form.video_url} onChange={(e) => set("video_url", e.target.value)} placeholder="https://..." />
+          <p className="mt-1 text-xs text-muted-foreground">Direct link to an MP4 video file</p>
+        </div>
         <div className="flex items-center gap-3">
           <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
           <Label>{form.is_active ? "Active" : "Draft"}</Label>

@@ -83,23 +83,32 @@ export default function ProductDetail() {
           {/* Image gallery - fixed aspect ratio so descriptions can't break it */}
           <div className="relative md:w-1/2">
             <div className="relative aspect-square w-full overflow-hidden bg-muted">
-              {allImages.length > 0 ? (
+              {allMedia.length > 0 ? (
                 <>
-                  <img
-                    src={allImages[currentImage]}
-                    alt={product.name}
-                    className="h-full w-full object-contain"
-                  />
-                  {allImages.length > 1 && (
+                  {allMedia[currentImage].type === "video" ? (
+                    <video
+                      src={allMedia[currentImage].url}
+                      controls
+                      autoPlay
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <img
+                      src={allMedia[currentImage].url}
+                      alt={product.name}
+                      className="h-full w-full object-contain"
+                    />
+                  )}
+                  {allMedia.length > 1 && (
                     <>
                       <button
-                        onClick={() => setCurrentImage((i) => (i - 1 + allImages.length) % allImages.length)}
+                        onClick={() => setCurrentImage((i) => (i - 1 + allMedia.length) % allMedia.length)}
                         className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </button>
                       <button
-                        onClick={() => setCurrentImage((i) => (i + 1) % allImages.length)}
+                        onClick={() => setCurrentImage((i) => (i + 1) % allMedia.length)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
                       >
                         <ChevronRight className="h-5 w-5" />
@@ -114,17 +123,23 @@ export default function ProductDetail() {
               )}
             </div>
             {/* Thumbnail strip */}
-            {allImages.length > 1 && (
+            {allMedia.length > 1 && (
               <div className="flex gap-2 overflow-x-auto p-3">
-                {allImages.map((url, i) => (
+                {allMedia.map((item, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentImage(i)}
-                    className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
+                    className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
                       i === currentImage ? "border-primary" : "border-transparent"
                     }`}
                   >
-                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                    {item.type === "video" ? (
+                      <div className="flex h-full w-full items-center justify-center bg-muted">
+                        <Play className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <img src={item.url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                    )}
                   </button>
                 ))}
               </div>
