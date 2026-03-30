@@ -165,7 +165,7 @@ export default function ProductList({ onEdit }: Props) {
                     <span className="text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="px-4 py-3">{p.price}</td>
+                <td className="px-4 py-3">{formatPrice(p.price)}</td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={p.is_active}

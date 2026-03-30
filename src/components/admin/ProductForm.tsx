@@ -27,7 +27,7 @@ interface SpecRow {
 const empty = {
   name: "",
   description: "",
-  price: "",
+  price: "" as string | number,
   image_url: "",
   affiliate_url: "",
   category: "",
