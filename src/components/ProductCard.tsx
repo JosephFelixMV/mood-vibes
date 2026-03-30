@@ -28,11 +28,9 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       }`}
     >
       {/* Image */}
-      <div
-        className={`relative overflow-hidden bg-muted ${
-          featured ? "md:w-1/2" : "aspect-[4/3]"
-        }`}
-      >
+      <Link to={`/product/${product.id}`} className={`relative block overflow-hidden bg-muted ${
+        featured ? "md:w-1/2" : "aspect-[4/3]"
+      }`}>
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -47,7 +45,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
         <Badge className="absolute left-3 top-3 bg-primary/90 text-primary-foreground backdrop-blur-sm">
           {product.category}
         </Badge>
-      </div>
+      </Link>
 
       {/* Content */}
       <div className={`flex flex-col gap-3 p-5 ${featured ? "md:w-1/2 md:justify-center md:p-8" : ""}`}>
