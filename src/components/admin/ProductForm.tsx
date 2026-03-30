@@ -115,6 +115,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         company_name: form.company_name,
         is_active: form.is_active,
         vibe_category: form.vibe_category || null,
+        video_url: form.video_url || null,
       };
 
       let productId = editId;
