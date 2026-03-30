@@ -8,7 +8,7 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Upload, Download } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
@@ -102,6 +102,48 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   }, [existing, editId]);
 
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
+
+  const handleTemplateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string);
+        setForm((prev: any) => ({
+          ...prev,
+          name: data.name || prev.name,
+          company_name: data.company_name || prev.company_name,
+          affiliate_url: data.affiliate_url || prev.affiliate_url,
+          image_url: data.image_url || prev.image_url,
+          additional_images: Array.isArray(data.additional_images) && data.additional_images.length > 0
+            ? data.additional_images.slice(0, 4)
+            : prev.additional_images,
+          video_url: data.video_url || prev.video_url,
+          price: data.price || prev.price,
+          description: data.description || prev.description,
+          category: data.category || prev.category,
+          vibe_category: data.vibe_category || prev.vibe_category,
+          specifications: Array.isArray(data.specifications) && data.specifications.length > 0
+            ? data.specifications
+            : prev.specifications,
+          is_active: typeof data.is_active === "boolean" ? data.is_active : prev.is_active,
+        }));
+        toast.success("Template loaded successfully");
+      } catch {
+        toast.error("Invalid JSON file");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const downloadTemplate = () => {
+    const a = document.createElement("a");
+    a.href = "/product-template.json";
+    a.download = "product-template.json";
+    a.click();
+  };
 
   const addImageField = () => {
     if (form.additional_images.length < 4) {
@@ -230,6 +272,18 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         }}
         className="space-y-4"
       >
+        {/* Template upload/download */}
+        <div className="flex items-center gap-2 pb-2 border-b border-border mb-2">
+          <Button type="button" variant="outline" size="sm" onClick={downloadTemplate} className="gap-1.5">
+            <Download className="h-3.5 w-3.5" /> Download Template
+          </Button>
+          <label>
+            <input type="file" accept=".json" onChange={handleTemplateUpload} className="hidden" />
+            <Button type="button" variant="outline" size="sm" className="gap-1.5 cursor-pointer" asChild>
+              <span><Upload className="h-3.5 w-3.5" /> Upload Template</span>
+            </Button>
+          </label>
+        </div>
         <div>
           <Label>Product Name</Label>
           <Input value={form.name} onChange={(e) => set("name", e.target.value)} required />
