@@ -156,7 +156,3 @@ export function getRandomProduct(products: Product[], excludeId?: string): Produ
   if (!filtered.length) return null;
   return filtered[Math.floor(Math.random() * filtered.length)];
 }
-  const filtered = excludeId ? products.filter((p) => p.id !== excludeId) : products;
-  if (!filtered.length) return null;
-  return filtered[Math.floor(Math.random() * filtered.length)];
-}
