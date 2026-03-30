@@ -62,9 +62,10 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
         </div>
 
         {product.description && (
-          <p className={`text-sm text-muted-foreground ${featured ? "line-clamp-3" : "line-clamp-2"}`}>
-            {product.description}
-          </p>
+          <div
+            className={`text-sm text-muted-foreground [&_p]:inline [&_p]:m-0 [&_br]:hidden ${featured ? "line-clamp-3" : "line-clamp-2"}`}
+            dangerouslySetInnerHTML={{ __html: product.description }}
+          />
         )}
 
         <div className="mt-auto flex items-center justify-between pt-2">
