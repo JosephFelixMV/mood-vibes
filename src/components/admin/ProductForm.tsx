@@ -76,6 +76,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             category: existing.category,
             vibe_category: existing.vibe_category || "",
             company_name: existing.company_name || "",
+            video_url: existing.video_url || "",
             is_active: existing.is_active,
             additional_images: data?.map((d) => d.image_url) || [],
           });
