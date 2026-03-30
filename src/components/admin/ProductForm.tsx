@@ -163,6 +163,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     vibe_category: form.vibe_category || null,
     company_name: form.company_name || null,
     is_active: form.is_active,
+    video_url: form.video_url || null,
     date_added: new Date().toISOString(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
