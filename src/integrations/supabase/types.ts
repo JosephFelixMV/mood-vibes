@@ -152,6 +152,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           name: string
+          page_error: boolean
           price: string
           updated_at: string
           vibe_category: string | null
@@ -168,6 +169,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           name: string
+          page_error?: boolean
           price: string
           updated_at?: string
           vibe_category?: string | null
@@ -184,6 +186,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           name?: string
+          page_error?: boolean
           price?: string
           updated_at?: string
           vibe_category?: string | null
