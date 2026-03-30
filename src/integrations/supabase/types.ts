@@ -120,6 +120,7 @@ export type Database = {
           price: string
           updated_at: string
           vibe_category: string | null
+          video_url: string | null
         }
         Insert: {
           affiliate_url: string
@@ -135,6 +136,7 @@ export type Database = {
           price: string
           updated_at?: string
           vibe_category?: string | null
+          video_url?: string | null
         }
         Update: {
           affiliate_url?: string
@@ -150,6 +152,7 @@ export type Database = {
           price?: string
           updated_at?: string
           vibe_category?: string | null
+          video_url?: string | null
         }
         Relationships: []
       }
