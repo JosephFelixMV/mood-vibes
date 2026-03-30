@@ -355,18 +355,29 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </Select>
         </div>
         <div>
-          <Label>Vibe (Optional)</Label>
-          <Select value={form.vibe_category || "none"} onValueChange={(v) => set("vibe_category", v === "none" ? "" : v)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select vibe" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No vibe</SelectItem>
-              {vibeCategories.map((c) => (
-                <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>Vibes (Optional — select multiple)</Label>
+          <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
+            {vibeCategories.map((c) => {
+              const selected = (form.vibe_category || "").split(",").filter(Boolean);
+              const isChecked = selected.includes(c.name);
+              return (
+                <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => {
+                      const updated = isChecked
+                        ? selected.filter((v: string) => v !== c.name)
+                        : [...selected, c.name];
+                      set("vibe_category", updated.join(","));
+                    }}
+                    className="rounded"
+                  />
+                  {c.icon} {c.name}
+                </label>
+              );
+            })}
+          </div>
         </div>
 
         {/* Specifications */}
