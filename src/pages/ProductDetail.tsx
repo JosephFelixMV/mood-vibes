@@ -187,7 +187,7 @@ export default function ProductDetail() {
           <div className="border-t px-8 py-6">
             <h2 className="mb-3 font-heading text-lg font-semibold">About this product</h2>
             <div
-              className="prose prose-sm max-w-none text-muted-foreground leading-relaxed"
+              className="prose prose-sm max-w-none text-muted-foreground leading-relaxed [&_p]:my-3 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:my-1"
               dangerouslySetInnerHTML={{ __html: product.description }}
             />
           </div>

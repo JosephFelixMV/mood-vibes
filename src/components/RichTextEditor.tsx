@@ -1,8 +1,6 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
-import BulletList from "@tiptap/extension-bullet-list";
-import ListItem from "@tiptap/extension-list-item";
 import { Bold, Underline as UnderlineIcon, List as ListIcon } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { useEffect } from "react";
@@ -14,7 +12,7 @@ interface Props {
 
 export default function RichTextEditor({ value, onChange }: Props) {
   const editor = useEditor({
-    extensions: [StarterKit.configure({ bulletList: false, listItem: false }), Underline, BulletList, ListItem],
+    extensions: [StarterKit, Underline],
     content: value,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
@@ -59,7 +57,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
       </div>
       <EditorContent
         editor={editor}
-        className="prose prose-sm max-w-none px-3 py-2 text-sm min-h-[80px] focus-within:outline-none [&_.tiptap]:outline-none [&_.tiptap]:min-h-[60px]"
+        className="prose prose-sm max-w-none px-3 py-2 text-sm min-h-[80px] focus-within:outline-none [&_.tiptap]:min-h-[60px] [&_.tiptap]:outline-none [&_.tiptap_p]:my-2 [&_.tiptap_ul]:my-2 [&_.tiptap_ul]:list-disc [&_.tiptap_ul]:pl-5 [&_.tiptap_li]:my-1"
       />
     </div>
   );
