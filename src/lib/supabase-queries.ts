@@ -16,7 +16,7 @@ export async function getProducts(options?: {
     query = query.eq("is_active", true);
   }
   if (options?.category) {
-    query = query.eq("category", options.category);
+    query = query.ilike("category", `%${options.category}%`);
   }
   if (options?.vibeCategory) {
     query = query.ilike("vibe_category", `%${options.vibeCategory}%`);
@@ -78,7 +78,10 @@ export async function getProductCountByCategory() {
 
   const counts: Record<string, number> = {};
   data.forEach((p) => {
-    counts[p.category] = (counts[p.category] || 0) + 1;
+    p.category.split(",").forEach((c) => {
+      const trimmed = c.trim();
+      if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
+    });
   });
   return counts;
 }

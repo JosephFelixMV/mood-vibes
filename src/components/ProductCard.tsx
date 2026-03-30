@@ -43,9 +43,13 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
             🛍️
           </div>
         )}
-        <Badge className="absolute left-3 top-3 bg-primary/90 text-primary-foreground backdrop-blur-sm">
-          {product.category}
-        </Badge>
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1">
+          {product.category.split(",").map((c) => (
+            <Badge key={c} className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
+              {c.trim()}
+            </Badge>
+          ))}
+        </div>
       </Link>
 
       {/* Content */}

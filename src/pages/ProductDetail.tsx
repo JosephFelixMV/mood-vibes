@@ -138,7 +138,9 @@ export default function ProductDetail() {
           {/* Product info */}
           <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
             <div className="flex flex-wrap gap-2">
-              <Badge>{product.category}</Badge>
+              {product.category.split(",").map((c) => (
+                <Badge key={c}>{c.trim()}</Badge>
+              ))}
               {product.vibe_category && product.vibe_category.split(",").map((v) => (
                 <Badge key={v} variant="secondary">{v.trim()}</Badge>
               ))}
