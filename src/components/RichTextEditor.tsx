@@ -1,7 +1,9 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
-import { Bold, Underline as UnderlineIcon, List } from "lucide-react";
+import BulletList from "@tiptap/extension-bullet-list";
+import ListItem from "@tiptap/extension-list-item";
+import { Bold, Underline as UnderlineIcon, List as ListIcon } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { useEffect } from "react";
 
