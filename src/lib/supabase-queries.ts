@@ -141,6 +141,16 @@ function simpleHash(str: string): number {
   return hash;
 }
 
+export async function getProductSpecifications(productId: string) {
+  const { data, error } = await supabase
+    .from("product_specifications")
+    .select("*")
+    .eq("product_id", productId)
+    .order("display_order");
+  if (error) throw error;
+  return data;
+}
+
 export function getRandomProduct(products: Product[], excludeId?: string): Product | null {
   const filtered = excludeId ? products.filter((p) => p.id !== excludeId) : products;
   if (!filtered.length) return null;
