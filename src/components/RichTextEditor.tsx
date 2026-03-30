@@ -12,7 +12,7 @@ interface Props {
 
 export default function RichTextEditor({ value, onChange }: Props) {
   const editor = useEditor({
-    extensions: [StarterKit.configure({ bulletList: false, listItem: false }), Underline, BulletList, ListItem],
+    extensions: [StarterKit, Underline],
     content: value,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
