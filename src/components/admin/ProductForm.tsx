@@ -336,7 +336,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
         <div>
           <Label>Price</Label>
-          <Input value={form.price} onChange={(e) => set("price", e.target.value)} required placeholder="$29.99" />
+          <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => set("price", e.target.value)} required placeholder="29.99" />
         </div>
         <div>
           <Label>Description</Label>
