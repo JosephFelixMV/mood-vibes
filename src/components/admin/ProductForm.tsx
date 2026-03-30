@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getProduct, getCategories } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/RichTextEditor";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -235,6 +235,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Input value={form.name} onChange={(e) => set("name", e.target.value)} required />
         </div>
         <div>
+          <Label>Company Name</Label>
+          <Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
+        </div>
+        <div>
           <Label>Affiliate Link</Label>
           <Input value={form.affiliate_url} onChange={(e) => set("affiliate_url", e.target.value)} required placeholder="https://..." />
         </div>
@@ -279,8 +283,8 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Input value={form.price} onChange={(e) => set("price", e.target.value)} required placeholder="$29.99" />
         </div>
         <div>
-          <Label>Short Description</Label>
-          <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} />
+          <Label>Description</Label>
+          <RichTextEditor value={form.description} onChange={(html) => set("description", html)} />
         </div>
         <div>
           <Label>Category (Core Lifestyle)</Label>
@@ -308,10 +312,6 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               ))}
             </SelectContent>
           </Select>
-        </div>
-        <div>
-          <Label>Company Name</Label>
-          <Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
         </div>
 
         {/* Specifications */}
