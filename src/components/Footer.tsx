@@ -15,7 +15,13 @@ export default function Footer() {
           <Link to="/vibes" className="hover:text-foreground">Vibes</Link>
           <Link to="/products" className="hover:text-foreground">All Products</Link>
         </div>
-        <p>© {new Date().getFullYear()} Surprise Shopper. All rights reserved.</p>
+        <div className="flex flex-col items-center gap-2 md:items-end">
+          <div className="flex gap-4">
+            <Link to="/disclosure" className="hover:text-foreground">Affiliate Disclosure</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+          </div>
+          <p>© {new Date().getFullYear()} Surprise Shopper. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   );

@@ -11,7 +11,10 @@ import Vibes from "./pages/Vibes";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Admin from "./pages/Admin";
+import Disclosure from "./pages/Disclosure";
+import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +25,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <div className="flex min-h-screen flex-col">
+          <AffiliateDisclosureBanner />
           <Navbar />
           <main className="flex-1">
             <Routes>
@@ -31,6 +35,8 @@ const App = () => (
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/disclosure" element={<Disclosure />} />
+              <Route path="/privacy" element={<Privacy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
