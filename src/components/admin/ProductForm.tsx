@@ -182,7 +182,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       const payload = {
         name: form.name,
         description: form.description,
-        price: form.price,
+        price: Number(form.price) || 0,
         image_url: form.image_url,
         affiliate_url: form.affiliate_url,
         category: form.category,
