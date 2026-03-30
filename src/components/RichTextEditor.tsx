@@ -54,7 +54,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
           onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
           aria-label="Bullet list"
         >
-          <List className="h-4 w-4" />
+          <ListIcon className="h-4 w-4" />
         </Toggle>
       </div>
       <EditorContent
