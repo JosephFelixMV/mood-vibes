@@ -134,11 +134,13 @@ export function getProductOfTheDay(products: Product[]): Product | null {
   return shuffled[dayInWindow % shuffled.length];
 }
 
-export function formatPrice(price: number): string {
+export function formatPrice(price: number | string): string {
+  const num = typeof price === "string" ? parseFloat(price.replace(/[^0-9.]/g, "")) : price;
+  if (isNaN(num)) return "$0.00";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-  }).format(price);
+  }).format(num);
 }
 
 function simpleHash(str: string): number {
