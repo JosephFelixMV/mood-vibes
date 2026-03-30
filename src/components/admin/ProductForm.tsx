@@ -12,6 +12,7 @@ import { X, Plus, Upload, Download } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
+import { formatPrice } from "@/lib/supabase-queries";
 
 interface Props {
   editId: string | null;
