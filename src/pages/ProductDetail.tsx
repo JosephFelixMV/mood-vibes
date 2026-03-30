@@ -168,11 +168,28 @@ export default function ProductDetail() {
           </div>
         </div>
 
+        {/* Video */}
+        {product.video_url && (
+          <div className="border-t px-8 py-6">
+            <h2 className="mb-3 font-heading text-lg font-semibold">Product Video</h2>
+            <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted">
+              <video controls className="h-full w-full object-contain">
+                <source src={product.video_url} type="video/mp4" />
+                <source src={`${product.video_url}.mp4`} />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        )}
+
         {/* Description */}
         {product.description && (
           <div className="border-t px-8 py-6">
             <h2 className="mb-3 font-heading text-lg font-semibold">About this product</h2>
-            <p className="whitespace-pre-line text-muted-foreground leading-relaxed">{product.description}</p>
+            <div
+              className="prose prose-sm max-w-none text-muted-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
           </div>
         )}
 
@@ -190,20 +207,6 @@ export default function ProductDetail() {
                   <div className="w-2/3 border-l px-4 py-3 text-sm text-muted-foreground">{spec.specification}</div>
                 </div>
               ))}
-            </div>
-          </div>
-        )}
-
-        {/* Video */}
-        {product.video_url && (
-          <div className="border-t px-8 py-6">
-            <h2 className="mb-3 font-heading text-lg font-semibold">Product Video</h2>
-            <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted">
-              <video controls className="h-full w-full object-contain">
-                <source src={product.video_url} type="video/mp4" />
-                <source src={`${product.video_url}.mp4`} />
-                Your browser does not support the video tag.
-              </video>
             </div>
           </div>
         )}
