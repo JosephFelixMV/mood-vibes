@@ -103,6 +103,48 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
+  const handleTemplateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string);
+        setForm((prev: any) => ({
+          ...prev,
+          name: data.name || prev.name,
+          company_name: data.company_name || prev.company_name,
+          affiliate_url: data.affiliate_url || prev.affiliate_url,
+          image_url: data.image_url || prev.image_url,
+          additional_images: Array.isArray(data.additional_images) && data.additional_images.length > 0
+            ? data.additional_images.slice(0, 4)
+            : prev.additional_images,
+          video_url: data.video_url || prev.video_url,
+          price: data.price || prev.price,
+          description: data.description || prev.description,
+          category: data.category || prev.category,
+          vibe_category: data.vibe_category || prev.vibe_category,
+          specifications: Array.isArray(data.specifications) && data.specifications.length > 0
+            ? data.specifications
+            : prev.specifications,
+          is_active: typeof data.is_active === "boolean" ? data.is_active : prev.is_active,
+        }));
+        toast.success("Template loaded successfully");
+      } catch {
+        toast.error("Invalid JSON file");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const downloadTemplate = () => {
+    const a = document.createElement("a");
+    a.href = "/product-template.json";
+    a.download = "product-template.json";
+    a.click();
+  };
+
   const addImageField = () => {
     if (form.additional_images.length < 4) {
       set("additional_images", [...form.additional_images, ""]);
