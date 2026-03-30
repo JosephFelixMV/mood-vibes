@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getProduct, getProducts, getRandomProduct, getProductImages } from "@/lib/supabase-queries";
+import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications } from "@/lib/supabase-queries";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -26,6 +26,12 @@ export default function ProductDetail() {
     enabled: !!id,
   });
 
+  const { data: specifications = [] } = useQuery({
+    queryKey: ["product-specifications", id],
+    queryFn: () => getProductSpecifications(id!),
+    enabled: !!id,
+  });
+
   const { data: allProducts = [] } = useQuery({
     queryKey: ["products"],
     queryFn: () => getProducts({ activeOnly: true }),
@@ -38,12 +44,10 @@ export default function ProductDetail() {
     url: product ? `${window.location.origin}/product/${product.id}` : undefined,
   });
 
-  // Combine main image + additional images + video
-  type MediaItem = { type: "image"; url: string } | { type: "video"; url: string };
-  const allMedia: MediaItem[] = product ? [
-    ...(product.image_url ? [{ type: "image" as const, url: product.image_url }] : []),
-    ...images.map((img) => ({ type: "image" as const, url: img.image_url })),
-    ...(product.video_url ? [{ type: "video" as const, url: product.video_url }] : []),
+  // Images only (no video in gallery)
+  const allImages = product ? [
+    ...(product.image_url ? [product.image_url] : []),
+    ...images.map((img) => img.image_url),
   ] : [];
 
   const handleAnother = () => {
@@ -78,41 +82,28 @@ export default function ProductDetail() {
         animate={{ opacity: 1, y: 0 }}
         className="mx-auto max-w-5xl overflow-hidden rounded-2xl border bg-card"
       >
-        {/* Top section: images + key info side by side */}
+        {/* Top section: images + key info */}
         <div className="md:flex">
-          {/* Image gallery - fixed aspect ratio so descriptions can't break it */}
+          {/* Image gallery */}
           <div className="relative md:w-1/2">
             <div className="relative aspect-square w-full overflow-hidden bg-muted">
-              {allMedia.length > 0 ? (
+              {allImages.length > 0 ? (
                 <>
-                  {allMedia[currentImage].type === "video" ? (
-                    <video
-                      key={allMedia[currentImage].url}
-                      controls
-                      autoPlay
-                      className="h-full w-full object-contain"
-                    >
-                      <source src={allMedia[currentImage].url} type="video/mp4" />
-                      <source src={`${allMedia[currentImage].url}.mp4`} />
-                      Your browser does not support the video tag.
-                    </video>
-                  ) : (
-                    <img
-                      src={allMedia[currentImage].url}
-                      alt={product.name}
-                      className="h-full w-full object-contain"
-                    />
-                  )}
-                  {allMedia.length > 1 && (
+                  <img
+                    src={allImages[currentImage]}
+                    alt={product.name}
+                    className="h-full w-full object-contain"
+                  />
+                  {allImages.length > 1 && (
                     <>
                       <button
-                        onClick={() => setCurrentImage((i) => (i - 1 + allMedia.length) % allMedia.length)}
+                        onClick={() => setCurrentImage((i) => (i - 1 + allImages.length) % allImages.length)}
                         className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </button>
                       <button
-                        onClick={() => setCurrentImage((i) => (i + 1) % allMedia.length)}
+                        onClick={() => setCurrentImage((i) => (i + 1) % allImages.length)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
                       >
                         <ChevronRight className="h-5 w-5" />
@@ -127,9 +118,9 @@ export default function ProductDetail() {
               )}
             </div>
             {/* Thumbnail strip */}
-            {allMedia.length > 1 && (
+            {allImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto p-3">
-                {allMedia.map((item, i) => (
+                {allImages.map((url, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentImage(i)}
@@ -137,13 +128,7 @@ export default function ProductDetail() {
                       i === currentImage ? "border-primary" : "border-transparent"
                     }`}
                   >
-                    {item.type === "video" ? (
-                      <div className="flex h-full w-full items-center justify-center bg-muted">
-                        <Play className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                    ) : (
-                      <img src={item.url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
-                    )}
+                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -183,11 +168,43 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* Description below, full width, with proper whitespace rendering */}
+        {/* Description */}
         {product.description && (
           <div className="border-t px-8 py-6">
             <h2 className="mb-3 font-heading text-lg font-semibold">About this product</h2>
             <p className="whitespace-pre-line text-muted-foreground leading-relaxed">{product.description}</p>
+          </div>
+        )}
+
+        {/* Specifications */}
+        {specifications.length > 0 && (
+          <div className="border-t px-8 py-6">
+            <h2 className="mb-3 font-heading text-lg font-semibold">Specifications</h2>
+            <div className="overflow-hidden rounded-lg border">
+              {specifications.map((spec, i) => (
+                <div
+                  key={spec.id}
+                  className={`flex ${i % 2 === 0 ? "bg-muted/50" : "bg-background"}`}
+                >
+                  <div className="w-1/3 px-4 py-3 font-medium text-sm">{spec.item_detail}</div>
+                  <div className="w-2/3 border-l px-4 py-3 text-sm text-muted-foreground">{spec.specification}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Video */}
+        {product.video_url && (
+          <div className="border-t px-8 py-6">
+            <h2 className="mb-3 font-heading text-lg font-semibold">Product Video</h2>
+            <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted">
+              <video controls className="h-full w-full object-contain">
+                <source src={product.video_url} type="video/mp4" />
+                <source src={`${product.video_url}.mp4`} />
+                Your browser does not support the video tag.
+              </video>
+            </div>
           </div>
         )}
       </motion.div>

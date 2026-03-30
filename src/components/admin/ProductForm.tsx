@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
@@ -17,6 +17,11 @@ interface Props {
   editId: string | null;
   onDone: () => void;
   savedState?: MutableRefObject<Record<string, any> | null>;
+}
+
+interface SpecRow {
+  item_detail: string;
+  specification: string;
 }
 
 const empty = {
@@ -31,6 +36,7 @@ const empty = {
   video_url: "",
   is_active: true,
   additional_images: [] as string[],
+  specifications: [] as SpecRow[],
 };
 
 export default function ProductForm({ editId, onDone, savedState }: Props) {
@@ -51,7 +57,6 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const [form, setForm] = useState(() => savedState?.current || empty);
 
-  // Save form state on every change
   useEffect(() => {
     if (savedState) {
       savedState.current = form;
@@ -60,33 +65,43 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   useEffect(() => {
     if (existing && editId) {
-      // Load existing images
-      supabase
-        .from("product_images")
-        .select("image_url")
-        .eq("product_id", editId)
-        .order("display_order")
-        .then(({ data }) => {
-          setForm({
-            name: existing.name,
-            description: existing.description || "",
-            price: existing.price,
-            image_url: existing.image_url || "",
-            affiliate_url: existing.affiliate_url,
-            category: existing.category,
-            vibe_category: existing.vibe_category || "",
-            company_name: existing.company_name || "",
-            video_url: existing.video_url || "",
-            is_active: existing.is_active,
-            additional_images: data?.map((d) => d.image_url) || [],
-          });
+      // Load existing images and specifications
+      Promise.all([
+        supabase
+          .from("product_images")
+          .select("image_url")
+          .eq("product_id", editId)
+          .order("display_order"),
+        supabase
+          .from("product_specifications")
+          .select("item_detail, specification")
+          .eq("product_id", editId)
+          .order("display_order"),
+      ]).then(([imgRes, specRes]) => {
+        setForm({
+          name: existing.name,
+          description: existing.description || "",
+          price: existing.price,
+          image_url: existing.image_url || "",
+          affiliate_url: existing.affiliate_url,
+          category: existing.category,
+          vibe_category: existing.vibe_category || "",
+          company_name: existing.company_name || "",
+          video_url: existing.video_url || "",
+          is_active: existing.is_active,
+          additional_images: imgRes.data?.map((d) => d.image_url) || [],
+          specifications: specRes.data?.map((s) => ({
+            item_detail: s.item_detail,
+            specification: s.specification,
+          })) || [],
         });
+      });
     } else if (!editId && !savedState?.current) {
       setForm(empty);
     }
   }, [existing, editId]);
 
-  const set = (key: string, val: string | boolean | string[]) => setForm((f) => ({ ...f, [key]: val }));
+  const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
   const addImageField = () => {
     if (form.additional_images.length < 4) {
@@ -101,7 +116,22 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   };
 
   const removeImage = (index: number) => {
-    set("additional_images", form.additional_images.filter((_, i) => i !== index));
+    set("additional_images", form.additional_images.filter((_: any, i: number) => i !== index));
+  };
+
+  // Specifications helpers
+  const addSpecRow = () => {
+    set("specifications", [...form.specifications, { item_detail: "", specification: "" }]);
+  };
+
+  const updateSpec = (index: number, field: keyof SpecRow, value: string) => {
+    const updated = [...form.specifications];
+    updated[index] = { ...updated[index], [field]: value };
+    set("specifications", updated);
+  };
+
+  const removeSpec = (index: number) => {
+    set("specifications", form.specifications.filter((_: any, i: number) => i !== index));
   };
 
   const mutation = useMutation({
@@ -124,7 +154,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       if (editId) {
         const { error } = await supabase.from("products").update(payload).eq("id", editId);
         if (error) throw error;
-        await supabase.from("product_images").delete().eq("product_id", editId);
+        // Clear old related data
+        await Promise.all([
+          supabase.from("product_images").delete().eq("product_id", editId),
+          supabase.from("product_specifications").delete().eq("product_id", editId),
+        ]);
       } else {
         const { data, error } = await supabase.from("products").insert([payload]).select("id").single();
         if (error) throw error;
@@ -132,12 +166,28 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       }
 
       // Insert additional images
-      const validImages = form.additional_images.filter((url) => url.trim());
+      const validImages = form.additional_images.filter((url: string) => url.trim());
       if (validImages.length > 0 && productId) {
         const { error } = await supabase.from("product_images").insert(
-          validImages.map((url, i) => ({
+          validImages.map((url: string, i: number) => ({
             product_id: productId!,
             image_url: url.trim(),
+            display_order: i + 1,
+          }))
+        );
+        if (error) throw error;
+      }
+
+      // Insert specifications
+      const validSpecs = form.specifications.filter(
+        (s: SpecRow) => s.item_detail.trim() && s.specification.trim()
+      );
+      if (validSpecs.length > 0 && productId) {
+        const { error } = await supabase.from("product_specifications").insert(
+          validSpecs.map((s: SpecRow, i: number) => ({
+            product_id: productId!,
+            item_detail: s.item_detail.trim(),
+            specification: s.specification.trim(),
             display_order: i + 1,
           }))
         );
@@ -202,7 +252,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             </Button>
           </div>
           <div className="mt-2 space-y-2">
-            {form.additional_images.map((url, i) => (
+            {form.additional_images.map((url: string, i: number) => (
               <div key={i} className="flex gap-2">
                 <Input
                   value={url}
@@ -215,6 +265,13 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Video URL - after images */}
+        <div>
+          <Label>Video URL (optional)</Label>
+          <Input value={form.video_url} onChange={(e) => set("video_url", e.target.value)} placeholder="https://..." />
+          <p className="mt-1 text-xs text-muted-foreground">Direct link to an MP4 video file</p>
         </div>
 
         <div>
@@ -256,11 +313,38 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Label>Company Name</Label>
           <Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
         </div>
+
+        {/* Specifications */}
         <div>
-          <Label>Video URL (optional)</Label>
-          <Input value={form.video_url} onChange={(e) => set("video_url", e.target.value)} placeholder="https://..." />
-          <p className="mt-1 text-xs text-muted-foreground">Direct link to an MP4 video file</p>
+          <div className="flex items-center justify-between">
+            <Label>Specifications (optional)</Label>
+            <Button type="button" variant="outline" size="sm" onClick={addSpecRow} className="gap-1">
+              <Plus className="h-3 w-3" /> Add Spec
+            </Button>
+          </div>
+          <div className="mt-2 space-y-2">
+            {form.specifications.map((spec: SpecRow, i: number) => (
+              <div key={i} className="flex gap-2">
+                <Input
+                  value={spec.item_detail}
+                  onChange={(e) => updateSpec(i, "item_detail", e.target.value)}
+                  placeholder="Item Detail (e.g. Material)"
+                  className="w-2/5"
+                />
+                <Input
+                  value={spec.specification}
+                  onChange={(e) => updateSpec(i, "specification", e.target.value)}
+                  placeholder="Specification (e.g. 100% Cotton)"
+                  className="w-3/5"
+                />
+                <Button type="button" variant="ghost" size="icon" onClick={() => removeSpec(i)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
+
         <div className="flex items-center gap-3">
           <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
           <Label>{form.is_active ? "Active" : "Draft"}</Label>
