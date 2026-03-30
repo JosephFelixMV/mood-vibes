@@ -16,7 +16,7 @@ export async function getProducts(options?: {
     query = query.eq("is_active", true);
   }
   if (options?.category) {
-    query = query.eq("category", options.category);
+    query = query.ilike("category", `%${options.category}%`);
   }
   if (options?.vibeCategory) {
     query = query.ilike("vibe_category", `%${options.vibeCategory}%`);
