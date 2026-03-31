@@ -1,4 +1,3 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -6,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// All available sub-categories (with parent_slug) for core
+// Sub-categories (ones with parent_slug) from the categories table
 const CORE_CATEGORIES = [
   "Beauty", "Automotive", "Cleaning", "Garden", "Health", "Office",
   "Fashion", "Home", "Accessories", "Handbags", "Jewelry", "Watches",
@@ -28,7 +27,8 @@ serve(async (req) => {
   }
 
   try {
-    const { name, description, price } = await req.json();
+    const body = await req.text();
+    const { name, description, price } = JSON.parse(body);
 
     const prompt = `You are a product categorization assistant. Given a product, select the most fitting categories.
 
@@ -62,7 +62,10 @@ Use exact category names from the lists above. Pick categories that genuinely fi
       }),
     });
 
-    const data = await response.json();
+    const rawText = await response.text();
+    console.log("AI raw response:", rawText.substring(0, 500));
+    
+    const data = JSON.parse(rawText);
     const content = data.choices?.[0]?.message?.content || "{}";
     
     // Extract JSON from response
@@ -77,12 +80,14 @@ Use exact category names from the lists above. Pick categories that genuinely fi
     const validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 3);
     const validVibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
 
+    console.log("Suggestions:", { core: validCore, vibes: validVibes });
+
     return new Response(JSON.stringify({ core: validCore, vibes: validVibes }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error suggesting categories:", error);
-    return new Response(JSON.stringify({ core: [], vibes: [] }), {
+    return new Response(JSON.stringify({ core: [], vibes: [], error: String(error) }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
