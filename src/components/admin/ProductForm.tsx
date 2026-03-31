@@ -270,6 +270,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     price: Number(form.price) || 0,
     image_url: form.image_url || null,
     affiliate_url: form.affiliate_url || "#",
+    source_url: form.source_url || "",
     category: form.category || "Category",
     vibe_category: form.vibe_category || null,
     company_name: form.company_name || null,
