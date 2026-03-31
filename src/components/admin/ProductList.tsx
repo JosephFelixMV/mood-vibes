@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, XCircle } from "lucide-react";
+import { Pencil, Trash2, XCircle, ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Props {
@@ -59,6 +59,29 @@ export default function ProductList({ onEdit }: Props) {
     },
   });
 
+  const [checkingLinks, setCheckingLinks] = useState(false);
+
+  const handleCheckLinks = async () => {
+    setCheckingLinks(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("check-affiliate-links");
+      if (error) throw error;
+      const errors = data.results?.filter((r: any) => r.error) || [];
+      if (errors.length > 0) {
+        toast.error(`${errors.length} product(s) have link issues`, {
+          description: errors.map((e: any) => `${e.name}: ${e.status}`).join(", "),
+          duration: 10000,
+        });
+      } else {
+        toast.success(`All ${data.checked} products checked — no issues found`);
+      }
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+    } catch (err: any) {
+      toast.error("Link check failed: " + err.message);
+    } finally {
+      setCheckingLinks(false);
+    }
+  };
   const filtered = products.filter((p) => {
     if (filterCategory !== "all" && p.category !== filterCategory) return false;
     if (filterVibe !== "all") {
@@ -76,8 +99,18 @@ export default function ProductList({ onEdit }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      {/* Filters + Actions */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleCheckLinks}
+          disabled={checkingLinks}
+          className="gap-1.5"
+        >
+          {checkingLinks ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+          {checkingLinks ? "Checking…" : "Check All Links"}
+        </Button>
         <Select value={filterCategory} onValueChange={setFilterCategory}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Category" />

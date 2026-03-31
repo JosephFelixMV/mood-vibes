@@ -31,6 +31,7 @@ const empty = {
   price: "" as string | number,
   image_url: "",
   affiliate_url: "",
+  source_url: "",
   category: "",
   vibe_category: "",
   company_name: "",
@@ -85,6 +86,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           price: existing.price,
           image_url: existing.image_url || "",
           affiliate_url: existing.affiliate_url,
+          source_url: existing.source_url || "",
           category: existing.category,
           vibe_category: existing.vibe_category || "",
           company_name: existing.company_name || "",
@@ -116,6 +118,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           name: data.name || prev.name,
           company_name: data.company_name || prev.company_name,
           affiliate_url: data.affiliate_url || prev.affiliate_url,
+          source_url: data.source_url || prev.source_url,
           image_url: data.image_url || prev.image_url,
           additional_images: Array.isArray(data.additional_images) && data.additional_images.length > 0
             ? data.additional_images.slice(0, 4)
@@ -197,6 +200,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         price: Number(form.price) || 0,
         image_url: form.image_url,
         affiliate_url: form.affiliate_url,
+        source_url: form.source_url,
         category: form.category,
         company_name: form.company_name,
         is_active: form.is_active,
@@ -266,6 +270,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     price: Number(form.price) || 0,
     image_url: form.image_url || null,
     affiliate_url: form.affiliate_url || "#",
+    source_url: form.source_url || "",
     category: form.category || "Category",
     vibe_category: form.vibe_category || null,
     company_name: form.company_name || null,
@@ -310,6 +315,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         <div>
           <Label>Affiliate Link</Label>
           <Input value={form.affiliate_url} onChange={(e) => set("affiliate_url", e.target.value)} required placeholder="https://..." />
+        </div>
+        <div>
+          <Label>Source Product Page URL (required, admin only)</Label>
+          <Input value={form.source_url} onChange={(e) => set("source_url", e.target.value)} required placeholder="https://retailer.com/product/..." />
+          <p className="mt-1 text-xs text-muted-foreground">Original product page URL for link validation</p>
         </div>
         <div>
           <Label>Main Image URL</Label>
