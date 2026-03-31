@@ -118,6 +118,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           name: data.name || prev.name,
           company_name: data.company_name || prev.company_name,
           affiliate_url: data.affiliate_url || prev.affiliate_url,
+          source_url: data.source_url || prev.source_url,
           image_url: data.image_url || prev.image_url,
           additional_images: Array.isArray(data.additional_images) && data.additional_images.length > 0
             ? data.additional_images.slice(0, 4)
