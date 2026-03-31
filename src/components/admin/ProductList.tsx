@@ -99,8 +99,18 @@ export default function ProductList({ onEdit }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      {/* Filters + Actions */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleCheckLinks}
+          disabled={checkingLinks}
+          className="gap-1.5"
+        >
+          {checkingLinks ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+          {checkingLinks ? "Checking…" : "Check All Links"}
+        </Button>
         <Select value={filterCategory} onValueChange={setFilterCategory}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Category" />
