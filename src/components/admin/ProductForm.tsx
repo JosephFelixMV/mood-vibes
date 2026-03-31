@@ -86,6 +86,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           price: existing.price,
           image_url: existing.image_url || "",
           affiliate_url: existing.affiliate_url,
+          source_url: existing.source_url || "",
           category: existing.category,
           vibe_category: existing.vibe_category || "",
           company_name: existing.company_name || "",
