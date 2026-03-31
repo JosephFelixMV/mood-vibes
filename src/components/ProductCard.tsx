@@ -37,6 +37,9 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
             src={product.image_url}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            style={{ imageRendering: "auto", WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden", transform: "translateZ(0)" }}
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="flex h-full min-h-[200px] items-center justify-center text-4xl text-muted-foreground">
