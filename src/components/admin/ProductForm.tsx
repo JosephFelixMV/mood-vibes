@@ -250,6 +250,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       qc.invalidateQueries({ queryKey: ["admin-products"] });
       qc.invalidateQueries({ queryKey: ["products"] });
       toast.success(editId ? "Product updated" : "Product added");
+      if (!editId) {
+        setForm(empty);
+        if (savedState) savedState.current = null;
+      }
       onDone();
     },
     onError: (err) => toast.error(err.message),
