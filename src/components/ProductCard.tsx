@@ -35,6 +35,8 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
         {product.image_url ? (
           <img
             src={product.image_url}
+            srcSet={`${product.image_url} 1x, ${product.image_url} 2x`}
+            sizes={featured ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"}
             alt={product.name}
             className="sharp-image h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
