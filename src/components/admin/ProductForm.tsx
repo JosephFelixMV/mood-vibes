@@ -179,6 +179,18 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
+      // Duplicate check by name
+      if (!editId) {
+        const { data: dupes } = await supabase
+          .from("products")
+          .select("id")
+          .ilike("name", form.name.trim())
+          .limit(1);
+        if (dupes && dupes.length > 0) {
+          throw new Error(`A product named "${form.name.trim()}" already exists.`);
+        }
+      }
+
       const payload = {
         name: form.name,
         description: form.description,
@@ -197,7 +209,6 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       if (editId) {
         const { error } = await supabase.from("products").update(payload).eq("id", editId);
         if (error) throw error;
-        // Clear old related data
         await Promise.all([
           supabase.from("product_images").delete().eq("product_id", editId),
           supabase.from("product_specifications").delete().eq("product_id", editId),
@@ -208,7 +219,6 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         productId = data.id;
       }
 
-      // Insert additional images
       const validImages = form.additional_images.filter((url: string) => url.trim());
       if (validImages.length > 0 && productId) {
         const { error } = await supabase.from("product_images").insert(
@@ -221,7 +231,6 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         if (error) throw error;
       }
 
-      // Insert specifications
       const validSpecs = form.specifications.filter(
         (s: SpecRow) => s.item_detail.trim() && s.specification.trim()
       );
@@ -434,6 +443,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Button type="submit" disabled={mutation.isPending} className="rounded-full">
             {editId ? "Update Product" : "Add Product"}
           </Button>
+          {!editId && (
+            <Button type="button" variant="outline" onClick={() => { setForm(empty); if (savedState) savedState.current = null; }} className="rounded-full">
+              Clear Fields
+            </Button>
+          )}
           <Button type="button" variant="outline" onClick={onDone} className="rounded-full">Cancel</Button>
         </div>
       </form>
