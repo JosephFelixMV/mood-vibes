@@ -9,7 +9,7 @@ interface SEOProps {
 
 export function useSEO({ title, description, image, url }: SEOProps) {
   useEffect(() => {
-    const suffix = "Bored Shopper";
+    const suffix = "Surprise Shopper";
     document.title = title ? `${title} | ${suffix}` : suffix;
 
     const setMeta = (attr: string, key: string, content: string) => {
