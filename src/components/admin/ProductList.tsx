@@ -59,6 +59,29 @@ export default function ProductList({ onEdit }: Props) {
     },
   });
 
+  const [checkingLinks, setCheckingLinks] = useState(false);
+
+  const handleCheckLinks = async () => {
+    setCheckingLinks(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("check-affiliate-links");
+      if (error) throw error;
+      const errors = data.results?.filter((r: any) => r.error) || [];
+      if (errors.length > 0) {
+        toast.error(`${errors.length} product(s) have link issues`, {
+          description: errors.map((e: any) => `${e.name}: ${e.status}`).join(", "),
+          duration: 10000,
+        });
+      } else {
+        toast.success(`All ${data.checked} products checked — no issues found`);
+      }
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+    } catch (err: any) {
+      toast.error("Link check failed: " + err.message);
+    } finally {
+      setCheckingLinks(false);
+    }
+  };
   const filtered = products.filter((p) => {
     if (filterCategory !== "all" && p.category !== filterCategory) return false;
     if (filterVibe !== "all") {
