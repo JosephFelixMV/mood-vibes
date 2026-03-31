@@ -107,6 +107,8 @@ export default function ProductList({ onEdit }: Props) {
     setCurrentPage(1);
   };
 
+  if (isLoading) return <div className="py-10 text-center text-muted-foreground">Loading…</div>;
+
   return (
     <div className="space-y-4">
       {/* Filters + Actions */}
