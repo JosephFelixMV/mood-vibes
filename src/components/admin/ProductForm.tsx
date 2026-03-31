@@ -106,6 +106,30 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
+  const [suggestingCategories, setSuggestingCategories] = useState(false);
+
+  const suggestCategories = async (productName: string, description: string, price: string | number) => {
+    setSuggestingCategories(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("suggest-categories", {
+        body: { name: productName, description, price },
+      });
+      if (error) throw error;
+      if (data?.core?.length || data?.vibes?.length) {
+        setForm((prev: any) => ({
+          ...prev,
+          category: data.core?.length ? data.core.join(",") : prev.category,
+          vibe_category: data.vibes?.length ? data.vibes.join(",") : prev.vibe_category,
+        }));
+        toast.success(`Suggested ${data.core?.length || 0} categories and ${data.vibes?.length || 0} vibes`);
+      }
+    } catch (err) {
+      console.error("Category suggestion failed:", err);
+    } finally {
+      setSuggestingCategories(false);
+    }
+  };
+
   const handleTemplateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -113,6 +137,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target?.result as string);
+        const parsedPrice = typeof data.price === "string" ? parseFloat(data.price.replace(/[^0-9.]/g, "")) || "" : (data.price || "");
         setForm((prev: any) => ({
           ...prev,
           name: data.name || prev.name,
@@ -124,7 +149,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             ? data.additional_images.slice(0, 4)
             : prev.additional_images,
           video_url: data.video_url || prev.video_url,
-          price: typeof data.price === "string" ? parseFloat(data.price.replace(/[^0-9.]/g, "")) || prev.price : (data.price || prev.price),
+          price: parsedPrice,
           description: data.description || prev.description,
           category: data.category || prev.category,
           vibe_category: data.vibe_category || prev.vibe_category,
@@ -133,7 +158,13 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             : prev.specifications,
           is_active: typeof data.is_active === "boolean" ? data.is_active : prev.is_active,
         }));
-        toast.success("Template loaded successfully");
+        toast.success("Template loaded — suggesting categories...");
+        // Auto-suggest categories based on product details
+        const productName = data.name || "";
+        const desc = data.description || "";
+        if (productName) {
+          suggestCategories(productName, desc, parsedPrice);
+        }
       } catch {
         toast.error("Invalid JSON file");
       }
@@ -366,7 +397,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <RichTextEditor value={form.description} onChange={(html) => set("description", html)} />
         </div>
         <div>
-          <Label>Category (Core Lifestyle — up to 3)</Label>
+          <Label>Category (Core Lifestyle — up to 3) {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>}</Label>
           <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
             {coreCategories.filter((c) => !!c.parent_slug).map((c) => {
               const selected = (form.category || "").split(",").filter(Boolean);
