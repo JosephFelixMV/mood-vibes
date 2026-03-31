@@ -175,6 +175,7 @@ export type Database = {
           name: string
           page_error: boolean
           price: number
+          source_url: string
           updated_at: string
           vibe_category: string | null
           video_url: string | null
@@ -192,6 +193,7 @@ export type Database = {
           name: string
           page_error?: boolean
           price: number
+          source_url?: string
           updated_at?: string
           vibe_category?: string | null
           video_url?: string | null
@@ -209,6 +211,7 @@ export type Database = {
           name?: string
           page_error?: boolean
           price?: number
+          source_url?: string
           updated_at?: string
           vibe_category?: string | null
           video_url?: string | null
