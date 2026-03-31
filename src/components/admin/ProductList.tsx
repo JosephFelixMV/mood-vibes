@@ -19,6 +19,8 @@ export default function ProductList({ onEdit }: Props) {
   const [filterVibe, setFilterVibe] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterError, setFilterError] = useState("all");
+  const [pageSize, setPageSize] = useState(100);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-products"],
