@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { getProducts, getCategories, formatPrice } from "@/lib/supabase-queries";
+import { getProducts, getCategories, formatPrice, getProductClickCounts } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,11 @@ export default function ProductList({ onEdit }: Props) {
   const { data: vibeCategories = [] } = useQuery({
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
+  });
+
+  const { data: clickCounts = {} } = useQuery({
+    queryKey: ["product-click-counts"],
+    queryFn: getProductClickCounts,
   });
 
   const toggleMut = useMutation({
@@ -128,6 +133,7 @@ export default function ProductList({ onEdit }: Props) {
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
               <th className="px-4 py-3 font-medium">Price</th>
+              <th className="px-4 py-3 font-medium">Clicks</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Error</th>
               <th className="px-4 py-3 font-medium">Actions</th>
@@ -166,6 +172,7 @@ export default function ProductList({ onEdit }: Props) {
                   )}
                 </td>
                 <td className="px-4 py-3">{formatPrice(p.price)}</td>
+                <td className="px-4 py-3 text-center font-medium">{clickCounts[p.id] || 0}</td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={p.is_active}
@@ -200,7 +207,7 @@ export default function ProductList({ onEdit }: Props) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">
                   No products match filters
                 </td>
               </tr>
