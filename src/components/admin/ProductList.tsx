@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, XCircle, ShieldCheck, Loader2 } from "lucide-react";
+import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 interface Props {
@@ -19,6 +19,8 @@ export default function ProductList({ onEdit }: Props) {
   const [filterVibe, setFilterVibe] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterError, setFilterError] = useState("all");
+  const [pageSize, setPageSize] = useState(100);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-products"],
@@ -95,6 +97,16 @@ export default function ProductList({ onEdit }: Props) {
     return true;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginated = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  // Reset to page 1 when filters change
+  const handleFilterChange = (setter: (v: string) => void) => (v: string) => {
+    setter(v);
+    setCurrentPage(1);
+  };
+
   if (isLoading) return <div className="py-10 text-center text-muted-foreground">Loading…</div>;
 
   return (
@@ -111,7 +123,7 @@ export default function ProductList({ onEdit }: Props) {
           {checkingLinks ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
           {checkingLinks ? "Checking…" : "Check All Links"}
         </Button>
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
+        <Select value={filterCategory} onValueChange={handleFilterChange(setFilterCategory)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
@@ -123,7 +135,7 @@ export default function ProductList({ onEdit }: Props) {
           </SelectContent>
         </Select>
 
-        <Select value={filterVibe} onValueChange={setFilterVibe}>
+        <Select value={filterVibe} onValueChange={handleFilterChange(setFilterVibe)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Vibe" />
           </SelectTrigger>
@@ -135,7 +147,7 @@ export default function ProductList({ onEdit }: Props) {
           </SelectContent>
         </Select>
 
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
+        <Select value={filterStatus} onValueChange={handleFilterChange(setFilterStatus)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -146,7 +158,7 @@ export default function ProductList({ onEdit }: Props) {
           </SelectContent>
         </Select>
 
-        <Select value={filterError} onValueChange={setFilterError}>
+        <Select value={filterError} onValueChange={handleFilterChange(setFilterError)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Page Error" />
           </SelectTrigger>
@@ -156,6 +168,22 @@ export default function ProductList({ onEdit }: Props) {
             <SelectItem value="ok">No Error</SelectItem>
           </SelectContent>
         </Select>
+
+        <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
+          <SelectTrigger className="w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="20">20 per page</SelectItem>
+            <SelectItem value="50">50 per page</SelectItem>
+            <SelectItem value="100">100 per page</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="text-xs text-muted-foreground">
+        Showing {paginated.length} of {filtered.length} products
+        {totalPages > 1 && ` — Page ${safePage} of ${totalPages}`}
       </div>
 
       <div className="overflow-x-auto rounded-xl border">
@@ -173,7 +201,7 @@ export default function ProductList({ onEdit }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((p) => (
+            {paginated.map((p) => (
               <tr key={p.id} className="border-b last:border-0">
                 <td className="px-4 py-3">
                   <div>
@@ -248,6 +276,38 @@ export default function ProductList({ onEdit }: Props) {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={safePage <= 1}
+            onClick={() => setCurrentPage(safePage - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" /> Previous
+          </Button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <Button
+              key={page}
+              variant={page === safePage ? "default" : "outline"}
+              size="sm"
+              className="w-9"
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={safePage >= totalPages}
+            onClick={() => setCurrentPage(safePage + 1)}
+          >
+            Next <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
