@@ -121,7 +121,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             ? data.additional_images.slice(0, 4)
             : prev.additional_images,
           video_url: data.video_url || prev.video_url,
-          price: data.price || prev.price,
+          price: typeof data.price === "string" ? parseFloat(data.price.replace(/[^0-9.]/g, "")) || prev.price : (data.price || prev.price),
           description: data.description || prev.description,
           category: data.category || prev.category,
           vibe_category: data.vibe_category || prev.vibe_category,
