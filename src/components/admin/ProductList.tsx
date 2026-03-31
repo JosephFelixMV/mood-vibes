@@ -97,7 +97,15 @@ export default function ProductList({ onEdit }: Props) {
     return true;
   });
 
-  if (isLoading) return <div className="py-10 text-center text-muted-foreground">Loading…</div>;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginated = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  // Reset to page 1 when filters change
+  const handleFilterChange = (setter: (v: string) => void) => (v: string) => {
+    setter(v);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="space-y-4">
