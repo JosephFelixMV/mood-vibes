@@ -111,30 +111,21 @@ export async function getProductCountByVibe() {
  * Uses a hash of today's date as a seed. Cycles through products
  * ensuring no product repeats within 31 days (unless fewer products exist).
  */
-export function getProductOfTheDay(products: Product[]): Product | null {
-  if (!products.length) return null;
+/**
+ * Server-side Product of the Day — same product for all visitors.
+ * Calls a DB function that creates/returns today's pick.
+ */
+export async function getDailyPick(): Promise<Product | null> {
+  const { data: productId, error } = await supabase.rpc("get_or_create_daily_pick");
+  if (error || !productId) return null;
 
-  const today = new Date();
-  const dayIndex = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-
-  if (products.length <= 31) {
-    // Not enough products to avoid 31-day repeats, just cycle
-    return products[dayIndex % products.length];
-  }
-
-  // Use a sliding window: partition products into 31-day windows
-  // The window offset shifts every 31 days
-  const windowIndex = Math.floor(dayIndex / 31);
-  const dayInWindow = dayIndex % 31;
-
-  // Shuffle deterministically based on window
-  const shuffled = [...products].sort((a, b) => {
-    const hashA = simpleHash(a.id + windowIndex);
-    const hashB = simpleHash(b.id + windowIndex);
-    return hashA - hashB;
-  });
-
-  return shuffled[dayInWindow % shuffled.length];
+  const { data: product, error: pErr } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", productId)
+    .single();
+  if (pErr) return null;
+  return product;
 }
 
 export function formatPrice(price: number | string): string {

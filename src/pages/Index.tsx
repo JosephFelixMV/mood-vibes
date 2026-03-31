@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, getProductOfTheDay, getRandomProduct } from "@/lib/supabase-queries";
+import { getProducts, getDailyPick, getRandomProduct } from "@/lib/supabase-queries";
 
 function useCountdownToMidnightUTC() {
   const getRemaining = () => {
@@ -30,28 +30,26 @@ function useCountdownToMidnightUTC() {
 
 export default function Index() {
   useSEO({ title: "Home", description: "Discover interesting products you never knew you needed. New surprise every day on Surprise Shopper." });
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => getProducts({ activeOnly: true }),
   });
 
-  const productOfDay = getProductOfTheDay(products);
-  const [surprise, setSurprise] = useState<typeof productOfDay>(null);
-  const [key, setKey] = useState(0);
   const countdown = useCountdownToMidnightUTC();
 
-  // When countdown expires, pick a new random product of the day
-  const [refreshKey, setRefreshKey] = useState(0);
-  useEffect(() => {
-    if (countdown.expired) {
-      const t = setTimeout(() => setRefreshKey((k) => k + 1), 1000);
-      return () => clearTimeout(t);
-    }
-  }, [countdown.expired]);
+  // Server-side daily pick — same for all visitors, refetches when countdown expires
+  const { data: dailyPick, isLoading: pickLoading } = useQuery({
+    queryKey: ["daily-pick", countdown.expired ? "expired" : "active"],
+    queryFn: getDailyPick,
+    staleTime: countdown.expired ? 0 : 5 * 60 * 1000,
+    refetchInterval: countdown.expired ? 5000 : false,
+  });
 
-  const displayedProduct = countdown.expired
-    ? getRandomProduct(products, productOfDay?.id) ?? productOfDay
-    : productOfDay;
+  const [surprise, setSurprise] = useState<typeof dailyPick>(null);
+  const [key, setKey] = useState(0);
+  const isLoading = productsLoading || pickLoading;
+
+  const displayedProduct = dailyPick;
 
   const handleSurprise = () => {
     const next = getRandomProduct(products, surprise?.id);

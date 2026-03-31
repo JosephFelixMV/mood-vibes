@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_picks: {
+        Row: {
+          created_at: string
+          id: string
+          pick_date: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pick_date?: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pick_date?: string
+          product_id?: string
+        }
+        Relationships: []
+      }
       product_clicks: {
         Row: {
           clicked_at: string
@@ -199,7 +220,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_or_create_daily_pick: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
