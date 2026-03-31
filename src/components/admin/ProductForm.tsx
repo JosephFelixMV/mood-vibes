@@ -443,6 +443,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Button type="submit" disabled={mutation.isPending} className="rounded-full">
             {editId ? "Update Product" : "Add Product"}
           </Button>
+          {!editId && (
+            <Button type="button" variant="outline" onClick={() => { setForm(empty); if (savedState) savedState.current = null; }} className="rounded-full">
+              Clear Fields
+            </Button>
+          )}
           <Button type="button" variant="outline" onClick={onDone} className="rounded-full">Cancel</Button>
         </div>
       </form>
