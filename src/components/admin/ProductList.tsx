@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, XCircle } from "lucide-react";
+import { Pencil, Trash2, XCircle, ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Props {
