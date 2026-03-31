@@ -317,6 +317,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Input value={form.affiliate_url} onChange={(e) => set("affiliate_url", e.target.value)} required placeholder="https://..." />
         </div>
         <div>
+          <Label>Source Product Page URL (required, admin only)</Label>
+          <Input value={form.source_url} onChange={(e) => set("source_url", e.target.value)} required placeholder="https://retailer.com/product/..." />
+          <p className="mt-1 text-xs text-muted-foreground">Original product page URL for link validation</p>
+        </div>
+        <div>
           <Label>Main Image URL</Label>
           <Input value={form.image_url} onChange={(e) => set("image_url", e.target.value)} placeholder="https://..." />
         </div>
