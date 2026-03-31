@@ -49,9 +49,7 @@ export default function Index() {
   const [key, setKey] = useState(0);
   const isLoading = productsLoading || pickLoading;
 
-  const displayedProduct = countdown.expired
-    ? getRandomProduct(products, productOfDay?.id) ?? productOfDay
-    : productOfDay;
+  const displayedProduct = dailyPick;
 
   const handleSurprise = () => {
     const next = getRandomProduct(products, surprise?.id);
