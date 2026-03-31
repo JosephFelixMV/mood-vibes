@@ -162,3 +162,15 @@ export function getRandomProduct(products: Product[], excludeId?: string): Produ
   if (!filtered.length) return null;
   return filtered[Math.floor(Math.random() * filtered.length)];
 }
+
+export async function getProductClickCounts(): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from("product_clicks")
+    .select("product_id");
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  (data || []).forEach((row) => {
+    counts[row.product_id] = (counts[row.product_id] || 0) + 1;
+  });
+  return counts;
+}
