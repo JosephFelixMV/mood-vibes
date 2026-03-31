@@ -31,6 +31,7 @@ const empty = {
   price: "" as string | number,
   image_url: "",
   affiliate_url: "",
+  source_url: "",
   category: "",
   vibe_category: "",
   company_name: "",
