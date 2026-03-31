@@ -199,7 +199,7 @@ export default function ProductList({ onEdit }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((p) => (
+            {paginated.map((p) => (
               <tr key={p.id} className="border-b last:border-0">
                 <td className="px-4 py-3">
                   <div>
