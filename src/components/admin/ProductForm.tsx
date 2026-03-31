@@ -368,6 +368,21 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Input value={form.image_url} onChange={(e) => set("image_url", e.target.value)} placeholder="https://..." />
         </div>
 
+        {/* Manual Suggest Categories Button */}
+        <Button
+          type="button"
+          variant="outline"
+          disabled={suggestingCategories || !form.name}
+          onClick={() => suggestCategories(form.name, form.description || "", form.price)}
+          className="w-full"
+        >
+          {suggestingCategories ? (
+            <span className="animate-pulse">✨ Analyzing...</span>
+          ) : (
+            <>✨ Suggest Categories</>
+          )}
+        </Button>
+
         {/* AI Category Suggestions Display */}
         {(suggestingCategories || aiSuggestions) && (
           <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
