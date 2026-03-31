@@ -121,7 +121,7 @@ export default function ProductList({ onEdit }: Props) {
           {checkingLinks ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
           {checkingLinks ? "Checking…" : "Check All Links"}
         </Button>
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
+        <Select value={filterCategory} onValueChange={handleFilterChange(setFilterCategory)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
@@ -133,7 +133,7 @@ export default function ProductList({ onEdit }: Props) {
           </SelectContent>
         </Select>
 
-        <Select value={filterVibe} onValueChange={setFilterVibe}>
+        <Select value={filterVibe} onValueChange={handleFilterChange(setFilterVibe)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Vibe" />
           </SelectTrigger>
@@ -145,7 +145,7 @@ export default function ProductList({ onEdit }: Props) {
           </SelectContent>
         </Select>
 
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
+        <Select value={filterStatus} onValueChange={handleFilterChange(setFilterStatus)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -156,7 +156,7 @@ export default function ProductList({ onEdit }: Props) {
           </SelectContent>
         </Select>
 
-        <Select value={filterError} onValueChange={setFilterError}>
+        <Select value={filterError} onValueChange={handleFilterChange(setFilterError)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Page Error" />
           </SelectTrigger>
@@ -166,6 +166,22 @@ export default function ProductList({ onEdit }: Props) {
             <SelectItem value="ok">No Error</SelectItem>
           </SelectContent>
         </Select>
+
+        <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
+          <SelectTrigger className="w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="20">20 per page</SelectItem>
+            <SelectItem value="50">50 per page</SelectItem>
+            <SelectItem value="100">100 per page</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="text-xs text-muted-foreground">
+        Showing {paginated.length} of {filtered.length} products
+        {totalPages > 1 && ` — Page ${safePage} of ${totalPages}`}
       </div>
 
       <div className="overflow-x-auto rounded-xl border">
