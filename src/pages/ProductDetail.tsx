@@ -92,7 +92,7 @@ export default function ProductDetail() {
                   <img
                     src={allImages[currentImage]}
                     alt={product.name}
-                    className="h-full w-full object-contain"
+                    className="sharp-image h-full w-full object-contain"
                   />
                   {allImages.length > 1 && (
                     <>

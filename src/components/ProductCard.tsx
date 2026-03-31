@@ -36,8 +36,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
           <img
             src={product.image_url}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            style={{ imageRendering: "auto", WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden", transform: "translateZ(0)" }}
+            className="sharp-image h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
             decoding="async"
           />
