@@ -35,6 +35,11 @@ export default function ProductList({ onEdit }: Props) {
     queryFn: () => getCategories("vibe"),
   });
 
+  const { data: clickCounts = {} } = useQuery({
+    queryKey: ["product-click-counts"],
+    queryFn: getProductClickCounts,
+  });
+
   const toggleMut = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
       const { error } = await supabase.from("products").update({ is_active }).eq("id", id);
