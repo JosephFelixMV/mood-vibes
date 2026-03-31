@@ -107,24 +107,35 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
   const [suggestingCategories, setSuggestingCategories] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<{ core: string[]; vibes: string[] } | null>(null);
 
   const suggestCategories = async (productName: string, description: string, price: string | number) => {
     setSuggestingCategories(true);
+    setAiSuggestions(null);
     try {
       const { data, error } = await supabase.functions.invoke("suggest-categories", {
         body: { name: productName, description, price },
       });
       if (error) throw error;
+      console.log("AI category suggestions:", data);
       if (data?.core?.length || data?.vibes?.length) {
+        const suggestions = {
+          core: data.core || [],
+          vibes: data.vibes || [],
+        };
+        setAiSuggestions(suggestions);
         setForm((prev: any) => ({
           ...prev,
-          category: data.core?.length ? data.core.join(",") : prev.category,
-          vibe_category: data.vibes?.length ? data.vibes.join(",") : prev.vibe_category,
+          category: suggestions.core.length ? suggestions.core.join(",") : prev.category,
+          vibe_category: suggestions.vibes.length ? suggestions.vibes.join(",") : prev.vibe_category,
         }));
-        toast.success(`Suggested ${data.core?.length || 0} categories and ${data.vibes?.length || 0} vibes`);
+        toast.success(`Suggested ${suggestions.core.length} categories and ${suggestions.vibes.length} vibes`);
+      } else {
+        toast.info("No category suggestions returned");
       }
     } catch (err) {
       console.error("Category suggestion failed:", err);
+      toast.error("Category suggestion failed");
     } finally {
       setSuggestingCategories(false);
     }
