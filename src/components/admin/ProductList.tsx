@@ -279,8 +279,6 @@ export default function ProductList({ onEdit }: Props) {
                   No products match filters
                 </td>
               </tr>
-                </td>
-              </tr>
             )}
           </tbody>
         </table>
