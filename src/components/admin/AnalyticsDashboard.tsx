@@ -90,13 +90,41 @@ export default function AnalyticsDashboard() {
   const { data: events = [], isLoading } = useQuery({
     queryKey: ["analytics-events", fromDate, toDate],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch views from product_events
+      const { data: viewData, error: viewErr } = await supabase
         .from("product_events")
         .select("product_id, event_type")
+        .eq("event_type", "view")
         .gte("created_at", fromDate)
         .lte("created_at", toDate);
-      if (error) throw error;
-      return data;
+      if (viewErr) throw viewErr;
+
+      // Fetch clicks from product_clicks (the primary click store)
+      const { data: clickData, error: clickErr } = await supabase
+        .from("product_clicks")
+        .select("product_id, clicked_at")
+        .gte("clicked_at", fromDate)
+        .lte("clicked_at", toDate);
+      if (clickErr) throw clickErr;
+
+      // Merge into unified format
+      const merged: { product_id: string; event_type: string }[] = [
+        ...(viewData || []).map((r) => ({ product_id: r.product_id, event_type: "view" })),
+        ...(clickData || []).map((r) => ({ product_id: r.product_id, event_type: "click" })),
+      ];
+
+      // Also fetch clicks from product_events (in case some were recorded there)
+      const { data: eventClicks, error: ecErr } = await supabase
+        .from("product_events")
+        .select("product_id, event_type")
+        .eq("event_type", "click")
+        .gte("created_at", fromDate)
+        .lte("created_at", toDate);
+      if (!ecErr && eventClicks) {
+        merged.push(...eventClicks.map((r) => ({ product_id: r.product_id, event_type: "click" })));
+      }
+
+      return merged;
     },
   });
 
