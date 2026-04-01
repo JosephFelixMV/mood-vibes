@@ -223,6 +223,35 @@ export default function ProductList({ onEdit }: Props) {
             <SelectItem value="100">100 per page</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Date range filter */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left text-xs", !dateFrom && "text-muted-foreground")}>
+              <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+              {dateFrom ? format(dateFrom, "MM/dd/yyyy") : "From date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateFrom} onSelect={(d) => { setDateFrom(d); setCurrentPage(1); }} initialFocus className="p-3 pointer-events-auto" />
+          </PopoverContent>
+        </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left text-xs", !dateTo && "text-muted-foreground")}>
+              <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+              {dateTo ? format(dateTo, "MM/dd/yyyy") : "To date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateTo} onSelect={(d) => { setDateTo(d); setCurrentPage(1); }} initialFocus className="p-3 pointer-events-auto" />
+          </PopoverContent>
+        </Popover>
+        {(dateFrom || dateTo) && (
+          <Button variant="ghost" size="sm" className="text-xs" onClick={() => { setDateFrom(undefined); setDateTo(undefined); setCurrentPage(1); }}>
+            Clear dates
+          </Button>
+        )}
       </div>
 
       <div className="text-xs text-muted-foreground">
