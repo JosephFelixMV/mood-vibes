@@ -8,7 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 
-type SortOption = "views-desc" | "views-asc" | "clicks-desc" | "clicks-asc";
+type SortOption = "views-desc" | "views-asc" | "clicks-desc" | "clicks-asc" | "products-desc" | "products-asc";
 
 function getDefaultRange() {
   const now = new Date();
