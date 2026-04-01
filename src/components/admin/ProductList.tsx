@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   onEdit: (id: string) => void;
@@ -21,6 +26,10 @@ export default function ProductList({ onEdit }: Props) {
   const [filterError, setFilterError] = useState("all");
   const [pageSize, setPageSize] = useState(100);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortColumn, setSortColumn] = useState<"views" | "clicks" | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-products"],
@@ -89,6 +98,15 @@ export default function ProductList({ onEdit }: Props) {
       setCheckingLinks(false);
     }
   };
+  const toggleSort = (col: "views" | "clicks") => {
+    if (sortColumn === col) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(col);
+      setSortDir("desc");
+    }
+  };
+
   const filtered = products.filter((p) => {
     if (filterCategory !== "all" && p.category !== filterCategory) return false;
     if (filterVibe !== "all") {
@@ -99,12 +117,33 @@ export default function ProductList({ onEdit }: Props) {
     if (filterStatus === "inactive" && p.is_active) return false;
     if (filterError === "error" && !p.page_error) return false;
     if (filterError === "ok" && p.page_error) return false;
+    if (dateFrom) {
+      const added = new Date(p.date_added);
+      if (added < dateFrom) return false;
+    }
+    if (dateTo) {
+      const added = new Date(p.date_added);
+      const endOfDay = new Date(dateTo);
+      endOfDay.setHours(23, 59, 59, 999);
+      if (added > endOfDay) return false;
+    }
     return true;
   });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  // Sort by views/clicks if active
+  const sorted = [...filtered];
+  if (sortColumn) {
+    sorted.sort((a, b) => {
+      const countsMap = sortColumn === "views" ? viewCounts : clickCounts;
+      const aVal = countsMap[a.id] || 0;
+      const bVal = countsMap[b.id] || 0;
+      return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+    });
+  }
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
-  const paginated = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const paginated = sorted.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   // Reset to page 1 when filters change
   const handleFilterChange = (setter: (v: string) => void) => (v: string) => {
@@ -184,10 +223,39 @@ export default function ProductList({ onEdit }: Props) {
             <SelectItem value="100">100 per page</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Date range filter */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left text-xs", !dateFrom && "text-muted-foreground")}>
+              <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+              {dateFrom ? format(dateFrom, "MM/dd/yyyy") : "From date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateFrom} onSelect={(d) => { setDateFrom(d); setCurrentPage(1); }} initialFocus className="p-3 pointer-events-auto" />
+          </PopoverContent>
+        </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left text-xs", !dateTo && "text-muted-foreground")}>
+              <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+              {dateTo ? format(dateTo, "MM/dd/yyyy") : "To date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateTo} onSelect={(d) => { setDateTo(d); setCurrentPage(1); }} initialFocus className="p-3 pointer-events-auto" />
+          </PopoverContent>
+        </Popover>
+        {(dateFrom || dateTo) && (
+          <Button variant="ghost" size="sm" className="text-xs" onClick={() => { setDateFrom(undefined); setDateTo(undefined); setCurrentPage(1); }}>
+            Clear dates
+          </Button>
+        )}
       </div>
 
       <div className="text-xs text-muted-foreground">
-        Showing {paginated.length} of {filtered.length} products
+        Showing {paginated.length} of {sorted.length} products
         {totalPages > 1 && ` — Page ${safePage} of ${totalPages}`}
       </div>
 
@@ -199,8 +267,16 @@ export default function ProductList({ onEdit }: Props) {
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
               <th className="px-4 py-3 font-medium">Price</th>
-              <th className="px-4 py-3 font-medium">Views</th>
-              <th className="px-4 py-3 font-medium">Clicks</th>
+              <th className="px-4 py-3 font-medium">
+                <button onClick={() => toggleSort("views")} className="inline-flex items-center gap-1 hover:text-primary">
+                  Views {sortColumn === "views" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                </button>
+              </th>
+              <th className="px-4 py-3 font-medium">
+                <button onClick={() => toggleSort("clicks")} className="inline-flex items-center gap-1 hover:text-primary">
+                  Clicks {sortColumn === "clicks" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                </button>
+              </th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Error</th>
               <th className="px-4 py-3 font-medium">Actions</th>
@@ -222,6 +298,9 @@ export default function ProductList({ onEdit }: Props) {
                     {p.company_name && (
                       <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
                     )}
+                    <div className="text-[11px] text-muted-foreground">
+                      {format(new Date(p.date_added), "MM/dd/yyyy")}
+                    </div>
                   </div>
                 </td>
                 <td className="px-4 py-3">
