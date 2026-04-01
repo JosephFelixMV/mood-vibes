@@ -42,6 +42,11 @@ export default function ProductList({ onEdit }: Props) {
     queryFn: getProductClickCounts,
   });
 
+  const { data: viewCounts = {} } = useQuery({
+    queryKey: ["product-view-counts"],
+    queryFn: getProductViewCounts,
+  });
+
   const toggleMut = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
       const { error } = await supabase.from("products").update({ is_active }).eq("id", id);
