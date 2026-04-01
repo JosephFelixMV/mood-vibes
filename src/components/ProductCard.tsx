@@ -40,6 +40,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
 
   return (
     <motion.div
+      ref={cardRef}
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
