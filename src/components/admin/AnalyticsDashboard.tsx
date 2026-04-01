@@ -12,10 +12,16 @@ type SortOption = "views-desc" | "views-asc" | "clicks-desc" | "clicks-asc";
 
 function getDefaultRange() {
   const now = new Date();
-  const from = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  // Go back 5 months from current month
+  let fromMonth = now.getMonth() - 5;
+  let fromYear = now.getFullYear();
+  if (fromMonth < 0) {
+    fromMonth += 12;
+    fromYear -= 1;
+  }
   return {
-    fromYear: from.getFullYear(),
-    fromMonth: from.getMonth(),
+    fromYear,
+    fromMonth,
     toYear: now.getFullYear(),
     toMonth: now.getMonth(),
   };
