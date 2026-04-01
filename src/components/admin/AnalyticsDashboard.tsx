@@ -8,7 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 
-type SortOption = "views-desc" | "views-asc" | "clicks-desc" | "clicks-asc";
+type SortOption = "views-desc" | "views-asc" | "clicks-desc" | "clicks-asc" | "products-desc" | "products-asc";
 
 function getDefaultRange() {
   const now = new Date();
@@ -202,6 +202,8 @@ export default function AnalyticsDashboard() {
         case "views-asc": return a.views - b.views;
         case "clicks-desc": return b.clicks - a.clicks;
         case "clicks-asc": return a.clicks - b.clicks;
+        case "products-desc": return b.productCount - a.productCount;
+        case "products-asc": return a.productCount - b.productCount;
       }
     });
 
@@ -244,6 +246,8 @@ export default function AnalyticsDashboard() {
               <SelectItem value="views-asc">Views — Ascending</SelectItem>
               <SelectItem value="clicks-desc">Clicks — Descending</SelectItem>
               <SelectItem value="clicks-asc">Clicks — Ascending</SelectItem>
+              <SelectItem value="products-desc">Products — Descending</SelectItem>
+              <SelectItem value="products-asc">Products — Ascending</SelectItem>
             </SelectContent>
           </Select>
         </div>
