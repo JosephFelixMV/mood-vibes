@@ -202,6 +202,8 @@ export default function AnalyticsDashboard() {
         case "views-asc": return a.views - b.views;
         case "clicks-desc": return b.clicks - a.clicks;
         case "clicks-asc": return a.clicks - b.clicks;
+        case "products-desc": return b.productCount - a.productCount;
+        case "products-asc": return a.productCount - b.productCount;
       }
     });
 
