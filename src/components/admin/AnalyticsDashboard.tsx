@@ -257,6 +257,7 @@ export default function AnalyticsDashboard() {
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-muted-foreground">Categories:</span>
             <button onClick={selectAll} className="text-xs text-primary hover:underline">Select All</button>
+            <button onClick={() => setSelectedCategories(new Set())} className="text-xs text-primary hover:underline">Deselect All</button>
           </div>
           <div className="flex flex-wrap gap-2">
             {availableCategories.map((cat) => (
