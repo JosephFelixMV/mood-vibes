@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { getProducts, getCategories, formatPrice, getProductClickCounts } from "@/lib/supabase-queries";
+import { getProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,11 @@ export default function ProductList({ onEdit }: Props) {
   const { data: clickCounts = {} } = useQuery({
     queryKey: ["product-click-counts"],
     queryFn: getProductClickCounts,
+  });
+
+  const { data: viewCounts = {} } = useQuery({
+    queryKey: ["product-view-counts"],
+    queryFn: getProductViewCounts,
   });
 
   const toggleMut = useMutation({
@@ -194,6 +199,7 @@ export default function ProductList({ onEdit }: Props) {
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
               <th className="px-4 py-3 font-medium">Price</th>
+              <th className="px-4 py-3 font-medium">Views</th>
               <th className="px-4 py-3 font-medium">Clicks</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Error</th>
@@ -233,6 +239,7 @@ export default function ProductList({ onEdit }: Props) {
                   )}
                 </td>
                 <td className="px-4 py-3">{formatPrice(p.price)}</td>
+                <td className="px-4 py-3 text-center font-medium">{viewCounts[p.id] || 0}</td>
                 <td className="px-4 py-3 text-center font-medium">{clickCounts[p.id] || 0}</td>
                 <td className="px-4 py-3">
                   <Switch
@@ -268,7 +275,7 @@ export default function ProductList({ onEdit }: Props) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={9} className="px-4 py-10 text-center text-muted-foreground">
                   No products match filters
                 </td>
               </tr>

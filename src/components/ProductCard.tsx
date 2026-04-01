@@ -1,9 +1,11 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trackProductClick } from "@/lib/track-click";
+import { trackEvent } from "@/lib/track-event";
 import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 
@@ -13,12 +15,32 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, featured }: ProductCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          trackEvent(product.id, "view");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [product.id]);
+
   const handleBuyClick = () => {
     trackProductClick(product.id);
+    trackEvent(product.id, "click");
   };
 
   return (
     <motion.div
+      ref={cardRef}
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}

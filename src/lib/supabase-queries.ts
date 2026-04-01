@@ -174,3 +174,16 @@ export async function getProductClickCounts(): Promise<Record<string, number>> {
   });
   return counts;
 }
+
+export async function getProductViewCounts(): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from("product_events")
+    .select("product_id")
+    .eq("event_type", "view");
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  (data || []).forEach((row: any) => {
+    counts[row.product_id] = (counts[row.product_id] || 0) + 1;
+  });
+  return counts;
+}
