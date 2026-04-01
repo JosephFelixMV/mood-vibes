@@ -98,6 +98,15 @@ export default function ProductList({ onEdit }: Props) {
       setCheckingLinks(false);
     }
   };
+  const toggleSort = (col: "views" | "clicks") => {
+    if (sortColumn === col) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(col);
+      setSortDir("desc");
+    }
+  };
+
   const filtered = products.filter((p) => {
     if (filterCategory !== "all" && p.category !== filterCategory) return false;
     if (filterVibe !== "all") {
@@ -108,12 +117,33 @@ export default function ProductList({ onEdit }: Props) {
     if (filterStatus === "inactive" && p.is_active) return false;
     if (filterError === "error" && !p.page_error) return false;
     if (filterError === "ok" && p.page_error) return false;
+    if (dateFrom) {
+      const added = new Date(p.date_added);
+      if (added < dateFrom) return false;
+    }
+    if (dateTo) {
+      const added = new Date(p.date_added);
+      const endOfDay = new Date(dateTo);
+      endOfDay.setHours(23, 59, 59, 999);
+      if (added > endOfDay) return false;
+    }
     return true;
   });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  // Sort by views/clicks if active
+  const sorted = [...filtered];
+  if (sortColumn) {
+    sorted.sort((a, b) => {
+      const countsMap = sortColumn === "views" ? viewCounts : clickCounts;
+      const aVal = countsMap[a.id] || 0;
+      const bVal = countsMap[b.id] || 0;
+      return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+    });
+  }
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
-  const paginated = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const paginated = sorted.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   // Reset to page 1 when filters change
   const handleFilterChange = (setter: (v: string) => void) => (v: string) => {
