@@ -239,6 +239,7 @@ export default function ProductList({ onEdit }: Props) {
                   )}
                 </td>
                 <td className="px-4 py-3">{formatPrice(p.price)}</td>
+                <td className="px-4 py-3 text-center font-medium">{viewCounts[p.id] || 0}</td>
                 <td className="px-4 py-3 text-center font-medium">{clickCounts[p.id] || 0}</td>
                 <td className="px-4 py-3">
                   <Switch
