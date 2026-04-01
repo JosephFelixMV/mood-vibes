@@ -31,8 +31,17 @@ Deno.serve(async (req) => {
   const results: { id: string; name: string; status: string; error: boolean }[] = [];
 
   for (const product of products || []) {
-    if (!product.source_url) {
-      results.push({ id: product.id, name: product.name, status: "no_source_url", error: false });
+    // Flag products missing affiliate link or source URL
+    const missingAffiliate = !product.affiliate_url || product.affiliate_url.trim() === "";
+    const missingSource = !product.source_url || product.source_url.trim() === "";
+
+    if (missingAffiliate || missingSource) {
+      const reasons = [
+        ...(missingAffiliate ? ["missing_affiliate_url"] : []),
+        ...(missingSource ? ["missing_source_url"] : []),
+      ];
+      results.push({ id: product.id, name: product.name, status: reasons.join(", "), error: true });
+      await supabase.from("products").update({ page_error: true }).eq("id", product.id);
       continue;
     }
 
