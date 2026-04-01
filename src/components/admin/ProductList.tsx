@@ -199,6 +199,7 @@ export default function ProductList({ onEdit }: Props) {
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
               <th className="px-4 py-3 font-medium">Price</th>
+              <th className="px-4 py-3 font-medium">Views</th>
               <th className="px-4 py-3 font-medium">Clicks</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Error</th>
