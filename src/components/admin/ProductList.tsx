@@ -255,7 +255,7 @@ export default function ProductList({ onEdit }: Props) {
       </div>
 
       <div className="text-xs text-muted-foreground">
-        Showing {paginated.length} of {filtered.length} products
+        Showing {paginated.length} of {sorted.length} products
         {totalPages > 1 && ` — Page ${safePage} of ${totalPages}`}
       </div>
 
