@@ -246,6 +246,8 @@ export default function AnalyticsDashboard() {
               <SelectItem value="views-asc">Views — Ascending</SelectItem>
               <SelectItem value="clicks-desc">Clicks — Descending</SelectItem>
               <SelectItem value="clicks-asc">Clicks — Ascending</SelectItem>
+              <SelectItem value="products-desc">Products — Descending</SelectItem>
+              <SelectItem value="products-asc">Products — Ascending</SelectItem>
             </SelectContent>
           </Select>
         </div>
