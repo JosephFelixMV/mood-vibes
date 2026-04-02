@@ -294,8 +294,18 @@ export default function AnalyticsDashboard() {
                 >
                   Products {sortBy === "products-asc" ? "↑" : sortBy === "products-desc" ? "↓" : ""}
                 </th>
-                <th className="px-4 py-3 font-medium text-center">Total Views</th>
-                <th className="px-4 py-3 font-medium text-center">Total Clicks</th>
+                <th
+                  className="px-4 py-3 font-medium text-center cursor-pointer select-none hover:text-primary transition-colors"
+                  onClick={() => setSortBy(sortBy === "views-desc" ? "views-asc" : "views-desc")}
+                >
+                  Total Views {sortBy === "views-asc" ? "↑" : sortBy === "views-desc" ? "↓" : ""}
+                </th>
+                <th
+                  className="px-4 py-3 font-medium text-center cursor-pointer select-none hover:text-primary transition-colors"
+                  onClick={() => setSortBy(sortBy === "clicks-desc" ? "clicks-asc" : "clicks-desc")}
+                >
+                  Total Clicks {sortBy === "clicks-asc" ? "↑" : sortBy === "clicks-desc" ? "↓" : ""}
+                </th>
               </tr>
             </thead>
             <tbody>
