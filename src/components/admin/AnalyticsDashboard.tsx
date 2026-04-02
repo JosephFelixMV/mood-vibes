@@ -288,7 +288,12 @@ export default function AnalyticsDashboard() {
             <thead className="border-b bg-muted/50 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Category</th>
-                <th className="px-4 py-3 font-medium text-center">Products</th>
+                <th
+                  className="px-4 py-3 font-medium text-center cursor-pointer select-none hover:text-primary transition-colors"
+                  onClick={() => setSortBy(sortBy === "products-desc" ? "products-asc" : "products-desc")}
+                >
+                  Products {sortBy === "products-asc" ? "↑" : sortBy === "products-desc" ? "↓" : ""}
+                </th>
                 <th className="px-4 py-3 font-medium text-center">Total Views</th>
                 <th className="px-4 py-3 font-medium text-center">Total Clicks</th>
               </tr>
