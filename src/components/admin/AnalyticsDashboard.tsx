@@ -239,17 +239,6 @@ export default function AnalyticsDashboard() {
             <ToggleGroupItem value="vibe" className="rounded-full px-4">Vibe</ToggleGroupItem>
           </ToggleGroup>
 
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="views-desc">Views — Descending</SelectItem>
-              <SelectItem value="views-asc">Views — Ascending</SelectItem>
-              <SelectItem value="clicks-desc">Clicks — Descending</SelectItem>
-              <SelectItem value="clicks-asc">Clicks — Ascending</SelectItem>
-              <SelectItem value="products-desc">Products — Descending</SelectItem>
-              <SelectItem value="products-asc">Products — Ascending</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
