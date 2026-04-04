@@ -331,7 +331,16 @@ export default function ProductList({ onEdit }: Props) {
                 </td>
                 <td className="px-4 py-3 text-center">
                   {p.page_error && (
-                    <XCircle className="h-5 w-5 text-destructive inline-block" />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <XCircle className="h-5 w-5 text-destructive inline-block cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs text-xs">{(p as any).page_error_detail || "Unknown error detected during link check"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </td>
                 <td className="px-4 py-3">

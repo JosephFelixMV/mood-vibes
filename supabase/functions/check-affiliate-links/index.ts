@@ -101,13 +101,14 @@ Deno.serve(async (req) => {
       results.push({ id: product.id, name: product.name, status, error: isError });
       await supabase.from("products").update({ page_error: isError, page_error_detail: isError ? status : null }).eq("id", product.id);
     } catch (e) {
+      const detail = `fetch_error: ${e.message}`;
       results.push({
         id: product.id,
         name: product.name,
-        status: `fetch_error: ${e.message}`,
+        status: detail,
         error: true,
       });
-      await supabase.from("products").update({ page_error: true }).eq("id", product.id);
+      await supabase.from("products").update({ page_error: true, page_error_detail: detail }).eq("id", product.id);
     }
   }
 
