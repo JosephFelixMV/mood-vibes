@@ -7,7 +7,6 @@ interface Product {
   id: string;
   name: string;
   image_url: string | null;
-  affiliate_url: string;
   source_url: string;
   is_active: boolean;
   page_error: boolean;
@@ -17,12 +16,15 @@ test.describe("Product page health checks", () => {
   let products: Product[] = [];
 
   test.beforeAll(async () => {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?is_active=eq.true&select=id,name,image_url,affiliate_url,source_url,is_active,page_error`, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-      },
-    });
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/products?is_active=eq.true&select=id,name,image_url,source_url,is_active,page_error`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
     products = await res.json();
   });
 
@@ -44,60 +46,75 @@ test.describe("Product page health checks", () => {
     expect(errors).toEqual([]);
   });
 
-  test("all affiliate links resolve to source product pages", async ({ page }) => {
+  test("all source URLs resolve to the correct product page", async ({ page }) => {
     const errors: string[] = [];
 
     for (const product of products) {
-      if (!product.affiliate_url || product.affiliate_url === "#") continue;
       if (!product.source_url) {
         errors.push(`${product.name}: missing source_url`);
         continue;
       }
 
       try {
-        const response = await page.request.get(product.affiliate_url, {
-          maxRedirects: 5,
-          timeout: 15000,
+        // Navigate to the source URL and wait for full load
+        const response = await page.goto(product.source_url, {
+          waitUntil: "networkidle",
+          timeout: 30000,
         });
 
-        if (response.status() >= 400) {
-          errors.push(`${product.name}: affiliate URL returned ${response.status()}`);
+        // Wait for any JS-based redirects to settle
+        await page.waitForTimeout(3000);
+
+        const finalUrl = page.url();
+        const statusCode = response?.status() ?? 0;
+
+        // Check for HTTP errors
+        if (statusCode >= 400) {
+          errors.push(`${product.name}: source URL returned ${statusCode}`);
           continue;
         }
 
-        // Verify the affiliate link resolves to the same domain as the source URL
-        const finalUrl = response.url();
-        const sourceHost = new URL(product.source_url).hostname.replace("www.", "");
-        const finalHost = new URL(finalUrl).hostname.replace("www.", "");
-
-        if (sourceHost !== finalHost) {
-          errors.push(`${product.name}: affiliate resolved to ${finalHost}, expected ${sourceHost}`);
+        // Check if redirected to home page
+        const finalPath = new URL(finalUrl).pathname.replace(/\/$/, "");
+        if (finalPath === "" || finalPath === "/") {
+          const sourcePath = new URL(product.source_url).pathname.replace(/\/$/, "");
+          if (sourcePath.length > 1) {
+            errors.push(
+              `${product.name}: redirected to home page (${finalUrl}), expected product page`
+            );
+            continue;
+          }
         }
-      } catch (e: any) {
-        errors.push(`${product.name}: affiliate URL failed: ${e.message}`);
-      }
-    }
 
-    if (errors.length > 0) {
-      console.log("Affiliate link errors found:", errors);
-    }
-    expect(errors).toEqual([]);
-  });
+        // Check for domain mismatch
+        const sourceHost = new URL(product.source_url).hostname.replace(/^www\./, "");
+        const finalHost = new URL(finalUrl).hostname.replace(/^www\./, "");
+        if (sourceHost !== finalHost) {
+          errors.push(
+            `${product.name}: redirected to different domain (${finalHost}), expected ${sourceHost}`
+          );
+          continue;
+        }
 
-  test("source product pages are still accessible (no 404s)", async ({ page }) => {
-    const errors: string[] = [];
+        // Check page content for common 404/not-found indicators
+        const bodyText = await page.textContent("body");
+        const lower = bodyText?.toLowerCase() ?? "";
+        const notFoundPatterns = [
+          "page not found",
+          "404",
+          "this page doesn't exist",
+          "no longer available",
+          "product not found",
+          "item not found",
+          "we couldn't find",
+          "sorry, we can't find",
+        ];
 
-    for (const product of products) {
-      if (!product.source_url) continue;
-
-      try {
-        const response = await page.request.get(product.source_url, {
-          maxRedirects: 5,
-          timeout: 15000,
-        });
-
-        if (response.status() >= 400) {
-          errors.push(`${product.name}: source URL ${product.source_url} returned ${response.status()}`);
+        const matchedPattern = notFoundPatterns.find((p) => lower.includes(p));
+        if (matchedPattern) {
+          errors.push(
+            `${product.name}: page content suggests product not found ("${matchedPattern}")`
+          );
         }
       } catch (e: any) {
         errors.push(`${product.name}: source URL failed: ${e.message}`);
