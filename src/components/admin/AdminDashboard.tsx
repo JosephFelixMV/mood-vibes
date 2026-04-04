@@ -38,6 +38,9 @@ export default function AdminDashboard() {
         <TabsContent value="form" forceMount className={tab !== "form" ? "hidden" : ""}>
           <ProductForm editId={editId} onDone={handleDone} savedState={formStateRef} />
         </TabsContent>
+        <TabsContent value="bulk" forceMount className={tab !== "bulk" ? "hidden" : ""}>
+          <BulkUpload />
+        </TabsContent>
         <TabsContent value="analytics" forceMount className={tab !== "analytics" ? "hidden" : ""}>
           <AnalyticsDashboard />
         </TabsContent>
