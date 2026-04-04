@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductForm from "./ProductForm";
 import ProductList from "./ProductList";
 import AnalyticsDashboard from "./AnalyticsDashboard";
+import BulkUpload from "./BulkUpload";
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState("list");
