@@ -42,8 +42,9 @@ Deno.serve(async (req) => {
         ...(missingSource ? ["missing_source_url"] : []),
         ...(missingAffiliate ? ["missing_affiliate_url"] : []),
       ];
-      results.push({ id: product.id, name: product.name, status: reasons.join(", "), error: true });
-      await supabase.from("products").update({ page_error: true }).eq("id", product.id);
+      const detail = reasons.join(", ");
+      results.push({ id: product.id, name: product.name, status: detail, error: true });
+      await supabase.from("products").update({ page_error: true, page_error_detail: detail }).eq("id", product.id);
       continue;
     }
 
