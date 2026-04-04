@@ -182,6 +182,9 @@ export default function ProductDetail() {
                 Show me another <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
+            <p className="text-xs italic text-muted-foreground pt-1">
+              More colors &amp; styles may be available on the seller's site
+            </p>
           </div>
         </div>
 
