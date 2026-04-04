@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -151,7 +152,19 @@ export default function ProductDetail() {
             {product.company_name && (
               <p className="text-sm text-muted-foreground">by {product.company_name}</p>
             )}
-            <p className="font-heading text-3xl font-bold text-primary">{formatPrice(product.price)}</p>
+            <span className="flex items-center gap-1.5 font-heading text-3xl font-bold text-primary">
+              {formatPrice(product.price)}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Prices may vary based on current seller deals.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </span>
 
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 rounded-full" onClick={handleBuyClick}>

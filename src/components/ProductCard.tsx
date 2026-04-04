@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -100,7 +101,19 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
         )}
 
         <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="font-heading text-xl font-bold text-primary">{formatPrice(product.price)}</span>
+          <span className="flex items-center gap-1 font-heading text-xl font-bold text-primary">
+            {formatPrice(product.price)}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 cursor-help text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Prices may vary based on current seller deals.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </span>
           <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
             <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
               Buy Now <ExternalLink className="h-3.5 w-3.5" />
