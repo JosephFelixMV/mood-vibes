@@ -319,6 +319,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     is_active: form.is_active,
     video_url: form.video_url || null,
     page_error: false,
+    page_error_detail: null,
     date_added: new Date().toISOString(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

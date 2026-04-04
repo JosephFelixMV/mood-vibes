@@ -203,6 +203,7 @@ export type Database = {
           is_active: boolean
           name: string
           page_error: boolean
+          page_error_detail: string | null
           price: number
           source_url: string
           updated_at: string
@@ -221,6 +222,7 @@ export type Database = {
           is_active?: boolean
           name: string
           page_error?: boolean
+          page_error_detail?: string | null
           price: number
           source_url?: string
           updated_at?: string
@@ -239,6 +241,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           page_error?: boolean
+          page_error_detail?: string | null
           price?: number
           source_url?: string
           updated_at?: string
