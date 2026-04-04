@@ -199,7 +199,7 @@ export default function ProductList({ onEdit }: Props) {
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="inactive">Draft / Inactive</SelectItem>
           </SelectContent>
         </Select>
 

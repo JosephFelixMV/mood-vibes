@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductForm from "./ProductForm";
 import ProductList from "./ProductList";
 import AnalyticsDashboard from "./AnalyticsDashboard";
+import BulkUpload from "./BulkUpload";
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState("list");
@@ -28,6 +29,7 @@ export default function AdminDashboard() {
         <TabsList>
           <TabsTrigger value="list">Products</TabsTrigger>
           <TabsTrigger value="form">{editId ? "Edit Product" : "Add Product"}</TabsTrigger>
+          <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         <TabsContent value="list" forceMount className={tab !== "list" ? "hidden" : ""}>
@@ -35,6 +37,9 @@ export default function AdminDashboard() {
         </TabsContent>
         <TabsContent value="form" forceMount className={tab !== "form" ? "hidden" : ""}>
           <ProductForm editId={editId} onDone={handleDone} savedState={formStateRef} />
+        </TabsContent>
+        <TabsContent value="bulk" forceMount className={tab !== "bulk" ? "hidden" : ""}>
+          <BulkUpload />
         </TabsContent>
         <TabsContent value="analytics" forceMount className={tab !== "analytics" ? "hidden" : ""}>
           <AnalyticsDashboard />
