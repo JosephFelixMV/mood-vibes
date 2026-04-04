@@ -6,6 +6,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -15,10 +19,9 @@ Deno.serve(async (req) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-  // Get all active products with source_url
   const { data: products, error } = await supabase
     .from("products")
-    .select("id, name, affiliate_url, source_url")
+    .select("id, name, source_url, affiliate_url")
     .eq("is_active", true);
 
   if (error) {
@@ -31,14 +34,13 @@ Deno.serve(async (req) => {
   const results: { id: string; name: string; status: string; error: boolean }[] = [];
 
   for (const product of products || []) {
-    // Flag products missing affiliate link or source URL
-    const missingAffiliate = !product.affiliate_url || product.affiliate_url.trim() === "";
     const missingSource = !product.source_url || product.source_url.trim() === "";
+    const missingAffiliate = !product.affiliate_url || product.affiliate_url.trim() === "";
 
-    if (missingAffiliate || missingSource) {
+    if (missingSource || missingAffiliate) {
       const reasons = [
-        ...(missingAffiliate ? ["missing_affiliate_url"] : []),
         ...(missingSource ? ["missing_source_url"] : []),
+        ...(missingAffiliate ? ["missing_affiliate_url"] : []),
       ];
       results.push({ id: product.id, name: product.name, status: reasons.join(", "), error: true });
       await supabase.from("products").update({ page_error: true }).eq("id", product.id);
@@ -46,6 +48,7 @@ Deno.serve(async (req) => {
     }
 
     try {
+      // Follow redirects to the final URL
       const response = await fetch(product.source_url, {
         method: "GET",
         redirect: "follow",
@@ -54,43 +57,48 @@ Deno.serve(async (req) => {
         },
       });
 
-      const hasError = response.status >= 400;
+      // Wait to allow any JS-based redirects to settle
+      await delay(2000);
 
-      // Also check if affiliate link domain matches source domain
-      let domainMismatch = false;
-      try {
-        const affiliateResponse = await fetch(product.affiliate_url, {
-          method: "GET",
-          redirect: "follow",
-          headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; SurpriseShopperBot/1.0)",
-          },
-        });
-        const finalUrl = affiliateResponse.url;
-        const sourceHost = new URL(product.source_url).hostname.replace("www.", "");
-        const finalHost = new URL(finalUrl).hostname.replace("www.", "");
-        domainMismatch = sourceHost !== finalHost;
-      } catch {
-        domainMismatch = true;
+      const finalUrl = response.url;
+      const hasHttpError = response.status >= 400;
+
+      // Check if redirected to a home page or generic error page
+      const sourceUrlObj = new URL(product.source_url);
+      const finalUrlObj = new URL(finalUrl);
+
+      const sourcePath = sourceUrlObj.pathname.replace(/\/$/, "");
+      const finalPath = finalUrlObj.pathname.replace(/\/$/, "");
+
+      // Detect redirect to home page (path becomes "/" or empty)
+      const redirectedToHome = finalPath === "" || finalPath === "/";
+
+      // Detect domain mismatch (redirected to a completely different site)
+      const sourceHost = sourceUrlObj.hostname.replace(/^www\./, "");
+      const finalHost = finalUrlObj.hostname.replace(/^www\./, "");
+      const domainMismatch = sourceHost !== finalHost;
+
+      // Detect if the source had a product-like path but final URL lost it
+      const sourceHadPath = sourcePath.length > 1;
+      const pathChanged = sourceHadPath && sourcePath !== finalPath;
+      const redirectedAway = pathChanged && redirectedToHome;
+
+      let isError = false;
+      let status = "ok";
+
+      if (hasHttpError) {
+        isError = true;
+        status = `source_${response.status}`;
+      } else if (domainMismatch) {
+        isError = true;
+        status = `domain_mismatch: expected ${sourceHost}, got ${finalHost}`;
+      } else if (redirectedAway) {
+        isError = true;
+        status = `redirected_to_home: ${finalUrl}`;
       }
 
-      const isError = hasError || domainMismatch;
-      results.push({
-        id: product.id,
-        name: product.name,
-        status: hasError
-          ? `source_${response.status}`
-          : domainMismatch
-          ? "affiliate_domain_mismatch"
-          : "ok",
-        error: isError,
-      });
-
-      // Update page_error flag
-      await supabase
-        .from("products")
-        .update({ page_error: isError })
-        .eq("id", product.id);
+      results.push({ id: product.id, name: product.name, status, error: isError });
+      await supabase.from("products").update({ page_error: isError }).eq("id", product.id);
     } catch (e) {
       results.push({
         id: product.id,
@@ -98,10 +106,7 @@ Deno.serve(async (req) => {
         status: `fetch_error: ${e.message}`,
         error: true,
       });
-      await supabase
-        .from("products")
-        .update({ page_error: true })
-        .eq("id", product.id);
+      await supabase.from("products").update({ page_error: true }).eq("id", product.id);
     }
   }
 
