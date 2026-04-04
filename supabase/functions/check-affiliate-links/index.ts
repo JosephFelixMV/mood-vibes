@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
       }
 
       results.push({ id: product.id, name: product.name, status, error: isError });
-      await supabase.from("products").update({ page_error: isError }).eq("id", product.id);
+      await supabase.from("products").update({ page_error: isError, page_error_detail: isError ? status : null }).eq("id", product.id);
     } catch (e) {
       results.push({
         id: product.id,
