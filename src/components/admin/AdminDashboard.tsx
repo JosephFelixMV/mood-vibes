@@ -29,6 +29,7 @@ export default function AdminDashboard() {
         <TabsList>
           <TabsTrigger value="list">Products</TabsTrigger>
           <TabsTrigger value="form">{editId ? "Edit Product" : "Add Product"}</TabsTrigger>
+          <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         <TabsContent value="list" forceMount className={tab !== "list" ? "hidden" : ""}>
