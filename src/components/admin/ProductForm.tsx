@@ -224,15 +224,20 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      // Duplicate check by name
+      // Duplicate check by name (includes drafts)
       if (!editId) {
         const { data: dupes } = await supabase
           .from("products")
-          .select("id")
+          .select("id, is_active")
           .ilike("name", form.name.trim())
           .limit(1);
         if (dupes && dupes.length > 0) {
-          throw new Error(`A product named "${form.name.trim()}" already exists.`);
+          const isDraft = !dupes[0].is_active;
+          throw new Error(
+            isDraft
+              ? `A draft product named "${form.name.trim()}" already exists. Review existing drafts before adding a new one.`
+              : `A product named "${form.name.trim()}" already exists.`
+          );
         }
       }
 

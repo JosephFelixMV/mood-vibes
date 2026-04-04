@@ -43,15 +43,23 @@ export default function BulkUpload() {
           continue;
         }
 
-        // Check for duplicate by name
+        // Check for duplicate by name (includes drafts)
         const { data: dupes } = await supabase
           .from("products")
-          .select("id")
+          .select("id, is_active")
           .ilike("name", data.name.trim())
           .limit(1);
 
         if (dupes && dupes.length > 0) {
-          uploadResults.push({ fileName: file.name, success: false, productName: data.name, error: "Product already exists" });
+          const isDraft = !dupes[0].is_active;
+          uploadResults.push({
+            fileName: file.name,
+            success: false,
+            productName: data.name,
+            error: isDraft
+              ? "Duplicate — a draft with this name already exists"
+              : "Duplicate — a published product with this name already exists",
+          });
           continue;
         }
 
