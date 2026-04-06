@@ -29,6 +29,12 @@ export async function getProducts(options?: {
     case "price-high":
       query = query.order("price", { ascending: false });
       break;
+    case "updated-desc":
+      query = query.order("updated_at", { ascending: false });
+      break;
+    case "updated-asc":
+      query = query.order("updated_at", { ascending: true });
+      break;
     case "newest":
     default:
       query = query.order("date_added", { ascending: false });
