@@ -33,7 +33,7 @@ serve(async (req) => {
 
     const prompt = `You are a product categorization assistant. Given a product, select the most fitting categories.
 
-CORE CATEGORIES (pick 1-3 that best fit):
+CORE CATEGORIES (pick 1-5 that best fit):
 ${CORE_CATEGORIES.join(", ")}
 
 VIBE CATEGORIES (pick 0-4 that best fit the product's aesthetic/vibe):
