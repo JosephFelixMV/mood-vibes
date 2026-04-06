@@ -468,7 +468,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <RichTextEditor value={form.description} onChange={(html) => set("description", html)} />
         </div>
         <div>
-          <Label>Category (Core Lifestyle — up to 3) {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>}</Label>
+          <Label><Label>Category (Core Lifestyle — up to 5) {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>}</Label> {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>}</Label>
           <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
             {coreCategories.filter((c) => !!c.parent_slug).map((c) => {
               const selected = (form.category || "").split(",").filter(Boolean);
