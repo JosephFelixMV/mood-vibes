@@ -78,7 +78,7 @@ Use exact category names from the lists above. Pick categories that genuinely fi
     const suggestions = JSON.parse(jsonMatch[0]);
     
     // Validate against actual category names
-    const validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 3);
+    const validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
     const validVibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
 
     console.log("Suggestions:", { core: validCore, vibes: validVibes });
