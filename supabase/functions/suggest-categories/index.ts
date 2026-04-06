@@ -8,7 +8,8 @@ const corsHeaders = {
 // Sub-categories (ones with parent_slug) from the categories table
 const CORE_CATEGORIES = [
   "Beauty", "Automotive", "Cleaning", "Garden", "Health", "Office",
-  "Fashion", "Home", "Accessories", "Handbags", "Jewelry", "Watches",
+  "Fashion", "Men's Fashion", "Women's Fashion", "Home", "Accessories",
+  "Handbags", "Jewelry", "Watches", "Men's Watches", "Women's Watches",
   "Baby", "Family", "Kids", "Kitchen", "Books", "Fitness", "Gaming",
   "Pets", "Toys", "Electronics", "Tech", "Hand Tools", "Power Tools",
   "Tool Accessories", "Outdoors", "Travel"
