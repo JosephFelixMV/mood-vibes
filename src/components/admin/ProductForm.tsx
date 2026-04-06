@@ -473,7 +473,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             {coreCategories.filter((c) => !!c.parent_slug).map((c) => {
               const selected = (form.category || "").split(",").filter(Boolean);
               const isChecked = selected.includes(c.name);
-              const atLimit = selected.length >= 3 && !isChecked;
+              const atLimit = selected.length >= 5 && !isChecked;
               return (
                 <label key={c.id} className={`flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 ${atLimit ? "opacity-50 cursor-not-allowed" : ""}`}>
                   <input

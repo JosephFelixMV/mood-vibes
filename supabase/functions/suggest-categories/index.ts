@@ -17,8 +17,8 @@ const CORE_CATEGORIES = [
 
 const VIBE_CATEGORIES = [
   "Bloom & Glow", "Build Mode", "Dress to Impress", "Drip & Shine",
-  "Eclectic Maximalist", "Geek & Gamer", "Little Ones", "Organized Life",
-  "Quiet Luxury", "Soft Academia", "Sporty Clean Girl", "Sustainable Futurism",
+  "Eclectic Maximalist", "Geek & Gamer", "Get Sporty", "Little Ones",
+  "Organized Life", "Quiet Luxury", "Soft Academia", "Sustainable Futurism",
   "The Wellness Era", "Urban Tech-Wear", "Whimsigoth", "Work-From-Anywhere"
 ];
 
