@@ -8,7 +8,8 @@ const corsHeaders = {
 // Sub-categories (ones with parent_slug) from the categories table
 const CORE_CATEGORIES = [
   "Beauty", "Automotive", "Cleaning", "Garden", "Health", "Office",
-  "Fashion", "Home", "Accessories", "Handbags", "Jewelry", "Watches",
+  "Fashion", "Men's Fashion", "Women's Fashion", "Home", "Accessories",
+  "Handbags", "Jewelry", "Watches", "Men's Watches", "Women's Watches",
   "Baby", "Family", "Kids", "Kitchen", "Books", "Fitness", "Gaming",
   "Pets", "Toys", "Electronics", "Tech", "Hand Tools", "Power Tools",
   "Tool Accessories", "Outdoors", "Travel"
@@ -16,8 +17,8 @@ const CORE_CATEGORIES = [
 
 const VIBE_CATEGORIES = [
   "Bloom & Glow", "Build Mode", "Dress to Impress", "Drip & Shine",
-  "Eclectic Maximalist", "Geek & Gamer", "Little Ones", "Organized Life",
-  "Quiet Luxury", "Soft Academia", "Sporty Clean Girl", "Sustainable Futurism",
+  "Eclectic Maximalist", "Geek & Gamer", "Get Sporty", "Little Ones",
+  "Organized Life", "Quiet Luxury", "Soft Academia", "Sustainable Futurism",
   "The Wellness Era", "Urban Tech-Wear", "Whimsigoth", "Work-From-Anywhere"
 ];
 
@@ -32,7 +33,7 @@ serve(async (req) => {
 
     const prompt = `You are a product categorization assistant. Given a product, select the most fitting categories.
 
-CORE CATEGORIES (pick 1-3 that best fit):
+CORE CATEGORIES (pick 1-5 that best fit):
 ${CORE_CATEGORIES.join(", ")}
 
 VIBE CATEGORIES (pick 0-4 that best fit the product's aesthetic/vibe):
@@ -77,7 +78,7 @@ Use exact category names from the lists above. Pick categories that genuinely fi
     const suggestions = JSON.parse(jsonMatch[0]);
     
     // Validate against actual category names
-    const validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 3);
+    const validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
     const validVibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
 
     console.log("Suggestions:", { core: validCore, vibes: validVibes });
