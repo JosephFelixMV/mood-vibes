@@ -29,7 +29,7 @@ export default function Products() {
     description: `Browse ${categoryName || vibeName || "all products"} on Surprise Shopper.`,
   });
 
-  const [sort, setSort] = useState<"newest" | "price-low" | "price-high">("newest");
+  const [sort, setSort] = useState<"newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc">("newest");
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", categoryName, vibeName, sort],
@@ -104,6 +104,8 @@ export default function Products() {
             <SelectItem value="newest">Newest First</SelectItem>
             <SelectItem value="price-low">Price: Low → High</SelectItem>
             <SelectItem value="price-high">Price: High → Low</SelectItem>
+            <SelectItem value="updated-desc">Last Updated ↓</SelectItem>
+            <SelectItem value="updated-asc">Last Updated ↑</SelectItem>
           </SelectContent>
         </Select>
       </div>

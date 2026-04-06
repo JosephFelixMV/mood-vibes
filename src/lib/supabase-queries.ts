@@ -7,7 +7,7 @@ export type Category = Database["public"]["Tables"]["categories"]["Row"];
 export async function getProducts(options?: {
   category?: string;
   vibeCategory?: string;
-  sort?: "newest" | "price-low" | "price-high";
+  sort?: "newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc";
   activeOnly?: boolean;
 }) {
   let query = supabase.from("products").select("*");
@@ -28,6 +28,12 @@ export async function getProducts(options?: {
       break;
     case "price-high":
       query = query.order("price", { ascending: false });
+      break;
+    case "updated-desc":
+      query = query.order("updated_at", { ascending: false });
+      break;
+    case "updated-asc":
+      query = query.order("updated_at", { ascending: true });
       break;
     case "newest":
     default:
