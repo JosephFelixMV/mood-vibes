@@ -88,6 +88,25 @@ export default function BulkUpload() {
 
         if (error) throw error;
 
+        // AI category suggestion — update product with suggested categories
+        if (inserted) {
+          try {
+            const { data: aiData } = await supabase.functions.invoke("suggest-categories", {
+              body: { name: data.name.trim(), description: data.description || "", price: parsedPrice },
+            });
+            if (aiData) {
+              const updates: Record<string, string> = {};
+              if (aiData.core?.length) updates.category = aiData.core.join(", ");
+              if (aiData.vibes?.length) updates.vibe_category = aiData.vibes.join(", ");
+              if (Object.keys(updates).length > 0) {
+                await supabase.from("products").update(updates).eq("id", inserted.id);
+              }
+            }
+          } catch {
+            // Silently continue — categories can be set manually
+          }
+        }
+
         // Insert additional images
         const images = Array.isArray(data.additional_images)
           ? data.additional_images.filter((url: string) => url?.trim()).slice(0, 4)
