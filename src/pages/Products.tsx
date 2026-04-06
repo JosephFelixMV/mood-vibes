@@ -104,6 +104,8 @@ export default function Products() {
             <SelectItem value="newest">Newest First</SelectItem>
             <SelectItem value="price-low">Price: Low → High</SelectItem>
             <SelectItem value="price-high">Price: High → Low</SelectItem>
+            <SelectItem value="updated-desc">Last Updated ↓</SelectItem>
+            <SelectItem value="updated-asc">Last Updated ↑</SelectItem>
           </SelectContent>
         </Select>
       </div>
