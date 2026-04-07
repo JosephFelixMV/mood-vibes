@@ -95,7 +95,7 @@ export default function BulkUpload() {
               body: { name: data.name.trim(), description: data.description || "", price: parsedPrice },
             });
             if (aiData) {
-              const updates: Record<string, string> = {};
+              const updates: { category?: string; vibe_category?: string } = {};
               if (aiData.core?.length) updates.category = aiData.core.join(", ");
               if (aiData.vibes?.length) updates.vibe_category = aiData.vibes.join(", ");
               if (Object.keys(updates).length > 0) {
