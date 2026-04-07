@@ -10,7 +10,7 @@ const CORE_CATEGORIES = [
   "Beauty", "Automotive", "Cleaning", "Garden", "Health", "Office",
   "Fashion", "Men's Fashion", "Women's Fashion", "Home", "Accessories",
   "Handbags", "Jewelry", "Watches", "Men's Watches", "Women's Watches",
-  "Baby", "Family", "Kids", "Kitchen", "Books", "Fitness", "Gaming",
+  "Baby", "Family", "Kids", "Kitchen", "Books", "Fitness & Sports", "Gaming",
   "Pets", "Toys", "Electronics", "Tech", "Hand Tools", "Power Tools",
   "Tool Accessories", "Outdoors", "Travel"
 ];
