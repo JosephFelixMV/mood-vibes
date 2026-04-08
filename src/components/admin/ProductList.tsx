@@ -79,6 +79,34 @@ export default function ProductList({ onEdit }: Props) {
     },
   });
 
+  const bulkDeleteMut = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("products").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_data, ids) => {
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+      setSelectedIds(new Set());
+      toast.success(`${ids.length} product(s) deleted`);
+    },
+  });
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === paginated.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(paginated.map((p) => p.id)));
+    }
+  };
+
   const [checkingLinks, setCheckingLinks] = useState(false);
 
   const handleCheckLinks = async () => {
