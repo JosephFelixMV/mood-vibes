@@ -165,12 +165,26 @@ export default function ProductDetail() {
           {/* Product info */}
           <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
             <div className="flex flex-wrap gap-2">
-              {product.category.split(",").map((c) => (
-                <Badge key={c}>{c.trim()}</Badge>
-              ))}
-              {product.vibe_category && product.vibe_category.split(",").map((v) => (
-                <Badge key={v} variant="secondary">{v.trim()}</Badge>
-              ))}
+              {product.category.split(",").map((c) => {
+                const trimmed = c.trim();
+                const cat = categorySlugMap[trimmed];
+                const to = cat ? (cat.type === "vibe" ? `/vibes/${cat.slug}` : `/category/${cat.slug}`) : "#";
+                return (
+                  <Link key={trimmed} to={to}>
+                    <Badge className="cursor-pointer hover:bg-primary/80">{trimmed}</Badge>
+                  </Link>
+                );
+              })}
+              {product.vibe_category && product.vibe_category.split(",").map((v) => {
+                const trimmed = v.trim();
+                const cat = categorySlugMap[trimmed];
+                const to = cat ? `/vibes/${cat.slug}` : "#";
+                return (
+                  <Link key={trimmed} to={to}>
+                    <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">{trimmed}</Badge>
+                  </Link>
+                );
+              })}
             </div>
             <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
             {product.company_name && (
