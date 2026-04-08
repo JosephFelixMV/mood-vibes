@@ -176,7 +176,36 @@ export default function ProductList({ onEdit }: Props) {
     },
   });
 
-  const handleCheckLinks = async () => {
+  const [cronActive, setCronActive] = useState(true);
+  const [togglingCron, setTogglingCron] = useState(false);
+
+  useQuery({
+    queryKey: ["cron-job-status"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("toggle-cron-job", { method: "GET" });
+      if (error) throw error;
+      setCronActive(data.active);
+      return data.active;
+    },
+  });
+
+  const handleToggleCron = async (enable: boolean) => {
+    setTogglingCron(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("toggle-cron-job", {
+        body: { enable },
+      });
+      if (error) throw error;
+      setCronActive(data.active);
+      toast.success(`Batch link checker ${data.active ? "enabled" : "disabled"}`);
+    } catch (err: any) {
+      toast.error("Failed to toggle: " + err.message);
+    } finally {
+      setTogglingCron(false);
+    }
+  };
+
+
     setCheckingLinks(true);
     try {
       const idsToCheck = paginated.map((p) => p.id);
@@ -391,14 +420,27 @@ export default function ProductList({ onEdit }: Props) {
       </div>
 
       {/* Background job indicator */}
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <ShieldCheck className="h-3.5 w-3.5" />
-        <span>
-          Automated link check (every 6h):{" "}
-          {lastBatchCheck
-            ? <>Last run <strong>{format(new Date(lastBatchCheck), "MMM d, yyyy h:mm a")}</strong></>
-            : "No checks recorded yet"}
-        </span>
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-3.5 w-3.5" />
+          <span>
+            Automated link check (every 6h):{" "}
+            {lastBatchCheck
+              ? <>Last run <strong>{format(new Date(lastBatchCheck), "MMM d, yyyy h:mm a")}</strong></>
+              : "No checks recorded yet"}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Switch
+            checked={cronActive}
+            onCheckedChange={handleToggleCron}
+            disabled={togglingCron}
+            className="scale-75"
+          />
+          <span className={cronActive ? "text-green-600" : "text-muted-foreground"}>
+            {togglingCron ? "Updating…" : cronActive ? "Enabled" : "Disabled"}
+          </span>
+        </div>
       </div>
 
       {selectedIds.size > 0 && (
