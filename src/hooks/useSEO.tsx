@@ -5,6 +5,7 @@ interface SEOProps {
   description?: string;
   image?: string;
   url?: string;
+  keywords?: string[];
 }
 
 export function useSEO({ title, description, image, url }: SEOProps) {
