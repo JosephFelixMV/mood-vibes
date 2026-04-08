@@ -11,6 +11,7 @@ import { trackProductClick } from "@/lib/track-click";
 import { trackEvent } from "@/lib/track-event";
 import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
+import { useProxiedImage } from "@/hooks/useProxiedImage";
 
 interface ProductCardProps {
   product: Product;
@@ -19,6 +20,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, featured }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const proxiedImage = useProxiedImage(product.image_url);
 
   useEffect(() => {
     const el = cardRef.current;
@@ -57,10 +59,10 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       <Link to={`/product/${product.id}`} className={`relative block overflow-hidden bg-muted ${
         featured ? "md:w-1/2" : "aspect-[4/3]"
       }`}>
-        {product.image_url ? (
+        {proxiedImage ? (
           <img
-            src={product.image_url}
-            srcSet={`${product.image_url} 1x, ${product.image_url} 2x`}
+            src={proxiedImage}
+            srcSet={`${proxiedImage} 1x, ${proxiedImage} 2x`}
             sizes={featured ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"}
             alt={product.name}
             className="sharp-image h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

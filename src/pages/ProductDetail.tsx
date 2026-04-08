@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, formatPrice } from "@/lib/supabase-queries";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
+import { useProxiedImage } from "@/hooks/useProxiedImage";
+import ProxiedImg from "@/components/ProxiedImg";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -91,9 +93,8 @@ export default function ProductDetail() {
             <div className="relative aspect-square w-full overflow-hidden bg-muted">
               {allImages.length > 0 ? (
                 <>
-                  <img
+                  <ProxiedImg
                     src={allImages[currentImage]}
-                    srcSet={`${allImages[currentImage]} 1x, ${allImages[currentImage]} 2x`}
                     sizes="(min-width: 768px) 50vw, 100vw"
                     alt={product.name}
                     className="sharp-image h-full w-full object-contain"
@@ -132,7 +133,7 @@ export default function ProductDetail() {
                       i === currentImage ? "border-primary" : "border-transparent"
                     }`}
                   >
-                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                    <ProxiedImg src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
