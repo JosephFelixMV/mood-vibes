@@ -54,9 +54,9 @@ export default function Categories() {
               {subs.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {subs.map((sub) => (
-                    <Link
+                     <Link
                       key={sub.id}
-                      to={`/products?category=${sub.name}`}
+                      to={`/category/${sub.slug}`}
                       className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
                     >
                       <span>{sub.icon}</span>
