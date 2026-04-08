@@ -72,13 +72,14 @@ interface Product {
   company_name: string | null;
 }
 
-function keywordScore(product: Product, keywords: string[]): number {
+function keywordScore(product: Product, keywords: string[], productKeywords: string[] = []): number {
   const text = [
     product.name,
     product.description || "",
     product.category,
     product.vibe_category || "",
     product.company_name || "",
+    ...productKeywords,
   ].join(" ").toLowerCase();
 
   let score = 0;
@@ -203,7 +204,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch all active products
+    // Fetch all active products with their keywords
     const { data: allProducts, error: prodErr } = await supabase
       .from("products")
       .select("id, name, description, category, vibe_category, price, company_name")
@@ -219,9 +220,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Fetch product keywords for enrichment
+    const { data: productKeywords } = await supabase
+      .from("product_keywords")
+      .select("product_id, keywords(term)");
+    
+    const keywordsByProduct: Record<string, string[]> = {};
+    (productKeywords || []).forEach((pk: any) => {
+      if (!keywordsByProduct[pk.product_id]) keywordsByProduct[pk.product_id] = [];
+      if (pk.keywords?.term) keywordsByProduct[pk.product_id].push(pk.keywords.term);
+    });
+
     // Keyword pre-filter: score and take top 80 candidates
     const keywords = extractKeywords(prompt);
-    const scored = allProducts.map((p) => ({ ...p, score: keywordScore(p, keywords) }));
+    const scored = allProducts.map((p) => ({
+      ...p,
+      score: keywordScore(p, keywords, keywordsByProduct[p.id] || []),
+    }));
     scored.sort((a, b) => b.score - a.score);
 
     // Take top 80 or all if fewer, but always include at least some zero-score for diversity
@@ -234,7 +249,8 @@ Deno.serve(async (req) => {
     // Build catalog text for AI
     const catalogText = candidates.map((p) => {
       const desc = (p.description || "").replace(/<[^>]*>/g, "").slice(0, 150);
-      return `ID:${p.id} | ${p.name} | $${p.price} | Cat:${p.category} | Vibe:${p.vibe_category || "none"} | ${desc}`;
+      const kws = (keywordsByProduct[p.id] || []).join(", ");
+      return `ID:${p.id} | ${p.name} | $${p.price} | Cat:${p.category} | Vibe:${p.vibe_category || "none"} | Keys:${kws || "none"} | ${desc}`;
     }).join("\n");
 
     const systemPrompt = `You are a product matching assistant for a gift and lifestyle shopping site. Your ONLY job is to return a JSON array of product IDs from the catalog below that best match the user's request, ranked by relevance (best match first).

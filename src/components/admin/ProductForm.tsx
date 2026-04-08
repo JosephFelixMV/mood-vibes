@@ -1,4 +1,4 @@
-import { useEffect, useState, MutableRefObject } from "react";
+import { useEffect, useState, useRef, MutableRefObject } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getProduct, getCategories } from "@/lib/supabase-queries";
@@ -40,6 +40,7 @@ const empty = {
   is_active: true,
   additional_images: [] as string[],
   specifications: [] as SpecRow[],
+  keywords: [] as string[],
 };
 
 export default function ProductForm({ editId, onDone, savedState }: Props) {
@@ -57,8 +58,18 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     queryFn: () => getProduct(editId!),
     enabled: !!editId,
   });
+  const { data: allKeywords = [] } = useQuery({
+    queryKey: ["keywords"],
+    queryFn: async () => {
+      const { data } = await supabase.from("keywords").select("*").order("term");
+      return data || [];
+    },
+  });
 
   const [form, setForm] = useState(() => savedState?.current || empty);
+  const [keywordInput, setKeywordInput] = useState("");
+  const [showKeywordSuggestions, setShowKeywordSuggestions] = useState(false);
+  const keywordRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (savedState) {
@@ -67,20 +78,22 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   }, [form, savedState]);
 
   useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (keywordRef.current && !keywordRef.current.contains(e.target as Node)) {
+        setShowKeywordSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
     if (existing && editId) {
-      // Load existing images and specifications
       Promise.all([
-        supabase
-          .from("product_images")
-          .select("image_url")
-          .eq("product_id", editId)
-          .order("display_order"),
-        supabase
-          .from("product_specifications")
-          .select("item_detail, specification")
-          .eq("product_id", editId)
-          .order("display_order"),
-      ]).then(([imgRes, specRes]) => {
+        supabase.from("product_images").select("image_url").eq("product_id", editId).order("display_order"),
+        supabase.from("product_specifications").select("item_detail, specification").eq("product_id", editId).order("display_order"),
+        supabase.from("product_keywords").select("keyword_id, keywords(term)").eq("product_id", editId),
+      ]).then(([imgRes, specRes, kwRes]) => {
         setForm({
           name: existing.name,
           description: existing.description || "",
@@ -98,6 +111,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             item_detail: s.item_detail,
             specification: s.specification,
           })) || [],
+          keywords: kwRes.data?.map((k: any) => k.keywords?.term).filter(Boolean) || [],
         });
       });
     } else if (!editId && !savedState?.current) {
@@ -107,8 +121,32 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
+  const filteredKeywords = allKeywords.filter(
+    (kw) =>
+      kw.term.toLowerCase().includes(keywordInput.toLowerCase()) &&
+      !form.keywords.includes(kw.term)
+  );
+
+  const addKeyword = async (term: string) => {
+    const normalized = term.toLowerCase().trim();
+    if (!normalized || form.keywords.includes(normalized)) return;
+    // Create keyword if it doesn't exist
+    const exists = allKeywords.find((k) => k.term === normalized);
+    if (!exists) {
+      await supabase.from("keywords").insert({ term: normalized });
+      qc.invalidateQueries({ queryKey: ["keywords"] });
+    }
+    set("keywords", [...form.keywords, normalized]);
+    setKeywordInput("");
+    setShowKeywordSuggestions(false);
+  };
+
+  const removeKeyword = (term: string) => {
+    set("keywords", form.keywords.filter((k: string) => k !== term));
+  };
+
   const [suggestingCategories, setSuggestingCategories] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<{ core: string[]; vibes: string[] } | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<{ core: string[]; vibes: string[]; keywords: string[] } | null>(null);
 
   const suggestCategories = async (productName: string, description: string, price: string | number) => {
     setSuggestingCategories(true);
@@ -119,20 +157,24 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       });
       if (error) throw error;
       console.log("AI category suggestions:", data);
-      if (data?.core?.length || data?.vibes?.length) {
+      if (data?.core?.length || data?.vibes?.length || data?.keywords?.length) {
         const suggestions = {
           core: data.core || [],
           vibes: data.vibes || [],
+          keywords: data.keywords || [],
         };
         setAiSuggestions(suggestions);
         setForm((prev: any) => ({
           ...prev,
           category: suggestions.core.length ? suggestions.core.join(",") : prev.category,
           vibe_category: suggestions.vibes.length ? suggestions.vibes.join(",") : prev.vibe_category,
+          keywords: suggestions.keywords.length
+            ? [...new Set([...prev.keywords, ...suggestions.keywords.map((k: string) => k.toLowerCase())])]
+            : prev.keywords,
         }));
-        toast.success(`Suggested ${suggestions.core.length} categories and ${suggestions.vibes.length} vibes`);
+        toast.success(`Suggested ${suggestions.core.length} categories, ${suggestions.vibes.length} vibes, and ${suggestions.keywords.length} keywords`);
       } else {
-        toast.info("No category suggestions returned");
+        toast.info("No suggestions returned");
       }
     } catch (err) {
       console.error("Category suggestion failed:", err);
@@ -264,6 +306,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         await Promise.all([
           supabase.from("product_images").delete().eq("product_id", editId),
           supabase.from("product_specifications").delete().eq("product_id", editId),
+          supabase.from("product_keywords").delete().eq("product_id", editId),
         ]);
       } else {
         const { data, error } = await supabase.from("products").insert([payload]).select("id").single();
@@ -296,6 +339,21 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           }))
         );
         if (error) throw error;
+      }
+
+      // Save keywords
+      if (form.keywords.length > 0 && productId) {
+        for (const term of form.keywords) {
+          // Ensure keyword exists
+          let { data: kw } = await supabase.from("keywords").select("id").eq("term", term).single();
+          if (!kw) {
+            const { data: newKw } = await supabase.from("keywords").insert({ term }).select("id").single();
+            kw = newKw;
+          }
+          if (kw) {
+            await supabase.from("product_keywords").insert({ product_id: productId!, keyword_id: kw.id });
+          }
+        }
       }
     },
     onSuccess: () => {
@@ -425,7 +483,19 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                     </div>
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground">These categories have been auto-selected below. Adjust as needed.</p>
+                {aiSuggestions.keywords.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Keywords:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {aiSuggestions.keywords.map((k) => (
+                        <span key={k} className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">
+                          {k}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">These have been auto-selected below. Adjust as needed.</p>
               </>
             )}
           </div>
@@ -546,6 +616,60 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               );
             })}
           </div>
+        </div>
+
+        {/* Keywords */}
+        <div ref={keywordRef}>
+          <Label>Keywords (for SEO & AI Discovery)</Label>
+          <div className="mt-2 flex flex-wrap gap-1.5 min-h-[32px] rounded-lg border p-2">
+            {form.keywords.map((kw: string) => (
+              <span key={kw} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">
+                {kw}
+                <button type="button" onClick={() => removeKeyword(kw)} className="ml-0.5 hover:text-destructive">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="relative mt-1">
+            <Input
+              value={keywordInput}
+              onChange={(e) => { setKeywordInput(e.target.value); setShowKeywordSuggestions(true); }}
+              onFocus={() => setShowKeywordSuggestions(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && keywordInput.trim()) {
+                  e.preventDefault();
+                  addKeyword(keywordInput);
+                }
+              }}
+              placeholder="Type to search or add keywords..."
+              className="text-sm"
+            />
+            {showKeywordSuggestions && keywordInput && filteredKeywords.length > 0 && (
+              <div className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-lg border bg-popover p-1 shadow-md">
+                {filteredKeywords.slice(0, 15).map((kw) => (
+                  <button
+                    key={kw.id}
+                    type="button"
+                    onClick={() => addKeyword(kw.term)}
+                    className="w-full rounded px-2 py-1 text-left text-sm hover:bg-muted"
+                  >
+                    {kw.term}
+                  </button>
+                ))}
+                {!allKeywords.find((k) => k.term === keywordInput.toLowerCase().trim()) && (
+                  <button
+                    type="button"
+                    onClick={() => addKeyword(keywordInput)}
+                    className="w-full rounded px-2 py-1 text-left text-sm text-primary hover:bg-muted"
+                  >
+                    + Create "{keywordInput.trim()}"
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Press Enter to add custom keywords. Not visible to shoppers.</p>
         </div>
 
         {/* Specifications */}

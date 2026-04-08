@@ -104,6 +104,24 @@ export type Database = {
         }
         Relationships: []
       }
+      keywords: {
+        Row: {
+          created_at: string
+          id: string
+          term: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          term: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          term?: string
+        }
+        Relationships: []
+      }
       product_clicks: {
         Row: {
           clicked_at: string
@@ -184,6 +202,42 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_keywords: {
+        Row: {
+          created_at: string
+          id: string
+          keyword_id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          keyword_id: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          keyword_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_keywords_keyword_id_fkey"
+            columns: ["keyword_id"]
+            isOneToOne: false
+            referencedRelation: "keywords"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_keywords_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"

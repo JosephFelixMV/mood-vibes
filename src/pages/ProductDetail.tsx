@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, getCategories, formatPrice } from "@/lib/supabase-queries";
+import { supabase } from "@/integrations/supabase/client";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
@@ -36,6 +37,18 @@ export default function ProductDetail() {
     enabled: !!id,
   });
 
+  const { data: productKeywords = [] } = useQuery({
+    queryKey: ["product-keywords", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("product_keywords")
+        .select("keyword_id, keywords(term)")
+        .eq("product_id", id!);
+      return (data || []).map((k: any) => k.keywords?.term).filter(Boolean) as string[];
+    },
+    enabled: !!id,
+  });
+
   const { data: allProducts = [] } = useQuery({
     queryKey: ["products"],
     queryFn: () => getProducts({ activeOnly: true }),
@@ -54,6 +67,7 @@ export default function ProductDetail() {
     description: product?.description || `Check out ${product?.name} on Surprise Shopper.`,
     image: product?.image_url || undefined,
     url: product ? `${window.location.origin}/product/${product.id}` : undefined,
+    keywords: productKeywords.length > 0 ? productKeywords : undefined,
   });
 
   // Images only (no video in gallery)
