@@ -306,6 +306,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         await Promise.all([
           supabase.from("product_images").delete().eq("product_id", editId),
           supabase.from("product_specifications").delete().eq("product_id", editId),
+          supabase.from("product_keywords").delete().eq("product_id", editId),
         ]);
       } else {
         const { data, error } = await supabase.from("products").insert([payload]).select("id").single();
@@ -339,7 +340,21 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         );
         if (error) throw error;
       }
-    },
+
+      // Save keywords
+      if (form.keywords.length > 0 && productId) {
+        for (const term of form.keywords) {
+          // Ensure keyword exists
+          let { data: kw } = await supabase.from("keywords").select("id").eq("term", term).single();
+          if (!kw) {
+            const { data: newKw } = await supabase.from("keywords").insert({ term }).select("id").single();
+            kw = newKw;
+          }
+          if (kw) {
+            await supabase.from("product_keywords").insert({ product_id: productId!, keyword_id: kw.id });
+          }
+        }
+      }
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-products"] });
       qc.invalidateQueries({ queryKey: ["products"] });
