@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Info } from "lucide-react";
@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, formatPrice } from "@/lib/supabase-queries";
+import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, getCategories, formatPrice } from "@/lib/supabase-queries";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
