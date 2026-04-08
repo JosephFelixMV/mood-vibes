@@ -142,7 +142,7 @@ export default function CategoryLanding() {
       {/* Sort + Product grid */}
       {!isLoading && products.length > 0 && (
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-semibold">All Products</h2>
+          <h2 className="font-heading text-lg font-semibold">All {categoryName} Products</h2>
           <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue />

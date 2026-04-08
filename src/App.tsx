@@ -15,6 +15,7 @@ import Disclosure from "./pages/Disclosure";
 import Privacy from "./pages/Privacy";
 import CategoryLanding from "./pages/CategoryLanding";
 import Discover from "./pages/Discover";
+import VibeLanding from "./pages/VibeLanding";
 import NotFound from "./pages/NotFound";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/vibes" element={<Vibes />} />
+              <Route path="/vibes/:slug" element={<VibeLanding />} />
               <Route path="/products" element={<Products />} />
               <Route path="/category/:slug" element={<CategoryLanding />} />
               <Route path="/product/:id" element={<ProductDetail />} />
