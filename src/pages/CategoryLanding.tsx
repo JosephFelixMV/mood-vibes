@@ -65,10 +65,10 @@ export default function CategoryLanding() {
 
   // Auto-pick a random product on first load
   useEffect(() => {
-    if (products.length > 0 && !randomPick) {
-      setRandomPick(getRandomProduct(products));
+    if (healthyProducts.length > 0 && !randomPick) {
+      setRandomPick(getRandomProduct(healthyProducts));
     }
-  }, [products]);
+  }, [healthyProducts]);
 
   const handleRandomPick = () => {
     trigger(() => {
