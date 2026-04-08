@@ -49,13 +49,16 @@ export default function Index() {
   const [surprise, setSurprise] = useState<typeof dailyPick>(null);
   const [key, setKey] = useState(0);
   const isLoading = productsLoading || pickLoading;
+  const { trigger, cooldown } = useRateLimitedAction(2000);
 
   const displayedProduct = dailyPick;
 
   const handleSurprise = () => {
-    const next = getRandomProduct(products, surprise?.id);
-    setSurprise(next);
-    setKey((k) => k + 1);
+    trigger(() => {
+      const next = getRandomProduct(products, surprise?.id);
+      setSurprise(next);
+      setKey((k) => k + 1);
+    });
   };
 
   return (
