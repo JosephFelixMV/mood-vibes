@@ -6,6 +6,7 @@ import { Shuffle, Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { getProducts, getDailyPick, getRandomProduct } from "@/lib/supabase-queries";
+import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 
 function useCountdownToMidnightUTC() {
   const getRemaining = () => {
