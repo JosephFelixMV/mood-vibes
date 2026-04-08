@@ -53,10 +53,10 @@ export default function VibeLanding() {
   });
 
   useEffect(() => {
-    if (products.length > 0 && !randomPick) {
-      setRandomPick(getRandomProduct(products));
+    if (healthyProducts.length > 0 && !randomPick) {
+      setRandomPick(getRandomProduct(healthyProducts));
     }
-  }, [products]);
+  }, [healthyProducts]);
 
   const handleRandomPick = () => {
     trigger(() => {
