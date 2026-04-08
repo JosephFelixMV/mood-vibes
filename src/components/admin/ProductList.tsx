@@ -102,6 +102,18 @@ export default function ProductList({ onEdit }: Props) {
     queryFn: getProductViewCounts,
   });
 
+  const inlineUpdateMut = useMutation({
+    mutationFn: async ({ id, field, value }: { id: string; field: "name" | "price"; value: string }) => {
+      const update = field === "price" ? { price: Number(value) } : { [field]: value };
+      const { error } = await supabase.from("products").update(update).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+      toast.success("Updated");
+    },
+  });
+
   const toggleMut = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
       const { error } = await supabase.from("products").update({ is_active }).eq("id", id);
