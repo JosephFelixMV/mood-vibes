@@ -42,7 +42,7 @@ export default function Categories() {
               transition={{ delay: i * 0.05 }}
               className="rounded-2xl border bg-card p-6"
             >
-              <div className="mb-4 flex items-start gap-3">
+              <Link to={`/category/${parent.slug}`} className="mb-4 flex items-start gap-3 transition-colors hover:text-primary">
                 <span className="text-3xl">{parent.icon}</span>
                 <div className="flex-1">
                   <h2 className="font-heading text-lg font-semibold">{parent.name}</h2>
@@ -50,7 +50,7 @@ export default function Categories() {
                     <p className="mt-1 text-sm text-muted-foreground">{parent.description}</p>
                   )}
                 </div>
-              </div>
+              </Link>
               {subs.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {subs.map((sub) => (
