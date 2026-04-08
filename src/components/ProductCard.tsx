@@ -20,6 +20,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, featured }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const proxiedImage = useProxiedImage(product.image_url);
 
   useEffect(() => {
     const el = cardRef.current;
