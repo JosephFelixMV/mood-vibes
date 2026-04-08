@@ -63,7 +63,21 @@ export default function ProductDetail() {
   ] : [];
 
   const handleAnother = () => {
-    const next = getRandomProduct(allProducts, id);
+    if (!product) return;
+    // Get all categories and vibes for this product
+    const cats = product.category.split(",").map((c) => c.trim()).filter(Boolean);
+    const vibes = product.vibe_category?.split(",").map((v) => v.trim()).filter(Boolean) || [];
+
+    // Filter to products sharing at least one category or vibe
+    const related = allProducts.filter((p) => {
+      if (p.id === id) return false;
+      const pCats = p.category.split(",").map((c) => c.trim());
+      const pVibes = p.vibe_category?.split(",").map((v) => v.trim()) || [];
+      return cats.some((c) => pCats.includes(c)) || vibes.some((v) => pVibes.includes(v));
+    });
+
+    const pool = related.length > 0 ? related : allProducts;
+    const next = getRandomProduct(pool, id);
     if (next) navigate(`/product/${next.id}`);
   };
 
