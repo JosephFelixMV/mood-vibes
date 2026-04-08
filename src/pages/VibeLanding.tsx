@@ -40,6 +40,7 @@ export default function VibeLanding() {
     enabled: !!vibeName,
   });
 
+  const healthyProducts = products.filter((p) => !p.page_error);
   const [randomPick, setRandomPick] = useState<typeof products[0] | null>(null);
   const [animKey, setAnimKey] = useState(0);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
