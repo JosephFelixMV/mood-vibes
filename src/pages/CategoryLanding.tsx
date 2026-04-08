@@ -54,6 +54,13 @@ export default function CategoryLanding() {
   const [animKey, setAnimKey] = useState(0);
   const { trigger, cooldown } = useRateLimitedAction(2000);
 
+  // Auto-pick a random product on first load
+  useEffect(() => {
+    if (products.length > 0 && !randomPick) {
+      setRandomPick(getRandomProduct(products));
+    }
+  }, [products]);
+
   const handleRandomPick = () => {
     trigger(() => {
       const next = getRandomProduct(products, randomPick?.id);
