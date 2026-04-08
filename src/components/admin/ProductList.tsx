@@ -33,6 +33,7 @@ export default function ProductList({ onEdit }: Props) {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-products"],
