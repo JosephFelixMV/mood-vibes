@@ -354,7 +354,13 @@ export default function ProductList({ onEdit }: Props) {
           </thead>
           <tbody>
             {paginated.map((p) => (
-              <tr key={p.id} className="border-b last:border-0">
+              <tr key={p.id} className={cn("border-b last:border-0", selectedIds.has(p.id) && "bg-primary/5")}>
+                <td className="px-3 py-3">
+                  <Checkbox
+                    checked={selectedIds.has(p.id)}
+                    onCheckedChange={() => toggleSelect(p.id)}
+                  />
+                </td>
                 <td className="px-4 py-3">
                   <div>
                     <a
