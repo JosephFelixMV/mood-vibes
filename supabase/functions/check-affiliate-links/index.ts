@@ -32,11 +32,15 @@ Deno.serve(async (req) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-  // Parse options: batch mode (scheduled) vs full check (manual from admin)
+  // Parse options: batch mode (scheduled) vs full check, optional product_ids filter
   let batchMode = false;
+  let productIds: string[] | null = null;
   try {
     const body = await req.json();
     batchMode = body?.batch === true;
+    if (Array.isArray(body?.product_ids) && body.product_ids.length > 0) {
+      productIds = body.product_ids;
+    }
   } catch {
     // no body = full check (manual trigger)
   }
@@ -46,7 +50,10 @@ Deno.serve(async (req) => {
     .select("id, name, source_url, affiliate_url, check_failure_count")
     .eq("is_active", true);
 
-  if (batchMode) {
+  if (productIds) {
+    // Manual trigger with specific product IDs
+    query = query.in("id", productIds);
+  } else if (batchMode) {
     // In batch mode: check oldest-checked products first, limited batch
     query = query
       .order("last_checked_at", { ascending: true, nullsFirst: true })
