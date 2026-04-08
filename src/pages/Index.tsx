@@ -53,9 +53,11 @@ export default function Index() {
 
   const displayedProduct = dailyPick;
 
+  const healthyProducts = products.filter((p) => !p.page_error);
+
   const handleSurprise = () => {
     trigger(() => {
-      const next = getRandomProduct(products, surprise?.id);
+      const next = getRandomProduct(healthyProducts, surprise?.id);
       setSurprise(next);
       setKey((k) => k + 1);
     });
