@@ -14,7 +14,12 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const imageUrl = url.searchParams.get("url");
+    let imageUrl = url.searchParams.get("url");
+
+    // Handle protocol-relative URLs
+    if (imageUrl && imageUrl.startsWith("//")) {
+      imageUrl = `https:${imageUrl}`;
+    }
 
     if (!imageUrl) {
       return new Response(JSON.stringify({ error: "Missing url parameter" }), {
