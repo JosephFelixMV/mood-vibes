@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Sparkles, ArrowRight, RotateCcw, Loader2, AlertTriangle, ChevronRight } from "lucide-react";
+import { Search, Sparkles, ArrowRight, RotateCcw, Loader2, AlertTriangle, ChevronRight, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +69,7 @@ export default function Discover() {
   const [totalCount, setTotalCount] = useState(0);
   const [activePrompt, setActivePrompt] = useState("");
   const [hasResults, setHasResults] = useState(false);
+  const [showProtoBanner, setShowProtoBanner] = useState(true);
 
   // Restore queue from session on mount
   useEffect(() => {
@@ -198,6 +199,23 @@ export default function Discover() {
 
   return (
     <div className="flex flex-col">
+      {/* Prototype banner */}
+      {showProtoBanner && (
+        <div className="border-b bg-primary/5">
+          <div className="container flex items-center justify-between gap-3 py-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Info className="h-4 w-4 shrink-0 text-primary" />
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">Prototype:</strong> AI Discover is an early feature designed to help you find what you're looking for. Results may vary — we're always improving!
+              </span>
+            </div>
+            <button onClick={() => setShowProtoBanner(false)} className="shrink-0 text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <section className="relative overflow-hidden py-16 md:py-24">
         <div className="container flex flex-col items-center text-center">
@@ -255,6 +273,9 @@ export default function Discover() {
                 <span>Tip: include who it's for, their interests, and a budget for the best results</span>
                 <span>{prompt.length}/{MAX_PROMPT_LENGTH}</span>
               </div>
+              <p className="mt-1 text-xs text-muted-foreground/70">
+                ⚡ Usage is limited to 3 prompts per day
+              </p>
 
               {/* Example prompts */}
               <div className="mt-4 flex flex-wrap gap-2">
