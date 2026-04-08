@@ -62,13 +62,12 @@ Deno.serve(async (req) => {
 
     const storagePath = `${hash}.${ext}`;
 
-    // Check if already cached
-    const { data: existing } = await supabase.storage
+    // Check if already cached via list
+    const { data: files } = await supabase.storage
       .from(BUCKET)
-      .createSignedUrl(storagePath, 60);
+      .list("", { search: storagePath, limit: 1 });
 
-    if (existing?.signedUrl) {
-      // File exists — return the public URL
+    if (files && files.length > 0 && files[0].name === storagePath) {
       const { data: publicUrlData } = supabase.storage
         .from(BUCKET)
         .getPublicUrl(storagePath);
