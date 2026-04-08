@@ -436,14 +436,11 @@ export default function ProductList({ onEdit }: Props) {
                 </td>
                 <td className="px-4 py-3">
                   <div>
-                    <a
-                      href={`/product/${p.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-foreground underline-offset-2 hover:text-primary hover:underline"
-                    >
-                      {p.name}
-                    </a>
+                    <InlineEdit
+                      value={p.name}
+                      onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "name", value: v })}
+                      className="font-medium"
+                    />
                     {p.company_name && (
                       <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
                     )}
