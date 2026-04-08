@@ -72,13 +72,14 @@ interface Product {
   company_name: string | null;
 }
 
-function keywordScore(product: Product, keywords: string[]): number {
+function keywordScore(product: Product, keywords: string[], productKeywords: string[] = []): number {
   const text = [
     product.name,
     product.description || "",
     product.category,
     product.vibe_category || "",
     product.company_name || "",
+    ...productKeywords,
   ].join(" ").toLowerCase();
 
   let score = 0;
