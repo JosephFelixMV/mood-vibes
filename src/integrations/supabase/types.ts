@@ -230,6 +230,7 @@ export type Database = {
         Row: {
           affiliate_url: string
           category: string
+          check_failure_count: number
           company_name: string | null
           created_at: string
           date_added: string
@@ -237,6 +238,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          last_checked_at: string | null
           name: string
           page_error: boolean
           page_error_detail: string | null
@@ -249,6 +251,7 @@ export type Database = {
         Insert: {
           affiliate_url: string
           category: string
+          check_failure_count?: number
           company_name?: string | null
           created_at?: string
           date_added?: string
@@ -256,6 +259,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          last_checked_at?: string | null
           name: string
           page_error?: boolean
           page_error_detail?: string | null
@@ -268,6 +272,7 @@ export type Database = {
         Update: {
           affiliate_url?: string
           category?: string
+          check_failure_count?: number
           company_name?: string | null
           created_at?: string
           date_added?: string
@@ -275,6 +280,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          last_checked_at?: string | null
           name?: string
           page_error?: boolean
           page_error_detail?: string | null
