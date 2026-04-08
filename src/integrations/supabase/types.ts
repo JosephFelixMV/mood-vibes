@@ -324,6 +324,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      disable_cron_job: { Args: never; Returns: undefined }
+      enable_cron_job: { Args: never; Returns: undefined }
+      get_cron_job_status: { Args: never; Returns: boolean }
       get_or_create_daily_pick: { Args: never; Returns: string }
     }
     Enums: {
