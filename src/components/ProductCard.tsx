@@ -119,11 +119,14 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
               </Tooltip>
             </TooltipProvider>
           </span>
-          <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
-            <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
-              Buy Now <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <ShareButton product={product} />
+            <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
+              <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
+                Buy Now <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
     </motion.div>

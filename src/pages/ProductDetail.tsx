@@ -173,6 +173,7 @@ export default function ProductDetail() {
                   Buy Now <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>
+              <ShareButton product={product} variant="full" />
               <Button
                 variant="outline"
                 size="lg"
