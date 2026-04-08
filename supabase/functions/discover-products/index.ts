@@ -166,20 +166,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Rate limit: 3 per day per IP
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+    // Rate limit: 5 per week per IP
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 7);
     const { data: recentRequests } = await supabase
       .from("ai_requests")
       .select("id, created_at")
       .eq("ip_hash", ipHash)
-      .gte("created_at", todayStart.toISOString());
+      .gte("created_at", weekStart.toISOString());
 
     const requestCount = recentRequests?.length || 0;
 
-    if (requestCount >= 3) {
+    if (requestCount >= 5) {
       return new Response(JSON.stringify({
-        error: "You've used all 3 AI searches for today. Come back tomorrow for more!",
+        error: "You've used all 5 AI searches for this week. Check back next week for more!",
       }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
