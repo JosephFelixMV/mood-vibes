@@ -355,6 +355,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           }
         }
       }
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-products"] });
       qc.invalidateQueries({ queryKey: ["products"] });
