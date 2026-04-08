@@ -15,6 +15,7 @@ import Disclosure from "./pages/Disclosure";
 import Privacy from "./pages/Privacy";
 import CategoryLanding from "./pages/CategoryLanding";
 import Discover from "./pages/Discover";
+import VibeLanding from "./pages/VibeLanding";
 import NotFound from "./pages/NotFound";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 
