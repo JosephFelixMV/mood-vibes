@@ -132,7 +132,21 @@ export default function CategoryLanding() {
         </section>
       )}
 
-      {/* Product grid */}
+      {/* Sort + Product grid */}
+      {!isLoading && products.length > 0 && (
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="font-heading text-lg font-semibold">All Products</h2>
+          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       {isLoading ? (
         <div className="flex justify-center py-20">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -141,7 +155,7 @@ export default function CategoryLanding() {
         <p className="py-20 text-center text-muted-foreground">No products found in this category.</p>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p, i) => (
+          {sortedProducts.map((p, i) => (
             <motion.div
               key={p.id}
               initial={{ opacity: 0, y: 20 }}
