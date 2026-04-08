@@ -18,6 +18,7 @@ import Discover from "./pages/Discover";
 import VibeLanding from "./pages/VibeLanding";
 import NotFound from "./pages/NotFound";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
+import CookieConsent from "@/components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
             </Routes>
           </main>
           <Footer />
+          <CookieConsent />
         </div>
       </BrowserRouter>
     </TooltipProvider>
