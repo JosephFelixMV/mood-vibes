@@ -40,6 +40,7 @@ const empty = {
   is_active: true,
   additional_images: [] as string[],
   specifications: [] as SpecRow[],
+  keywords: [] as string[],
 };
 
 export default function ProductForm({ editId, onDone, savedState }: Props) {
