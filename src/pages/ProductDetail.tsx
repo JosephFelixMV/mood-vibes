@@ -36,6 +36,18 @@ export default function ProductDetail() {
     enabled: !!id,
   });
 
+  const { data: productKeywords = [] } = useQuery({
+    queryKey: ["product-keywords", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("product_keywords")
+        .select("keyword_id, keywords(term)")
+        .eq("product_id", id!);
+      return (data || []).map((k: any) => k.keywords?.term).filter(Boolean) as string[];
+    },
+    enabled: !!id,
+  });
+
   const { data: allProducts = [] } = useQuery({
     queryKey: ["products"],
     queryFn: () => getProducts({ activeOnly: true }),
