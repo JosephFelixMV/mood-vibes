@@ -11,6 +11,7 @@ import { trackProductClick } from "@/lib/track-click";
 import { trackEvent } from "@/lib/track-event";
 import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
+import { useProxiedImage } from "@/hooks/useProxiedImage";
 
 interface ProductCardProps {
   product: Product;
