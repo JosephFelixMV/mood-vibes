@@ -87,10 +87,11 @@ For keywords, suggest 5-10 lowercase search terms shoppers might use to find thi
     // Validate against actual category names
     const validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
     const validVibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
+    const validKeywords = (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 10);
 
-    console.log("Suggestions:", { core: validCore, vibes: validVibes });
+    console.log("Suggestions:", { core: validCore, vibes: validVibes, keywords: validKeywords });
 
-    return new Response(JSON.stringify({ core: validCore, vibes: validVibes }), {
+    return new Response(JSON.stringify({ core: validCore, vibes: validVibes, keywords: validKeywords }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
