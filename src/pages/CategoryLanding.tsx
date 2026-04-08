@@ -53,7 +53,14 @@ export default function CategoryLanding() {
 
   const [randomPick, setRandomPick] = useState<typeof products[0] | null>(null);
   const [animKey, setAnimKey] = useState(0);
+  const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const { trigger, cooldown } = useRateLimitedAction(2000);
+
+  const sortedProducts = [...products].sort((a, b) => {
+    const dateA = new Date(a.date_added).getTime();
+    const dateB = new Date(b.date_added).getTime();
+    return sort === "newest" ? dateB - dateA : dateA - dateB;
+  });
 
   // Auto-pick a random product on first load
   useEffect(() => {
