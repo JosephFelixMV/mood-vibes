@@ -189,7 +189,17 @@ export default function ProductList({ onEdit }: Props) {
     },
   });
 
+  const [showCronConfirm, setShowCronConfirm] = useState(false);
+
   const handleToggleCron = async (enable: boolean) => {
+    if (!enable) {
+      setShowCronConfirm(true);
+      return;
+    }
+    await executeCronToggle(true);
+  };
+
+  const executeCronToggle = async (enable: boolean) => {
     setTogglingCron(true);
     try {
       const { data, error } = await supabase.functions.invoke("toggle-cron-job", {
@@ -205,7 +215,7 @@ export default function ProductList({ onEdit }: Props) {
     }
   };
 
-
+  const handleCheckLinks = async () => {
     setCheckingLinks(true);
     try {
       const idsToCheck = paginated.map((p) => p.id);
