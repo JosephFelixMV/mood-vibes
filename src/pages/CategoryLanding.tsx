@@ -115,7 +115,7 @@ export default function CategoryLanding() {
               size="sm"
               variant="outline"
               onClick={handleRandomPick}
-              disabled={cooldown || products.length === 0}
+              disabled={cooldown || healthyProducts.length === 0}
               className="gap-2 rounded-full"
             >
               <Shuffle className="h-4 w-4" />
