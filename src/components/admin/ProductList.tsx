@@ -189,7 +189,17 @@ export default function ProductList({ onEdit }: Props) {
     },
   });
 
+  const [showCronConfirm, setShowCronConfirm] = useState(false);
+
   const handleToggleCron = async (enable: boolean) => {
+    if (!enable) {
+      setShowCronConfirm(true);
+      return;
+    }
+    await executeCronToggle(true);
+  };
+
+  const executeCronToggle = async (enable: boolean) => {
     setTogglingCron(true);
     try {
       const { data, error } = await supabase.functions.invoke("toggle-cron-job", {
@@ -205,7 +215,7 @@ export default function ProductList({ onEdit }: Props) {
     }
   };
 
-
+  const handleCheckLinks = async () => {
     setCheckingLinks(true);
     try {
       const idsToCheck = paginated.map((p) => p.id);
@@ -441,6 +451,20 @@ export default function ProductList({ onEdit }: Props) {
             {togglingCron ? "Updating…" : cronActive ? "Enabled" : "Disabled"}
           </span>
         </div>
+        <AlertDialog open={showCronConfirm} onOpenChange={setShowCronConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Disable automated link checker?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will stop the background job that checks product links every 6 hours. Broken links won't be detected automatically until you re-enable it.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => executeCronToggle(false)}>Disable</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {selectedIds.size > 0 && (
