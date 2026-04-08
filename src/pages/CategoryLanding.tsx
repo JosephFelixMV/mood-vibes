@@ -72,7 +72,7 @@ export default function CategoryLanding() {
 
   const handleRandomPick = () => {
     trigger(() => {
-      const next = getRandomProduct(products, randomPick?.id);
+      const next = getRandomProduct(healthyProducts, randomPick?.id);
       setRandomPick(next);
       setAnimKey((k) => k + 1);
     });
