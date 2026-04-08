@@ -163,6 +163,19 @@ export default function ProductList({ onEdit }: Props) {
 
   const [checkingLinks, setCheckingLinks] = useState(false);
 
+  const { data: lastBatchCheck } = useQuery({
+    queryKey: ["last-batch-check"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("last_checked_at")
+        .not("last_checked_at", "is", null)
+        .order("last_checked_at", { ascending: false })
+        .limit(1);
+      return data?.[0]?.last_checked_at ?? null;
+    },
+  });
+
   const handleCheckLinks = async () => {
     setCheckingLinks(true);
     try {
