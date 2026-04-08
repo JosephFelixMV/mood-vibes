@@ -19,7 +19,13 @@ const VIBE_CATEGORIES = [
   "Bloom & Glow", "Build Mode", "Dress to Impress", "Drip & Shine",
   "Eclectic Maximalist", "Geek & Gamer", "Get Sporty", "Little Ones",
   "Organized Life", "Quiet Luxury", "Soft Academia", "Sustainable Futurism",
-  "The Wellness Era", "Urban Tech-Wear", "Whimsigoth", "Work-From-Anywhere"
+  "The Wellness Era", "Urban Tech-Wear", "Whimsigoth", "Work-From-Anywhere",
+  "Tis the Season", "Sneakerheads", "Main Character Energy", "Sunday Reset",
+  "Kitchen Flex", "Off-Duty Model", "In My Zone", "Coastal Cool",
+  "Going Out Era", "That Girl / That Guy", "Touch Grass", "Pet Parent Life",
+  "Content Creator Kit", "Corporate Core", "Jet Set", "Clean Girl / Clean Guy",
+  "Stay-In Cinema", "Aura Farming", "Ballin' on a Budget", "Icy Minimal",
+  "Hot Mess Express"
 ];
 
 serve(async (req) => {
