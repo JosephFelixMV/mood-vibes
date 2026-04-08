@@ -274,7 +274,7 @@ export default function Discover() {
                 <span>{prompt.length}/{MAX_PROMPT_LENGTH}</span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground/70">
-                ⚡ Usage is limited to 3 prompts per day
+                ⚡ Usage is limited to 5 prompts per week
               </p>
 
               {/* Example prompts */}
