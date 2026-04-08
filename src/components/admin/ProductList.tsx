@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
+import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, FilterX } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -16,6 +17,47 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+/* ── Inline‑editable cell ── */
+function InlineEdit({ value, onSave, type = "text", className }: { value: string; onSave: (v: string) => void; type?: "text" | "number"; className?: string }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+  const commit = () => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== value) onSave(trimmed);
+    else setDraft(value);
+    setEditing(false);
+  };
+
+  if (!editing) {
+    return (
+      <span
+        className={cn("cursor-pointer rounded px-1 -mx-1 hover:bg-muted transition-colors", className)}
+        onClick={() => { setDraft(value); setEditing(true); }}
+        title="Click to edit"
+      >
+        {type === "number" ? formatPrice(Number(value)) : value}
+      </span>
+    );
+  }
+
+  return (
+    <Input
+      ref={inputRef}
+      type={type}
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(value); setEditing(false); } }}
+      className="h-7 w-full min-w-[80px] text-sm"
+      step={type === "number" ? "0.01" : undefined}
+    />
+  );
+}
 
 interface Props {
   onEdit: (id: string) => void;
@@ -58,6 +100,18 @@ export default function ProductList({ onEdit }: Props) {
   const { data: viewCounts = {} } = useQuery({
     queryKey: ["product-view-counts"],
     queryFn: getProductViewCounts,
+  });
+
+  const inlineUpdateMut = useMutation({
+    mutationFn: async ({ id, field, value }: { id: string; field: "name" | "price"; value: string }) => {
+      const update = field === "price" ? { price: Number(value) } : { [field]: value };
+      const { error } = await supabase.from("products").update(update).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+      toast.success("Updated");
+    },
   });
 
   const toggleMut = useMutation({
@@ -287,6 +341,25 @@ export default function ProductList({ onEdit }: Props) {
             Clear dates
           </Button>
         )}
+        {(filterCategory !== "all" || filterVibe !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs"
+            onClick={() => {
+              setFilterCategory("all");
+              setFilterVibe("all");
+              setFilterStatus("all");
+              setFilterError("all");
+              setDateFrom(undefined);
+              setDateTo(undefined);
+              setCurrentPage(1);
+            }}
+          >
+            <FilterX className="h-3.5 w-3.5" />
+            Clear All Filters
+          </Button>
+        )}
       </div>
 
       {selectedIds.size > 0 && (
@@ -363,14 +436,11 @@ export default function ProductList({ onEdit }: Props) {
                 </td>
                 <td className="px-4 py-3">
                   <div>
-                    <a
-                      href={`/product/${p.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium text-foreground underline-offset-2 hover:text-primary hover:underline"
-                    >
-                      {p.name}
-                    </a>
+                    <InlineEdit
+                      value={p.name}
+                      onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "name", value: v })}
+                      className="font-medium"
+                    />
                     {p.company_name && (
                       <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
                     )}
@@ -393,7 +463,13 @@ export default function ProductList({ onEdit }: Props) {
                     <span className="text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="px-4 py-3">{formatPrice(p.price)}</td>
+                <td className="px-4 py-3">
+                  <InlineEdit
+                    value={String(p.price)}
+                    type="number"
+                    onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "price", value: v })}
+                  />
+                </td>
                 <td className="px-4 py-3 text-center font-medium">{viewCounts[p.id] || 0}</td>
                 <td className="px-4 py-3 text-center font-medium">{clickCounts[p.id] || 0}</td>
                 <td className="px-4 py-3">
