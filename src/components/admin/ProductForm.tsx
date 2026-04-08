@@ -617,6 +617,60 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </div>
         </div>
 
+        {/* Keywords */}
+        <div ref={keywordRef}>
+          <Label>Keywords (for SEO & AI Discovery)</Label>
+          <div className="mt-2 flex flex-wrap gap-1.5 min-h-[32px] rounded-lg border p-2">
+            {form.keywords.map((kw: string) => (
+              <span key={kw} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">
+                {kw}
+                <button type="button" onClick={() => removeKeyword(kw)} className="ml-0.5 hover:text-destructive">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="relative mt-1">
+            <Input
+              value={keywordInput}
+              onChange={(e) => { setKeywordInput(e.target.value); setShowKeywordSuggestions(true); }}
+              onFocus={() => setShowKeywordSuggestions(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && keywordInput.trim()) {
+                  e.preventDefault();
+                  addKeyword(keywordInput);
+                }
+              }}
+              placeholder="Type to search or add keywords..."
+              className="text-sm"
+            />
+            {showKeywordSuggestions && keywordInput && filteredKeywords.length > 0 && (
+              <div className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-lg border bg-popover p-1 shadow-md">
+                {filteredKeywords.slice(0, 15).map((kw) => (
+                  <button
+                    key={kw.id}
+                    type="button"
+                    onClick={() => addKeyword(kw.term)}
+                    className="w-full rounded px-2 py-1 text-left text-sm hover:bg-muted"
+                  >
+                    {kw.term}
+                  </button>
+                ))}
+                {!allKeywords.find((k) => k.term === keywordInput.toLowerCase().trim()) && (
+                  <button
+                    type="button"
+                    onClick={() => addKeyword(keywordInput)}
+                    className="w-full rounded px-2 py-1 text-left text-sm text-primary hover:bg-muted"
+                  >
+                    + Create "{keywordInput.trim()}"
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Press Enter to add custom keywords. Not visible to shoppers.</p>
+        </div>
+
         {/* Specifications */}
         <div>
           <div className="flex items-center justify-between">
