@@ -40,6 +40,7 @@ export default function VibeLanding() {
     enabled: !!vibeName,
   });
 
+  const healthyProducts = products.filter((p) => !p.page_error);
   const [randomPick, setRandomPick] = useState<typeof products[0] | null>(null);
   const [animKey, setAnimKey] = useState(0);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
@@ -52,14 +53,14 @@ export default function VibeLanding() {
   });
 
   useEffect(() => {
-    if (products.length > 0 && !randomPick) {
-      setRandomPick(getRandomProduct(products));
+    if (healthyProducts.length > 0 && !randomPick) {
+      setRandomPick(getRandomProduct(healthyProducts));
     }
-  }, [products]);
+  }, [healthyProducts]);
 
   const handleRandomPick = () => {
     trigger(() => {
-      const next = getRandomProduct(products, randomPick?.id);
+      const next = getRandomProduct(healthyProducts, randomPick?.id);
       setRandomPick(next);
       setAnimKey((k) => k + 1);
     });
@@ -100,7 +101,7 @@ export default function VibeLanding() {
               size="sm"
               variant="outline"
               onClick={handleRandomPick}
-              disabled={cooldown || products.length === 0}
+              disabled={cooldown || healthyProducts.length === 0}
               className="gap-2 rounded-full"
             >
               <Shuffle className="h-4 w-4" />

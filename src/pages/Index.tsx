@@ -53,9 +53,11 @@ export default function Index() {
 
   const displayedProduct = dailyPick;
 
+  const healthyProducts = products.filter((p) => !p.page_error);
+
   const handleSurprise = () => {
     trigger(() => {
-      const next = getRandomProduct(products, surprise?.id);
+      const next = getRandomProduct(healthyProducts, surprise?.id);
       setSurprise(next);
       setKey((k) => k + 1);
     });
@@ -90,7 +92,7 @@ export default function Index() {
             <Button
               size="lg"
               onClick={handleSurprise}
-              disabled={isLoading || products.length === 0 || cooldown}
+              disabled={isLoading || healthyProducts.length === 0 || cooldown}
               className="gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105"
             >
               <Shuffle className="h-5 w-5" /> {cooldown ? "Wait…" : "Surprise Me"}
