@@ -13,7 +13,6 @@ import { trackEvent } from "@/lib/track-event";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
-import { useProxiedImage } from "@/hooks/useProxiedImage";
 
 interface ProductCardProps {
   product: Product;
