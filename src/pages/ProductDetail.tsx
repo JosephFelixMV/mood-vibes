@@ -41,6 +41,14 @@ export default function ProductDetail() {
     queryFn: () => getProducts({ activeOnly: true }),
   });
 
+  const { data: allCategories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => getCategories(),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
+
   useSEO({
     title: product?.name,
     description: product?.description || `Check out ${product?.name} on Surprise Shopper.`,
