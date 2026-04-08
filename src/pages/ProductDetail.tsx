@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, getCategories, formatPrice } from "@/lib/supabase-queries";
+import { supabase } from "@/integrations/supabase/client";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
