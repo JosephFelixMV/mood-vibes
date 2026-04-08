@@ -451,12 +451,21 @@ export default function ProductList({ onEdit }: Props) {
             {togglingCron ? "Updating…" : cronActive ? "Enabled" : "Disabled"}
           </span>
         </div>
+        <AlertDialog open={showCronConfirm} onOpenChange={setShowCronConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Disable automated link checker?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will stop the background job that checks product links every 6 hours. Broken links won't be detected automatically until you re-enable it.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => executeCronToggle(false)}>Disable</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-
-      {selectedIds.size > 0 && (
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium">{selectedIds.size} selected</span>
-          <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm" className="gap-1.5" disabled={bulkDeleteMut.isPending}>
                 {bulkDeleteMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
