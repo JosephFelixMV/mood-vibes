@@ -289,6 +289,35 @@ export default function ProductList({ onEdit }: Props) {
         )}
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="gap-1.5" disabled={bulkDeleteMut.isPending}>
+                {bulkDeleteMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                Delete Selected
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete {selectedIds.size} product(s)?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the selected products and all associated data.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => bulkDeleteMut.mutate(Array.from(selectedIds))} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>Clear selection</Button>
+        </div>
+      )}
+
       <div className="text-xs text-muted-foreground">
         Showing {paginated.length} of {sorted.length} products
         {totalPages > 1 && ` — Page ${safePage} of ${totalPages}`}
@@ -298,6 +327,12 @@ export default function ProductList({ onEdit }: Props) {
         <table className="w-full text-sm">
           <thead className="border-b bg-muted/50 text-left">
             <tr>
+              <th className="px-3 py-3 w-10">
+                <Checkbox
+                  checked={paginated.length > 0 && selectedIds.size === paginated.length}
+                  onCheckedChange={toggleSelectAll}
+                />
+              </th>
               <th className="px-4 py-3 font-medium">Product</th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
