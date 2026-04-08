@@ -5,7 +5,9 @@ import { getProducts, getCategories, formatPrice, getProductClickCounts, getProd
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
@@ -31,6 +33,7 @@ export default function ProductList({ onEdit }: Props) {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-products"],
@@ -75,6 +78,34 @@ export default function ProductList({ onEdit }: Props) {
       toast.success("Product deleted");
     },
   });
+
+  const bulkDeleteMut = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("products").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_data, ids) => {
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+      setSelectedIds(new Set());
+      toast.success(`${ids.length} product(s) deleted`);
+    },
+  });
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === paginated.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(paginated.map((p) => p.id)));
+    }
+  };
 
   const [checkingLinks, setCheckingLinks] = useState(false);
 
@@ -258,6 +289,35 @@ export default function ProductList({ onEdit }: Props) {
         )}
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" className="gap-1.5" disabled={bulkDeleteMut.isPending}>
+                {bulkDeleteMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                Delete Selected
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete {selectedIds.size} product(s)?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the selected products and all associated data.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => bulkDeleteMut.mutate(Array.from(selectedIds))} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>Clear selection</Button>
+        </div>
+      )}
+
       <div className="text-xs text-muted-foreground">
         Showing {paginated.length} of {sorted.length} products
         {totalPages > 1 && ` — Page ${safePage} of ${totalPages}`}
@@ -267,6 +327,12 @@ export default function ProductList({ onEdit }: Props) {
         <table className="w-full text-sm">
           <thead className="border-b bg-muted/50 text-left">
             <tr>
+              <th className="px-3 py-3 w-10">
+                <Checkbox
+                  checked={paginated.length > 0 && selectedIds.size === paginated.length}
+                  onCheckedChange={toggleSelectAll}
+                />
+              </th>
               <th className="px-4 py-3 font-medium">Product</th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
@@ -288,7 +354,13 @@ export default function ProductList({ onEdit }: Props) {
           </thead>
           <tbody>
             {paginated.map((p) => (
-              <tr key={p.id} className="border-b last:border-0">
+              <tr key={p.id} className={cn("border-b last:border-0", selectedIds.has(p.id) && "bg-primary/5")}>
+                <td className="px-3 py-3">
+                  <Checkbox
+                    checked={selectedIds.has(p.id)}
+                    onCheckedChange={() => toggleSelect(p.id)}
+                  />
+                </td>
                 <td className="px-4 py-3">
                   <div>
                     <a
@@ -367,7 +439,7 @@ export default function ProductList({ onEdit }: Props) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={10} className="px-4 py-10 text-center text-muted-foreground">
                   No products match filters
                 </td>
               </tr>
