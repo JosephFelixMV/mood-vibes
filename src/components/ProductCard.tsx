@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { ExternalLink, Info } from "lucide-react";
+import ShareButton from "@/components/ShareButton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
