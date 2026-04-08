@@ -66,6 +66,7 @@ export default function ProductDetail() {
     description: product?.description || `Check out ${product?.name} on Surprise Shopper.`,
     image: product?.image_url || undefined,
     url: product ? `${window.location.origin}/product/${product.id}` : undefined,
+    keywords: productKeywords.length > 0 ? productKeywords : undefined,
   });
 
   // Images only (no video in gallery)
