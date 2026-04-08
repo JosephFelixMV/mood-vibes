@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Sparkles, ArrowRight, RotateCcw, Loader2, AlertTriangle, ChevronRight } from "lucide-react";
+import { Search, Sparkles, ArrowRight, RotateCcw, Loader2, AlertTriangle, ChevronRight, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
