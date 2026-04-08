@@ -401,7 +401,7 @@ export default function ProductList({ onEdit }: Props) {
         </span>
       </div>
 
-
+      {selectedIds.size > 0 && (
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium">{selectedIds.size} selected</span>
           <AlertDialog>
