@@ -236,48 +236,132 @@ export default function Discover() {
             </p>
           </motion.div>
 
-          {/* Search input */}
-          {!hasResults && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-8 w-full max-w-xl"
-            >
-              <label className="mb-2 block text-left text-sm font-medium text-foreground">
-                What are you looking for?
-              </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value.slice(0, MAX_PROMPT_LENGTH))}
-                    onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSubmit()}
-                    placeholder="e.g. Fun birthday gift for a 15-year-old gamer girl under $50"
-                    className="pl-10"
-                    maxLength={MAX_PROMPT_LENGTH}
-                    disabled={isLoading}
-                  />
+          {/* Result tile — above the prompt */}
+          {hasResults && !isLoading && currentProduct && (
+            <div className="mt-8 w-full max-w-3xl">
+              {/* Active prompt bar */}
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Results for:</span>
+                  <span className="font-medium">"{activePrompt}"</span>
+                  <Badge variant="secondary" className="ml-1">
+                    {currentIndex + 1} of {totalCount}
+                  </Badge>
                 </div>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isLoading || !prompt.trim()}
-                  className="gap-2 rounded-full px-6"
-                >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                  Search
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={handleRefine} className="gap-1 text-xs">
+                    Refine search
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleStartOver} className="gap-1 text-xs">
+                    <RotateCcw className="h-3.5 w-3.5" /> Start Over
+                  </Button>
+                </div>
               </div>
-              <div className="mt-1.5 flex items-center justify-between text-xs text-muted-foreground">
-                <span>Tip: include who it's for, their interests, and a budget for the best results</span>
-                <span>{prompt.length}/{MAX_PROMPT_LENGTH}</span>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground/70">
-                ⚡ Usage is limited to 5 prompts per week
-              </p>
 
-              {/* Example prompts */}
+              {warning && (
+                <div className="mb-4 rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-4 py-2 text-sm text-yellow-700 dark:text-yellow-400">
+                  {warning}
+                </div>
+              )}
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentProduct.id}
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -40 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 28 }}
+                >
+                  <ProductCard product={currentProduct} featured />
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Navigation */}
+              <div className="mt-6 flex justify-center">
+                {isQueueEnd ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <p className="text-sm text-muted-foreground">You've seen all matching products!</p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={handleRefine} className="gap-2">
+                        Refine my search
+                      </Button>
+                      <Button onClick={handleStartOver} className="gap-2">
+                        <RotateCcw className="h-4 w-4" /> Search Again
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button onClick={handleNext} size="lg" className="gap-2 rounded-full px-8">
+                    Discover Next <ChevronRight className="h-5 w-5" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Loading */}
+          {isLoading && (
+            <div className="mt-8 flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border bg-card p-10">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-lg font-medium">Finding products for you...</p>
+              <p className="text-sm text-muted-foreground">This usually takes a few seconds</p>
+            </div>
+          )}
+
+          {/* Error */}
+          {error && !isLoading && (
+            <div className="mt-8 flex w-full max-w-lg flex-col items-center gap-4 rounded-2xl border border-destructive/20 bg-card p-8">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+              <p className="font-medium">{error}</p>
+              <Button variant="outline" onClick={handleStartOver} className="gap-2">
+                <RotateCcw className="h-4 w-4" /> Try Again
+              </Button>
+            </div>
+          )}
+
+          {/* Search input — always visible */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-8 w-full max-w-xl"
+          >
+            <label className="mb-2 block text-left text-sm font-medium text-foreground">
+              {hasResults ? "Search for something else" : "What are you looking for?"}
+            </label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value.slice(0, MAX_PROMPT_LENGTH))}
+                  onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSubmit()}
+                  placeholder="e.g. Fun birthday gift for a 15-year-old gamer girl under $50"
+                  className="pl-10"
+                  maxLength={MAX_PROMPT_LENGTH}
+                  disabled={isLoading}
+                />
+              </div>
+              <Button
+                onClick={handleSubmit}
+                disabled={isLoading || !prompt.trim()}
+                className="gap-2 rounded-full px-6"
+              >
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                Search
+              </Button>
+            </div>
+            <div className="mt-1.5 flex items-center justify-between text-xs text-muted-foreground">
+              <span>Tip: include who it's for, their interests, and a budget for the best results</span>
+              <span>{prompt.length}/{MAX_PROMPT_LENGTH}</span>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground/70">
+              ⚡ Usage is limited to 5 prompts per week
+            </p>
+
+            {/* Example prompts — only when no results */}
+            {!hasResults && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {EXAMPLE_PROMPTS.map((ex) => (
                   <button
@@ -289,101 +373,12 @@ export default function Discover() {
                   </button>
                 ))}
               </div>
-            </motion.div>
-          )}
+            )}
+          </motion.div>
         </div>
         <div className="pointer-events-none absolute -left-32 -top-32 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
       </section>
-
-      {/* Loading */}
-      {isLoading && (
-        <section className="container pb-16">
-          <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border bg-card p-10 text-center">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-lg font-medium">Finding products for you...</p>
-            <p className="text-sm text-muted-foreground">This usually takes a few seconds</p>
-          </div>
-        </section>
-      )}
-
-      {/* Error */}
-      {error && !isLoading && (
-        <section className="container pb-16">
-          <div className="mx-auto flex max-w-lg flex-col items-center gap-4 rounded-2xl border border-destructive/20 bg-card p-8 text-center">
-            <AlertTriangle className="h-8 w-8 text-destructive" />
-            <p className="font-medium">{error}</p>
-            <Button variant="outline" onClick={handleStartOver} className="gap-2">
-              <RotateCcw className="h-4 w-4" /> Try Again
-            </Button>
-          </div>
-        </section>
-      )}
-
-      {/* Results */}
-      {hasResults && !isLoading && currentProduct && (
-        <section className="container pb-16">
-          {/* Active prompt bar */}
-          <div className="mx-auto mb-6 flex max-w-3xl flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Results for:</span>
-              <span className="font-medium">"{activePrompt}"</span>
-              <Badge variant="secondary" className="ml-1">
-                {currentIndex + 1} of {totalCount}
-              </Badge>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={handleRefine} className="gap-1 text-xs">
-                Refine search
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleStartOver} className="gap-1 text-xs">
-                <RotateCcw className="h-3.5 w-3.5" /> Start Over
-              </Button>
-            </div>
-          </div>
-
-          {warning && (
-            <div className="mx-auto mb-4 max-w-3xl rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-4 py-2 text-sm text-yellow-700 dark:text-yellow-400">
-              {warning}
-            </div>
-          )}
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentProduct.id}
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ type: "spring", stiffness: 300, damping: 28 }}
-              className="mx-auto max-w-3xl"
-            >
-              <ProductCard product={currentProduct} featured />
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation */}
-          <div className="mx-auto mt-6 flex max-w-3xl justify-center">
-            {isQueueEnd ? (
-              <div className="flex flex-col items-center gap-3">
-                <p className="text-sm text-muted-foreground">You've seen all matching products!</p>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleRefine} className="gap-2">
-                    Refine my search
-                  </Button>
-                  <Button onClick={handleStartOver} className="gap-2">
-                    <RotateCcw className="h-4 w-4" /> Search Again
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Button onClick={handleNext} size="lg" className="gap-2 rounded-full px-8">
-                Discover Next <ChevronRight className="h-5 w-5" />
-              </Button>
-            )}
-          </div>
-        </section>
-      )}
     </div>
   );
 }
