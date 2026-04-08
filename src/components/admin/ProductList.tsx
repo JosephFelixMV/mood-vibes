@@ -163,6 +163,19 @@ export default function ProductList({ onEdit }: Props) {
 
   const [checkingLinks, setCheckingLinks] = useState(false);
 
+  const { data: lastBatchCheck } = useQuery({
+    queryKey: ["last-batch-check"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("last_checked_at")
+        .not("last_checked_at", "is", null)
+        .order("last_checked_at", { ascending: false })
+        .limit(1);
+      return data?.[0]?.last_checked_at ?? null;
+    },
+  });
+
   const handleCheckLinks = async () => {
     setCheckingLinks(true);
     try {
@@ -375,6 +388,17 @@ export default function ProductList({ onEdit }: Props) {
             Clear All Filters
           </Button>
         )}
+      </div>
+
+      {/* Background job indicator */}
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <ShieldCheck className="h-3.5 w-3.5" />
+        <span>
+          Automated link check (every 6h):{" "}
+          {lastBatchCheck
+            ? <>Last run <strong>{format(new Date(lastBatchCheck), "MMM d, yyyy h:mm a")}</strong></>
+            : "No checks recorded yet"}
+        </span>
       </div>
 
       {selectedIds.size > 0 && (
