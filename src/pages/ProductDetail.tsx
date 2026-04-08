@@ -93,9 +93,8 @@ export default function ProductDetail() {
             <div className="relative aspect-square w-full overflow-hidden bg-muted">
               {allImages.length > 0 ? (
                 <>
-                  <img
+                  <ProxiedImg
                     src={allImages[currentImage]}
-                    srcSet={`${allImages[currentImage]} 1x, ${allImages[currentImage]} 2x`}
                     sizes="(min-width: 768px) 50vw, 100vw"
                     alt={product.name}
                     className="sharp-image h-full w-full object-contain"
