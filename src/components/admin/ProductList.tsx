@@ -341,6 +341,25 @@ export default function ProductList({ onEdit }: Props) {
             Clear dates
           </Button>
         )}
+        {(filterCategory !== "all" || filterVibe !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs"
+            onClick={() => {
+              setFilterCategory("all");
+              setFilterVibe("all");
+              setFilterStatus("all");
+              setFilterError("all");
+              setDateFrom(undefined);
+              setDateTo(undefined);
+              setCurrentPage(1);
+            }}
+          >
+            <FilterX className="h-3.5 w-3.5" />
+            Clear All Filters
+          </Button>
+        )}
       </div>
 
       {selectedIds.size > 0 && (
