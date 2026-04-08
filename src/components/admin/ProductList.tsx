@@ -176,7 +176,36 @@ export default function ProductList({ onEdit }: Props) {
     },
   });
 
-  const handleCheckLinks = async () => {
+  const [cronActive, setCronActive] = useState(true);
+  const [togglingCron, setTogglingCron] = useState(false);
+
+  useQuery({
+    queryKey: ["cron-job-status"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("toggle-cron-job", { method: "GET" });
+      if (error) throw error;
+      setCronActive(data.active);
+      return data.active;
+    },
+  });
+
+  const handleToggleCron = async (enable: boolean) => {
+    setTogglingCron(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("toggle-cron-job", {
+        body: { enable },
+      });
+      if (error) throw error;
+      setCronActive(data.active);
+      toast.success(`Batch link checker ${data.active ? "enabled" : "disabled"}`);
+    } catch (err: any) {
+      toast.error("Failed to toggle: " + err.message);
+    } finally {
+      setTogglingCron(false);
+    }
+  };
+
+
     setCheckingLinks(true);
     try {
       const idsToCheck = paginated.map((p) => p.id);
