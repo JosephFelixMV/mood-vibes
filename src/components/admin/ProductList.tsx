@@ -109,7 +109,10 @@ export default function ProductList({ onEdit }: Props) {
   };
 
   const filtered = products.filter((p) => {
-    if (filterCategory !== "all" && p.category !== filterCategory) return false;
+    if (filterCategory !== "all") {
+      const cats = p.category.split(",").map((c) => c.trim());
+      if (!cats.includes(filterCategory)) return false;
+    }
     if (filterVibe !== "all") {
       const vibes = (p.vibe_category || "").split(",").filter(Boolean);
       if (!vibes.includes(filterVibe)) return false;
