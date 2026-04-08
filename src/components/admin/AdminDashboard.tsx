@@ -34,6 +34,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="ai">AI Discover</TabsTrigger>
+          <TabsTrigger value="config">Configuration</TabsTrigger>
         </TabsList>
         <TabsContent value="list" forceMount className={tab !== "list" ? "hidden" : ""}>
           <ProductList onEdit={handleEdit} />
@@ -49,6 +50,9 @@ export default function AdminDashboard() {
         </TabsContent>
         <TabsContent value="ai" forceMount className={tab !== "ai" ? "hidden" : ""}>
           <AIDashboard />
+        </TabsContent>
+        <TabsContent value="config" forceMount className={tab !== "config" ? "hidden" : ""}>
+          <SiteConfiguration />
         </TabsContent>
       </Tabs>
     </div>
