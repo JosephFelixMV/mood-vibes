@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_requests: {
+        Row: {
+          created_at: string
+          flag_reason: string | null
+          flagged: boolean
+          id: string
+          ip_hash: string
+          product_ids: string[] | null
+          prompt_hash: string
+          prompt_text: string
+          result_count: number
+        }
+        Insert: {
+          created_at?: string
+          flag_reason?: string | null
+          flagged?: boolean
+          id?: string
+          ip_hash: string
+          product_ids?: string[] | null
+          prompt_hash: string
+          prompt_text: string
+          result_count?: number
+        }
+        Update: {
+          created_at?: string
+          flag_reason?: string | null
+          flagged?: boolean
+          id?: string
+          ip_hash?: string
+          product_ids?: string[] | null
+          prompt_hash?: string
+          prompt_text?: string
+          result_count?: number
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string

@@ -4,6 +4,7 @@ import ProductForm from "./ProductForm";
 import ProductList from "./ProductList";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import BulkUpload from "./BulkUpload";
+import AIDashboard from "./AIDashboard";
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState("list");
@@ -31,6 +32,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="form">{editId ? "Edit Product" : "Add Product"}</TabsTrigger>
           <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="ai">AI Discover</TabsTrigger>
         </TabsList>
         <TabsContent value="list" forceMount className={tab !== "list" ? "hidden" : ""}>
           <ProductList onEdit={handleEdit} />
@@ -43,6 +45,9 @@ export default function AdminDashboard() {
         </TabsContent>
         <TabsContent value="analytics" forceMount className={tab !== "analytics" ? "hidden" : ""}>
           <AnalyticsDashboard />
+        </TabsContent>
+        <TabsContent value="ai" forceMount className={tab !== "ai" ? "hidden" : ""}>
+          <AIDashboard />
         </TabsContent>
       </Tabs>
     </div>
