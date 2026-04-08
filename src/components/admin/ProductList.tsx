@@ -466,6 +466,11 @@ export default function ProductList({ onEdit }: Props) {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+          <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm" className="gap-1.5" disabled={bulkDeleteMut.isPending}>
                 {bulkDeleteMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
