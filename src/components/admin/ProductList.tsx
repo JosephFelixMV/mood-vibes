@@ -463,7 +463,13 @@ export default function ProductList({ onEdit }: Props) {
                     <span className="text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="px-4 py-3">{formatPrice(p.price)}</td>
+                <td className="px-4 py-3">
+                  <InlineEdit
+                    value={String(p.price)}
+                    type="number"
+                    onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "price", value: v })}
+                  />
+                </td>
                 <td className="px-4 py-3 text-center font-medium">{viewCounts[p.id] || 0}</td>
                 <td className="px-4 py-3 text-center font-medium">{clickCounts[p.id] || 0}</td>
                 <td className="px-4 py-3">
