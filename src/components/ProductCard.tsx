@@ -7,9 +7,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 import { trackProductClick } from "@/lib/track-click";
 import { trackEvent } from "@/lib/track-event";
-import { formatPrice } from "@/lib/supabase-queries";
+import { formatPrice, getCategories } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
 
@@ -21,6 +22,14 @@ interface ProductCardProps {
 export default function ProductCard({ product, featured }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const proxiedImage = useProxiedImage(product.image_url);
+
+  const { data: allCategories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => getCategories(),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
   useEffect(() => {
     const el = cardRef.current;
@@ -75,11 +84,18 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
           </div>
         )}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1">
-          {product.category.split(",").map((c) => (
-            <Badge key={c} className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
-              {c.trim()}
-            </Badge>
-          ))}
+          {product.category.split(",").map((c) => {
+            const trimmed = c.trim();
+            const cat = categorySlugMap[trimmed];
+            const to = cat ? (cat.type === "vibe" ? `/vibes/${cat.slug}` : `/category/${cat.slug}`) : "#";
+            return (
+              <Link key={trimmed} to={to} onClick={(e) => e.stopPropagation()}>
+                <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm hover:bg-primary cursor-pointer">
+                  {trimmed}
+                </Badge>
+              </Link>
+            );
+          })}
         </div>
       </Link>
 

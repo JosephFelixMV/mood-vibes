@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Info } from "lucide-react";
@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, formatPrice } from "@/lib/supabase-queries";
+import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, getCategories, formatPrice } from "@/lib/supabase-queries";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
@@ -41,6 +41,14 @@ export default function ProductDetail() {
     queryFn: () => getProducts({ activeOnly: true }),
   });
 
+  const { data: allCategories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => getCategories(),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
+
   useSEO({
     title: product?.name,
     description: product?.description || `Check out ${product?.name} on Surprise Shopper.`,
@@ -55,7 +63,21 @@ export default function ProductDetail() {
   ] : [];
 
   const handleAnother = () => {
-    const next = getRandomProduct(allProducts, id);
+    if (!product) return;
+    // Get all categories and vibes for this product
+    const cats = product.category.split(",").map((c) => c.trim()).filter(Boolean);
+    const vibes = product.vibe_category?.split(",").map((v) => v.trim()).filter(Boolean) || [];
+
+    // Filter to products sharing at least one category or vibe
+    const related = allProducts.filter((p) => {
+      if (p.id === id) return false;
+      const pCats = p.category.split(",").map((c) => c.trim());
+      const pVibes = p.vibe_category?.split(",").map((v) => v.trim()) || [];
+      return cats.some((c) => pCats.includes(c)) || vibes.some((v) => pVibes.includes(v));
+    });
+
+    const pool = related.length > 0 ? related : allProducts;
+    const next = getRandomProduct(pool, id);
     if (next) navigate(`/product/${next.id}`);
   };
 
@@ -143,12 +165,26 @@ export default function ProductDetail() {
           {/* Product info */}
           <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
             <div className="flex flex-wrap gap-2">
-              {product.category.split(",").map((c) => (
-                <Badge key={c}>{c.trim()}</Badge>
-              ))}
-              {product.vibe_category && product.vibe_category.split(",").map((v) => (
-                <Badge key={v} variant="secondary">{v.trim()}</Badge>
-              ))}
+              {product.category.split(",").map((c) => {
+                const trimmed = c.trim();
+                const cat = categorySlugMap[trimmed];
+                const to = cat ? (cat.type === "vibe" ? `/vibes/${cat.slug}` : `/category/${cat.slug}`) : "#";
+                return (
+                  <Link key={trimmed} to={to}>
+                    <Badge className="cursor-pointer hover:bg-primary/80">{trimmed}</Badge>
+                  </Link>
+                );
+              })}
+              {product.vibe_category && product.vibe_category.split(",").map((v) => {
+                const trimmed = v.trim();
+                const cat = categorySlugMap[trimmed];
+                const to = cat ? `/vibes/${cat.slug}` : "#";
+                return (
+                  <Link key={trimmed} to={to}>
+                    <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">{trimmed}</Badge>
+                  </Link>
+                );
+              })}
             </div>
             <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
             {product.company_name && (
