@@ -58,8 +58,18 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     queryFn: () => getProduct(editId!),
     enabled: !!editId,
   });
+  const { data: allKeywords = [] } = useQuery({
+    queryKey: ["keywords"],
+    queryFn: async () => {
+      const { data } = await supabase.from("keywords").select("*").order("term");
+      return data || [];
+    },
+  });
 
   const [form, setForm] = useState(() => savedState?.current || empty);
+  const [keywordInput, setKeywordInput] = useState("");
+  const [showKeywordSuggestions, setShowKeywordSuggestions] = useState(false);
+  const keywordRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (savedState) {
@@ -68,20 +78,22 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   }, [form, savedState]);
 
   useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (keywordRef.current && !keywordRef.current.contains(e.target as Node)) {
+        setShowKeywordSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
     if (existing && editId) {
-      // Load existing images and specifications
       Promise.all([
-        supabase
-          .from("product_images")
-          .select("image_url")
-          .eq("product_id", editId)
-          .order("display_order"),
-        supabase
-          .from("product_specifications")
-          .select("item_detail, specification")
-          .eq("product_id", editId)
-          .order("display_order"),
-      ]).then(([imgRes, specRes]) => {
+        supabase.from("product_images").select("image_url").eq("product_id", editId).order("display_order"),
+        supabase.from("product_specifications").select("item_detail, specification").eq("product_id", editId).order("display_order"),
+        supabase.from("product_keywords").select("keyword_id, keywords(term)").eq("product_id", editId),
+      ]).then(([imgRes, specRes, kwRes]) => {
         setForm({
           name: existing.name,
           description: existing.description || "",
@@ -99,6 +111,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             item_detail: s.item_detail,
             specification: s.specification,
           })) || [],
+          keywords: kwRes.data?.map((k: any) => k.keywords?.term).filter(Boolean) || [],
         });
       });
     } else if (!editId && !savedState?.current) {
@@ -107,6 +120,30 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   }, [existing, editId]);
 
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
+
+  const filteredKeywords = allKeywords.filter(
+    (kw) =>
+      kw.term.toLowerCase().includes(keywordInput.toLowerCase()) &&
+      !form.keywords.includes(kw.term)
+  );
+
+  const addKeyword = async (term: string) => {
+    const normalized = term.toLowerCase().trim();
+    if (!normalized || form.keywords.includes(normalized)) return;
+    // Create keyword if it doesn't exist
+    const exists = allKeywords.find((k) => k.term === normalized);
+    if (!exists) {
+      await supabase.from("keywords").insert({ term: normalized });
+      qc.invalidateQueries({ queryKey: ["keywords"] });
+    }
+    set("keywords", [...form.keywords, normalized]);
+    setKeywordInput("");
+    setShowKeywordSuggestions(false);
+  };
+
+  const removeKeyword = (term: string) => {
+    set("keywords", form.keywords.filter((k: string) => k !== term));
+  };
 
   const [suggestingCategories, setSuggestingCategories] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<{ core: string[]; vibes: string[] } | null>(null);
