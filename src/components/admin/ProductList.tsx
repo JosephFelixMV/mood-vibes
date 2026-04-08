@@ -166,7 +166,10 @@ export default function ProductList({ onEdit }: Props) {
   const handleCheckLinks = async () => {
     setCheckingLinks(true);
     try {
-      const { data, error } = await supabase.functions.invoke("check-affiliate-links");
+      const idsToCheck = paginated.map((p) => p.id);
+      const { data, error } = await supabase.functions.invoke("check-affiliate-links", {
+        body: { product_ids: idsToCheck },
+      });
       if (error) throw error;
       const errors = data.results?.filter((r: any) => r.error) || [];
       if (errors.length > 0) {
