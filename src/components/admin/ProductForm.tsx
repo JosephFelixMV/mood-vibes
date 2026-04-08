@@ -146,7 +146,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   };
 
   const [suggestingCategories, setSuggestingCategories] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<{ core: string[]; vibes: string[] } | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<{ core: string[]; vibes: string[]; keywords: string[] } | null>(null);
 
   const suggestCategories = async (productName: string, description: string, price: string | number) => {
     setSuggestingCategories(true);
@@ -157,20 +157,24 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       });
       if (error) throw error;
       console.log("AI category suggestions:", data);
-      if (data?.core?.length || data?.vibes?.length) {
+      if (data?.core?.length || data?.vibes?.length || data?.keywords?.length) {
         const suggestions = {
           core: data.core || [],
           vibes: data.vibes || [],
+          keywords: data.keywords || [],
         };
         setAiSuggestions(suggestions);
         setForm((prev: any) => ({
           ...prev,
           category: suggestions.core.length ? suggestions.core.join(",") : prev.category,
           vibe_category: suggestions.vibes.length ? suggestions.vibes.join(",") : prev.vibe_category,
+          keywords: suggestions.keywords.length
+            ? [...new Set([...prev.keywords, ...suggestions.keywords.map((k: string) => k.toLowerCase())])]
+            : prev.keywords,
         }));
-        toast.success(`Suggested ${suggestions.core.length} categories and ${suggestions.vibes.length} vibes`);
+        toast.success(`Suggested ${suggestions.core.length} categories, ${suggestions.vibes.length} vibes, and ${suggestions.keywords.length} keywords`);
       } else {
-        toast.info("No category suggestions returned");
+        toast.info("No suggestions returned");
       }
     } catch (err) {
       console.error("Category suggestion failed:", err);
