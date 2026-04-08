@@ -133,7 +133,7 @@ export default function ProductDetail() {
                       i === currentImage ? "border-primary" : "border-transparent"
                     }`}
                   >
-                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                    <ProxiedImg src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
