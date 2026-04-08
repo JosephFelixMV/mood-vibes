@@ -439,7 +439,7 @@ export default function ProductList({ onEdit }: Props) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={10} className="px-4 py-10 text-center text-muted-foreground">
                   No products match filters
                 </td>
               </tr>
