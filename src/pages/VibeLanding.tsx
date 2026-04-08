@@ -1,0 +1,164 @@
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Shuffle, Sparkles } from "lucide-react";
+import { getProducts, getCategories, getRandomProduct } from "@/lib/supabase-queries";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSEO } from "@/hooks/useSEO";
+import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
+import { Button } from "@/components/ui/button";
+import ProductCard from "@/components/ProductCard";
+
+export default function VibeLanding() {
+  const { slug } = useParams<{ slug: string }>();
+
+  const { data: vibes = [] } = useQuery({
+    queryKey: ["categories", "vibe"],
+    queryFn: () => getCategories("vibe"),
+  });
+
+  const vibe = vibes.find((v) => v.slug === slug);
+  const vibeName = vibe?.name || "";
+
+  useSEO({
+    title: vibeName || "Vibe",
+    description: vibe?.description || `Browse ${vibeName} products on Surprise Shopper.`,
+  });
+
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["vibe-products", slug, vibeName],
+    queryFn: async () => {
+      const all = await getProducts({ sort: "newest", activeOnly: true });
+      return all.filter((p) =>
+        p.vibe_category
+          ?.split(",")
+          .map((v) => v.trim())
+          .includes(vibeName)
+      );
+    },
+    enabled: !!vibeName,
+  });
+
+  const [randomPick, setRandomPick] = useState<typeof products[0] | null>(null);
+  const [animKey, setAnimKey] = useState(0);
+  const [sort, setSort] = useState<"newest" | "oldest">("newest");
+  const { trigger, cooldown } = useRateLimitedAction(2000);
+
+  const sortedProducts = [...products].sort((a, b) => {
+    const dateA = new Date(a.date_added).getTime();
+    const dateB = new Date(b.date_added).getTime();
+    return sort === "newest" ? dateB - dateA : dateA - dateB;
+  });
+
+  useEffect(() => {
+    if (products.length > 0 && !randomPick) {
+      setRandomPick(getRandomProduct(products));
+    }
+  }, [products]);
+
+  const handleRandomPick = () => {
+    trigger(() => {
+      const next = getRandomProduct(products, randomPick?.id);
+      setRandomPick(next);
+      setAnimKey((k) => k + 1);
+    });
+  };
+
+  if (!vibe && !isLoading) {
+    return (
+      <div className="container py-20 text-center">
+        <h1 className="font-heading text-3xl font-bold">Vibe not found</h1>
+        <p className="mt-2 text-muted-foreground">The vibe you're looking for doesn't exist.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container py-12">
+      <div className="mb-4">
+        <h1 className="mb-2 flex items-center gap-3 font-heading text-3xl font-bold tracking-tight md:text-4xl">
+          {vibe?.icon && <span className="text-4xl">{vibe.icon}</span>}
+          {vibeName}
+        </h1>
+        {vibe?.description && (
+          <p className="mb-2 text-muted-foreground">{vibe.description}</p>
+        )}
+        <p className="text-sm text-muted-foreground">
+          {products.length} product{products.length !== 1 ? "s" : ""} in this vibe
+        </p>
+      </div>
+
+      {!isLoading && products.length > 0 && (
+        <section className="mb-12">
+          <div className="mb-4 flex items-center gap-4">
+            <h2 className="font-heading text-xl font-semibold">
+              <Sparkles className="mr-2 inline h-5 w-5 text-primary" />
+              Discover Something Random
+            </h2>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRandomPick}
+              disabled={cooldown || products.length === 0}
+              className="gap-2 rounded-full"
+            >
+              <Shuffle className="h-4 w-4" />
+              {cooldown ? "Wait…" : randomPick ? "Try Another" : "Pick One"}
+            </Button>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {randomPick && (
+              <motion.div
+                key={animKey}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                className="mx-auto max-w-3xl"
+              >
+                <ProductCard product={randomPick} featured />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
+      )}
+
+      {!isLoading && products.length > 0 && (
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="font-heading text-lg font-semibold">All {vibeName} Products</h2>
+          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : products.length === 0 ? (
+        <p className="py-20 text-center text-muted-foreground">No products found in this vibe.</p>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {sortedProducts.map((p, i) => (
+            <motion.div
+              key={p.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <ProductCard product={p} />
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

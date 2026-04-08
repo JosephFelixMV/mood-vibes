@@ -38,7 +38,7 @@ export default function Vibes() {
             transition={{ delay: i * 0.05 }}
           >
             <Link
-              to={`/products?vibe=${vibe.slug}`}
+              to={`/vibes/${vibe.slug}`}
               className="group flex items-start gap-4 rounded-2xl border bg-card p-6 transition-all hover:border-accent/30 hover:shadow-md"
             >
               <span className="text-3xl">{vibe.icon}</span>
