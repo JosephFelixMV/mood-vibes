@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Sparkles } from "lucide-react";
 import { getProducts, getCategories, getRandomProduct } from "@/lib/supabase-queries";
@@ -53,6 +53,13 @@ export default function CategoryLanding() {
   const [randomPick, setRandomPick] = useState<typeof products[0] | null>(null);
   const [animKey, setAnimKey] = useState(0);
   const { trigger, cooldown } = useRateLimitedAction(2000);
+
+  // Auto-pick a random product on first load
+  useEffect(() => {
+    if (products.length > 0 && !randomPick) {
+      setRandomPick(getRandomProduct(products));
+    }
+  }, [products]);
 
   const handleRandomPick = () => {
     trigger(() => {
