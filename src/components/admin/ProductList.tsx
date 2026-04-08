@@ -390,7 +390,18 @@ export default function ProductList({ onEdit }: Props) {
         )}
       </div>
 
-      {selectedIds.size > 0 && (
+      {/* Background job indicator */}
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <ShieldCheck className="h-3.5 w-3.5" />
+        <span>
+          Automated link check (every 6h):{" "}
+          {lastBatchCheck
+            ? <>Last run <strong>{format(new Date(lastBatchCheck), "MMM d, yyyy h:mm a")}</strong></>
+            : "No checks recorded yet"}
+        </span>
+      </div>
+
+
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium">{selectedIds.size} selected</span>
           <AlertDialog>
