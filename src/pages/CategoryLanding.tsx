@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Sparkles } from "lucide-react";
 import { getProducts, getCategories, getRandomProduct } from "@/lib/supabase-queries";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSEO } from "@/hooks/useSEO";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { Button } from "@/components/ui/button";
