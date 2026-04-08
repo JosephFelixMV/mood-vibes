@@ -11,6 +11,7 @@ import { getProduct, getProducts, getRandomProduct, getProductImages, getProduct
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
+import ProxiedImg from "@/components/ProxiedImg";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
