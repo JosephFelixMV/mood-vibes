@@ -249,16 +249,28 @@ export default function ProductList({ onEdit }: Props) {
     <div className="space-y-4">
       {/* Filters + Actions */}
       <div className="flex flex-wrap items-center gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCheckLinks}
-          disabled={checkingLinks}
-          className="gap-1.5"
-        >
-          {checkingLinks ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
-          {checkingLinks ? "Checking…" : "Check All Links"}
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCheckLinks}
+            disabled={checkingLinks}
+            className="gap-1.5"
+          >
+            {checkingLinks ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+            {checkingLinks ? "Checking…" : "Check Links"}
+          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs text-xs">
+                <p>Verifies that each product's source URL is still active. Limited to the {paginated.length} products currently shown in the filtered list.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         <Select value={filterCategory} onValueChange={handleFilterChange(setFilterCategory)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Category" />
