@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, formatPrice } from "@/lib/supabase-queries";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
+import { useProxiedImage } from "@/hooks/useProxiedImage";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
