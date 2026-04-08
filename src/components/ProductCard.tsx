@@ -24,6 +24,14 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const proxiedImage = useProxiedImage(product.image_url);
 
+  const { data: allCategories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => getCategories(),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
+
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
