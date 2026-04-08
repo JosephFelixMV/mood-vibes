@@ -69,6 +69,7 @@ export default function Discover() {
   const [totalCount, setTotalCount] = useState(0);
   const [activePrompt, setActivePrompt] = useState("");
   const [hasResults, setHasResults] = useState(false);
+  const [showProtoBanner, setShowProtoBanner] = useState(true);
 
   // Restore queue from session on mount
   useEffect(() => {
