@@ -8,7 +8,7 @@ interface SEOProps {
   keywords?: string[];
 }
 
-export function useSEO({ title, description, image, url }: SEOProps) {
+export function useSEO({ title, description, image, url, keywords }: SEOProps) {
   useEffect(() => {
     const suffix = "Surprise Shopper";
     document.title = title ? `${title} | ${suffix}` : suffix;
@@ -39,5 +39,8 @@ export function useSEO({ title, description, image, url }: SEOProps) {
     if (url) {
       setMeta("property", "og:url", url);
     }
-  }, [title, description, image, url]);
+    if (keywords && keywords.length > 0) {
+      setMeta("name", "keywords", keywords.join(", "));
+    }
+  }, [title, description, image, url, keywords]);
 }
