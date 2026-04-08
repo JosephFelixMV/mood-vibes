@@ -326,6 +326,8 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     video_url: form.video_url || null,
     page_error: false,
     page_error_detail: null,
+    check_failure_count: 0,
+    last_checked_at: null,
     date_added: new Date().toISOString(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
