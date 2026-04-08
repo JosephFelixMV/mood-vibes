@@ -166,19 +166,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Rate limit: 5 per hour per IP
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    // Rate limit: 3 per day per IP
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
     const { data: recentRequests } = await supabase
       .from("ai_requests")
       .select("id, created_at")
       .eq("ip_hash", ipHash)
-      .gte("created_at", oneHourAgo);
+      .gte("created_at", todayStart.toISOString());
 
     const requestCount = recentRequests?.length || 0;
 
-    if (requestCount >= 5) {
+    if (requestCount >= 3) {
       return new Response(JSON.stringify({
-        error: "You've reached the maximum number of searches this hour. Please try again later.",
+        error: "You've used all 3 AI searches for today. Come back tomorrow for more!",
       }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -259,7 +260,7 @@ ${catalogText}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-lite",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Find products matching: ${prompt}` },
