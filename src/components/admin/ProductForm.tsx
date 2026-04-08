@@ -8,7 +8,8 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Plus, Upload, Download } from "lucide-react";
+import { X, Plus, Upload, Download, Info } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
@@ -495,7 +496,32 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </div>
         </div>
         <div>
-          <Label>Vibes (Optional — select multiple)</Label>
+          <div className="flex items-center gap-2">
+            <Label>Vibes (Optional — select multiple)</Label>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button type="button" className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted hover:bg-muted/80 text-muted-foreground transition-colors">
+                  <Info className="h-3 w-3" />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Vibe Categories Guide</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 mt-2">
+                  {vibeCategories.map((c) => (
+                    <div key={c.id} className="flex gap-2">
+                      <span className="text-lg shrink-0">{c.icon}</span>
+                      <div>
+                        <p className="text-sm font-medium">{c.name}</p>
+                        <p className="text-xs text-muted-foreground">{c.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
             {vibeCategories.map((c) => {
               const selected = (form.vibe_category || "").split(",").filter(Boolean);
