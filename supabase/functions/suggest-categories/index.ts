@@ -37,7 +37,7 @@ serve(async (req) => {
     const body = await req.text();
     const { name, description, price } = JSON.parse(body);
 
-    const prompt = `You are a product categorization assistant. Given a product, select the most fitting categories.
+    const prompt = `You are a product categorization assistant. Given a product, select the most fitting categories and suggest relevant keywords for SEO and search.
 
 CORE CATEGORIES (pick 1-5 that best fit):
 ${CORE_CATEGORIES.join(", ")}
@@ -50,9 +50,10 @@ Description: ${description || "No description"}
 Price: ${price || "Unknown"}
 
 Respond ONLY with valid JSON in this exact format, no other text:
-{"core": ["Category1", "Category2"], "vibes": ["Vibe1", "Vibe2"]}
+{"core": ["Category1", "Category2"], "vibes": ["Vibe1", "Vibe2"], "keywords": ["keyword1", "keyword2", "keyword3"]}
 
-Use exact category names from the lists above. Pick categories that genuinely fit.`;
+Use exact category names from the lists above. Pick categories that genuinely fit.
+For keywords, suggest 5-10 lowercase search terms shoppers might use to find this product (e.g. "gift for her", "under 50", "eco friendly", "wireless", "home office"). Focus on use cases, demographics, price ranges, occasions, and attributes.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
