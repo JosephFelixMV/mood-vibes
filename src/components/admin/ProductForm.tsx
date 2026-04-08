@@ -482,7 +482,19 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                     </div>
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground">These categories have been auto-selected below. Adjust as needed.</p>
+                {aiSuggestions.keywords.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Keywords:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {aiSuggestions.keywords.map((k) => (
+                        <span key={k} className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">
+                          {k}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">These have been auto-selected below. Adjust as needed.</p>
               </>
             )}
           </div>
