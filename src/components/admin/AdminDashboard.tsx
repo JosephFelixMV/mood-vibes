@@ -5,6 +5,7 @@ import ProductList from "./ProductList";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import BulkUpload from "./BulkUpload";
 import AIDashboard from "./AIDashboard";
+import SiteConfiguration from "./SiteConfiguration";
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState("list");
