@@ -6,6 +6,7 @@ import { Shuffle, Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { getProducts, getDailyPick, getRandomProduct } from "@/lib/supabase-queries";
+import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 
 function useCountdownToMidnightUTC() {
   const getRemaining = () => {
@@ -48,13 +49,16 @@ export default function Index() {
   const [surprise, setSurprise] = useState<typeof dailyPick>(null);
   const [key, setKey] = useState(0);
   const isLoading = productsLoading || pickLoading;
+  const { trigger, cooldown } = useRateLimitedAction(2000);
 
   const displayedProduct = dailyPick;
 
   const handleSurprise = () => {
-    const next = getRandomProduct(products, surprise?.id);
-    setSurprise(next);
-    setKey((k) => k + 1);
+    trigger(() => {
+      const next = getRandomProduct(products, surprise?.id);
+      setSurprise(next);
+      setKey((k) => k + 1);
+    });
   };
 
   return (
@@ -86,10 +90,10 @@ export default function Index() {
             <Button
               size="lg"
               onClick={handleSurprise}
-              disabled={isLoading || products.length === 0}
+              disabled={isLoading || products.length === 0 || cooldown}
               className="gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105"
             >
-              <Shuffle className="h-5 w-5" /> Surprise Me
+              <Shuffle className="h-5 w-5" /> {cooldown ? "Wait…" : "Surprise Me"}
             </Button>
           </motion.div>
         </div>

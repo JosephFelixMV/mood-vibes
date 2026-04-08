@@ -13,6 +13,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Admin from "./pages/Admin";
 import Disclosure from "./pages/Disclosure";
 import Privacy from "./pages/Privacy";
+import CategoryLanding from "./pages/CategoryLanding";
 import NotFound from "./pages/NotFound";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/categories" element={<Categories />} />
               <Route path="/vibes" element={<Vibes />} />
               <Route path="/products" element={<Products />} />
+              <Route path="/category/:slug" element={<CategoryLanding />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/disclosure" element={<Disclosure />} />
