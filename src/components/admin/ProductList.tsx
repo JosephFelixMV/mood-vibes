@@ -517,7 +517,11 @@ export default function ProductList({ onEdit }: Props) {
                   onCheckedChange={toggleSelectAll}
                 />
               </th>
-              <th className="px-4 py-3 font-medium">Product</th>
+              <th className="px-4 py-3 font-medium">
+                <button onClick={() => toggleSort("updated")} className="inline-flex items-center gap-1 hover:text-primary">
+                  Product {sortColumn === "updated" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                </button>
+              </th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
               <th className="px-4 py-3 font-medium">Price</th>
@@ -529,11 +533,6 @@ export default function ProductList({ onEdit }: Props) {
               <th className="px-4 py-3 font-medium">
                 <button onClick={() => toggleSort("clicks")} className="inline-flex items-center gap-1 hover:text-primary">
                   Clicks {sortColumn === "clicks" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-                </button>
-              </th>
-              <th className="px-4 py-3 font-medium">
-                <button onClick={() => toggleSort("updated")} className="inline-flex items-center gap-1 hover:text-primary">
-                  Last Updated {sortColumn === "updated" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                 </button>
               </th>
               <th className="px-4 py-3 font-medium">Status</th>
@@ -561,7 +560,10 @@ export default function ProductList({ onEdit }: Props) {
                       <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
                     )}
                     <div className="text-[11px] text-muted-foreground">
-                      {format(new Date(p.date_added), "MM/dd/yyyy")}
+                      Added {format(new Date(p.date_added), "MM/dd/yyyy")}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      Updated {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
                     </div>
                   </div>
                 </td>
@@ -588,9 +590,6 @@ export default function ProductList({ onEdit }: Props) {
                 </td>
                 <td className="px-4 py-3 text-center font-medium">{viewCounts[p.id] || 0}</td>
                 <td className="px-4 py-3 text-center font-medium">{clickCounts[p.id] || 0}</td>
-                <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                  {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
-                </td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={p.is_active}
@@ -634,7 +633,7 @@ export default function ProductList({ onEdit }: Props) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={11} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={10} className="px-4 py-10 text-center text-muted-foreground">
                   No products match filters
                 </td>
               </tr>
