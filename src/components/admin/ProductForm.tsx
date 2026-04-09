@@ -620,7 +620,42 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
         {/* Keywords */}
         <div ref={keywordRef}>
-          <Label>Keywords (for SEO & AI Discovery)</Label>
+          <div className="flex items-center justify-between">
+            <Label>Keywords (for SEO & AI Discovery)</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={suggestingCategories || (!form.name && !form.company_name)}
+              onClick={async () => {
+                setSuggestingCategories(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke("suggest-categories", {
+                    body: { name: form.name, description: form.description, price: form.price },
+                  });
+                  if (error) throw error;
+                  const suggested = (data?.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean);
+                  if (suggested.length) {
+                    setForm((prev: any) => ({
+                      ...prev,
+                      keywords: [...new Set([...prev.keywords, ...suggested])],
+                    }));
+                    toast.success(`Added ${suggested.length} keyword suggestions`);
+                  } else {
+                    toast.info("No keyword suggestions returned");
+                  }
+                } catch (err) {
+                  console.error("Keyword suggestion failed:", err);
+                  toast.error("Keyword suggestion failed");
+                } finally {
+                  setSuggestingCategories(false);
+                }
+              }}
+              className="gap-1 text-xs"
+            >
+              {suggestingCategories ? "Suggesting..." : "✨ Suggest Keywords"}
+            </Button>
+          </div>
           <div className="mt-2 flex flex-wrap gap-1.5 min-h-[32px] rounded-lg border p-2">
             {form.keywords.map((kw: string) => (
               <span key={kw} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">
@@ -669,7 +704,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               </div>
             )}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Press Enter to add custom keywords. Not visible to shoppers.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Press Enter to add custom keywords. Use ✨ Suggest to auto-generate from product name & description.</p>
         </div>
 
         {/* Specifications */}
