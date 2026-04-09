@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -162,60 +162,6 @@ export default function ProductList({ onEdit }: Props) {
   };
 
   const [checkingLinks, setCheckingLinks] = useState(false);
-
-  const { data: lastBatchCheck } = useQuery({
-    queryKey: ["last-batch-check"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("last_checked_at")
-        .not("last_checked_at", "is", null)
-        .order("last_checked_at", { ascending: false })
-        .limit(1);
-      return data?.[0]?.last_checked_at ?? null;
-    },
-  });
-
-  const [cronActive, setCronActive] = useState(true);
-  const [togglingCron, setTogglingCron] = useState(false);
-
-  useQuery({
-    queryKey: ["cron-job-status"],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("toggle-cron-job", { method: "GET" });
-      if (error) throw error;
-      setCronActive(data.active);
-      return data.active;
-    },
-  });
-
-  const [showCronConfirm, setShowCronConfirm] = useState(false);
-
-  const handleToggleCron = async (enable: boolean) => {
-    if (!enable) {
-      setShowCronConfirm(true);
-      return;
-    }
-    await executeCronToggle(true);
-  };
-
-  const executeCronToggle = async (enable: boolean) => {
-    setShowCronConfirm(false);
-    setTogglingCron(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("toggle-cron-job", {
-        body: { enable },
-      });
-      if (error) throw error;
-      const isActive = data?.active ?? enable;
-      setCronActive(isActive);
-      toast.success(`Batch link checker ${isActive ? "enabled" : "disabled"}`);
-    } catch (err: any) {
-      toast.error("Failed to toggle: " + err.message);
-    } finally {
-      setTogglingCron(false);
-    }
-  };
 
   const handleCheckLinks = async () => {
     setCheckingLinks(true);
@@ -437,43 +383,6 @@ export default function ProductList({ onEdit }: Props) {
         )}
       </div>
 
-      {/* Background job indicator */}
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-3.5 w-3.5" />
-          <span>
-            Automated link check (every 6h):{" "}
-            {lastBatchCheck
-              ? <>Last run <strong>{format(new Date(lastBatchCheck), "MMM d, yyyy h:mm a")}</strong></>
-              : "No checks recorded yet"}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Switch
-            checked={cronActive}
-            onCheckedChange={handleToggleCron}
-            disabled={togglingCron}
-            className="scale-75"
-          />
-          <span className={cronActive ? "text-green-600" : "text-muted-foreground"}>
-            {togglingCron ? "Updating…" : cronActive ? "Enabled" : "Disabled"}
-          </span>
-        </div>
-        <AlertDialog open={showCronConfirm} onOpenChange={setShowCronConfirm}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Disable automated link checker?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will stop the background job that checks product links every 6 hours. Broken links won't be detected automatically until you re-enable it.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => executeCronToggle(false)}>Disable</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
 
       {selectedIds.size > 0 && (
         <div className="flex items-center gap-3">
