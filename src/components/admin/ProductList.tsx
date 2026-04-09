@@ -71,7 +71,7 @@ export default function ProductList({ onEdit }: Props) {
   const [filterError, setFilterError] = useState("all");
   const [pageSize, setPageSize] = useState(100);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortColumn, setSortColumn] = useState<"views" | "clicks" | null>(null);
+  const [sortColumn, setSortColumn] = useState<"views" | "clicks" | "updated" | null>("updated");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
@@ -239,7 +239,7 @@ export default function ProductList({ onEdit }: Props) {
       setCheckingLinks(false);
     }
   };
-  const toggleSort = (col: "views" | "clicks") => {
+  const toggleSort = (col: "views" | "clicks" | "updated") => {
     if (sortColumn === col) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
@@ -276,7 +276,13 @@ export default function ProductList({ onEdit }: Props) {
 
   // Sort by views/clicks if active
   const sorted = [...filtered];
-  if (sortColumn) {
+  if (sortColumn === "updated") {
+    sorted.sort((a, b) => {
+      const aTime = new Date(a.updated_at).getTime();
+      const bTime = new Date(b.updated_at).getTime();
+      return sortDir === "asc" ? aTime - bTime : bTime - aTime;
+    });
+  } else if (sortColumn) {
     sorted.sort((a, b) => {
       const countsMap = sortColumn === "views" ? viewCounts : clickCounts;
       const aVal = countsMap[a.id] || 0;
@@ -525,6 +531,11 @@ export default function ProductList({ onEdit }: Props) {
                   Clicks {sortColumn === "clicks" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                 </button>
               </th>
+              <th className="px-4 py-3 font-medium">
+                <button onClick={() => toggleSort("updated")} className="inline-flex items-center gap-1 hover:text-primary">
+                  Last Updated {sortColumn === "updated" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                </button>
+              </th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Error</th>
               <th className="px-4 py-3 font-medium">Actions</th>
@@ -577,6 +588,9 @@ export default function ProductList({ onEdit }: Props) {
                 </td>
                 <td className="px-4 py-3 text-center font-medium">{viewCounts[p.id] || 0}</td>
                 <td className="px-4 py-3 text-center font-medium">{clickCounts[p.id] || 0}</td>
+                <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                  {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
+                </td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={p.is_active}
@@ -620,7 +634,7 @@ export default function ProductList({ onEdit }: Props) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={10} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={11} className="px-4 py-10 text-center text-muted-foreground">
                   No products match filters
                 </td>
               </tr>
