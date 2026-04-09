@@ -276,7 +276,13 @@ export default function ProductList({ onEdit }: Props) {
 
   // Sort by views/clicks if active
   const sorted = [...filtered];
-  if (sortColumn) {
+  if (sortColumn === "updated") {
+    sorted.sort((a, b) => {
+      const aTime = new Date(a.updated_at).getTime();
+      const bTime = new Date(b.updated_at).getTime();
+      return sortDir === "asc" ? aTime - bTime : bTime - aTime;
+    });
+  } else if (sortColumn) {
     sorted.sort((a, b) => {
       const countsMap = sortColumn === "views" ? viewCounts : clickCounts;
       const aVal = countsMap[a.id] || 0;
