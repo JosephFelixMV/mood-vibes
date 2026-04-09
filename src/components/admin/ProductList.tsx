@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, FilterX, Info } from "lucide-react";
+import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, FilterX, Info, Search } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -76,6 +76,7 @@ export default function ProductList({ onEdit }: Props) {
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-products"],
@@ -197,6 +198,14 @@ export default function ProductList({ onEdit }: Props) {
   };
 
   const filtered = products.filter((p) => {
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchName = p.name.toLowerCase().includes(q);
+      const matchCompany = (p.company_name || "").toLowerCase().includes(q);
+      const matchCategory = p.category.toLowerCase().includes(q);
+      const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
+      if (!matchName && !matchCompany && !matchCategory && !matchVibe) return false;
+    }
     if (filterCategory !== "all") {
       const cats = p.category.split(",").map((c) => c.trim());
       if (!cats.includes(filterCategory)) return false;
@@ -253,7 +262,16 @@ export default function ProductList({ onEdit }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Filters + Actions */}
+      {/* Search + Filters + Actions */}
+      <div className="relative w-full max-w-sm mb-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search products, brands, categories…"
+          value={searchQuery}
+          onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+          className="pl-9 h-9"
+        />
+      </div>
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1.5">
           <Button
@@ -368,6 +386,7 @@ export default function ProductList({ onEdit }: Props) {
             size="sm"
             className="gap-1.5 text-xs"
             onClick={() => {
+              setSearchQuery("");
               setFilterCategory("all");
               setFilterVibe("all");
               setFilterStatus("all");
