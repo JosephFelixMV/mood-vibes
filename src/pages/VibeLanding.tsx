@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Sparkles } from "lucide-react";
 import { getProducts, getCategories, getRandomProduct } from "@/lib/supabase-queries";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSEO } from "@/hooks/useSEO";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
@@ -79,7 +80,7 @@ export default function VibeLanding() {
     <div className="container py-12">
       <div className="mb-4">
         <h1 className="mb-2 flex items-center gap-3 font-heading text-3xl font-bold tracking-tight md:text-4xl">
-          {vibe?.icon && <span className="text-4xl">{vibe.icon}</span>}
+          {vibe?.icon && <CategoryIcon category={vibe} emojiClassName="text-4xl" imgClassName="h-10 w-10 rounded object-cover" />}
           {vibeName}
         </h1>
         {vibe?.description && (
