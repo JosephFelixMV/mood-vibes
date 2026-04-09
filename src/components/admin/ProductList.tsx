@@ -239,7 +239,7 @@ export default function ProductList({ onEdit }: Props) {
       setCheckingLinks(false);
     }
   };
-  const toggleSort = (col: "views" | "clicks") => {
+  const toggleSort = (col: "views" | "clicks" | "updated") => {
     if (sortColumn === col) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
