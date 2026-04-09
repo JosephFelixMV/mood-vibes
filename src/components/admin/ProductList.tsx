@@ -531,11 +531,6 @@ export default function ProductList({ onEdit }: Props) {
                   Clicks {sortColumn === "clicks" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                 </button>
               </th>
-              <th className="px-4 py-3 font-medium">
-                <button onClick={() => toggleSort("updated")} className="inline-flex items-center gap-1 hover:text-primary">
-                  Last Updated {sortColumn === "updated" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-                </button>
-              </th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Error</th>
               <th className="px-4 py-3 font-medium">Actions</th>
