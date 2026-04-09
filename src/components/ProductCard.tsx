@@ -84,8 +84,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
           </div>
         )}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1">
-          {product.category.split(",").map((c) => {
-            const trimmed = c.trim();
+          {[...new Set(product.category.split(",").map(c => c.trim()).filter(Boolean))].map((trimmed) => {
             const cat = categorySlugMap[trimmed];
             const to = cat ? (cat.type === "vibe" ? `/vibes/${cat.slug}` : `/category/${cat.slug}`) : "#";
             return (

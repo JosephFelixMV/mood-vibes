@@ -179,8 +179,7 @@ export default function ProductDetail() {
           {/* Product info */}
           <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
             <div className="flex flex-wrap gap-2">
-              {product.category.split(",").map((c) => {
-                const trimmed = c.trim();
+              {[...new Set(product.category.split(",").map(c => c.trim()).filter(Boolean))].map((trimmed) => {
                 const cat = categorySlugMap[trimmed];
                 const to = cat ? (cat.type === "vibe" ? `/vibes/${cat.slug}` : `/category/${cat.slug}`) : "#";
                 return (
