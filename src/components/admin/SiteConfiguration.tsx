@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Save, Loader2, ExternalLink, BarChart3, MousePointer, Search, Globe, FileText, Shield } from "lucide-react";
 import { toast } from "sonner";
+import CategoryVibeManager from "./CategoryVibeManager";
 
 interface ConfigItem {
   id: string;
