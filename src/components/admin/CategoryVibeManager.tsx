@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -15,20 +14,22 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, Loader2, Layers, Sparkles } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Layers, Sparkles, Upload, X, ImageIcon, Info } from "lucide-react";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Category } from "@/lib/supabase-queries";
 
 interface CategoryForm {
   name: string;
   slug: string;
   icon: string;
+  icon_url: string;
   description: string;
   parent_slug: string;
   type: "core" | "vibe";
 }
 
-const emptyForm: CategoryForm = { name: "", slug: "", icon: "📦", description: "", parent_slug: "", type: "core" };
+const emptyForm: CategoryForm = { name: "", slug: "", icon: "📦", icon_url: "", description: "", parent_slug: "", type: "core" };
 
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -41,6 +42,8 @@ export default function CategoryVibeManager() {
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<CategoryForm>(emptyForm);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ["categories-all"],
@@ -55,12 +58,47 @@ export default function CategoryVibeManager() {
   const vibeCategories = categories.filter((c) => c.type === "vibe");
   const parents = coreCategories.filter((c) => !c.parent_slug);
 
+  const handleIconUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("category-icons")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("category-icons")
+        .getPublicUrl(fileName);
+
+      setForm((p) => ({ ...p, icon_url: urlData.publicUrl }));
+      toast.success("Icon uploaded");
+    } catch (err: any) {
+      toast.error("Upload failed: " + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const saveMut = useMutation({
     mutationFn: async (data: CategoryForm & { id?: string }) => {
       const payload = {
         name: data.name.trim(),
         slug: data.slug || slugify(data.name),
         icon: data.icon || "📦",
+        icon_url: data.icon_url || null,
         description: data.description || null,
         parent_slug: data.type === "core" && data.parent_slug ? data.parent_slug : null,
         type: data.type,
@@ -110,6 +148,7 @@ export default function CategoryVibeManager() {
       name: cat.name,
       slug: cat.slug,
       icon: cat.icon,
+      icon_url: (cat as any).icon_url || "",
       description: cat.description || "",
       parent_slug: cat.parent_slug || "",
       type: cat.type as "core" | "vibe",
@@ -122,12 +161,20 @@ export default function CategoryVibeManager() {
     saveMut.mutate({ ...form, id: editingId || undefined });
   };
 
+  const renderCategoryIcon = (cat: Category) => {
+    const iconUrl = (cat as any).icon_url;
+    if (iconUrl) {
+      return <img src={iconUrl} alt={cat.name} className="h-6 w-6 rounded object-cover" />;
+    }
+    return <span className="text-xl">{cat.icon}</span>;
+  };
+
   const renderCategoryRow = (cat: Category, indent = false) => (
     <div
       key={cat.id}
       className={`flex items-center gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-accent/30 ${indent ? "ml-8" : ""}`}
     >
-      <span className="text-xl">{cat.icon}</span>
+      {renderCategoryIcon(cat)}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="font-medium truncate">{cat.name}</span>
@@ -190,7 +237,6 @@ export default function CategoryVibeManager() {
                 </div>
               );
             })}
-            {/* Orphan subcategories (parent_slug set but parent not found) */}
             {coreCategories
               .filter((c) => c.parent_slug && !parents.find((p) => p.slug === c.parent_slug))
               .map((c) => renderCategoryRow(c))}
@@ -214,31 +260,101 @@ export default function CategoryVibeManager() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-[60px_1fr] gap-3">
-              <div className="space-y-1.5">
+            {/* Icon section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
                 <label className="text-xs font-medium">Icon</label>
-                <Input
-                  value={form.icon}
-                  onChange={(e) => setForm((p) => ({ ...p, icon: e.target.value }))}
-                  className="text-center text-lg"
-                  maxLength={4}
-                />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-[220px]">
+                      <p className="text-xs">Use an emoji or upload an image. Recommended: <strong>128×128px</strong> (square, PNG or SVG). Max 2MB.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium">Name *</label>
-                <Input
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm((p) => ({
-                      ...p,
-                      name: e.target.value,
-                      slug: editingId ? p.slug : slugify(e.target.value),
-                    }))
-                  }
-                  placeholder="e.g. Kitchen & Dining"
-                />
+
+              <div className="flex items-start gap-3">
+                {/* Emoji input */}
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-foreground">Emoji</label>
+                  <Input
+                    value={form.icon}
+                    onChange={(e) => setForm((p) => ({ ...p, icon: e.target.value }))}
+                    className="w-14 text-center text-lg"
+                    maxLength={4}
+                  />
+                </div>
+
+                <div className="text-xs text-muted-foreground pt-7">or</div>
+
+                {/* Image upload */}
+                <div className="flex-1 space-y-1">
+                  <label className="text-[11px] text-muted-foreground">Upload image</label>
+                  {form.icon_url ? (
+                    <div className="flex items-center gap-2">
+                      <img src={form.icon_url} alt="Icon" className="h-10 w-10 rounded border object-cover" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive"
+                        onClick={() => setForm((p) => ({ ...p, icon_url: "" }))}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 w-full"
+                      disabled={uploading}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                      {uploading ? "Uploading…" : "Choose file"}
+                    </Button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleIconUpload(file);
+                      e.target.value = "";
+                    }}
+                  />
+                  <p className="text-[11px] text-muted-foreground">128×128px recommended · PNG or SVG · Max 2MB</p>
+                </div>
               </div>
             </div>
+
+            {/* Name */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium">Name *</label>
+              <Input
+                value={form.name}
+                onChange={(e) =>
+                  setForm((p) => ({
+                    ...p,
+                    name: e.target.value,
+                    slug: editingId ? p.slug : slugify(e.target.value),
+                  }))
+                }
+                placeholder="e.g. Kitchen & Dining"
+              />
+            </div>
+
             <div className="space-y-1.5">
               <label className="text-xs font-medium">Slug</label>
               <Input
