@@ -386,6 +386,7 @@ export default function ProductList({ onEdit }: Props) {
             size="sm"
             className="gap-1.5 text-xs"
             onClick={() => {
+              setSearchQuery("");
               setFilterCategory("all");
               setFilterVibe("all");
               setFilterStatus("all");
