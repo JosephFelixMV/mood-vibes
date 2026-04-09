@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getCategories, getProductCountByVibe } from "@/lib/supabase-queries";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -41,7 +42,7 @@ export default function Vibes() {
               to={`/vibes/${vibe.slug}`}
               className="group flex items-start gap-4 rounded-2xl border bg-card p-6 transition-all hover:border-accent/30 hover:shadow-md"
             >
-              <span className="text-3xl">{vibe.icon}</span>
+              <CategoryIcon category={vibe} emojiClassName="text-3xl" imgClassName="h-8 w-8 rounded object-cover" />
               <div className="flex-1">
                 <span className="font-heading text-lg font-semibold group-hover:text-accent">
                   {vibe.name}
