@@ -591,9 +591,6 @@ export default function ProductList({ onEdit }: Props) {
                 </td>
                 <td className="px-4 py-3 text-center font-medium">{viewCounts[p.id] || 0}</td>
                 <td className="px-4 py-3 text-center font-medium">{clickCounts[p.id] || 0}</td>
-                <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                  {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
-                </td>
                 <td className="px-4 py-3">
                   <Switch
                     checked={p.is_active}
