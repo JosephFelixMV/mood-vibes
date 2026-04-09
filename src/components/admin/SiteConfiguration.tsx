@@ -162,6 +162,9 @@ export default function SiteConfiguration() {
         </div>
       )}
 
+      {/* Category & Vibe Manager */}
+      <CategoryVibeManager />
+
       {/* Config sections */}
       {CONFIG_SECTIONS.map((section) => (
         <Card key={section.title}>
