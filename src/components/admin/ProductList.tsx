@@ -561,7 +561,10 @@ export default function ProductList({ onEdit }: Props) {
                       <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
                     )}
                     <div className="text-[11px] text-muted-foreground">
-                      {format(new Date(p.date_added), "MM/dd/yyyy")}
+                      Added {format(new Date(p.date_added), "MM/dd/yyyy")}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      Updated {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
                     </div>
                   </div>
                 </td>
