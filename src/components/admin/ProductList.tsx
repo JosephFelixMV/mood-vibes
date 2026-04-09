@@ -200,14 +200,16 @@ export default function ProductList({ onEdit }: Props) {
   };
 
   const executeCronToggle = async (enable: boolean) => {
+    setShowCronConfirm(false);
     setTogglingCron(true);
     try {
       const { data, error } = await supabase.functions.invoke("toggle-cron-job", {
         body: { enable },
       });
       if (error) throw error;
-      setCronActive(data.active);
-      toast.success(`Batch link checker ${data.active ? "enabled" : "disabled"}`);
+      const isActive = data?.active ?? enable;
+      setCronActive(isActive);
+      toast.success(`Batch link checker ${isActive ? "enabled" : "disabled"}`);
     } catch (err: any) {
       toast.error("Failed to toggle: " + err.message);
     } finally {
