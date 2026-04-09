@@ -517,7 +517,11 @@ export default function ProductList({ onEdit }: Props) {
                   onCheckedChange={toggleSelectAll}
                 />
               </th>
-              <th className="px-4 py-3 font-medium">Product</th>
+              <th className="px-4 py-3 font-medium">
+                <button onClick={() => toggleSort("updated")} className="inline-flex items-center gap-1 hover:text-primary">
+                  Product {sortColumn === "updated" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                </button>
+              </th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
               <th className="px-4 py-3 font-medium">Price</th>
