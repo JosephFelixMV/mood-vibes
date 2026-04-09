@@ -5,6 +5,7 @@ import { getCategories, getProductCountByCategory } from "@/lib/supabase-queries
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/useSEO";
 import type { Category } from "@/lib/supabase-queries";
+import { CategoryIcon } from "@/components/CategoryIcon";
 
 export default function Categories() {
   useSEO({
@@ -43,7 +44,7 @@ export default function Categories() {
               className="rounded-2xl border bg-card p-6"
             >
               <Link to={`/category/${parent.slug}`} className="mb-4 flex items-start gap-3 transition-colors hover:text-primary">
-                <span className="text-3xl">{parent.icon}</span>
+                <CategoryIcon category={parent} emojiClassName="text-3xl" imgClassName="h-8 w-8 rounded object-cover" />
                 <div className="flex-1">
                   <h2 className="font-heading text-lg font-semibold">{parent.name}</h2>
                   {parent.description && (
@@ -59,7 +60,7 @@ export default function Categories() {
                       to={`/category/${sub.slug}`}
                       className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
                     >
-                      <span>{sub.icon}</span>
+                      <CategoryIcon category={sub} emojiClassName="text-sm" imgClassName="h-4 w-4 rounded object-cover" />
                       {sub.name}
                       <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                         {counts[sub.name] ?? 0}
