@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Save, Loader2, ExternalLink, BarChart3, MousePointer, Search, Globe, FileText, Shield } from "lucide-react";
 import { toast } from "sonner";
 import CategoryVibeManager from "./CategoryVibeManager";
+import AutomatedLinkCheckConfig from "./AutomatedLinkCheckConfig";
 
 interface ConfigItem {
   id: string;
@@ -164,6 +165,9 @@ export default function SiteConfiguration() {
 
       {/* Category & Vibe Manager */}
       <CategoryVibeManager />
+
+      {/* Automated Link Check */}
+      <AutomatedLinkCheckConfig />
 
       {/* Config sections */}
       {CONFIG_SECTIONS.map((section) => (
