@@ -8,7 +8,7 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Plus, Upload, Download, Info } from "lucide-react";
+import { X, Plus, Upload, Download, Info, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
@@ -742,10 +742,17 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
           <Label>{form.is_active ? "Active" : "Draft"}</Label>
         </div>
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-wrap gap-3 pt-2">
           <Button type="submit" disabled={mutation.isPending} className="rounded-full">
             {editId ? "Update Product" : "Add Product"}
           </Button>
+          {editId && form.is_active && (
+            <Button type="button" variant="outline" className="gap-1.5 rounded-full" asChild>
+              <a href={`/product/${editId}`} target="_blank" rel="noopener noreferrer">
+                View Product Page <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </Button>
+          )}
           {!editId && (
             <Button type="button" variant="outline" onClick={() => { setForm(empty); if (savedState) savedState.current = null; }} className="rounded-full">
               Clear Fields
