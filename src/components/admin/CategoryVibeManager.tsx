@@ -14,7 +14,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, Loader2, Layers, Sparkles, Upload, X, ImageIcon, Info } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Layers, Sparkles, Upload, X, ImageIcon, Info, Heart } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Category } from "@/lib/supabase-queries";
@@ -26,7 +26,7 @@ interface CategoryForm {
   icon_url: string;
   description: string;
   parent_slug: string;
-  type: "core" | "vibe";
+  type: "core" | "vibe" | "mood";
 }
 
 const emptyForm: CategoryForm = { name: "", slug: "", icon: "📦", icon_url: "", description: "", parent_slug: "", type: "core" };
@@ -37,7 +37,7 @@ function slugify(text: string) {
 
 export default function CategoryVibeManager() {
   const qc = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"core" | "vibe">("core");
+  const [activeTab, setActiveTab] = useState<"core" | "vibe" | "mood">("core");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -56,6 +56,7 @@ export default function CategoryVibeManager() {
 
   const coreCategories = categories.filter((c) => c.type === "core");
   const vibeCategories = categories.filter((c) => c.type === "vibe");
+  const moodCategories = categories.filter((c) => c.type === "mood");
   const parents = coreCategories.filter((c) => !c.parent_slug);
 
   const handleIconUpload = async (file: File) => {
@@ -136,7 +137,7 @@ export default function CategoryVibeManager() {
     onError: (err: any) => toast.error("Failed: " + err.message),
   });
 
-  const openAdd = (type: "core" | "vibe") => {
+  const openAdd = (type: "core" | "vibe" | "mood") => {
     setEditingId(null);
     setForm({ ...emptyForm, type });
     setDialogOpen(true);
@@ -151,7 +152,7 @@ export default function CategoryVibeManager() {
       icon_url: (cat as any).icon_url || "",
       description: cat.description || "",
       parent_slug: cat.parent_slug || "",
-      type: cat.type as "core" | "vibe",
+      type: cat.type as "core" | "vibe" | "mood",
     });
     setDialogOpen(true);
   };
@@ -198,6 +199,12 @@ export default function CategoryVibeManager() {
     </div>
   );
 
+  const getTabLabel = () => {
+    if (activeTab === "core") return "Category";
+    if (activeTab === "vibe") return "Vibe";
+    return "Mood";
+  };
+
   if (isLoading) {
     return <div className="py-10 text-center text-muted-foreground">Loading categories…</div>;
   }
@@ -207,23 +214,26 @@ export default function CategoryVibeManager() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Layers className="h-5 w-5 text-primary" />
-          Categories & Vibes
+          Categories, Vibes & Moods
         </CardTitle>
-        <CardDescription>Manage your product taxonomy — core lifestyle categories and vibe collections.</CardDescription>
+        <CardDescription>Manage your product taxonomy — core categories, vibe collections, and mood tags.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "core" | "vibe")}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "core" | "vibe" | "mood")}>
           <div className="flex items-center justify-between mb-4">
             <TabsList>
               <TabsTrigger value="core" className="gap-1.5">
-                <Layers className="h-3.5 w-3.5" /> Core Categories ({coreCategories.length})
+                <Layers className="h-3.5 w-3.5" /> Categories ({coreCategories.length})
               </TabsTrigger>
               <TabsTrigger value="vibe" className="gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" /> Vibes ({vibeCategories.length})
               </TabsTrigger>
+              <TabsTrigger value="mood" className="gap-1.5">
+                <Heart className="h-3.5 w-3.5" /> Moods ({moodCategories.length})
+              </TabsTrigger>
             </TabsList>
             <Button size="sm" className="gap-1.5" onClick={() => openAdd(activeTab)}>
-              <Plus className="h-4 w-4" /> Add {activeTab === "core" ? "Category" : "Vibe"}
+              <Plus className="h-4 w-4" /> Add {getTabLabel()}
             </Button>
           </div>
 
@@ -245,6 +255,10 @@ export default function CategoryVibeManager() {
           <TabsContent value="vibe" className="space-y-1.5 mt-0">
             {vibeCategories.map((v) => renderCategoryRow(v))}
           </TabsContent>
+
+          <TabsContent value="mood" className="space-y-1.5 mt-0">
+            {moodCategories.map((m) => renderCategoryRow(m))}
+          </TabsContent>
         </Tabs>
       </CardContent>
 
@@ -252,11 +266,13 @@ export default function CategoryVibeManager() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingId ? "Edit" : "Add"} {form.type === "core" ? "Category" : "Vibe"}</DialogTitle>
+            <DialogTitle>{editingId ? "Edit" : "Add"} {form.type === "core" ? "Category" : form.type === "vibe" ? "Vibe" : "Mood"}</DialogTitle>
             <DialogDescription>
               {form.type === "core"
                 ? "Core lifestyle categories organize products by function."
-                : "Vibes are aesthetic collections that group products by mood."}
+                : form.type === "vibe"
+                  ? "Vibes are aesthetic collections that group products by style."
+                  : "Moods describe the feeling or emotion a product evokes. Include anchor keywords in the description to help AI categorization."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -277,7 +293,6 @@ export default function CategoryVibeManager() {
               </div>
 
               <div className="flex items-start gap-3">
-                {/* Emoji input */}
                 <div className="space-y-1">
                   <label className="text-[11px] text-muted-foreground">Emoji</label>
                   <Input
@@ -290,7 +305,6 @@ export default function CategoryVibeManager() {
 
                 <div className="text-xs text-muted-foreground pt-7">or</div>
 
-                {/* Image upload */}
                 <div className="flex-1 space-y-1">
                   <label className="text-[11px] text-muted-foreground">Upload image</label>
                   {form.icon_url ? (
@@ -351,7 +365,7 @@ export default function CategoryVibeManager() {
                     slug: editingId ? p.slug : slugify(e.target.value),
                   }))
                 }
-                placeholder="e.g. Kitchen & Dining"
+                placeholder={form.type === "mood" ? "e.g. Cozy" : "e.g. Kitchen & Dining"}
               />
             </div>
 
@@ -365,13 +379,22 @@ export default function CategoryVibeManager() {
               <p className="text-[11px] text-muted-foreground">URL path segment — auto-generated if left empty.</p>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">Description</label>
+              <label className="text-xs font-medium">
+                Description {form.type === "mood" && <span className="text-muted-foreground font-normal">(include anchor keywords for AI)</span>}
+              </label>
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-                placeholder="Short description for landing pages…"
-                rows={2}
+                placeholder={form.type === "mood"
+                  ? "e.g. Warm, soft, comfort-seeking. Blankets, candles, slippers, mugs, loungewear"
+                  : "Short description for landing pages…"}
+                rows={form.type === "mood" ? 3 : 2}
               />
+              {form.type === "mood" && (
+                <p className="text-[11px] text-muted-foreground">
+                  💡 Include product types and attributes as anchor keywords. These help the AI categorize products cheaply without extra API calls.
+                </p>
+              )}
             </div>
             {form.type === "core" && (
               <div className="space-y-1.5">

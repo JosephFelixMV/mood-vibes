@@ -65,7 +65,7 @@ export async function getProductImages(productId: string) {
   return data;
 }
 
-export async function getCategories(type?: "core" | "vibe") {
+export async function getCategories(type?: "core" | "vibe" | "mood") {
   let query = supabase.from("categories").select("*").order("name");
   if (type) {
     query = query.eq("type", type);

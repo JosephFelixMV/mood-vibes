@@ -3,7 +3,7 @@ import { useSEO } from "@/hooks/useSEO";
 export default function Disclosure() {
   useSEO({
     title: "Affiliate Disclosure",
-    description: "Affiliate and earnings disclosure for Surprise Shopper.",
+    description: "Affiliate and earnings disclosure for Mood & Vibes.",
   });
 
   return (
@@ -14,7 +14,7 @@ export default function Disclosure() {
 
       <div className="space-y-5 text-muted-foreground leading-relaxed">
         <p>
-          Surprise Shopper ("we," "us," or "our") is a participant in affiliate
+          Mood & Vibes ("we," "us," or "our") is a participant in affiliate
           marketing programs. When you click on product links on this website and
           make a purchase, we may receive a commission from the retailer or brand
           at no extra cost to you.
@@ -43,7 +43,7 @@ export default function Disclosure() {
           If you have any questions about our affiliate relationships, please
           contact us at{" "}
           <span className="font-medium text-foreground">
-            hello@surpriseshopper.com
+            hello@moodandvibes.com
           </span>
           .
         </p>

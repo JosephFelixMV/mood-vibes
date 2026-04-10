@@ -64,7 +64,7 @@ export default function ProductDetail() {
 
   useSEO({
     title: product?.name,
-    description: product?.description || `Check out ${product?.name} on Surprise Shopper.`,
+    description: product?.description || `Check out ${product?.name} on Mood & Vibes.`,
     image: product?.image_url || undefined,
     url: product ? `${window.location.origin}/product/${product.id}` : undefined,
     keywords: productKeywords.length > 0 ? productKeywords : undefined,
@@ -193,8 +193,18 @@ export default function ProductDetail() {
                 const cat = categorySlugMap[trimmed];
                 const to = cat ? `/vibes/${cat.slug}` : "#";
                 return (
-                  <Link key={trimmed} to={to}>
+                  <Link key={`vibe-${trimmed}`} to={to}>
                     <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">{trimmed}</Badge>
+                  </Link>
+                );
+              })}
+              {product.mood && product.mood.split(",").map((m) => {
+                const trimmed = m.trim();
+                const cat = categorySlugMap[trimmed];
+                const to = cat ? `/moods/${cat.slug}` : "#";
+                return (
+                  <Link key={`mood-${trimmed}`} to={to}>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-muted">{trimmed}</Badge>
                   </Link>
                 );
               })}

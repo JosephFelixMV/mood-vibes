@@ -68,6 +68,7 @@ interface Product {
   description: string | null;
   category: string;
   vibe_category: string | null;
+  mood: string | null;
   price: number;
   company_name: string | null;
 }
@@ -78,6 +79,7 @@ function keywordScore(product: Product, keywords: string[], productKeywords: str
     product.description || "",
     product.category,
     product.vibe_category || "",
+    product.mood || "",
     product.company_name || "",
     ...productKeywords,
   ].join(" ").toLowerCase();
@@ -207,7 +209,7 @@ Deno.serve(async (req) => {
     // Fetch all active products with their keywords
     const { data: allProducts, error: prodErr } = await supabase
       .from("products")
-      .select("id, name, description, category, vibe_category, price, company_name")
+      .select("id, name, description, category, vibe_category, mood, price, company_name")
       .eq("is_active", true);
 
     if (prodErr || !allProducts?.length) {
@@ -250,7 +252,7 @@ Deno.serve(async (req) => {
     const catalogText = candidates.map((p) => {
       const desc = (p.description || "").replace(/<[^>]*>/g, "").slice(0, 150);
       const kws = (keywordsByProduct[p.id] || []).join(", ");
-      return `ID:${p.id} | ${p.name} | $${p.price} | Cat:${p.category} | Vibe:${p.vibe_category || "none"} | Keys:${kws || "none"} | ${desc}`;
+      return `ID:${p.id} | ${p.name} | $${p.price} | Cat:${p.category} | Vibe:${p.vibe_category || "none"} | Mood:${p.mood || "none"} | Keys:${kws || "none"} | ${desc}`;
     }).join("\n");
 
     const systemPrompt = `You are a product matching assistant for a gift and lifestyle shopping site. Your ONLY job is to return a JSON array of product IDs from the catalog below that best match the user's request, ranked by relevance (best match first).

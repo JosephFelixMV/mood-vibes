@@ -296,6 +296,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           last_checked_at: string | null
+          mood: string | null
           name: string
           page_error: boolean
           page_error_detail: string | null
@@ -317,6 +318,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           last_checked_at?: string | null
+          mood?: string | null
           name: string
           page_error?: boolean
           page_error_detail?: string | null
@@ -338,6 +340,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           last_checked_at?: string | null
+          mood?: string | null
           name?: string
           page_error?: boolean
           page_error_detail?: string | null
