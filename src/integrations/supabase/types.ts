@@ -301,6 +301,7 @@ export type Database = {
           page_error: boolean
           page_error_detail: string | null
           price: number
+          regions: string[]
           source_url: string
           updated_at: string
           vibe_category: string | null
@@ -323,6 +324,7 @@ export type Database = {
           page_error?: boolean
           page_error_detail?: string | null
           price: number
+          regions?: string[]
           source_url?: string
           updated_at?: string
           vibe_category?: string | null
@@ -345,6 +347,7 @@ export type Database = {
           page_error?: boolean
           page_error_detail?: string | null
           price?: number
+          regions?: string[]
           source_url?: string
           updated_at?: string
           vibe_category?: string | null
