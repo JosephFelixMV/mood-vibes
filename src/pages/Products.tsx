@@ -45,7 +45,12 @@ export default function Products() {
     }),
   });
 
-  const regionProducts = filterByRegion(products, region).filter((p) => {
+  const regionFiltered = filterByRegion(products, region);
+  const availableBrands = useMemo(() =>
+    Array.from(new Set(regionFiltered.map((p) => p.company_name).filter(Boolean) as string[])).sort(),
+    [regionFiltered]
+  );
+  const regionProducts = regionFiltered.filter((p) => {
     if (!filterBrand) return true;
     return (p.company_name || "").toLowerCase() === filterBrand.toLowerCase();
   });
@@ -111,8 +116,8 @@ export default function Products() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Brands</SelectItem>
-            {brands.map((b) => (
-              <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+            {availableBrands.map((name) => (
+              <SelectItem key={name} value={name}>{name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
