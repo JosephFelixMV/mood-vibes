@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, FilterX, Info, Search, ExternalLink } from "lucide-react";
+import { MultiTagSelect } from "@/components/admin/MultiTagSelect";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -542,51 +543,25 @@ export default function ProductList({ onEdit }: Props) {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <Select
-                    value={p.category || ""}
-                    onValueChange={(v) => inlineUpdateMut.mutate({ id: p.id, field: "category", value: v })}
-                  >
-                    <SelectTrigger className="h-7 w-[160px] text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {coreCategories.filter((c) => !!c.parent_slug).map((c) => (
-                        <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MultiTagSelect
+                    value={p.category}
+                    options={coreCategories.filter((c) => !!c.parent_slug).map((c) => ({ name: c.name, icon: c.icon }))}
+                    onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "category", value: v })}
+                  />
                 </td>
                 <td className="px-4 py-3">
-                  <Select
-                    value={p.vibe_category || "none"}
-                    onValueChange={(v) => inlineUpdateMut.mutate({ id: p.id, field: "vibe_category", value: v === "none" ? "" : v })}
-                  >
-                    <SelectTrigger className="h-7 w-[160px] text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">—</SelectItem>
-                      {vibeCategories.map((c) => (
-                        <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MultiTagSelect
+                    value={p.vibe_category || ""}
+                    options={vibeCategories.map((c) => ({ name: c.name, icon: c.icon }))}
+                    onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "vibe_category", value: v })}
+                  />
                 </td>
                 <td className="px-4 py-3">
-                  <Select
-                    value={p.mood || "none"}
-                    onValueChange={(v) => inlineUpdateMut.mutate({ id: p.id, field: "mood", value: v === "none" ? "" : v })}
-                  >
-                    <SelectTrigger className="h-7 w-[160px] text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">—</SelectItem>
-                      {moodCategories.map((c) => (
-                        <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MultiTagSelect
+                    value={p.mood || ""}
+                    options={moodCategories.map((c) => ({ name: c.name, icon: c.icon }))}
+                    onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "mood", value: v })}
+                  />
                 </td>
                 <td className="px-4 py-3">
                   <InlineEdit
