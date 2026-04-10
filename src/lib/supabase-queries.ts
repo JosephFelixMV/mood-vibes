@@ -56,11 +56,14 @@ export async function getProducts(options?: {
   return data;
 }
 
-export async function getProduct(id: string) {
+export async function getProduct(idOrSlug: string) {
+  // Try slug first, fall back to id (UUID) for backwards compat
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
+  const column = isUuid ? "id" : "slug";
   const { data, error } = await supabase
     .from("products")
     .select("*")
-    .eq("id", id)
+    .eq(column, idOrSlug)
     .single();
   if (error) throw error;
   return data;

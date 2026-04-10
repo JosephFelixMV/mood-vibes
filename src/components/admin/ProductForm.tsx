@@ -310,6 +310,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         mood: form.mood || null,
         video_url: form.video_url || null,
         regions: form.regions.length > 0 ? form.regions : ["US"],
+        slug: generateSlug(form.name),
       };
 
       let productId = editId;
@@ -396,6 +397,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     is_active: form.is_active,
     video_url: form.video_url || null,
     regions: form.regions || ["US"],
+    slug: generateSlug(form.name || "product-name"),
     page_error: false,
     page_error_detail: null,
     check_failure_count: 0,

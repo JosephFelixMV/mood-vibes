@@ -82,6 +82,7 @@ export default function BulkUpload() {
             is_active: false, // Draft
             vibe_category: data.vibe_category || null,
             video_url: data.video_url || null,
+            slug: generateSlug(data.name.trim()),
           }])
           .select("id")
           .single();
