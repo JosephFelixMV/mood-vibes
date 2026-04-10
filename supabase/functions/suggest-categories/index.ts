@@ -7,12 +7,17 @@ const corsHeaders = {
 
 // Sub-categories (ones with parent_slug) from the categories table
 const CORE_CATEGORIES = [
-  "Beauty", "Automotive", "Cleaning", "Garden", "Health", "Office",
-  "Fashion", "Men's Fashion", "Women's Fashion", "Home", "Accessories",
-  "Handbags", "Jewelry", "Watches", "Men's Watches", "Women's Watches",
-  "Baby", "Family", "Kids", "Kitchen", "Books", "Fitness & Sports", "Gaming",
-  "Pets", "Toys", "Electronics", "Tech", "Hand Tools", "Power Tools",
-  "Tool Accessories", "Outdoors", "Travel"
+  "Automotive", "Cleaning", "Garden", "Health & Wellness", "Office & Stationery",
+  "Books", "Crafting & DIY", "Fitness & Sports", "Gaming", "Pets",
+  "Accessories", "Bags & Totes", "Jewelry", "Watches",
+  "Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear",
+  "Baby", "Kids", "Toys", "Parenting & Maternity",
+  "Cookware & Bakeware", "Coffee & Tea", "Dining & Entertaining", "Kitchen Storage",
+  "Décor & Artwork", "Textiles", "Candles & Home Fragrance", "Lighting", "Furniture",
+  "Audio & Visual", "Phones & Accessories", "Smart Home", "Tech & Gadgets",
+  "Skin Care", "Hair Care", "Makeup", "Body Care", "Fragrance", "Beauty Tools & Devices",
+  "Luggage & Bags", "Outdoor & Camping", "Travel Essentials",
+  "Hand Tools", "Power Tools", "Tool Accessories"
 ];
 
 const VIBE_CATEGORIES = [
