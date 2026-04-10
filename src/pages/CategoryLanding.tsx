@@ -60,7 +60,7 @@ export default function CategoryLanding() {
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const { trigger, cooldown } = useRateLimitedAction(2000);
 
-  const sortedProducts = [...products].sort((a, b) => {
+  const sortedProducts = [...healthyProducts].sort((a, b) => {
     const dateA = new Date(a.date_added).getTime();
     const dateB = new Date(b.date_added).getTime();
     return sort === "newest" ? dateB - dateA : dateA - dateB;
