@@ -68,6 +68,7 @@ export default function ProductList({ onEdit }: Props) {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterVibe, setFilterVibe] = useState("all");
   const [filterBrand, setFilterBrand] = useState("all");
+  const [filterMood, setFilterMood] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterError, setFilterError] = useState("all");
   const [pageSize, setPageSize] = useState(100);
@@ -94,6 +95,11 @@ export default function ProductList({ onEdit }: Props) {
     queryFn: () => getCategories("vibe"),
   });
 
+  const { data: moodCategories = [] } = useQuery({
+    queryKey: ["categories", "mood"],
+    queryFn: () => getCategories("mood"),
+  });
+
   const { data: clickCounts = {} } = useQuery({
     queryKey: ["product-click-counts"],
     queryFn: getProductClickCounts,
@@ -105,7 +111,7 @@ export default function ProductList({ onEdit }: Props) {
   });
 
   const inlineUpdateMut = useMutation({
-    mutationFn: async ({ id, field, value }: { id: string; field: "name" | "price"; value: string }) => {
+    mutationFn: async ({ id, field, value }: { id: string; field: "name" | "price" | "category" | "vibe_category" | "mood"; value: string }) => {
       const update = field === "price" ? { price: Number(value) } : { [field]: value };
       const { error } = await supabase.from("products").update(update).eq("id", id);
       if (error) throw error;
@@ -217,6 +223,10 @@ export default function ProductList({ onEdit }: Props) {
     if (filterVibe !== "all") {
       const vibes = (p.vibe_category || "").split(",").filter(Boolean);
       if (!vibes.includes(filterVibe)) return false;
+    }
+    if (filterMood !== "all") {
+      const moods = (p.mood || "").split(",").map((m) => m.trim()).filter(Boolean);
+      if (!moods.includes(filterMood)) return false;
     }
     if (filterStatus === "active" && !p.is_active) return false;
     if (filterStatus === "inactive" && p.is_active) return false;
@@ -335,6 +345,18 @@ export default function ProductList({ onEdit }: Props) {
           </SelectContent>
         </Select>
 
+        <Select value={filterMood} onValueChange={handleFilterChange(setFilterMood)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Mood" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Moods</SelectItem>
+            {moodCategories.map((c) => (
+              <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <Select value={filterStatus} onValueChange={handleFilterChange(setFilterStatus)}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Status" />
@@ -396,7 +418,7 @@ export default function ProductList({ onEdit }: Props) {
             Clear dates
           </Button>
         )}
-        {(filterCategory !== "all" || filterVibe !== "all" || filterBrand !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
+        {(filterCategory !== "all" || filterVibe !== "all" || filterMood !== "all" || filterBrand !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
           <Button
             variant="outline"
             size="sm"
@@ -405,6 +427,7 @@ export default function ProductList({ onEdit }: Props) {
               setSearchQuery("");
               setFilterCategory("all");
               setFilterVibe("all");
+              setFilterMood("all");
               setFilterBrand("all");
               setFilterStatus("all");
               setFilterError("all");
@@ -471,6 +494,7 @@ export default function ProductList({ onEdit }: Props) {
               </th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
+              <th className="px-4 py-3 font-medium">Mood</th>
               <th className="px-4 py-3 font-medium">Price</th>
               <th className="px-4 py-3 font-medium">
                 <button onClick={() => toggleSort("views")} className="inline-flex items-center gap-1 hover:text-primary">
@@ -518,18 +542,51 @@ export default function ProductList({ onEdit }: Props) {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <Badge variant="secondary">{p.category}</Badge>
+                  <Select
+                    value={p.category || ""}
+                    onValueChange={(v) => inlineUpdateMut.mutate({ id: p.id, field: "category", value: v })}
+                  >
+                    <SelectTrigger className="h-7 w-[160px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {coreCategories.filter((c) => !!c.parent_slug).map((c) => (
+                        <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </td>
                 <td className="px-4 py-3">
-                  {p.vibe_category ? (
-                    <div className="flex flex-wrap gap-1">
-                      {p.vibe_category.split(",").map((v: string) => (
-                        <Badge key={v} variant="outline" className="text-xs">{v.trim()}</Badge>
+                  <Select
+                    value={p.vibe_category || "none"}
+                    onValueChange={(v) => inlineUpdateMut.mutate({ id: p.id, field: "vibe_category", value: v === "none" ? "" : v })}
+                  >
+                    <SelectTrigger className="h-7 w-[160px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">—</SelectItem>
+                      {vibeCategories.map((c) => (
+                        <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
                       ))}
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
+                    </SelectContent>
+                  </Select>
+                </td>
+                <td className="px-4 py-3">
+                  <Select
+                    value={p.mood || "none"}
+                    onValueChange={(v) => inlineUpdateMut.mutate({ id: p.id, field: "mood", value: v === "none" ? "" : v })}
+                  >
+                    <SelectTrigger className="h-7 w-[160px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">—</SelectItem>
+                      {moodCategories.map((c) => (
+                        <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </td>
                 <td className="px-4 py-3">
                   <InlineEdit
@@ -583,7 +640,7 @@ export default function ProductList({ onEdit }: Props) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={10} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={11} className="px-4 py-10 text-center text-muted-foreground">
                   No products match filters
                 </td>
               </tr>
