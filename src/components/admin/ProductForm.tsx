@@ -587,8 +587,14 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               );
             })}
           </div>
+          {aiSuggestions && aiSuggestions.vibes.length > 0 && (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {aiSuggestions.vibes.map((v) => (
+                <span key={v} className="inline-flex items-center rounded-full bg-accent/50 px-2.5 py-0.5 text-xs font-medium text-accent-foreground">{v}</span>
+              ))}
+            </div>
+          )}
         </div>
-
         {/* Moods */}
         <div>
           <div className="flex items-center gap-2">
