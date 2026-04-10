@@ -67,6 +67,7 @@ export default function ProductList({ onEdit }: Props) {
   const qc = useQueryClient();
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterVibe, setFilterVibe] = useState("all");
+  const [filterBrand, setFilterBrand] = useState("all");
   const [filterMood, setFilterMood] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterError, setFilterError] = useState("all");
