@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { getProducts, getCategories, filterByRegion } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
@@ -21,16 +21,6 @@ export default function Products() {
   const { data: vibeCategories = [] } = useQuery({
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
-  });
-
-  const { data: brands = [] } = useQuery({
-    queryKey: ["brands"],
-    queryFn: async () => {
-      const { data, error } = await (await import("@/integrations/supabase/client")).supabase
-        .from("brands").select("id, name").eq("is_active", true).order("name");
-      if (error) throw error;
-      return data;
-    },
   });
 
   const [filterBrand, setFilterBrand] = useState("");
@@ -55,7 +45,12 @@ export default function Products() {
     }),
   });
 
-  const regionProducts = filterByRegion(products, region).filter((p) => {
+  const regionFiltered = filterByRegion(products, region);
+  const availableBrands = useMemo(() =>
+    Array.from(new Set(regionFiltered.map((p) => p.company_name).filter(Boolean) as string[])).sort(),
+    [regionFiltered]
+  );
+  const regionProducts = regionFiltered.filter((p) => {
     if (!filterBrand) return true;
     return (p.company_name || "").toLowerCase() === filterBrand.toLowerCase();
   });
@@ -121,8 +116,8 @@ export default function Products() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Brands</SelectItem>
-            {brands.map((b) => (
-              <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+            {availableBrands.map((name) => (
+              <SelectItem key={name} value={name}>{name}</SelectItem>
             ))}
           </SelectContent>
         </Select>

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Sparkles } from "lucide-react";
 import { getProducts, getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
@@ -11,7 +11,7 @@ import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
-import { supabase } from "@/integrations/supabase/client";
+
 
 export default function CategoryLanding() {
   const { region } = useRegion();
@@ -55,19 +55,14 @@ export default function CategoryLanding() {
     enabled: !!categoryName,
   });
 
-  const { data: brands = [] } = useQuery({
-    queryKey: ["brands"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("brands").select("id, name").eq("is_active", true).order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const [filterBrand, setFilterBrand] = useState("");
 
-  const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region).filter((p) => {
+  const regionFiltered = filterByRegion(products.filter((p) => !p.page_error), region);
+  const availableBrands = useMemo(() =>
+    Array.from(new Set(regionFiltered.map((p) => p.company_name).filter(Boolean) as string[])).sort(),
+    [regionFiltered]
+  );
+  const healthyProducts = regionFiltered.filter((p) => {
     if (!filterBrand) return true;
     return (p.company_name || "").toLowerCase() === filterBrand.toLowerCase();
   });
@@ -170,8 +165,8 @@ export default function CategoryLanding() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Brands</SelectItem>
-                {brands.map((b) => (
-                  <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+                {availableBrands.map((name) => (
+                  <SelectItem key={name} value={name}>{name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
