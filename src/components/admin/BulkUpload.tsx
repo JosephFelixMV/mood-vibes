@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Upload, FileUp, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { generateSlug } from "@/lib/slug-utils";
 
 interface UploadResult {
   fileName: string;
@@ -82,6 +83,7 @@ export default function BulkUpload() {
             is_active: false, // Draft
             vibe_category: data.vibe_category || null,
             video_url: data.video_url || null,
+            slug: generateSlug(data.name.trim()),
           }])
           .select("id")
           .single();

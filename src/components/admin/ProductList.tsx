@@ -503,7 +503,7 @@ export default function ProductList({ onEdit }: Props) {
                       onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "name", value: v })}
                       className="font-medium"
                     />
-                    <a href={`/product/${p.id}`} target="_blank" rel="noopener noreferrer" className="ml-1 inline-flex align-middle text-muted-foreground hover:text-primary" title="View product page">
+                    <a href={`/product/${(p as any).slug || p.id}`} target="_blank" rel="noopener noreferrer" className="ml-1 inline-flex align-middle text-muted-foreground hover:text-primary" title="View product page">
                       <ExternalLink className="h-3.5 w-3.5" />
                     </a>
                     {p.company_name && (
