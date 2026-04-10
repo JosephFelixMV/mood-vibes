@@ -114,12 +114,17 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Fetch all active products
+    const body = await req.json().catch(() => ({}));
+    const offset = body.offset || 0;
+    const limit = body.limit || 10;
+
+    // Fetch active products with pagination
     const { data: products, error: fetchError } = await supabase
       .from("products")
       .select("id, name, description, price, category, vibe_category, mood")
       .eq("is_active", true)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .range(offset, offset + limit - 1);
 
     if (fetchError) throw fetchError;
     if (!products || products.length === 0) {
