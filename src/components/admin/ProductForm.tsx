@@ -802,6 +802,33 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </div>
         </div>
 
+        {/* Region Availability */}
+        <div>
+          <Label>Region Availability</Label>
+          <div className="mt-2 flex flex-wrap gap-3 rounded-lg border p-3">
+            {AVAILABLE_REGIONS.map((r) => {
+              const checked = form.regions.includes(r.code);
+              return (
+                <label key={r.code} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...form.regions, r.code]
+                        : form.regions.filter((x: string) => x !== r.code);
+                      set("regions", next.length > 0 ? next : ["US"]);
+                    }}
+                    className="rounded"
+                  />
+                  {r.label}
+                </label>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Select regions where this product ships to. Default: US only.</p>
+        </div>
+
         <div className="flex items-center gap-3">
           <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
           <Label>{form.is_active ? "Active" : "Draft"}</Label>
