@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
 import Vibes from "./pages/Vibes";
+import Moods from "./pages/Moods";
+import MoodLanding from "./pages/MoodLanding";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Admin from "./pages/Admin";
@@ -37,6 +39,8 @@ const App = () => (
               <Route path="/categories" element={<Categories />} />
               <Route path="/vibes" element={<Vibes />} />
               <Route path="/vibes/:slug" element={<VibeLanding />} />
+              <Route path="/moods" element={<Moods />} />
+              <Route path="/moods/:slug" element={<MoodLanding />} />
               <Route path="/products" element={<Products />} />
               <Route path="/category/:slug" element={<CategoryLanding />} />
               <Route path="/product/:id" element={<ProductDetail />} />
