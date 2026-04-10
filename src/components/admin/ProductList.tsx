@@ -94,6 +94,11 @@ export default function ProductList({ onEdit }: Props) {
     queryFn: () => getCategories("vibe"),
   });
 
+  const { data: moodCategories = [] } = useQuery({
+    queryKey: ["categories", "mood"],
+    queryFn: () => getCategories("mood"),
+  });
+
   const { data: clickCounts = {} } = useQuery({
     queryKey: ["product-click-counts"],
     queryFn: getProductClickCounts,
