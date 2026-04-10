@@ -439,84 +439,23 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Input value={form.image_url} onChange={(e) => set("image_url", e.target.value)} placeholder="https://..." />
         </div>
 
-        {/* Manual Suggest Categories Button */}
-        <Button
-          type="button"
-          variant="outline"
-          disabled={suggestingCategories || !form.name}
-          onClick={() => suggestCategories(form.name, form.description || "", form.price)}
-          className="w-full"
-        >
-          {suggestingCategories ? (
-            <span className="animate-pulse">✨ Analyzing...</span>
-          ) : (
-            <>✨ Suggest Categories & Moods</>
-          )}
-        </Button>
-
-        {/* AI Category Suggestions Display */}
-        {(suggestingCategories || aiSuggestions) && (
+        {/* AI suggestions display - shown inline after suggest */}
+        {aiSuggestions && (
           <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
-            <p className="text-sm font-medium flex items-center gap-2">
-              ✨ AI Suggestions
-              {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse">analyzing...</span>}
-            </p>
-            {aiSuggestions && (
-              <>
-                {aiSuggestions.core.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Core Categories:</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {aiSuggestions.core.map((c) => (
-                        <span key={c} className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {aiSuggestions.vibes.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Vibes:</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {aiSuggestions.vibes.map((v) => (
-                        <span key={v} className="inline-flex items-center rounded-full bg-accent/50 px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
-                          {v}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {aiSuggestions.moods.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Moods:</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {aiSuggestions.moods.map((m) => (
-                        <span key={m} className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
-                          {m}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {aiSuggestions.keywords.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Keywords:</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {aiSuggestions.keywords.map((k) => (
-                        <span key={k} className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">
-                          {k}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">These have been auto-selected below. Adjust as needed.</p>
-              </>
+            <p className="text-sm font-medium flex items-center gap-2">✨ AI Suggestions Applied</p>
+            {aiSuggestions.keywords.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">Keywords:</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {aiSuggestions.keywords.map((k) => (
+                    <span key={k} className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">{k}</span>
+                  ))}
+                </div>
+              </div>
             )}
+            <p className="text-xs text-muted-foreground">Categories, vibes, moods, and keywords have been auto-selected. Adjust as needed.</p>
           </div>
         )}
-
         {/* Additional images */}
         <div>
           <div className="flex items-center justify-between">
