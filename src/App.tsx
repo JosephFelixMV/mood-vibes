@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { RegionProvider } from "@/contexts/RegionContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Index from "./pages/Index";
@@ -27,34 +28,36 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <div className="flex min-h-screen flex-col">
-          <AffiliateDisclosureBanner />
-          <Navbar />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/vibes" element={<Vibes />} />
-              <Route path="/vibes/:slug" element={<VibeLanding />} />
-              <Route path="/moods" element={<Moods />} />
-              <Route path="/moods/:slug" element={<MoodLanding />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/category/:slug" element={<CategoryLanding />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/discover" element={<Discover />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/disclosure" element={<Disclosure />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-          <CookieConsent />
-        </div>
-      </BrowserRouter>
+      <RegionProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <div className="flex min-h-screen flex-col">
+            <AffiliateDisclosureBanner />
+            <Navbar />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/vibes" element={<Vibes />} />
+                <Route path="/vibes/:slug" element={<VibeLanding />} />
+                <Route path="/moods" element={<Moods />} />
+                <Route path="/moods/:slug" element={<MoodLanding />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/category/:slug" element={<CategoryLanding />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/discover" element={<Discover />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/disclosure" element={<Disclosure />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+            <CookieConsent />
+          </div>
+        </BrowserRouter>
+      </RegionProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

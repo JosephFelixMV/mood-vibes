@@ -4,16 +4,18 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Shuffle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { getCategories, getRandomProduct } from "@/lib/supabase-queries";
+import { getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { useSEO } from "@/hooks/useSEO";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
+import { useRegion } from "@/contexts/RegionContext";
 import type { Product } from "@/lib/supabase-queries";
 
 export default function MoodLanding() {
   const { slug } = useParams<{ slug: string }>();
+  const { region } = useRegion();
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
 
   const { data: moods = [] } = useQuery({
@@ -44,19 +46,21 @@ export default function MoodLanding() {
     enabled: !!mood,
   });
 
+  const regionProducts = filterByRegion(products, region);
+
   const [randomPick, setRandomPick] = useState<Product | null>(null);
   const { trigger, cooldown } = useRateLimitedAction(2000);
   const hasAutoLoaded = useState(false);
 
   // Auto-load a random pick when products are available
-  if (products.length > 0 && !randomPick && !hasAutoLoaded[0]) {
+  if (regionProducts.length > 0 && !randomPick && !hasAutoLoaded[0]) {
     hasAutoLoaded[1](true);
-    setRandomPick(getRandomProduct(products));
+    setRandomPick(getRandomProduct(regionProducts));
   }
 
   const handleRandom = () => {
     trigger(() => {
-      const pick = getRandomProduct(products, randomPick?.id);
+      const pick = getRandomProduct(regionProducts, randomPick?.id);
       setRandomPick(pick);
     });
   };
@@ -81,7 +85,7 @@ export default function MoodLanding() {
       </div>
 
       {/* Random pick */}
-      {products.length > 0 && (
+      {regionProducts.length > 0 && (
         <div className="mb-10 rounded-2xl border bg-muted/30 p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-heading text-lg font-semibold">🎲 Discover Something Random</h2>
@@ -89,7 +93,7 @@ export default function MoodLanding() {
               variant="outline"
               size="sm"
               onClick={handleRandom}
-              disabled={cooldown || products.length === 0}
+              disabled={cooldown || regionProducts.length === 0}
               className="gap-1.5 rounded-full"
             >
               <Shuffle className="h-4 w-4" />
@@ -102,7 +106,7 @@ export default function MoodLanding() {
 
       {/* Sort */}
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="font-heading text-xl font-semibold">All {mood.name} Products</h2>
+        <h2 className="font-heading text-xl font-semibold">All {mood.name} Products ({regionProducts.length})</h2>
         <div className="flex gap-2">
           <Button
             variant={sort === "newest" ? "default" : "outline"}
@@ -127,11 +131,11 @@ export default function MoodLanding() {
         <div className="flex justify-center py-20">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
-      ) : products.length === 0 ? (
-        <p className="py-20 text-center text-muted-foreground">No products in this mood yet.</p>
+      ) : regionProducts.length === 0 ? (
+        <p className="py-20 text-center text-muted-foreground">No products available in your region for this mood.</p>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p, i) => (
+          {regionProducts.map((p, i) => (
             <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
               <ProductCard product={p} />
             </motion.div>

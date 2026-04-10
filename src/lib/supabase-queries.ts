@@ -1,8 +1,19 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import type { VisitorRegion } from "@/hooks/useVisitorRegion";
 
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
+
+/** Helper: filter products client-side by region availability */
+export function filterByRegion(products: Product[], region?: VisitorRegion): Product[] {
+  if (!region) return products;
+  return products.filter((p) => {
+    const regions = (p as any).regions as string[] | null;
+    if (!regions || regions.length === 0) return true; // no regions = show everywhere
+    return regions.includes(region) || regions.includes("Intl");
+  });
+}
 
 export async function getProducts(options?: {
   category?: string;
