@@ -1,6 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { Sparkles, Menu, X } from "lucide-react";
 import { useState } from "react";
+import RegionIndicator from "@/components/RegionIndicator";
+import { useRegion } from "@/contexts/RegionContext";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -14,6 +16,7 @@ const navLinks = [
 export default function Navbar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const { region, detected, isOverridden, setRegion, clearOverride } = useRegion();
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
@@ -38,6 +41,15 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
+          <div className="ml-2 border-l pl-2">
+            <RegionIndicator
+              region={region}
+              detected={detected}
+              isOverridden={isOverridden}
+              onSelect={setRegion}
+              onReset={clearOverride}
+            />
+          </div>
         </div>
 
         {/* Mobile toggle */}
@@ -66,6 +78,15 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
+          <div className="mt-2 border-t pt-2">
+            <RegionIndicator
+              region={region}
+              detected={detected}
+              isOverridden={isOverridden}
+              onSelect={setRegion}
+              onReset={clearOverride}
+            />
+          </div>
         </div>
       )}
     </nav>
