@@ -10,6 +10,7 @@ const navLinks = [
   { to: "/categories", label: "Categories" },
   { to: "/vibes", label: "Vibes" },
   { to: "/moods", label: "Moods" },
+  { to: "/brands", label: "Brands" },
   { to: "/products", label: "All Products" },
 ];
 

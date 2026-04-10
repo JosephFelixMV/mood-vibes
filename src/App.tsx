@@ -19,6 +19,7 @@ import Privacy from "./pages/Privacy";
 import CategoryLanding from "./pages/CategoryLanding";
 import Discover from "./pages/Discover";
 import VibeLanding from "./pages/VibeLanding";
+import Brands from "./pages/Brands";
 import NotFound from "./pages/NotFound";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import CookieConsent from "@/components/CookieConsent";
@@ -47,6 +48,7 @@ const App = () => (
                 <Route path="/category/:slug" element={<CategoryLanding />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/discover" element={<Discover />} />
+                <Route path="/brands" element={<Brands />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/disclosure" element={<Disclosure />} />
                 <Route path="/privacy" element={<Privacy />} />

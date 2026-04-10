@@ -1,0 +1,85 @@
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { ExternalLink } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useRegion } from "@/contexts/RegionContext";
+import { useSEO } from "@/hooks/useSEO";
+
+interface Brand {
+  id: string;
+  name: string;
+  affiliate_url: string;
+  regions: string[];
+  is_active: boolean;
+}
+
+export default function Brands() {
+  const { region } = useRegion();
+
+  useSEO({
+    title: "Our Brands",
+    description: "Browse our curated selection of affiliate brand partners on Mood & Vibes.",
+  });
+
+  const { data: brands = [], isLoading } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("brands")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as Brand[];
+    },
+  });
+
+  const filteredBrands = brands.filter((b) => {
+    const regions = b.regions || ["US"];
+    return regions.includes(region) || regions.includes("Intl");
+  });
+
+  return (
+    <div className="container py-12">
+      <h1 className="mb-2 font-heading text-3xl font-bold tracking-tight md:text-4xl">
+        🏷️ Our Brands
+      </h1>
+      <p className="mb-10 text-muted-foreground">
+        Curated brands we partner with — click to visit their site
+      </p>
+
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : filteredBrands.length === 0 ? (
+        <p className="py-20 text-center text-muted-foreground">
+          No brands available in your region yet.
+        </p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredBrands.map((brand, i) => (
+            <motion.div
+              key={brand.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+            >
+              <a
+                href={brand.affiliate_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between rounded-2xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md"
+              >
+                <span className="font-heading text-lg font-semibold group-hover:text-primary transition-colors">
+                  {brand.name}
+                </span>
+                <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+              </a>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

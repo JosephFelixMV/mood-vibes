@@ -6,6 +6,7 @@ import AnalyticsDashboard from "./AnalyticsDashboard";
 import BulkUpload from "./BulkUpload";
 import AIDashboard from "./AIDashboard";
 import SiteConfiguration from "./SiteConfiguration";
+import BrandManager from "./BrandManager";
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState("list");
@@ -28,9 +29,10 @@ export default function AdminDashboard() {
     <div className="container py-8">
       <h1 className="mb-6 font-heading text-2xl font-bold">Admin Panel</h1>
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="list">Products</TabsTrigger>
           <TabsTrigger value="form">{editId ? "Edit Product" : "Add Product"}</TabsTrigger>
+          <TabsTrigger value="brands">Brands</TabsTrigger>
           <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="ai">AI Discover</TabsTrigger>
@@ -41,6 +43,9 @@ export default function AdminDashboard() {
         </TabsContent>
         <TabsContent value="form" forceMount className={tab !== "form" ? "hidden" : ""}>
           <ProductForm editId={editId} onDone={handleDone} savedState={formStateRef} />
+        </TabsContent>
+        <TabsContent value="brands" forceMount className={tab !== "brands" ? "hidden" : ""}>
+          <BrandManager />
         </TabsContent>
         <TabsContent value="bulk" forceMount className={tab !== "bulk" ? "hidden" : ""}>
           <BulkUpload />
