@@ -28,6 +28,28 @@ const VIBE_CATEGORIES = [
   "Hot Mess Express"
 ];
 
+// Mood categories with anchor keywords baked in for cost-efficient AI matching.
+// The descriptions serve as few-shot guidance — no extra tokens needed.
+// FUTURE: At ~500+ categorized products, switch to embedding cosine similarity
+// for near-zero marginal cost. Only fall back to LLM for low-confidence matches.
+const MOOD_CATEGORIES: Record<string, string> = {
+  "Cozy": "warm, soft, comfort, blankets, candles, slippers, mugs, loungewear, plush, fleece, knit",
+  "Minimal": "clean, calm, uncluttered, white, simple, organizers, neutral, streamlined, scandinavian",
+  "Luxe": "elevated, indulgent, rich, silk, gold, high-end, skincare, velvet, premium, designer",
+  "Earthy": "grounded, natural, organic, wood, linen, clay, plants, neutral, terracotta, botanical",
+  "Playful": "fun, bright, lighthearted, toys, colorful, kitchenware, novelty, quirky, cheerful, vibrant",
+  "Bold": "statement, confident, bright, fashion, graphic, art, maximalist, loud, dramatic, eye-catching",
+  "Calm": "soothing, de-stressing, diffusers, weighted, blankets, bath, aromatherapy, zen, peaceful, tranquil",
+  "Romantic": "soft, intimate, warm, candles, lingerie, rose, flowers, date night, love, elegant",
+  "Adventurous": "outdoorsy, curious, daring, camping, travel, rugged, explorer, hiking, wanderlust",
+  "Festive": "celebratory, seasonal, joyful, holiday, decor, party, supplies, gift wrap, christmas, birthday",
+  "Focused": "productive, clear-headed, desk, organizers, planners, workwear, office, study, concentration",
+  "Summer Glow": "bright, breezy, outdoor, sunglasses, beach, swimwear, sandals, tropical, warm weather",
+  "Motivated": "active, pumped, energized, gym, fitness, sports, workout, bright colors, productivity",
+  "Spring Reset": "fresh, clean, pastel, renewal, decluttering, light, floral, garden, new beginnings",
+  "I Love Milo": "pet, animal, dog, cat, pet beds, toys, feeding, treats, grooming",
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -37,7 +59,11 @@ serve(async (req) => {
     const body = await req.text();
     const { name, description, price } = JSON.parse(body);
 
-    const prompt = `You are a product categorization assistant. Given a product, select the most fitting categories and suggest relevant keywords for SEO and search.
+    const moodList = Object.entries(MOOD_CATEGORIES)
+      .map(([mood, anchors]) => `- ${mood}: ${anchors}`)
+      .join("\n");
+
+    const prompt = `You are a product categorization assistant. Given a product, select the most fitting categories, vibes, moods, and suggest relevant keywords.
 
 CORE CATEGORIES (pick 1-5 that best fit):
 ${CORE_CATEGORIES.join(", ")}
@@ -45,15 +71,18 @@ ${CORE_CATEGORIES.join(", ")}
 VIBE CATEGORIES (pick 0-4 that best fit the product's aesthetic/vibe):
 ${VIBE_CATEGORIES.join(", ")}
 
+MOOD CATEGORIES (pick 1-3 that best describe the feeling/emotion this product evokes):
+${moodList}
+
 Product Name: ${name || "Unknown"}
 Description: ${description || "No description"}
 Price: ${price || "Unknown"}
 
 Respond ONLY with valid JSON in this exact format, no other text:
-{"core": ["Category1", "Category2"], "vibes": ["Vibe1", "Vibe2"], "keywords": ["keyword1", "keyword2", "keyword3"]}
+{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["keyword1", "keyword2"]}
 
-Use exact category names from the lists above. Pick categories that genuinely fit.
-For keywords, suggest 5-10 lowercase search terms shoppers might use to find this product (e.g. "gift for her", "under 50", "eco friendly", "wireless", "home office"). Focus on use cases, demographics, price ranges, occasions, and attributes.`;
+Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.
+For keywords, suggest 5-10 lowercase search terms shoppers might use to find this product.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
@@ -76,7 +105,6 @@ For keywords, suggest 5-10 lowercase search terms shoppers might use to find thi
     const data = JSON.parse(rawText);
     const content = data.choices?.[0]?.message?.content || "{}";
     
-    // Extract JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("No JSON in response");
@@ -84,19 +112,20 @@ For keywords, suggest 5-10 lowercase search terms shoppers might use to find thi
     
     const suggestions = JSON.parse(jsonMatch[0]);
     
-    // Validate against actual category names
     const validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
     const validVibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
+    const moodNames = Object.keys(MOOD_CATEGORIES);
+    const validMoods = (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3);
     const validKeywords = (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 10);
 
-    console.log("Suggestions:", { core: validCore, vibes: validVibes, keywords: validKeywords });
+    console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
 
-    return new Response(JSON.stringify({ core: validCore, vibes: validVibes, keywords: validKeywords }), {
+    return new Response(JSON.stringify({ core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error suggesting categories:", error);
-    return new Response(JSON.stringify({ core: [], vibes: [], error: String(error) }), {
+    return new Response(JSON.stringify({ core: [], vibes: [], moods: [], error: String(error) }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

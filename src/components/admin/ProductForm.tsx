@@ -35,6 +35,7 @@ const empty = {
   source_url: "",
   category: "",
   vibe_category: "",
+  mood: "",
   company_name: "",
   video_url: "",
   is_active: true,
@@ -52,6 +53,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   const { data: vibeCategories = [] } = useQuery({
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
+  });
+  const { data: moodCategories = [] } = useQuery({
+    queryKey: ["categories", "mood"],
+    queryFn: () => getCategories("mood"),
   });
   const { data: existing } = useQuery({
     queryKey: ["product", editId],
@@ -103,6 +108,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           source_url: existing.source_url || "",
           category: existing.category,
           vibe_category: existing.vibe_category || "",
+          mood: existing.mood || "",
           company_name: existing.company_name || "",
           video_url: existing.video_url || "",
           is_active: existing.is_active,
@@ -130,7 +136,6 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   const addKeyword = async (term: string) => {
     const normalized = term.toLowerCase().trim();
     if (!normalized || form.keywords.includes(normalized)) return;
-    // Create keyword if it doesn't exist
     const exists = allKeywords.find((k) => k.term === normalized);
     if (!exists) {
       await supabase.from("keywords").insert({ term: normalized });
@@ -146,7 +151,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   };
 
   const [suggestingCategories, setSuggestingCategories] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<{ core: string[]; vibes: string[]; keywords: string[] } | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<{ core: string[]; vibes: string[]; moods: string[]; keywords: string[] } | null>(null);
 
   const suggestCategories = async (productName: string, description: string, price: string | number) => {
     setSuggestingCategories(true);
@@ -156,11 +161,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         body: { name: productName, description, price },
       });
       if (error) throw error;
-      console.log("AI category suggestions:", data);
-      if (data?.core?.length || data?.vibes?.length || data?.keywords?.length) {
+      if (data?.core?.length || data?.vibes?.length || data?.moods?.length || data?.keywords?.length) {
         const suggestions = {
           core: data.core || [],
           vibes: data.vibes || [],
+          moods: data.moods || [],
           keywords: data.keywords || [],
         };
         setAiSuggestions(suggestions);
@@ -168,11 +173,12 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           ...prev,
           category: suggestions.core.length ? suggestions.core.join(",") : prev.category,
           vibe_category: suggestions.vibes.length ? suggestions.vibes.join(",") : prev.vibe_category,
+          mood: suggestions.moods.length ? suggestions.moods.join(",") : prev.mood,
           keywords: suggestions.keywords.length
             ? [...new Set([...prev.keywords, ...suggestions.keywords.map((k: string) => k.toLowerCase())])]
             : prev.keywords,
         }));
-        toast.success(`Suggested ${suggestions.core.length} categories, ${suggestions.vibes.length} vibes, and ${suggestions.keywords.length} keywords`);
+        toast.success(`Suggested ${suggestions.core.length} categories, ${suggestions.vibes.length} vibes, ${suggestions.moods.length} moods, and ${suggestions.keywords.length} keywords`);
       } else {
         toast.info("No suggestions returned");
       }
@@ -207,13 +213,13 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           description: data.description || prev.description,
           category: data.category || prev.category,
           vibe_category: data.vibe_category || prev.vibe_category,
+          mood: data.mood || prev.mood,
           specifications: Array.isArray(data.specifications) && data.specifications.length > 0
             ? data.specifications
             : prev.specifications,
           is_active: typeof data.is_active === "boolean" ? data.is_active : prev.is_active,
         }));
         toast.success("Template loaded — suggesting categories...");
-        // Auto-suggest categories based on product details
         const productName = data.name || "";
         const desc = data.description || "";
         if (productName) {
@@ -250,7 +256,6 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     set("additional_images", form.additional_images.filter((_: any, i: number) => i !== index));
   };
 
-  // Specifications helpers
   const addSpecRow = () => {
     set("specifications", [...form.specifications, { item_detail: "", specification: "" }]);
   };
@@ -267,7 +272,6 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      // Duplicate check by name (includes drafts)
       if (!editId) {
         const { data: dupes } = await supabase
           .from("products")
@@ -295,6 +299,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         company_name: form.company_name,
         is_active: form.is_active,
         vibe_category: form.vibe_category || null,
+        mood: form.mood || null,
         video_url: form.video_url || null,
       };
 
@@ -341,10 +346,8 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         if (error) throw error;
       }
 
-      // Save keywords
       if (form.keywords.length > 0 && productId) {
         for (const term of form.keywords) {
-          // Ensure keyword exists
           let { data: kw } = await supabase.from("keywords").select("id").eq("term", term).single();
           if (!kw) {
             const { data: newKw } = await supabase.from("keywords").insert({ term }).select("id").single();
@@ -379,6 +382,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     source_url: form.source_url || "",
     category: form.category || "Category",
     vibe_category: form.vibe_category || null,
+    mood: form.mood || null,
     company_name: form.company_name || null,
     is_active: form.is_active,
     video_url: form.video_url || null,
@@ -446,7 +450,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           {suggestingCategories ? (
             <span className="animate-pulse">✨ Analyzing...</span>
           ) : (
-            <>✨ Suggest Categories</>
+            <>✨ Suggest Categories & Moods</>
           )}
         </Button>
 
@@ -454,7 +458,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         {(suggestingCategories || aiSuggestions) && (
           <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
             <p className="text-sm font-medium flex items-center gap-2">
-              ✨ AI Category Suggestions
+              ✨ AI Suggestions
               {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse">analyzing...</span>}
             </p>
             {aiSuggestions && (
@@ -478,6 +482,18 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                       {aiSuggestions.vibes.map((v) => (
                         <span key={v} className="inline-flex items-center rounded-full bg-accent/50 px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
                           {v}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {aiSuggestions.moods.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Moods:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {aiSuggestions.moods.map((m) => (
+                        <span key={m} className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                          {m}
                         </span>
                       ))}
                     </div>
@@ -525,7 +541,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </div>
         </div>
 
-        {/* Video URL - after images */}
+        {/* Video URL */}
         <div>
           <Label>Video URL (optional)</Label>
           <Input value={form.video_url} onChange={(e) => set("video_url", e.target.value)} placeholder="https://..." />
@@ -541,7 +557,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <RichTextEditor value={form.description} onChange={(html) => set("description", html)} />
         </div>
         <div>
-          <Label><Label>Category (Core Lifestyle — up to 5) {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>}</Label> {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>}</Label>
+          <Label>Category (Core Lifestyle — up to 5) {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>}</Label>
           <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
             {coreCategories.filter((c) => !!c.parent_slug).map((c) => {
               const selected = (form.category || "").split(",").filter(Boolean);
@@ -608,6 +624,58 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                         ? selected.filter((v: string) => v !== c.name)
                         : [...selected, c.name];
                       set("vibe_category", updated.join(","));
+                    }}
+                    className="rounded"
+                  />
+                  {c.icon} {c.name}
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Moods */}
+        <div>
+          <div className="flex items-center gap-2">
+            <Label>Moods (Optional — select multiple)</Label>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button type="button" className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted hover:bg-muted/80 text-muted-foreground transition-colors">
+                  <Info className="h-3 w-3" />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Mood Categories Guide</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 mt-2">
+                  {moodCategories.map((c) => (
+                    <div key={c.id} className="flex gap-2">
+                      <span className="text-lg shrink-0">{c.icon}</span>
+                      <div>
+                        <p className="text-sm font-medium">{c.name}</p>
+                        <p className="text-xs text-muted-foreground">{c.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
+            {moodCategories.map((c) => {
+              const selected = (form.mood || "").split(",").filter(Boolean);
+              const isChecked = selected.includes(c.name);
+              return (
+                <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => {
+                      const updated = isChecked
+                        ? selected.filter((v: string) => v !== c.name)
+                        : [...selected, c.name];
+                      set("mood", updated.join(","));
                     }}
                     className="rounded"
                   />
