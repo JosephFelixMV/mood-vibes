@@ -67,6 +67,7 @@ export default function ProductList({ onEdit }: Props) {
   const qc = useQueryClient();
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterVibe, setFilterVibe] = useState("all");
+  const [filterBrand, setFilterBrand] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterError, setFilterError] = useState("all");
   const [pageSize, setPageSize] = useState(100);
@@ -206,6 +207,9 @@ export default function ProductList({ onEdit }: Props) {
       const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
       if (!matchName && !matchCompany && !matchCategory && !matchVibe) return false;
     }
+    if (filterBrand !== "all") {
+      if ((p.company_name || "").toLowerCase() !== filterBrand.toLowerCase()) return false;
+    }
     if (filterCategory !== "all") {
       const cats = p.category.split(",").map((c) => c.trim());
       if (!cats.includes(filterCategory)) return false;
@@ -295,6 +299,18 @@ export default function ProductList({ onEdit }: Props) {
             </Tooltip>
           </TooltipProvider>
         </div>
+        <Select value={filterBrand} onValueChange={handleFilterChange(setFilterBrand)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Brand" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Brands</SelectItem>
+            {Array.from(new Set(products.map((p) => p.company_name).filter(Boolean))).sort().map((name) => (
+              <SelectItem key={name} value={name!}>{name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <Select value={filterCategory} onValueChange={handleFilterChange(setFilterCategory)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Category" />
@@ -380,7 +396,7 @@ export default function ProductList({ onEdit }: Props) {
             Clear dates
           </Button>
         )}
-        {(filterCategory !== "all" || filterVibe !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
+        {(filterCategory !== "all" || filterVibe !== "all" || filterBrand !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
           <Button
             variant="outline"
             size="sm"
@@ -389,6 +405,7 @@ export default function ProductList({ onEdit }: Props) {
               setSearchQuery("");
               setFilterCategory("all");
               setFilterVibe("all");
+              setFilterBrand("all");
               setFilterStatus("all");
               setFilterError("all");
               setDateFrom(undefined);
