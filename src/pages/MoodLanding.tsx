@@ -46,6 +46,13 @@ export default function MoodLanding() {
 
   const [randomPick, setRandomPick] = useState<Product | null>(null);
   const { trigger, cooldown } = useRateLimitedAction(2000);
+  const hasAutoLoaded = useState(false);
+
+  // Auto-load a random pick when products are available
+  if (products.length > 0 && !randomPick && !hasAutoLoaded[0]) {
+    hasAutoLoaded[1](true);
+    setRandomPick(getRandomProduct(products));
+  }
 
   const handleRandom = () => {
     trigger(() => {
