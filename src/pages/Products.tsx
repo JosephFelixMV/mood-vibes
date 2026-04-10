@@ -118,11 +118,11 @@ export default function Products() {
         <div className="flex justify-center py-20">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
-      ) : products.length === 0 ? (
-        <p className="py-20 text-center text-muted-foreground">No products found.</p>
+      ) : regionProducts.length === 0 ? (
+        <p className="py-20 text-center text-muted-foreground">No products available in your region.</p>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p, i) => (
+          {regionProducts.map((p, i) => (
             <motion.div
               key={p.id}
               initial={{ opacity: 0, y: 20 }}
