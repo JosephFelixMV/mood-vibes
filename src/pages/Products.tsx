@@ -23,16 +23,6 @@ export default function Products() {
     queryFn: () => getCategories("vibe"),
   });
 
-  const { data: brands = [] } = useQuery({
-    queryKey: ["brands"],
-    queryFn: async () => {
-      const { data, error } = await (await import("@/integrations/supabase/client")).supabase
-        .from("brands").select("id, name").eq("is_active", true).order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const [filterBrand, setFilterBrand] = useState("");
 
   const categoryName = coreCategories.find((c) => c.slug === categorySlug)?.name || "";
