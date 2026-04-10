@@ -3,15 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Sparkles } from "lucide-react";
-import { getProducts, getCategories, getRandomProduct } from "@/lib/supabase-queries";
+import { getProducts, getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSEO } from "@/hooks/useSEO";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
+import { useRegion } from "@/contexts/RegionContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 
 export default function VibeLanding() {
+  const { region } = useRegion();
   const { slug } = useParams<{ slug: string }>();
 
   const { data: vibes = [] } = useQuery({
@@ -41,7 +43,7 @@ export default function VibeLanding() {
     enabled: !!vibeName,
   });
 
-  const healthyProducts = products.filter((p) => !p.page_error);
+  const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region);
   const [randomPick, setRandomPick] = useState<typeof products[0] | null>(null);
   const [animKey, setAnimKey] = useState(0);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");

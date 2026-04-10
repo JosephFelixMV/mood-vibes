@@ -2,12 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { getProducts, getCategories } from "@/lib/supabase-queries";
+import { getProducts, getCategories, filterByRegion } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSEO } from "@/hooks/useSEO";
+import { useRegion } from "@/contexts/RegionContext";
 
 export default function Products() {
+  const { region } = useRegion();
   const [searchParams, setSearchParams] = useSearchParams();
   const categorySlug = searchParams.get("category") || "";
   const vibeSlug = searchParams.get("vibe") || "";
@@ -40,6 +42,8 @@ export default function Products() {
       activeOnly: true,
     }),
   });
+
+  const regionProducts = filterByRegion(products, region);
 
   const setCategory = (slug: string) => {
     if (slug === "all") {
