@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Pencil, Trash2, XCircle, ShieldCheck, Loader2, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, FilterX, Info, Search, ExternalLink } from "lucide-react";
+import { MultiTagSelect } from "@/components/admin/MultiTagSelect";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
