@@ -50,6 +50,36 @@ export type Database = {
         }
         Relationships: []
       }
+      brands: {
+        Row: {
+          affiliate_url: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          regions: string[]
+          updated_at: string
+        }
+        Insert: {
+          affiliate_url: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          regions?: string[]
+          updated_at?: string
+        }
+        Update: {
+          affiliate_url?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          regions?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
