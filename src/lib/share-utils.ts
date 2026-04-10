@@ -32,7 +32,7 @@ export function getShareCopy(product: Product): string {
 }
 
 export function getProductShareUrl(product: Product, platform: string): string {
-  const baseUrl = `${window.location.origin}/product/${product.id}`;
+  const baseUrl = `${window.location.origin}/product/${(product as any).slug || product.id}`;
   const vibeSlug = product.vibe_category
     ? product.vibe_category.split(",")[0].trim().toLowerCase().replace(/\s+/g, "-")
     : "general";

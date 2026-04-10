@@ -65,7 +65,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       }`}
     >
       {/* Image */}
-      <Link to={`/product/${product.id}`} className={`relative block overflow-hidden bg-muted ${
+      <Link to={`/product/${(product as any).slug || product.id}`} className={`relative block overflow-hidden bg-muted ${
         featured ? "md:w-1/2" : "aspect-[4/3]"
       }`}>
         {proxiedImage ? (
@@ -102,7 +102,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       <div className={`flex flex-col gap-3 p-5 ${featured ? "md:w-1/2 md:justify-center md:p-8" : ""}`}>
         <div>
           <Link
-            to={`/product/${product.id}`}
+            to={`/product/${(product as any).slug || product.id}`}
             className="font-heading text-lg font-semibold leading-tight transition-colors hover:text-primary"
           >
             {product.name}
