@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, getDailyPick, getRandomProduct } from "@/lib/supabase-queries";
+import { getProducts, getDailyPick, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
+import { useRegion } from "@/contexts/RegionContext";
 
 function useCountdownToMidnightUTC() {
   const getRemaining = () => {
@@ -30,6 +31,7 @@ function useCountdownToMidnightUTC() {
 }
 
 export default function Index() {
+  const { region } = useRegion();
   useSEO({ title: "Home", description: "Discover products that match your mood and aesthetic. Curated finds for every vibe on Mood & Vibes." });
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ["products"],
@@ -52,7 +54,7 @@ export default function Index() {
 
   const displayedProduct = dailyPick;
 
-  const healthyProducts = products.filter((p) => !p.page_error);
+  const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region);
 
   const handleSurprise = () => {
     trigger(() => {
