@@ -11,6 +11,7 @@ import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function CategoryLanding() {
   const { region } = useRegion();
@@ -54,7 +55,22 @@ export default function CategoryLanding() {
     enabled: !!categoryName,
   });
 
-  const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region);
+  const { data: brands = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("brands").select("id, name").eq("is_active", true).order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [filterBrand, setFilterBrand] = useState("");
+
+  const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region).filter((p) => {
+    if (!filterBrand) return true;
+    return (p.company_name || "").toLowerCase() === filterBrand.toLowerCase();
+  });
   const [randomPick, setRandomPick] = useState<typeof products[0] | null>(null);
   const [animKey, setAnimKey] = useState(0);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
@@ -147,15 +163,28 @@ export default function CategoryLanding() {
       {!isLoading && products.length > 0 && (
         <div className="mb-6 flex items-center justify-between">
           <h2 className="font-heading text-lg font-semibold">All {categoryName} Products</h2>
-          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-3">
+            <Select value={filterBrand || "all"} onValueChange={(v) => setFilterBrand(v === "all" ? "" : v)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Brand" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Brands</SelectItem>
+                {brands.map((b) => (
+                  <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
       {isLoading ? (

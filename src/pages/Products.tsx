@@ -23,6 +23,18 @@ export default function Products() {
     queryFn: () => getCategories("vibe"),
   });
 
+  const { data: brands = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data, error } = await (await import("@/integrations/supabase/client")).supabase
+        .from("brands").select("id, name").eq("is_active", true).order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [filterBrand, setFilterBrand] = useState("");
+
   const categoryName = coreCategories.find((c) => c.slug === categorySlug)?.name || "";
   const vibeName = vibeCategories.find((c) => c.slug === vibeSlug)?.name || "";
 
@@ -43,7 +55,10 @@ export default function Products() {
     }),
   });
 
-  const regionProducts = filterByRegion(products, region);
+  const regionProducts = filterByRegion(products, region).filter((p) => {
+    if (!filterBrand) return true;
+    return (p.company_name || "").toLowerCase() === filterBrand.toLowerCase();
+  });
 
   const setCategory = (slug: string) => {
     if (slug === "all") {
@@ -96,6 +111,18 @@ export default function Products() {
             <SelectItem value="all">All Vibes</SelectItem>
             {vibeCategories.map((c) => (
               <SelectItem key={c.id} value={c.slug}>{c.icon} {c.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={filterBrand || "all"} onValueChange={(v) => setFilterBrand(v === "all" ? "" : v)}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Brand" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Brands</SelectItem>
+            {brands.map((b) => (
+              <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
