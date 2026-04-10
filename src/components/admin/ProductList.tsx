@@ -495,6 +495,7 @@ export default function ProductList({ onEdit }: Props) {
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Vibe</th>
               <th className="px-4 py-3 font-medium">Mood</th>
+              <th className="px-4 py-3 font-medium">Price</th>
               <th className="px-4 py-3 font-medium">
                 <button onClick={() => toggleSort("views")} className="inline-flex items-center gap-1 hover:text-primary">
                   Views {sortColumn === "views" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
