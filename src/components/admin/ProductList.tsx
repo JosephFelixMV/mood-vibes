@@ -226,6 +226,7 @@ export default function ProductList({ onEdit }: Props) {
     if (filterMood !== "all") {
       const moods = (p.mood || "").split(",").map((m) => m.trim()).filter(Boolean);
       if (!moods.includes(filterMood)) return false;
+    }
     if (filterStatus === "active" && !p.is_active) return false;
     if (filterStatus === "inactive" && p.is_active) return false;
     if (filterError === "error" && !p.page_error) return false;
