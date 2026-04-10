@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Gift, Menu, X } from "lucide-react";
+import { Sparkles, Menu, X } from "lucide-react";
 import { useState } from "react";
 
 const navLinks = [
@@ -7,6 +7,7 @@ const navLinks = [
   { to: "/discover", label: "Discover" },
   { to: "/categories", label: "Categories" },
   { to: "/vibes", label: "Vibes" },
+  { to: "/moods", label: "Moods" },
   { to: "/products", label: "All Products" },
 ];
 
@@ -18,8 +19,8 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight">
-          <Gift className="h-6 w-6 text-primary" />
-          <span>Surprise Shopper</span>
+          <Sparkles className="h-6 w-6 text-primary" />
+          <span>Mood & Vibes</span>
         </Link>
 
         {/* Desktop */}

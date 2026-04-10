@@ -30,7 +30,7 @@ function useCountdownToMidnightUTC() {
 }
 
 export default function Index() {
-  useSEO({ title: "Home", description: "Discover interesting products you never knew you needed. New surprise every day on Surprise Shopper." });
+  useSEO({ title: "Home", description: "Discover products that match your mood and aesthetic. Curated finds for every vibe on Mood & Vibes." });
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => getProducts({ activeOnly: true }),
@@ -38,7 +38,6 @@ export default function Index() {
 
   const countdown = useCountdownToMidnightUTC();
 
-  // Server-side daily pick — same for all visitors, refetches when countdown expires
   const { data: dailyPick, isLoading: pickLoading } = useQuery({
     queryKey: ["daily-pick", countdown.expired ? "expired" : "active"],
     queryFn: getDailyPick,
@@ -74,12 +73,12 @@ export default function Index() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="font-heading text-4xl font-extrabold leading-tight tracking-tight md:text-6xl lg:text-7xl">
-              Not sure what to buy?
+              Find your mood.
               <br />
-              <span className="text-gradient">Let us surprise you.</span>
+              <span className="text-gradient">Shop the vibe.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-md text-lg text-muted-foreground">
-              Discover interesting products you never knew you needed.
+              Discover products that match your mood and aesthetic.
             </p>
           </motion.div>
 

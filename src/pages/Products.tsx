@@ -26,7 +26,7 @@ export default function Products() {
 
   useSEO({
     title: categoryName || vibeName || "All Products",
-    description: `Browse ${categoryName || vibeName || "all products"} on Surprise Shopper.`,
+    description: `Browse ${categoryName || vibeName || "all products"} on Mood & Vibes.`,
   });
 
   const [sort, setSort] = useState<"newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc">("newest");

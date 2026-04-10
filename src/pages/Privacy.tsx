@@ -3,7 +3,7 @@ import { useSEO } from "@/hooks/useSEO";
 export default function Privacy() {
   useSEO({
     title: "Privacy Policy",
-    description: "Privacy and data notice for Surprise Shopper.",
+    description: "Privacy and data notice for Mood & Vibes.",
   });
 
   return (
@@ -16,7 +16,7 @@ export default function Privacy() {
         <p>
           This website may use cookies and third-party analytics tools (such as
           Google Analytics) to understand how visitors use our site. No
-          personally identifiable information is collected by Surprise Shopper
+          personally identifiable information is collected by Mood & Vibes
           directly.
         </p>
 
@@ -34,7 +34,7 @@ export default function Privacy() {
         <p>
           If you have questions about our privacy practices, please contact us at{" "}
           <span className="font-medium text-foreground">
-            hello@surpriseshopper.com
+            hello@moodandvibes.com
           </span>
           .
         </p>

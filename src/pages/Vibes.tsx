@@ -9,7 +9,7 @@ import { useSEO } from "@/hooks/useSEO";
 export default function Vibes() {
   useSEO({
     title: "Vibes",
-    description: "Shop by aesthetic and mood on Surprise Shopper.",
+    description: "Shop by aesthetic and mood on Mood & Vibes.",
   });
 
   const { data: vibes = [] } = useQuery({

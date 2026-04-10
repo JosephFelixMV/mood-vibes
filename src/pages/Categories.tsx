@@ -10,7 +10,7 @@ import { CategoryIcon } from "@/components/CategoryIcon";
 export default function Categories() {
   useSEO({
     title: "Categories",
-    description: "Browse products by category on Surprise Shopper.",
+    description: "Browse products by category on Mood & Vibes.",
   });
 
   const { data: categories = [] } = useQuery({
@@ -22,7 +22,6 @@ export default function Categories() {
     queryFn: getProductCountByCategory,
   });
 
-  // Separate parents and children
   const parents = categories.filter((c) => !c.parent_slug);
   const childrenOf = (parentSlug: string) =>
     categories.filter((c) => c.parent_slug === parentSlug);
