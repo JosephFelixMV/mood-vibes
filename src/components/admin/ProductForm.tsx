@@ -478,8 +478,24 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               </div>
             ))}
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={suggestingCategories || !form.name}
+            onClick={() => suggestCategories(form.name, form.description || "", form.price)}
+            className="mt-2 w-full"
+          >
+            {suggestingCategories ? <span className="animate-pulse">✨ Analyzing...</span> : <>✨ Suggest Categories</>}
+          </Button>
+          {aiSuggestions && aiSuggestions.core.length > 0 && (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {aiSuggestions.core.map((c) => (
+                <span key={c} className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{c}</span>
+              ))}
+            </div>
+          )}
         </div>
-
         {/* Video URL */}
         <div>
           <Label>Video URL (optional)</Label>
