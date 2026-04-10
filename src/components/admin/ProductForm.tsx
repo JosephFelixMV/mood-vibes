@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, MutableRefObject } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getProduct, getCategories } from "@/lib/supabase-queries";
+import { generateSlug } from "@/lib/slug-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/RichTextEditor";

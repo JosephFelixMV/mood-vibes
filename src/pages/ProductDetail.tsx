@@ -15,38 +15,38 @@ import { useProxiedImage } from "@/hooks/useProxiedImage";
 import ProxiedImg from "@/components/ProxiedImg";
 
 export default function ProductDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [currentImage, setCurrentImage] = useState(0);
 
   const { data: product, isLoading } = useQuery({
-    queryKey: ["product", id],
-    queryFn: () => getProduct(id!),
-    enabled: !!id,
+    queryKey: ["product", slug],
+    queryFn: () => getProduct(slug!),
+    enabled: !!slug,
   });
 
   const { data: images = [] } = useQuery({
-    queryKey: ["product-images", id],
-    queryFn: () => getProductImages(id!),
-    enabled: !!id,
+    queryKey: ["product-images", product?.id],
+    queryFn: () => getProductImages(product!.id),
+    enabled: !!product?.id,
   });
 
   const { data: specifications = [] } = useQuery({
-    queryKey: ["product-specifications", id],
-    queryFn: () => getProductSpecifications(id!),
-    enabled: !!id,
+    queryKey: ["product-specifications", product?.id],
+    queryFn: () => getProductSpecifications(product!.id),
+    enabled: !!product?.id,
   });
 
   const { data: productKeywords = [] } = useQuery({
-    queryKey: ["product-keywords", id],
+    queryKey: ["product-keywords", product?.id],
     queryFn: async () => {
       const { data } = await supabase
         .from("product_keywords")
         .select("keyword_id, keywords(term)")
-        .eq("product_id", id!);
+        .eq("product_id", product!.id);
       return (data || []).map((k: any) => k.keywords?.term).filter(Boolean) as string[];
     },
-    enabled: !!id,
+    enabled: !!product?.id,
   });
 
   const { data: allProducts = [] } = useQuery({
