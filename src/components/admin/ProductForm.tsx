@@ -639,9 +639,24 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               );
             })}
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={suggestingCategories || !form.name}
+            onClick={() => suggestCategories(form.name, form.description || "", form.price)}
+            className="mt-2 w-full"
+          >
+            {suggestingCategories ? <span className="animate-pulse">✨ Analyzing...</span> : <>✨ Suggest Moods</>}
+          </Button>
+          {aiSuggestions && aiSuggestions.moods.length > 0 && (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {aiSuggestions.moods.map((m) => (
+                <span key={m} className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">{m}</span>
+              ))}
+            </div>
+          )}
         </div>
-
-        {/* Keywords */}
         <div ref={keywordRef}>
           <div className="flex items-center justify-between">
             <Label>Keywords (for SEO & AI Discovery)</Label>
