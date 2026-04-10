@@ -26,6 +26,12 @@ interface SpecRow {
   specification: string;
 }
 
+const AVAILABLE_REGIONS = [
+  { code: "US", label: "🇺🇸 United States" },
+  { code: "CA", label: "🇨🇦 Canada" },
+  { code: "Intl", label: "🌍 International" },
+] as const;
+
 const empty = {
   name: "",
   description: "",
@@ -39,6 +45,7 @@ const empty = {
   company_name: "",
   video_url: "",
   is_active: true,
+  regions: ["US"] as string[],
   additional_images: [] as string[],
   specifications: [] as SpecRow[],
   keywords: [] as string[],
@@ -112,6 +119,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           company_name: existing.company_name || "",
           video_url: existing.video_url || "",
           is_active: existing.is_active,
+          regions: existing.regions || ["US"],
           additional_images: imgRes.data?.map((d) => d.image_url) || [],
           specifications: specRes.data?.map((s) => ({
             item_detail: s.item_detail,
@@ -301,6 +309,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         vibe_category: form.vibe_category || null,
         mood: form.mood || null,
         video_url: form.video_url || null,
+        regions: form.regions.length > 0 ? form.regions : ["US"],
       };
 
       let productId = editId;
@@ -386,6 +395,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     company_name: form.company_name || null,
     is_active: form.is_active,
     video_url: form.video_url || null,
+    regions: form.regions || ["US"],
     page_error: false,
     page_error_detail: null,
     check_failure_count: 0,
