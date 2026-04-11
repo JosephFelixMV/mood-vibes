@@ -94,12 +94,21 @@ For keywords, suggest 5-8 lowercase search terms shoppers might use to find this
   const suggestions = JSON.parse(jsonMatch[0]);
   const moodNames = Object.keys(MOOD_CATEGORIES);
 
-  return {
-    core: (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5),
-    vibes: (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4),
-    moods: (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3),
-    keywords: (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 8),
-  };
+  let core = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
+  let vibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
+  let moods = (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3);
+  const keywords = (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 8);
+
+  // Auto-assign "The Atelier" vibe and "Luxe" mood for fashion items over $1000
+  const FASHION_CATEGORIES = ["Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear", "Accessories", "Bags & Totes", "Jewelry", "Watches"];
+  const parsedPrice = typeof price === "number" ? price : parseFloat(String(price));
+  const isFashion = core.some((c: string) => FASHION_CATEGORIES.includes(c));
+  if (isFashion && parsedPrice >= 1000) {
+    if (!vibes.includes("The Atelier")) vibes = ["The Atelier", ...vibes].slice(0, 4);
+    if (!moods.includes("Luxe")) moods = ["Luxe", ...moods].slice(0, 3);
+  }
+
+  return { core, vibes, moods, keywords };
 }
 
 serve(async (req) => {
