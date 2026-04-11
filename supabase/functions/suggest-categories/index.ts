@@ -68,7 +68,8 @@ serve(async (req) => {
       .map(([mood, anchors]) => `- ${mood}: ${anchors}`)
       .join("\n");
 
-    const prompt = `You are a product categorization assistant. Given a product, select the most fitting categories, vibes, moods, and suggest relevant keywords.
+    const prompt = `You are a product tagging assistant for a curated affiliate shopping platform.
+Your job is to return structured JSON with four keys: core, vibes, moods, keywords.
 
 CORE CATEGORIES (pick 1-5 that best fit):
 ${CORE_CATEGORIES.join(", ")}
@@ -79,15 +80,27 @@ ${VIBE_CATEGORIES.join(", ")}
 MOOD CATEGORIES (pick 1-3 that best describe the feeling/emotion this product evokes):
 ${moodList}
 
+KEYWORD RULES — this is the most important part:
+1. NEVER return broad category terms as keywords (e.g. "men's watch", "luxury watch", "women's top"). These are category names, not tags.
+2. NEVER return generic specs as keywords (e.g. "stainless steel", "43mm", "water resistant"). These belong in the Specifications field, not keywords.
+3. ALWAYS return long-tail, intent-driven keywords that describe:
+   - Style / aesthetic (e.g. "bauhaus minimalist watch", "oversized boyfriend fit top")
+   - Material + form (e.g. "brushed titanium case watch", "heavyweight french terry hoodie")
+   - Occasion + intent (e.g. "anniversary gift watch for him", "workwear blazer for petite women")
+   - Vibe / search phrase (e.g. "quiet luxury accessories", "old money aesthetic watch")
+4. Return 6–10 keywords. Each should be 2–5 words. Think: what would someone actually type into Google to find this exact product?
+5. For fashion products, also include seasonal/warmth signals where applicable:
+   - Materials like "wool", "cashmere", "puffer", "fleece" → include them in keyword phrases, not standalone
+   - e.g. "chunky wool turtleneck sweater", "lightweight linen summer blouse"
+
 Product Name: ${name || "Unknown"}
 Description: ${description || "No description"}
 Price: ${price || "Unknown"}
 
-Respond ONLY with valid JSON in this exact format, no other text:
-{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["keyword1", "keyword2"]}
+IMPORTANT: Return only raw JSON. No markdown, no explanation. Format:
+{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["long-tail keyword phrase", ...]}
 
-Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.
-For keywords, suggest 5-10 lowercase search terms shoppers might use to find this product.`;
+Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
