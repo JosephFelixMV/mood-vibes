@@ -1,9 +1,8 @@
 import { useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { ExternalLink, Info } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import ShareButton from "@/components/ShareButton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -123,19 +122,12 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
         )}
 
         <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="flex items-center gap-1 font-heading text-xl font-bold text-primary">
-            {formatPrice(product.price)}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 cursor-help text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Prices may vary based on current seller deals.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </span>
+          <div>
+            <span className="font-heading text-xl font-bold text-primary">
+              {formatPrice(product.price)}
+            </span>
+            <p className="text-[10px] text-muted-foreground">Price at retailer may vary</p>
+          </div>
           <div className="flex items-center gap-1.5">
             <ShareButton product={product} />
             <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
