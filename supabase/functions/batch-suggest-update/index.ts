@@ -98,7 +98,7 @@ For keywords, suggest 5-10 lowercase search terms shoppers might use to find thi
     core: (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5),
     vibes: (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4),
     moods: (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3),
-    keywords: (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 10),
+    keywords: (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 8),
   };
 }
 
