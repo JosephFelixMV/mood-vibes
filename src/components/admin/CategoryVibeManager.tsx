@@ -41,6 +41,7 @@ export default function CategoryVibeManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [originalName, setOriginalName] = useState<string | null>(null);
   const [form, setForm] = useState<CategoryForm>(emptyForm);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -94,9 +95,10 @@ export default function CategoryVibeManager() {
   };
 
   const saveMut = useMutation({
-    mutationFn: async (data: CategoryForm & { id?: string }) => {
+    mutationFn: async (data: CategoryForm & { id?: string; oldName?: string }) => {
+      const newName = data.name.trim();
       const payload = {
-        name: data.name.trim(),
+        name: newName,
         slug: data.slug || slugify(data.name),
         icon: data.icon || "📦",
         icon_url: data.icon_url || null,
@@ -107,6 +109,30 @@ export default function CategoryVibeManager() {
       if (data.id) {
         const { error } = await supabase.from("categories").update(payload).eq("id", data.id);
         if (error) throw error;
+
+        // If name changed, update all products referencing the old name
+        const oldName = data.oldName;
+        if (oldName && oldName !== newName) {
+          const column = data.type === "core" ? "category" : data.type === "vibe" ? "vibe_category" : "mood";
+          // Fetch products containing the old name in the relevant column
+          const { data: products } = await supabase
+            .from("products")
+            .select("id, category, vibe_category, mood")
+            .ilike(column, `%${oldName}%`);
+
+          if (products && products.length > 0) {
+            for (const product of products) {
+              const rawValue = column === "category" ? product.category : column === "vibe_category" ? product.vibe_category : product.mood;
+              if (!rawValue) continue;
+              const tags = rawValue.split(",").map((t: string) => t.trim());
+              const updated = tags.map((t: string) => (t === oldName ? newName : t)).join(", ");
+              if (updated !== rawValue) {
+                const updatePayload = column === "category" ? { category: updated } : column === "vibe_category" ? { vibe_category: updated } : { mood: updated };
+                await supabase.from("products").update(updatePayload).eq("id", product.id);
+              }
+            }
+          }
+        }
       } else {
         const { error } = await supabase.from("categories").insert(payload);
         if (error) throw error;
@@ -115,6 +141,7 @@ export default function CategoryVibeManager() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categories-all"] });
       qc.invalidateQueries({ queryKey: ["categories"] });
+      qc.invalidateQueries({ queryKey: ["products"] });
       setDialogOpen(false);
       setEditingId(null);
       setForm(emptyForm);
@@ -139,12 +166,14 @@ export default function CategoryVibeManager() {
 
   const openAdd = (type: "core" | "vibe" | "mood") => {
     setEditingId(null);
+    setOriginalName(null);
     setForm({ ...emptyForm, type });
     setDialogOpen(true);
   };
 
   const openEdit = (cat: Category) => {
     setEditingId(cat.id);
+    setOriginalName(cat.name);
     setForm({
       name: cat.name,
       slug: cat.slug,
@@ -159,7 +188,7 @@ export default function CategoryVibeManager() {
 
   const handleSave = () => {
     if (!form.name.trim()) return toast.error("Name is required");
-    saveMut.mutate({ ...form, id: editingId || undefined });
+    saveMut.mutate({ ...form, id: editingId || undefined, oldName: originalName || undefined });
   };
 
   const renderCategoryIcon = (cat: Category) => {
