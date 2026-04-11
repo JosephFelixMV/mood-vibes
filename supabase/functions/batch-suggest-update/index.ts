@@ -70,7 +70,7 @@ Respond ONLY with valid JSON in this exact format, no other text:
 {"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["keyword1", "keyword2"]}
 
 Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.
-For keywords, suggest 5-10 lowercase search terms shoppers might use to find this product.`;
+For keywords, suggest 5-8 lowercase search terms shoppers might use to find this product.`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
