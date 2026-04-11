@@ -12,6 +12,20 @@ import { useRegion } from "@/contexts/RegionContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 
+const FASHION_SLUGS = ["fashion-style", "womens-fashion", "mens-fashion", "womens-shoes", "mens-shoes", "activewear"];
+
+const SEASON_OPTIONS = [
+  { value: "spring_summer", label: "Spring / Summer" },
+  { value: "fall_winter", label: "Fall / Winter" },
+  { value: "all_season", label: "All Season" },
+];
+
+const WARMTH_OPTIONS = [
+  { value: "light", label: "Light" },
+  { value: "mid_layer", label: "Mid-layer" },
+  { value: "warm", label: "Warm" },
+  { value: "heavy_duty", label: "Heavy Duty" },
+];
 
 export default function CategoryLanding() {
   const { region } = useRegion();
@@ -36,6 +50,8 @@ export default function CategoryLanding() {
     ? [categoryName, ...childNames]
     : [categoryName];
 
+  const isFashionCategory = FASHION_SLUGS.includes(slug || "");
+
   useSEO({
     title: categoryName || "Category",
     description: category?.description || `Browse ${categoryName} products on Surprise Shopper.`,
@@ -44,7 +60,6 @@ export default function CategoryLanding() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["category-products", slug, filterNames.join(",")],
     queryFn: async () => {
-      // Fetch all active products and filter client-side for multi-name matching
       const all = await getProducts({ sort: "newest", activeOnly: true });
       return all.filter((p) =>
         filterNames.some((name) =>
@@ -56,6 +71,8 @@ export default function CategoryLanding() {
   });
 
   const [filterBrand, setFilterBrand] = useState("");
+  const [filterSeason, setFilterSeason] = useState("");
+  const [filterWarmth, setFilterWarmth] = useState("");
 
   const regionFiltered = filterByRegion(products.filter((p) => !p.page_error), region);
   const availableBrands = useMemo(() =>
@@ -63,8 +80,10 @@ export default function CategoryLanding() {
     [regionFiltered]
   );
   const healthyProducts = regionFiltered.filter((p) => {
-    if (!filterBrand) return true;
-    return (p.company_name || "").toLowerCase() === filterBrand.toLowerCase();
+    if (filterBrand && (p.company_name || "").toLowerCase() !== filterBrand.toLowerCase()) return false;
+    if (filterSeason && p.fashion_season !== filterSeason) return false;
+    if (filterWarmth && p.fashion_warmth !== filterWarmth) return false;
+    return true;
   });
   const [randomPick, setRandomPick] = useState<typeof products[0] | null>(null);
   const [animKey, setAnimKey] = useState(0);
@@ -113,9 +132,66 @@ export default function CategoryLanding() {
           <p className="mb-2 text-muted-foreground">{category.description}</p>
         )}
         <p className="text-sm text-muted-foreground">
-          {products.length} product{products.length !== 1 ? "s" : ""} in this category
+          {healthyProducts.length} product{healthyProducts.length !== 1 ? "s" : ""}{" "}
+          {healthyProducts.length !== products.length ? `of ${products.length} total` : "in this category"}
         </p>
       </div>
+
+      {/* Fashion style filters */}
+      {isFashionCategory && !isLoading && products.length > 0 && (
+        <div className="mb-8 flex flex-wrap gap-2">
+          <div>
+            <p className="mb-1.5 text-xs font-medium text-muted-foreground">Season</p>
+            <div className="flex flex-wrap gap-1.5">
+              {SEASON_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setFilterSeason(filterSeason === value ? "" : value)}
+                  className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                    filterSeason === value
+                      ? "border-primary bg-primary/10 text-primary font-medium"
+                      : "border-border bg-card text-muted-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="ml-4">
+            <p className="mb-1.5 text-xs font-medium text-muted-foreground">Warmth</p>
+            <div className="flex flex-wrap gap-1.5">
+              {WARMTH_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setFilterWarmth(filterWarmth === value ? "" : value)}
+                  className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                    filterWarmth === value
+                      ? "border-accent bg-accent/10 text-accent-foreground font-medium"
+                      : "border-border bg-card text-muted-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {(filterSeason || filterWarmth) && (
+            <div className="ml-auto flex items-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setFilterSeason(""); setFilterWarmth(""); }}
+                className="text-xs"
+              >
+                Clear style filters
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Random pick section */}
       {!isLoading && products.length > 0 && (
@@ -188,6 +264,18 @@ export default function CategoryLanding() {
         </div>
       ) : products.length === 0 ? (
         <p className="py-20 text-center text-muted-foreground">No products found in this category.</p>
+      ) : healthyProducts.length === 0 ? (
+        <div className="py-20 text-center">
+          <p className="text-muted-foreground">No products match the current filters.</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => { setFilterSeason(""); setFilterWarmth(""); setFilterBrand(""); }}
+          >
+            Clear all filters
+          </Button>
+        </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {sortedProducts.map((p, i) => (
