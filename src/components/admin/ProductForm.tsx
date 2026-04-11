@@ -208,14 +208,24 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           keywords: data.keywords || [],
         };
         setAiSuggestions(suggestions);
+        const updatedCategory = suggestions.core.length ? suggestions.core.join(",") : form.category;
+        const updatedKeywords = suggestions.keywords.length
+          ? [...new Set([...form.keywords, ...suggestions.keywords.map((k: string) => k.toLowerCase())])]
+          : form.keywords;
+        const isFashion = FASHION_SUBCATEGORIES.some((sub) => updatedCategory?.toLowerCase().includes(sub.toLowerCase()));
+        const fashionUpdates: Record<string, any> = {};
+        if (isFashion && updatedKeywords.length) {
+          const { season, warmth } = inferFashionAttributes(updatedKeywords);
+          if (season) fashionUpdates.fashion_season = season;
+          if (warmth) fashionUpdates.fashion_warmth = warmth;
+        }
         setForm((prev: any) => ({
           ...prev,
           category: suggestions.core.length ? suggestions.core.join(",") : prev.category,
           vibe_category: suggestions.vibes.length ? suggestions.vibes.join(",") : prev.vibe_category,
           mood: suggestions.moods.length ? suggestions.moods.join(",") : prev.mood,
-          keywords: suggestions.keywords.length
-            ? [...new Set([...prev.keywords, ...suggestions.keywords.map((k: string) => k.toLowerCase())])]
-            : prev.keywords,
+          keywords: updatedKeywords,
+          ...fashionUpdates,
         }));
         toast.success(`Suggested ${suggestions.core.length} categories, ${suggestions.vibes.length} vibes, ${suggestions.moods.length} moods, and ${suggestions.keywords.length} keywords`);
       } else {
@@ -327,6 +337,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         }
       }
 
+      const isFashion = FASHION_SUBCATEGORIES.some((sub) => form.category?.toLowerCase().includes(sub.toLowerCase()));
       const payload = {
         name: form.name,
         description: form.description,
@@ -342,6 +353,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         video_url: form.video_url || null,
         regions: form.regions.length > 0 ? form.regions : ["US"],
         slug: generateSlug(form.name),
+        fashion_season: isFashion ? form.fashion_season || null : null,
+        fashion_warmth: isFashion ? form.fashion_warmth || null : null,
+        fashion_occasions: isFashion ? form.fashion_occasions : [],
       };
 
       let productId = editId;
@@ -810,6 +824,103 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </div>
           <p className="mt-1 text-xs text-muted-foreground">Press Enter to add custom keywords. Use ✨ Suggest to auto-generate from product name & description.</p>
         </div>
+
+        {/* Style Attributes — fashion only */}
+        {isFashionProduct && (
+          <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950 p-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <Label className="text-blue-700 dark:text-blue-300 font-medium">Style Attributes</Label>
+              <span className="text-xs text-blue-500 dark:text-blue-400">
+                Fashion category detected — inferred from keywords where possible
+              </span>
+            </div>
+            {/* Season */}
+            <div>
+              <Label className="text-sm text-muted-foreground mb-2 block">Season</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "spring_summer", label: "Spring / Summer" },
+                  { value: "fall_winter", label: "Fall / Winter" },
+                  { value: "all_season", label: "All season" },
+                ].map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => set("fashion_season", form.fashion_season === value ? "" : value)}
+                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                      form.fashion_season === value
+                        ? "bg-blue-100 dark:bg-blue-900 border-blue-500 text-blue-800 dark:text-blue-200"
+                        : "bg-background border-border text-muted-foreground hover:border-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Warmth */}
+            <div>
+              <Label className="text-sm text-muted-foreground mb-2 block">Warmth</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "light", label: "Light" },
+                  { value: "mid_layer", label: "Mid-layer" },
+                  { value: "warm", label: "Warm" },
+                  { value: "heavy_duty", label: "Heavy duty" },
+                ].map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => set("fashion_warmth", form.fashion_warmth === value ? "" : value)}
+                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                      form.fashion_warmth === value
+                        ? "bg-amber-100 dark:bg-amber-950 border-amber-500 text-amber-800 dark:text-amber-200"
+                        : "bg-background border-border text-muted-foreground hover:border-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Occasion */}
+            <div>
+              <Label className="text-sm text-muted-foreground mb-2 block">Occasion</Label>
+              <div className="flex flex-wrap gap-2">
+                {["Everyday", "Work", "Evening", "Active", "Outdoor"].map((occ) => {
+                  const val = occ.toLowerCase();
+                  const selected = form.fashion_occasions.includes(val);
+                  return (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() =>
+                        set(
+                          "fashion_occasions",
+                          selected
+                            ? form.fashion_occasions.filter((o: string) => o !== val)
+                            : [...form.fashion_occasions, val]
+                        )
+                      }
+                      className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                        selected
+                          ? "bg-green-100 dark:bg-green-950 border-green-500 text-green-800 dark:text-green-200"
+                          : "bg-background border-border text-muted-foreground hover:border-foreground"
+                      }`}
+                    >
+                      {occ}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {(form.fashion_season || form.fashion_warmth) && (
+              <p className="text-xs text-blue-500 dark:text-blue-400">
+                Season and warmth were inferred from keywords. Select to override.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Specifications */}
         <div>
