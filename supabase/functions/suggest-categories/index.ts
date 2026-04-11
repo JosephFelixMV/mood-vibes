@@ -30,7 +30,7 @@ const VIBE_CATEGORIES = [
   "Going Out Era", "That Girl / That Guy", "Touch Grass", "Pet Parent Life",
   "Content Creator Kit", "Corporate Core", "Jet Set", "Clean Girl / Clean Guy",
   "Stay-In Cinema", "Aura Farming", "Ballin' on a Budget", "Icy Minimal",
-  "Hot Mess Express"
+  "Hot Mess Express", "The Atelier"
 ];
 
 // Mood categories with anchor keywords baked in for cost-efficient AI matching.
@@ -130,11 +130,20 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     
     const suggestions = JSON.parse(jsonMatch[0]);
     
-    const validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
-    const validVibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
+    let validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
+    let validVibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
     const moodNames = Object.keys(MOOD_CATEGORIES);
-    const validMoods = (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3);
+    let validMoods = (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3);
     const validKeywords = (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 8);
+
+    // Auto-assign "The Atelier" vibe and "Luxe" mood for fashion items over $1000
+    const FASHION_CATEGORIES = ["Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear", "Accessories", "Bags & Totes", "Jewelry", "Watches"];
+    const parsedPrice = typeof price === "number" ? price : parseFloat(String(price));
+    const isFashion = validCore.some((c: string) => FASHION_CATEGORIES.includes(c));
+    if (isFashion && parsedPrice >= 1000) {
+      if (!validVibes.includes("The Atelier")) validVibes = ["The Atelier", ...validVibes].slice(0, 4);
+      if (!validMoods.includes("Luxe")) validMoods = ["Luxe", ...validMoods].slice(0, 3);
+    }
 
     console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
 
