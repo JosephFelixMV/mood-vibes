@@ -522,23 +522,35 @@ export default function ProductList({ onEdit }: Props) {
                   />
                 </td>
                 <td className="px-4 py-3">
-                  <div>
-                    <InlineEdit
-                      value={p.name}
-                      onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "name", value: v })}
-                      className="font-medium"
-                    />
-                    <a href={`/product/${(p as any).slug || p.id}`} target="_blank" rel="noopener noreferrer" className="ml-1 inline-flex align-middle text-muted-foreground hover:text-primary" title="View product page">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
-                    {p.company_name && (
-                      <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
+                  <div className="flex items-center gap-3">
+                    {p.image_url ? (
+                      <img
+                        src={p.image_url}
+                        alt=""
+                        className="h-10 w-10 shrink-0 rounded object-cover bg-muted"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted text-lg">🛍️</div>
                     )}
-                    <div className="text-[11px] text-muted-foreground">
-                      Added {format(new Date(p.date_added), "MM/dd/yyyy")}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground">
-                      Updated {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
+                    <div className="min-w-0">
+                      <InlineEdit
+                        value={p.name}
+                        onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "name", value: v })}
+                        className="font-medium"
+                      />
+                      <a href={`/product/${(p as any).slug || p.id}`} target="_blank" rel="noopener noreferrer" className="ml-1 inline-flex align-middle text-muted-foreground hover:text-primary" title="View product page">
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                      {p.company_name && (
+                        <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
+                      )}
+                      <div className="text-[11px] text-muted-foreground">
+                        Added {format(new Date(p.date_added), "MM/dd/yyyy")}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        Updated {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
+                      </div>
                     </div>
                   </div>
                 </td>
