@@ -116,18 +116,18 @@ export default function CategoryVibeManager() {
           // Fetch products containing the old name in the relevant column
           const { data: products } = await supabase
             .from("products")
-            .select("id, " + column)
+            .select("id, category, vibe_category, mood")
             .ilike(column, `%${oldName}%`);
 
           if (products && products.length > 0) {
             for (const product of products) {
-              const rawValue = (product as any)[column] as string;
+              const rawValue = column === "category" ? product.category : column === "vibe_category" ? product.vibe_category : product.mood;
               if (!rawValue) continue;
-              // Split, replace matching entries, rejoin
               const tags = rawValue.split(",").map((t: string) => t.trim());
               const updated = tags.map((t: string) => (t === oldName ? newName : t)).join(", ");
               if (updated !== rawValue) {
-                await supabase.from("products").update({ [column]: updated }).eq("id", product.id);
+                const updatePayload = column === "category" ? { category: updated } : column === "vibe_category" ? { vibe_category: updated } : { mood: updated };
+                await supabase.from("products").update(updatePayload).eq("id", product.id);
               }
             }
           }
