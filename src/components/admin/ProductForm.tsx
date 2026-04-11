@@ -33,6 +33,30 @@ const AVAILABLE_REGIONS = [
   { code: "Intl", label: "🌍 International" },
 ] as const;
 
+const FASHION_SUBCATEGORIES = [
+  "womens-fashion", "mens-fashion", "womens-shoes", "mens-shoes", "activewear",
+  "Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear",
+];
+
+function inferFashionAttributes(keywords: string[]): { season: string; warmth: string } {
+  const kws = keywords.map((k) => k.toLowerCase());
+  const fallWinterTerms = ["wool", "knit", "fleece", "flannel", "puffer", "thermal", "turtleneck", "fall", "winter", "sherpa", "down", "cashmere", "heavyweight", "insulated", "corduroy"];
+  const springSummerTerms = ["linen", "cotton", "sleeveless", "shorts", "floral", "lightweight", "breathable", "spring", "summer", "tank", "mesh", "seersucker"];
+  const lightTerms = ["linen", "mesh", "tank", "sleeveless", "breathable", "sheer"];
+  const midLayerTerms = ["cotton", "denim", "jersey", "poplin", "twill", "chambray"];
+  const warmTerms = ["wool", "knit", "fleece", "sherpa", "cashmere", "waffle knit"];
+  const heavyTerms = ["puffer", "down", "parka", "heavyweight", "insulated", "quilted"];
+  const hasFall = fallWinterTerms.some((t) => kws.some((k) => k.includes(t)));
+  const hasSpring = springSummerTerms.some((t) => kws.some((k) => k.includes(t)));
+  const season = hasFall ? "fall_winter" : hasSpring ? "spring_summer" : "";
+  const isHeavy = heavyTerms.some((t) => kws.some((k) => k.includes(t)));
+  const isWarm = warmTerms.some((t) => kws.some((k) => k.includes(t)));
+  const isMid = midLayerTerms.some((t) => kws.some((k) => k.includes(t)));
+  const isLight = lightTerms.some((t) => kws.some((k) => k.includes(t)));
+  const warmth = isHeavy ? "heavy_duty" : isWarm ? "warm" : isMid ? "mid_layer" : isLight ? "light" : "";
+  return { season, warmth };
+}
+
 const empty = {
   name: "",
   description: "",
@@ -50,6 +74,9 @@ const empty = {
   additional_images: [] as string[],
   specifications: [] as SpecRow[],
   keywords: [] as string[],
+  fashion_season: "" as string,
+  fashion_warmth: "" as string,
+  fashion_occasions: [] as string[],
 };
 
 export default function ProductForm({ editId, onDone, savedState }: Props) {
@@ -127,6 +154,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             specification: s.specification,
           })) || [],
           keywords: kwRes.data?.map((k: any) => k.keywords?.term).filter(Boolean) || [],
+          fashion_season: (existing as any).fashion_season || "",
+          fashion_warmth: (existing as any).fashion_warmth || "",
+          fashion_occasions: (existing as any).fashion_occasions || [],
         });
       });
     } else if (!editId && !savedState?.current) {
@@ -383,6 +413,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     onError: (err) => toast.error(err.message),
   });
 
+  const isFashionProduct = FASHION_SUBCATEGORIES.some(
+    (sub) => form.category?.toLowerCase().includes(sub.toLowerCase())
+  );
+
   const preview: Product = {
     id: "preview",
     name: form.name || "Product Name",
@@ -406,6 +440,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     date_added: new Date().toISOString(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    fashion_season: form.fashion_season || null,
+    fashion_warmth: form.fashion_warmth || null,
+    fashion_occasions: form.fashion_occasions || [],
   };
 
   return (
