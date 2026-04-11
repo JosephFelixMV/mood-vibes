@@ -754,9 +754,18 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                   if (error) throw error;
                   const suggested = (data?.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean);
                   if (suggested.length) {
+                    const updatedKws = [...new Set([...form.keywords, ...suggested])];
+                    const isFashion = FASHION_SUBCATEGORIES.some((sub) => form.category?.toLowerCase().includes(sub.toLowerCase()));
+                    const fashionUpdates: Record<string, any> = {};
+                    if (isFashion) {
+                      const { season, warmth } = inferFashionAttributes(updatedKws);
+                      if (season) fashionUpdates.fashion_season = season;
+                      if (warmth) fashionUpdates.fashion_warmth = warmth;
+                    }
                     setForm((prev: any) => ({
                       ...prev,
-                      keywords: [...new Set([...prev.keywords, ...suggested])],
+                      keywords: updatedKws,
+                      ...fashionUpdates,
                     }));
                     toast.success(`Added ${suggested.length} keyword suggestions`);
                   } else {
