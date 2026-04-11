@@ -173,6 +173,7 @@ export default function CategoryVibeManager() {
 
   const openEdit = (cat: Category) => {
     setEditingId(cat.id);
+    setOriginalName(cat.name);
     setForm({
       name: cat.name,
       slug: cat.slug,
@@ -187,7 +188,7 @@ export default function CategoryVibeManager() {
 
   const handleSave = () => {
     if (!form.name.trim()) return toast.error("Name is required");
-    saveMut.mutate({ ...form, id: editingId || undefined });
+    saveMut.mutate({ ...form, id: editingId || undefined, oldName: originalName || undefined });
   };
 
   const renderCategoryIcon = (cat: Category) => {
