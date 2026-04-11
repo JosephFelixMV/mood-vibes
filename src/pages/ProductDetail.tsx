@@ -1,9 +1,8 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import ShareButton from "@/components/ShareButton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
