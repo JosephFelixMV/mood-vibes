@@ -94,9 +94,10 @@ export default function CategoryVibeManager() {
   };
 
   const saveMut = useMutation({
-    mutationFn: async (data: CategoryForm & { id?: string }) => {
+    mutationFn: async (data: CategoryForm & { id?: string; oldName?: string }) => {
+      const newName = data.name.trim();
       const payload = {
-        name: data.name.trim(),
+        name: newName,
         slug: data.slug || slugify(data.name),
         icon: data.icon || "📦",
         icon_url: data.icon_url || null,
@@ -107,6 +108,30 @@ export default function CategoryVibeManager() {
       if (data.id) {
         const { error } = await supabase.from("categories").update(payload).eq("id", data.id);
         if (error) throw error;
+
+        // If name changed, update all products referencing the old name
+        const oldName = data.oldName;
+        if (oldName && oldName !== newName) {
+          const column = data.type === "core" ? "category" : data.type === "vibe" ? "vibe_category" : "mood";
+          // Fetch products containing the old name in the relevant column
+          const { data: products } = await supabase
+            .from("products")
+            .select("id, " + column)
+            .ilike(column, `%${oldName}%`);
+
+          if (products && products.length > 0) {
+            for (const product of products) {
+              const rawValue = (product as any)[column] as string;
+              if (!rawValue) continue;
+              // Split, replace matching entries, rejoin
+              const tags = rawValue.split(",").map((t: string) => t.trim());
+              const updated = tags.map((t: string) => (t === oldName ? newName : t)).join(", ");
+              if (updated !== rawValue) {
+                await supabase.from("products").update({ [column]: updated }).eq("id", product.id);
+              }
+            }
+          }
+        }
       } else {
         const { error } = await supabase.from("categories").insert(payload);
         if (error) throw error;
@@ -115,6 +140,7 @@ export default function CategoryVibeManager() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categories-all"] });
       qc.invalidateQueries({ queryKey: ["categories"] });
+      qc.invalidateQueries({ queryKey: ["products"] });
       setDialogOpen(false);
       setEditingId(null);
       setForm(emptyForm);
