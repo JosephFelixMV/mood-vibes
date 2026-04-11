@@ -88,7 +88,7 @@ KEYWORD RULES — this is the most important part:
    - Material + form (e.g. "brushed titanium case watch", "heavyweight french terry hoodie")
    - Occasion + intent (e.g. "anniversary gift watch for him", "workwear blazer for petite women")
    - Vibe / search phrase (e.g. "quiet luxury accessories", "old money aesthetic watch")
-4. Return 6–10 keywords. Each should be 2–5 words. Think: what would someone actually type into Google to find this exact product?
+4. Return 6–8 keywords. Each should be 2–5 words. Think: what would someone actually type into Google to find this exact product?
 5. For fashion products, also include seasonal/warmth signals where applicable:
    - Materials like "wool", "cashmere", "puffer", "fleece" → include them in keyword phrases, not standalone
    - e.g. "chunky wool turtleneck sweater", "lightweight linen summer blouse"
@@ -134,7 +134,7 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     const validVibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
     const moodNames = Object.keys(MOOD_CATEGORIES);
     const validMoods = (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3);
-    const validKeywords = (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 10);
+    const validKeywords = (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 8);
 
     console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
 
