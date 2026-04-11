@@ -322,6 +322,9 @@ export type Database = {
           created_at: string
           date_added: string
           description: string | null
+          fashion_occasions: string[] | null
+          fashion_season: string | null
+          fashion_warmth: string | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -346,6 +349,9 @@ export type Database = {
           created_at?: string
           date_added?: string
           description?: string | null
+          fashion_occasions?: string[] | null
+          fashion_season?: string | null
+          fashion_warmth?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -370,6 +376,9 @@ export type Database = {
           created_at?: string
           date_added?: string
           description?: string | null
+          fashion_occasions?: string[] | null
+          fashion_season?: string | null
+          fashion_warmth?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
