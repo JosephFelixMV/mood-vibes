@@ -166,6 +166,7 @@ export default function CategoryVibeManager() {
 
   const openAdd = (type: "core" | "vibe" | "mood") => {
     setEditingId(null);
+    setOriginalName(null);
     setForm({ ...emptyForm, type });
     setDialogOpen(true);
   };
