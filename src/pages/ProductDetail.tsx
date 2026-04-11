@@ -7,7 +7,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getProduct, getProducts, getRandomProduct, getProductImages, getProductSpecifications, getCategories, formatPrice } from "@/lib/supabase-queries";
+import {
+  getProduct,
+  getProducts,
+  getRandomProduct,
+  getProductImages,
+  getProductSpecifications,
+  getCategories,
+  formatPrice,
+} from "@/lib/supabase-queries";
 import { supabase } from "@/integrations/supabase/client";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
@@ -71,16 +79,22 @@ export default function ProductDetail() {
   });
 
   // Images only (no video in gallery)
-  const allImages = product ? [
-    ...(product.image_url ? [product.image_url] : []),
-    ...images.map((img) => img.image_url),
-  ] : [];
+  const allImages = product
+    ? [...(product.image_url ? [product.image_url] : []), ...images.map((img) => img.image_url)]
+    : [];
 
   const handleAnother = () => {
     if (!product) return;
     // Get all categories and vibes for this product
-    const cats = product.category.split(",").map((c) => c.trim()).filter(Boolean);
-    const vibes = product.vibe_category?.split(",").map((v) => v.trim()).filter(Boolean) || [];
+    const cats = product.category
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean);
+    const vibes =
+      product.vibe_category
+        ?.split(",")
+        .map((v) => v.trim())
+        .filter(Boolean) || [];
 
     // Filter to products sharing at least one category or vibe
     const related = allProducts.filter((p) => {
@@ -153,9 +167,7 @@ export default function ProductDetail() {
                   )}
                 </>
               ) : (
-                <div className="flex h-full items-center justify-center text-6xl text-muted-foreground">
-                  🛍️
-                </div>
+                <div className="flex h-full items-center justify-center text-6xl text-muted-foreground">🛍️</div>
               )}
             </div>
             {/* Thumbnail strip */}
@@ -179,7 +191,14 @@ export default function ProductDetail() {
           {/* Product info */}
           <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
             <div className="flex flex-wrap gap-2">
-              {[...new Set(product.category.split(",").map(c => c.trim()).filter(Boolean))].map((trimmed) => {
+              {[
+                ...new Set(
+                  product.category
+                    .split(",")
+                    .map((c) => c.trim())
+                    .filter(Boolean),
+                ),
+              ].map((trimmed) => {
                 const cat = categorySlugMap[trimmed];
                 const to = cat ? (cat.type === "vibe" ? `/vibes/${cat.slug}` : `/category/${cat.slug}`) : "#";
                 return (
@@ -188,31 +207,35 @@ export default function ProductDetail() {
                   </Link>
                 );
               })}
-              {product.vibe_category && product.vibe_category.split(",").map((v) => {
-                const trimmed = v.trim();
-                const cat = categorySlugMap[trimmed];
-                const to = cat ? `/vibes/${cat.slug}` : "#";
-                return (
-                  <Link key={`vibe-${trimmed}`} to={to}>
-                    <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">{trimmed}</Badge>
-                  </Link>
-                );
-              })}
-              {product.mood && product.mood.split(",").map((m) => {
-                const trimmed = m.trim();
-                const cat = categorySlugMap[trimmed];
-                const to = cat ? `/moods/${cat.slug}` : "#";
-                return (
-                  <Link key={`mood-${trimmed}`} to={to}>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-muted">{trimmed}</Badge>
-                  </Link>
-                );
-              })}
+              {product.vibe_category &&
+                product.vibe_category.split(",").map((v) => {
+                  const trimmed = v.trim();
+                  const cat = categorySlugMap[trimmed];
+                  const to = cat ? `/vibes/${cat.slug}` : "#";
+                  return (
+                    <Link key={`vibe-${trimmed}`} to={to}>
+                      <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">
+                        {trimmed}
+                      </Badge>
+                    </Link>
+                  );
+                })}
+              {product.mood &&
+                product.mood.split(",").map((m) => {
+                  const trimmed = m.trim();
+                  const cat = categorySlugMap[trimmed];
+                  const to = cat ? `/moods/${cat.slug}` : "#";
+                  return (
+                    <Link key={`mood-${trimmed}`} to={to}>
+                      <Badge variant="outline" className="cursor-pointer hover:bg-muted">
+                        {trimmed}
+                      </Badge>
+                    </Link>
+                  );
+                })}
             </div>
             <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
-            {product.company_name && (
-              <p className="text-sm text-muted-foreground">by {product.company_name}</p>
-            )}
+            {product.company_name && <p className="text-sm text-muted-foreground">by {product.company_name}</p>}
             <span className="flex items-center gap-1.5 font-heading text-3xl font-bold text-primary">
               {formatPrice(product.price)}
               <TooltipProvider>
@@ -281,10 +304,7 @@ export default function ProductDetail() {
             <h2 className="mb-3 font-heading text-lg font-semibold">Specifications</h2>
             <div className="overflow-hidden rounded-lg border">
               {specifications.map((spec, i) => (
-                <div
-                  key={spec.id}
-                  className={`flex ${i % 2 === 0 ? "bg-muted/50" : "bg-background"}`}
-                >
+                <div key={spec.id} className={`flex ${i % 2 === 0 ? "bg-muted/50" : "bg-background"}`}>
                   <div className="w-1/3 px-4 py-3 font-medium text-sm">{spec.item_detail}</div>
                   <div className="w-2/3 border-l px-4 py-3 text-sm text-muted-foreground">{spec.specification}</div>
                 </div>
