@@ -41,6 +41,7 @@ export default function CategoryVibeManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [originalName, setOriginalName] = useState<string | null>(null);
   const [form, setForm] = useState<CategoryForm>(emptyForm);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
