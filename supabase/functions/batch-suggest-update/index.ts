@@ -25,7 +25,7 @@ const VIBE_CATEGORIES = [
   "Going Out Era", "That Girl / That Guy", "Touch Grass", "Pet Parent Life",
   "Content Creator Kit", "Corporate Core", "Jet Set", "Clean Girl / Clean Guy",
   "Stay-In Cinema", "Aura Farming", "Ballin' on a Budget", "Icy Minimal",
-  "Hot Mess Express"
+  "Hot Mess Express", "The Atelier"
 ];
 
 const MOOD_CATEGORIES: Record<string, string> = {
