@@ -182,19 +182,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch configurable limits from site_config
-    const { data: configRows } = await supabase
-      .from("site_config")
-      .select("key, value")
-      .in("key", ["ai_weekly_prompt_limit", "ai_cache_duration_hours", "ai_max_results"]);
-
-    const configMap: Record<string, string> = {};
-    (configRows || []).forEach((r: any) => { configMap[r.key] = r.value; });
-
-    const WEEKLY_LIMIT = parseInt(configMap["ai_weekly_prompt_limit"] || "5", 10);
-    const CACHE_HOURS = parseInt(configMap["ai_cache_duration_hours"] || "24", 10);
-    const MAX_AI_RESULTS = parseInt(configMap["ai_max_results"] || "20", 10);
-
     // Rate limit: configurable per week per IP
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - 7);
