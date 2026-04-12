@@ -228,14 +228,15 @@ export default function AutomatedLinkCheckConfig() {
           <div className="rounded-md border p-3 space-y-2 text-xs text-muted-foreground">
             <p className="font-medium text-foreground text-sm">How it works</p>
             <ul className="list-disc pl-4 space-y-1">
-              <li><strong>Selection order:</strong> Products are checked oldest-first — whichever products haven't been checked for the longest time are prioritized. Products that have never been checked are processed first.</li>
-              <li><strong>What it checks:</strong> The checker fetches each product's source URL and verifies it returns a valid page (not a 404, not redirected to the homepage, not redirected to a different domain).</li>
-              <li><strong>Per-vendor cap:</strong> No single vendor (domain) will be checked more than the configured cap per batch run. This prevents hammering one site when many of your products come from the same store. Excess products are skipped and re-queued for the next run.</li>
-              <li><strong>Randomized timing:</strong> Delays between requests are randomized within a configurable min/max jitter window (default 2–5 seconds) so request patterns appear natural and avoid CDN bot detection.</li>
-              <li><strong>Soft-block detection:</strong> After fetching a page, the response body is scanned for CAPTCHA challenges, "access denied" messages, unusual traffic warnings, and suspiciously small page sizes. Soft-blocks are flagged as warnings but don't count toward deactivation — they indicate the vendor may be blocking the checker.</li>
-              <li><strong>Failure tracking:</strong> Each failed check increments a counter. When a product reaches the deactivation threshold of consecutive failures, it's automatically set to inactive.</li>
-              <li><strong>Recovery:</strong> A single successful check resets the failure counter to zero, so intermittent issues won't deactivate products.</li>
-              <li><strong>Error types detected:</strong> HTTP 4xx/5xx errors (except 403), domain mismatches (redirected to different site), home-page redirects (product page removed but domain still active), and soft-blocks (CAPTCHA, access denied, tiny pages).</li>
+              <li><strong>Selection order:</strong> Products are checked by <code>last_verified_at</code> ascending — the longest-unverified products are prioritized. Never-checked products are processed first.</li>
+              <li><strong>What it checks:</strong> The checker fetches each product's source URL using a full GET request and verifies it returns a valid page (not a 404/410, not redirected to the homepage, not redirected to a different domain).</li>
+              <li><strong>Per-vendor cap:</strong> No single vendor (domain) will be checked more than the configured cap per batch run, preventing vendor overload. Excess products are re-queued.</li>
+              <li><strong>Randomized timing:</strong> Delays between requests are randomized within a configurable jitter window (default 2–5s). A plausible <code>Referer</code> header simulates organic traffic.</li>
+              <li><strong>429 backoff:</strong> If a vendor returns HTTP 429 (rate limit), that vendor is immediately blocked for the remainder of the batch run. All remaining products from that vendor are skipped and re-queued.</li>
+              <li><strong>Soft-block detection:</strong> Response bodies are scanned for CAPTCHAs, "access denied" text, and suspiciously small pages (&lt;1.5KB). These generate warnings without counting toward deactivation.</li>
+              <li><strong>Status transitions:</strong> Failed checks increment a counter. At the threshold, active products become <strong>flagged</strong>. Flagged products that fail again become <strong>unpublished</strong>. A successful check resets the counter.</li>
+              <li><strong>Click-time validation:</strong> When users click "Buy Now", a non-blocking HEAD request validates the affiliate URL in the background, providing real-time broken link detection.</li>
+              <li><strong>User reports:</strong> Users can report broken links. After the configured threshold of unique reports (default 3), products are automatically flagged for admin review.</li>
             </ul>
           </div>
         </CardContent>
