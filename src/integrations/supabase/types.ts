@@ -54,6 +54,7 @@ export type Database = {
         Row: {
           affiliate_url: string
           created_at: string
+          description: string | null
           id: string
           is_active: boolean
           name: string
@@ -63,6 +64,7 @@ export type Database = {
         Insert: {
           affiliate_url: string
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           name: string
@@ -72,6 +74,7 @@ export type Database = {
         Update: {
           affiliate_url?: string
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           name?: string

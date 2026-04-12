@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Trash2, Plus, ExternalLink, Upload, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Pencil, Trash2, Plus, ExternalLink, Upload, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
+import { formatBrandName } from "@/lib/brand-utils";
 
 const AVAILABLE_REGIONS = [
   { code: "US", label: "🇺🇸 United States" },
@@ -17,6 +19,7 @@ const AVAILABLE_REGIONS = [
 interface Brand {
   id: string;
   name: string;
+  description: string | null;
   affiliate_url: string;
   regions: string[];
   is_active: boolean;
@@ -26,6 +29,7 @@ interface Brand {
 
 const emptyForm = {
   name: "",
+  description: "",
   affiliate_url: "",
   regions: ["US"] as string[],
   is_active: true,
@@ -37,7 +41,6 @@ export default function BrandManager() {
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [bulkLoading, setBulkLoading] = useState(false);
-  const fileInputRef = useState<HTMLInputElement | null>(null);
 
   const { data: brands = [], isLoading } = useQuery({
     queryKey: ["admin-brands"],
@@ -60,6 +63,7 @@ export default function BrandManager() {
 
       const payload = {
         name: form.name.trim(),
+        description: form.description.trim() || null,
         affiliate_url: form.affiliate_url.trim(),
         regions: form.regions.length > 0 ? form.regions : ["US"],
         is_active: form.is_active,
@@ -102,12 +106,20 @@ export default function BrandManager() {
   const startEdit = (brand: Brand) => {
     setForm({
       name: brand.name,
+      description: brand.description || "",
       affiliate_url: brand.affiliate_url,
       regions: brand.regions || ["US"],
       is_active: brand.is_active,
     });
     setEditId(brand.id);
     setShowForm(true);
+  };
+
+  const handleDownloadTemplate = () => {
+    const link = document.createElement("a");
+    link.href = "/brand-template.json";
+    link.download = "brand-template.json";
+    link.click();
   };
 
   const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,6 +136,7 @@ export default function BrandManager() {
         const json = JSON.parse(text);
         const name = (json.Brand_name || json.brand_name || "").trim();
         const url = (json.Affiliate_link || json.affiliate_link || "").trim();
+        const description = (json.Description || json.description || "").trim() || null;
         if (!name || !url) {
           skipped++;
           errors.push(`${file.name}: missing name or link`);
@@ -132,6 +145,7 @@ export default function BrandManager() {
         const { error } = await supabase.from("brands").insert([{
           name,
           affiliate_url: url,
+          description,
           regions: ["US"],
           is_active: true,
         }]);
@@ -164,6 +178,9 @@ export default function BrandManager() {
         </div>
         {!showForm && (
           <div className="flex gap-2">
+            <Button variant="outline" onClick={handleDownloadTemplate} className="gap-1.5 rounded-full">
+              <Download className="h-4 w-4" /> Template
+            </Button>
             <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent">
               {bulkLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
               Bulk Import
@@ -202,6 +219,15 @@ export default function BrandManager() {
               onChange={(e) => set("name", e.target.value)}
               placeholder="e.g. Amazon, Best Buy"
               required
+            />
+          </div>
+          <div>
+            <Label>Description</Label>
+            <Textarea
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+              placeholder="Short description of the brand (optional)"
+              rows={2}
             />
           </div>
           <div>
@@ -266,11 +292,14 @@ export default function BrandManager() {
             <div key={brand.id} className="flex items-center gap-4 p-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium truncate">{brand.name}</span>
+                  <span className="font-medium truncate">{formatBrandName(brand.name)}</span>
                   {!brand.is_active && (
                     <span className="text-[10px] rounded-full bg-muted px-2 py-0.5 text-muted-foreground">Hidden</span>
                   )}
                 </div>
+                {brand.description && (
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{brand.description}</p>
+                )}
                 <div className="flex items-center gap-2 mt-0.5">
                   <a
                     href={brand.affiliate_url}
@@ -290,12 +319,13 @@ export default function BrandManager() {
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
-                <Button variant="ghost" size="icon" onClick={() => startEdit(brand)}>
+                <Button variant="ghost" size="icon" onClick={() => startEdit(brand)} aria-label={`Edit ${brand.name}`}>
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label={`Delete ${brand.name}`}
                   onClick={() => {
                     if (confirm(`Delete "${brand.name}"?`)) {
                       deleteMutation.mutate(brand.id);

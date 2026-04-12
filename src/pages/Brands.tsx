@@ -4,10 +4,12 @@ import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegion } from "@/contexts/RegionContext";
 import { useSEO } from "@/hooks/useSEO";
+import { formatBrandName } from "@/lib/brand-utils";
 
 interface Brand {
   id: string;
   name: string;
+  description: string | null;
   affiliate_url: string;
   regions: string[];
   is_active: boolean;
@@ -50,7 +52,9 @@ export default function Brands() {
 
       {isLoading ? (
         <div className="flex justify-center py-20">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" role="status">
+            <span className="sr-only">Loading brands</span>
+          </div>
         </div>
       ) : filteredBrands.length === 0 ? (
         <p className="py-20 text-center text-muted-foreground">
@@ -69,12 +73,20 @@ export default function Brands() {
                 href={brand.affiliate_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center justify-between rounded-2xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md"
+                aria-label={`Visit ${formatBrandName(brand.name)}`}
+                className="group flex flex-col gap-1 rounded-2xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md"
               >
-                <span className="font-heading text-lg font-semibold group-hover:text-primary transition-colors">
-                  {brand.name}
-                </span>
-                <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                <div className="flex items-center justify-between">
+                  <span className="font-heading text-lg font-semibold group-hover:text-primary transition-colors">
+                    {formatBrandName(brand.name)}
+                  </span>
+                  <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+                {brand.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {brand.description}
+                  </p>
+                )}
               </a>
             </motion.div>
           ))}
