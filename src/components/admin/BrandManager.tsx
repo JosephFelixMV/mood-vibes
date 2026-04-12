@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Trash2, Plus, ExternalLink } from "lucide-react";
+import { Pencil, Trash2, Plus, ExternalLink, Upload, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const AVAILABLE_REGIONS = [
@@ -36,6 +36,8 @@ export default function BrandManager() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const fileInputRef = useState<HTMLInputElement | null>(null);
 
   const { data: brands = [], isLoading } = useQuery({
     queryKey: ["admin-brands"],
@@ -108,6 +110,51 @@ export default function BrandManager() {
     setShowForm(true);
   };
 
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setBulkLoading(true);
+    let added = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const file of Array.from(files)) {
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        const name = (json.Brand_name || json.brand_name || "").trim();
+        const url = (json.Affiliate_link || json.affiliate_link || "").trim();
+        if (!name || !url) {
+          skipped++;
+          errors.push(`${file.name}: missing name or link`);
+          continue;
+        }
+        const { error } = await supabase.from("brands").insert([{
+          name,
+          affiliate_url: url,
+          regions: ["US"],
+          is_active: true,
+        }]);
+        if (error) {
+          skipped++;
+          errors.push(`${file.name}: ${error.message}`);
+        } else {
+          added++;
+        }
+      } catch {
+        skipped++;
+        errors.push(`${file.name}: invalid JSON`);
+      }
+    }
+
+    qc.invalidateQueries({ queryKey: ["admin-brands"] });
+    setBulkLoading(false);
+    e.target.value = "";
+
+    if (added > 0) toast.success(`${added} brand${added > 1 ? "s" : ""} imported`);
+    if (skipped > 0) toast.error(`${skipped} file${skipped > 1 ? "s" : ""} skipped: ${errors.join("; ")}`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -116,9 +163,23 @@ export default function BrandManager() {
           <p className="text-sm text-muted-foreground">Manage affiliate brand links displayed on the Brands page</p>
         </div>
         {!showForm && (
-          <Button onClick={() => setShowForm(true)} className="gap-1.5 rounded-full">
-            <Plus className="h-4 w-4" /> Add Brand
-          </Button>
+          <div className="flex gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent">
+              {bulkLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              Bulk Import
+              <input
+                type="file"
+                accept=".json"
+                multiple
+                className="hidden"
+                onChange={handleBulkUpload}
+                disabled={bulkLoading}
+              />
+            </label>
+            <Button onClick={() => setShowForm(true)} className="gap-1.5 rounded-full">
+              <Plus className="h-4 w-4" /> Add Brand
+            </Button>
+          </div>
         )}
       </div>
 
