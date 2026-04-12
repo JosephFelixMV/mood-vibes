@@ -70,6 +70,19 @@ export default function Discover() {
   const [activePrompt, setActivePrompt] = useState("");
   const [hasResults, setHasResults] = useState(false);
   const [showProtoBanner, setShowProtoBanner] = useState(true);
+  const [weeklyLimit, setWeeklyLimit] = useState(5);
+
+  // Fetch configurable weekly limit
+  useEffect(() => {
+    supabase
+      .from("site_config")
+      .select("value")
+      .eq("key", "ai_weekly_prompt_limit")
+      .single()
+      .then(({ data }) => {
+        if (data?.value) setWeeklyLimit(parseInt(data.value, 10) || 5);
+      });
+  }, []);
 
   // Restore queue from session on mount
   useEffect(() => {
@@ -357,7 +370,7 @@ export default function Discover() {
               <span>{prompt.length}/{MAX_PROMPT_LENGTH}</span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground/70">
-              ⚡ Usage is limited to 5 prompts per week
+              ⚡ Usage is limited to {weeklyLimit} prompts per week
             </p>
 
             {/* Example prompts — only when no results */}
