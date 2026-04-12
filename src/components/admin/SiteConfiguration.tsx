@@ -22,6 +22,17 @@ interface ConfigItem {
 
 const CONFIG_SECTIONS = [
   {
+    title: "Link Reporting & Bot Protection",
+    icon: Shield,
+    description: "Configure the user-reported broken links system and Cloudflare Turnstile bot protection.",
+    keys: ["report_flag_threshold", "click_validate_enabled", "turnstile_site_key"],
+    helpTexts: {
+      report_flag_threshold: "Number of unique user reports before a product is automatically flagged for review (default: 3).",
+      click_validate_enabled: "Enable real-time HEAD request validation when users click Buy Now (true/false).",
+      turnstile_site_key: "Your Cloudflare Turnstile public site key. Leave blank to rely on honeypot-only protection.",
+    },
+  },
+  {
     title: "Analytics & Tracking",
     icon: BarChart3,
     description: "Connect your analytics and user behavior tracking tools.",

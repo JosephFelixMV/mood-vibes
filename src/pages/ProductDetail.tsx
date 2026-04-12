@@ -2,6 +2,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import ReportBrokenLink from "@/components/ReportBrokenLink";
 import ShareButton from "@/components/ShareButton";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -109,7 +110,13 @@ export default function ProductDetail() {
   };
 
   const handleBuyClick = () => {
-    if (product) trackProductClick(product.id);
+    if (product) {
+      trackProductClick(product.id);
+      // Fire async click-time validation (non-blocking)
+      supabase.functions.invoke("validate-click", {
+        body: { product_id: product.id },
+      }).catch(() => {});
+    }
   };
 
   if (isLoading) {
@@ -262,6 +269,7 @@ export default function ProductDetail() {
             <p className="text-xs italic text-muted-foreground pt-1">
               More colors &amp; styles may be available on the seller's site
             </p>
+            <ReportBrokenLink productId={product.id} variant="full" />
           </div>
         </div>
 

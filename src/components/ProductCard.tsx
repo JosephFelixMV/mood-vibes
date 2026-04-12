@@ -3,12 +3,14 @@ import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 import ShareButton from "@/components/ShareButton";
+import ReportBrokenLink from "@/components/ReportBrokenLink";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { trackProductClick } from "@/lib/track-click";
 import { trackEvent } from "@/lib/track-event";
+import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
@@ -49,6 +51,10 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
   const handleBuyClick = () => {
     trackProductClick(product.id);
     trackEvent(product.id, "click");
+    // Fire async click-time validation (non-blocking)
+    supabase.functions.invoke("validate-click", {
+      body: { product_id: product.id },
+    }).catch(() => {});
   };
 
   return (
@@ -129,6 +135,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
             <p className="text-[10px] text-muted-foreground">Price at retailer may vary</p>
           </div>
           <div className="flex items-center gap-1.5">
+            <ReportBrokenLink productId={product.id} />
             <ShareButton product={product} />
             <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
               <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
