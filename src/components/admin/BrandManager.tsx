@@ -163,9 +163,23 @@ export default function BrandManager() {
           <p className="text-sm text-muted-foreground">Manage affiliate brand links displayed on the Brands page</p>
         </div>
         {!showForm && (
-          <Button onClick={() => setShowForm(true)} className="gap-1.5 rounded-full">
-            <Plus className="h-4 w-4" /> Add Brand
-          </Button>
+          <div className="flex gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent">
+              {bulkLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              Bulk Import
+              <input
+                type="file"
+                accept=".json"
+                multiple
+                className="hidden"
+                onChange={handleBulkUpload}
+                disabled={bulkLoading}
+              />
+            </label>
+            <Button onClick={() => setShowForm(true)} className="gap-1.5 rounded-full">
+              <Plus className="h-4 w-4" /> Add Brand
+            </Button>
+          </div>
         )}
       </div>
 
