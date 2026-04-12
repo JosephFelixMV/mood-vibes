@@ -1,18 +1,41 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { ShieldCheck, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
+const LINK_CONFIG_KEYS = [
+  {
+    key: "link_check_batch_size",
+    label: "Batch Size",
+    help: "Number of products checked per scheduled run. Higher values check more products but take longer and increase vendor request volume.",
+    type: "number",
+    min: 5,
+    max: 200,
+  },
+  {
+    key: "link_check_deactivation_threshold",
+    label: "Auto-deactivation Threshold",
+    help: "Number of consecutive check failures before a product is automatically deactivated. A product's failure count resets to zero when it passes a check.",
+    type: "number",
+    min: 1,
+    max: 20,
+  },
+];
+
 export default function AutomatedLinkCheckConfig() {
+  const qc = useQueryClient();
   const [cronActive, setCronActive] = useState(true);
   const [togglingCron, setTogglingCron] = useState(false);
   const [showCronConfirm, setShowCronConfirm] = useState(false);
+  const [edited, setEdited] = useState<Record<string, string>>({});
 
   useQuery({
     queryKey: ["cron-job-status"],
@@ -36,6 +59,49 @@ export default function AutomatedLinkCheckConfig() {
       return data?.[0]?.last_checked_at ?? null;
     },
   });
+
+  const { data: configs = [] } = useQuery({
+    queryKey: ["site-config-link-check"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_config")
+        .select("*")
+        .in("key", LINK_CONFIG_KEYS.map((k) => k.key));
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const saveMut = useMutation({
+    mutationFn: async (updates: { key: string; value: string }[]) => {
+      for (const u of updates) {
+        const { error } = await supabase
+          .from("site_config")
+          .update({ value: u.value })
+          .eq("key", u.key);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["site-config-link-check"] });
+      qc.invalidateQueries({ queryKey: ["site-config"] });
+      setEdited({});
+      toast.success("Link checker configuration saved");
+    },
+    onError: (err: any) => toast.error("Failed to save: " + err.message),
+  });
+
+  const getValue = (key: string) => {
+    if (key in edited) return edited[key];
+    return configs.find((c) => c.key === key)?.value ?? "";
+  };
+
+  const hasChanges = Object.keys(edited).length > 0;
+
+  const handleSaveConfig = () => {
+    const updates = Object.entries(edited).map(([key, value]) => ({ key, value }));
+    if (updates.length > 0) saveMut.mutate(updates);
+  };
 
   const handleToggleCron = async (enable: boolean) => {
     if (!enable) {
@@ -72,14 +138,15 @@ export default function AutomatedLinkCheckConfig() {
             Automated Link Checker
           </CardTitle>
           <CardDescription>
-            Background job that verifies product source URLs are still active. Products with 3 consecutive failures are automatically flagged.
+            Periodically verifies that product source URLs are still live and haven't been redirected or removed. Protects your catalog from broken links that would lead visitors to dead pages.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Toggle */}
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-sm font-medium">Enable automated checks</p>
-              <p className="text-xs text-muted-foreground">Runs every 6 hours in batches of 50 products</p>
+              <p className="text-xs text-muted-foreground">Runs on a scheduled cron job (every 6 hours by default)</p>
             </div>
             <div className="flex items-center gap-2">
               {togglingCron && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
@@ -94,6 +161,30 @@ export default function AutomatedLinkCheckConfig() {
             </div>
           </div>
 
+          {/* Configurable fields */}
+          {LINK_CONFIG_KEYS.map((cfg) => (
+            <div key={cfg.key} className="space-y-1.5">
+              <label className="text-sm font-medium">{cfg.label}</label>
+              <p className="text-xs text-muted-foreground">{cfg.help}</p>
+              <Input
+                type={cfg.type}
+                min={cfg.min}
+                max={cfg.max}
+                value={getValue(cfg.key)}
+                onChange={(e) => setEdited((prev) => ({ ...prev, [cfg.key]: e.target.value }))}
+                className="max-w-[200px]"
+              />
+            </div>
+          ))}
+
+          {hasChanges && (
+            <Button onClick={handleSaveConfig} disabled={saveMut.isPending} className="gap-1.5">
+              {saveMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Save Link Checker Settings
+            </Button>
+          )}
+
+          {/* Stats */}
           <div className="rounded-md border p-3 space-y-2 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Last batch check</span>
@@ -104,13 +195,22 @@ export default function AutomatedLinkCheckConfig() {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Frequency</span>
-              <span className="font-medium">Every 6 hours</span>
+              <span className="text-muted-foreground">Schedule</span>
+              <span className="font-medium">Every 6 hours (cron)</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Auto-deactivation threshold</span>
-              <span className="font-medium">3 consecutive failures</span>
-            </div>
+          </div>
+
+          {/* How it works */}
+          <div className="rounded-md border p-3 space-y-2 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground text-sm">How it works</p>
+            <ul className="list-disc pl-4 space-y-1">
+              <li><strong>Selection order:</strong> Products are checked oldest-first — whichever products haven't been checked for the longest time are prioritized. Products that have never been checked are processed first.</li>
+              <li><strong>What it checks:</strong> The checker fetches each product's source URL and verifies it returns a valid page (not a 404, not redirected to the homepage, not redirected to a different domain).</li>
+              <li><strong>Rate limiting:</strong> Requests are throttled to 3 seconds between calls to the same vendor and 1 second between any requests to avoid being blocked.</li>
+              <li><strong>Failure tracking:</strong> Each failed check increments a counter. When a product reaches the deactivation threshold of consecutive failures, it's automatically set to inactive.</li>
+              <li><strong>Recovery:</strong> A single successful check resets the failure counter to zero, so intermittent issues won't deactivate products.</li>
+              <li><strong>Error types detected:</strong> HTTP 4xx/5xx errors (except 403), domain mismatches (redirected to different site), and home-page redirects (product page removed but domain still active).</li>
+            </ul>
           </div>
         </CardContent>
       </Card>
@@ -120,7 +220,7 @@ export default function AutomatedLinkCheckConfig() {
           <AlertDialogHeader>
             <AlertDialogTitle>Disable automated link checker?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will stop the background job that checks product links every 6 hours. Broken links won't be detected automatically until you re-enable it.
+              This will stop the background job that checks product links. Broken links won't be detected automatically until you re-enable it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -6,10 +6,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const AUTO_DEACTIVATE_THRESHOLD = 3;
-const PER_VENDOR_DELAY_MS = 3000; // 3s between requests to same vendor
-const GLOBAL_DELAY_MS = 1000;     // 1s minimum between any requests
-const BATCH_SIZE = 25;            // max products per invocation (for scheduled runs)
+let AUTO_DEACTIVATE_THRESHOLD = 3;
+const PER_VENDOR_DELAY_MS = 3000;
+const GLOBAL_DELAY_MS = 1000;
+let BATCH_SIZE = 25;
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -31,6 +31,18 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+  // Load configurable settings from site_config
+  const { data: configRows } = await supabase
+    .from("site_config")
+    .select("key, value")
+    .in("key", ["link_check_batch_size", "link_check_deactivation_threshold"]);
+
+  const cfgMap: Record<string, string> = {};
+  (configRows || []).forEach((r: any) => { cfgMap[r.key] = r.value; });
+
+  BATCH_SIZE = parseInt(cfgMap["link_check_batch_size"] || "25", 10);
+  AUTO_DEACTIVATE_THRESHOLD = parseInt(cfgMap["link_check_deactivation_threshold"] || "3", 10);
 
   // Parse options: batch mode (scheduled) vs full check, optional product_ids filter
   let batchMode = false;
