@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getProduct, getCategories } from "@/lib/supabase-queries";
 import { generateSlug } from "@/lib/slug-utils";
+import { stripHtml } from "@/lib/brand-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/RichTextEditor";
@@ -259,7 +260,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             : prev.additional_images,
           video_url: data.video_url || prev.video_url,
           price: parsedPrice,
-          description: data.description || prev.description,
+          description: stripHtml(data.description || "") || prev.description,
           category: data.category || prev.category,
           vibe_category: data.vibe_category || prev.vibe_category,
           mood: data.mood || prev.mood,
