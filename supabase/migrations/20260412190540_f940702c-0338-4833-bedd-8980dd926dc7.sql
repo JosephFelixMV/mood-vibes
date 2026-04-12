@@ -1,0 +1,1 @@
+ALTER TABLE public.brands ADD COLUMN description text DEFAULT NULL;
