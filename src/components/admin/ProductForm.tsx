@@ -457,6 +457,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     fashion_season: form.fashion_season || null,
     fashion_warmth: form.fashion_warmth || null,
     fashion_occasions: form.fashion_occasions || [],
+    status: "active",
+    report_count: 0,
+    last_click_at: null,
+    last_verified_at: null,
+    last_status_code: null,
   };
 
   return (
