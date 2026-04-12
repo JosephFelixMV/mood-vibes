@@ -82,9 +82,9 @@ export default function Brands() {
                   </span>
                   <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
-                {brand.description && (
+{brand.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2">
-                    {brand.description}
+                    {formatBrandDescription(brand.description)}
                   </p>
                 )}
               </a>

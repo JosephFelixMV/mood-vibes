@@ -297,8 +297,8 @@ export default function BrandManager() {
                     <span className="text-[10px] rounded-full bg-muted px-2 py-0.5 text-muted-foreground">Hidden</span>
                   )}
                 </div>
-                {brand.description && (
-                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{brand.description}</p>
+{brand.description && (
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{formatBrandDescription(brand.description)}</p>
                 )}
                 <div className="flex items-center gap-2 mt-0.5">
                   <a
