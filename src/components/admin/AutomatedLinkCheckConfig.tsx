@@ -28,6 +28,30 @@ const LINK_CONFIG_KEYS = [
     min: 1,
     max: 20,
   },
+  {
+    key: "link_check_vendor_cap",
+    label: "Per-Vendor Cap",
+    help: "Maximum number of products from the same vendor (domain) that will be checked in a single batch run. Prevents hammering one site with too many requests. Additional products from that vendor are skipped and re-queued for the next run.",
+    type: "number",
+    min: 1,
+    max: 50,
+  },
+  {
+    key: "link_check_min_delay_ms",
+    label: "Min Delay Between Requests (ms)",
+    help: "Minimum wait time in milliseconds between requests. The actual delay is randomized between the min and max values to avoid pattern detection by vendor CDNs.",
+    type: "number",
+    min: 500,
+    max: 10000,
+  },
+  {
+    key: "link_check_max_delay_ms",
+    label: "Max Delay Between Requests (ms)",
+    help: "Maximum wait time in milliseconds between requests. Together with the min delay, this creates a jitter window that makes request timing appear more natural.",
+    type: "number",
+    min: 1000,
+    max: 15000,
+  },
 ];
 
 export default function AutomatedLinkCheckConfig() {
