@@ -110,6 +110,51 @@ export default function BrandManager() {
     setShowForm(true);
   };
 
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setBulkLoading(true);
+    let added = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const file of Array.from(files)) {
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        const name = (json.Brand_name || json.brand_name || "").trim();
+        const url = (json.Affiliate_link || json.affiliate_link || "").trim();
+        if (!name || !url) {
+          skipped++;
+          errors.push(`${file.name}: missing name or link`);
+          continue;
+        }
+        const { error } = await supabase.from("brands").insert([{
+          name,
+          affiliate_url: url,
+          regions: ["US"],
+          is_active: true,
+        }]);
+        if (error) {
+          skipped++;
+          errors.push(`${file.name}: ${error.message}`);
+        } else {
+          added++;
+        }
+      } catch {
+        skipped++;
+        errors.push(`${file.name}: invalid JSON`);
+      }
+    }
+
+    qc.invalidateQueries({ queryKey: ["admin-brands"] });
+    setBulkLoading(false);
+    e.target.value = "";
+
+    if (added > 0) toast.success(`${added} brand${added > 1 ? "s" : ""} imported`);
+    if (skipped > 0) toast.error(`${skipped} file${skipped > 1 ? "s" : ""} skipped: ${errors.join("; ")}`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
