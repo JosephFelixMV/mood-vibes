@@ -43,14 +43,18 @@ export default function FlaggedProductsDashboard() {
       if (action === "delete") {
         const { error } = await supabase.from("products").delete().in("id", ids);
         if (error) throw error;
+      } else if (action === "active") {
+        const { error } = await supabase.from("products").update({
+          status: "active",
+          report_count: 0,
+          check_failure_count: 0,
+          page_error_detail: null,
+        }).in("id", ids);
+        if (error) throw error;
       } else {
-        const update: Record<string, any> = { status: action };
-        if (action === "active") {
-          update.report_count = 0;
-          update.check_failure_count = 0;
-          update.page_error_detail = null;
-        }
-        const { error } = await supabase.from("products").update(update).in("id", ids);
+        const { error } = await supabase.from("products").update({
+          status: "unpublished",
+        }).in("id", ids);
         if (error) throw error;
       }
     },
