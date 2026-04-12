@@ -152,6 +152,12 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
       validVibes = [...validVibes, "Pure Routine"].slice(0, 4);
     }
 
+    // Auto-assign "Calm" and "Summer Glow" moods for skincare/wellness/beauty products
+    if (isPureRoutine) {
+      if (!validMoods.includes("Calm")) validMoods = [...validMoods, "Calm"].slice(0, 3);
+      if (!validMoods.includes("Summer Glow")) validMoods = [...validMoods, "Summer Glow"].slice(0, 3);
+    }
+
     console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
 
     return new Response(JSON.stringify({ core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords }), {

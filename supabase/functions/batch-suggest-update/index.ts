@@ -115,6 +115,12 @@ For keywords, suggest 5-8 lowercase search terms shoppers might use to find this
     vibes = [...vibes, "Pure Routine"].slice(0, 4);
   }
 
+  // Auto-assign "Calm" and "Summer Glow" moods for skincare/wellness/beauty products
+  if (isPureRoutine) {
+    if (!moods.includes("Calm")) moods = [...moods, "Calm"].slice(0, 3);
+    if (!moods.includes("Summer Glow")) moods = [...moods, "Summer Glow"].slice(0, 3);
+  }
+
   return { core, vibes, moods, keywords };
 }
 
