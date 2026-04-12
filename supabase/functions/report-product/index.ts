@@ -54,8 +54,8 @@ Deno.serve(async (req) => {
       turnstilePassed = verifyData.success === true;
     }
 
-    // If Turnstile is configured but failed, reject
-    if (turnstileSecret && !turnstilePassed && !honeypotTriggered) {
+    // If Turnstile is configured AND a token was provided but failed, reject
+    if (turnstileSecret && turnstile_token && !turnstilePassed && !honeypotTriggered) {
       return new Response(JSON.stringify({ error: "Verification failed. Please try again." }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
