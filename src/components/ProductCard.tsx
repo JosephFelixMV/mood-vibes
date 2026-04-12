@@ -115,9 +115,6 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
           {product.company_name && (
             <p className="mt-0.5 text-xs text-muted-foreground">by {product.company_name}</p>
           )}
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
-            Updated {format(new Date(product.updated_at), "MM/dd/yyyy")}
-          </p>
         </div>
 
         {product.description && (
