@@ -25,7 +25,7 @@ const VIBE_CATEGORIES = [
   "Going Out Era", "That Girl / That Guy", "Touch Grass", "Pet Parent Life",
   "Content Creator Kit", "Corporate Core", "Jet Set", "Clean Girl / Clean Guy",
   "Stay-In Cinema", "Aura Farming", "Ballin' on a Budget", "Icy Minimal",
-  "Hot Mess Express", "The Atelier"
+  "Hot Mess Express", "The Atelier", "Pure Routine"
 ];
 
 const MOOD_CATEGORIES: Record<string, string> = {
@@ -106,6 +106,13 @@ For keywords, suggest 5-8 lowercase search terms shoppers might use to find this
   if (isFashion && parsedPrice >= 1000) {
     if (!vibes.includes("The Atelier")) vibes = ["The Atelier", ...vibes].slice(0, 4);
     if (!moods.includes("Luxe")) moods = ["Luxe", ...moods].slice(0, 3);
+  }
+
+  // Auto-assign "Pure Routine" vibe for skincare/wellness/beauty routine products
+  const PURE_ROUTINE_CATEGORIES = ["Skin Care", "Hair Care", "Body Care", "Beauty Tools & Devices", "Health & Wellness"];
+  const isPureRoutine = core.some((c: string) => PURE_ROUTINE_CATEGORIES.includes(c));
+  if (isPureRoutine && !vibes.includes("Pure Routine")) {
+    vibes = [...vibes, "Pure Routine"].slice(0, 4);
   }
 
   return { core, vibes, moods, keywords };
