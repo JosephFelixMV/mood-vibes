@@ -30,7 +30,7 @@ const VIBE_CATEGORIES = [
   "Going Out Era", "That Girl / That Guy", "Touch Grass", "Pet Parent Life",
   "Content Creator Kit", "Corporate Core", "Jet Set", "Clean Girl / Clean Guy",
   "Stay-In Cinema", "Aura Farming", "Ballin' on a Budget", "Icy Minimal",
-  "Hot Mess Express", "The Atelier"
+  "Hot Mess Express", "The Atelier", "Pure Routine"
 ];
 
 // Mood categories with anchor keywords baked in for cost-efficient AI matching.
@@ -143,6 +143,13 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     if (isFashion && parsedPrice >= 1000) {
       if (!validVibes.includes("The Atelier")) validVibes = ["The Atelier", ...validVibes].slice(0, 4);
       if (!validMoods.includes("Luxe")) validMoods = ["Luxe", ...validMoods].slice(0, 3);
+    }
+
+    // Auto-assign "Pure Routine" vibe for skincare/wellness/beauty routine products
+    const PURE_ROUTINE_CATEGORIES = ["Skin Care", "Hair Care", "Body Care", "Beauty Tools & Devices", "Health & Wellness"];
+    const isPureRoutine = validCore.some((c: string) => PURE_ROUTINE_CATEGORIES.includes(c));
+    if (isPureRoutine && !validVibes.includes("Pure Routine")) {
+      validVibes = [...validVibes, "Pure Routine"].slice(0, 4);
     }
 
     console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
