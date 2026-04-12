@@ -140,12 +140,25 @@ Deno.serve(async (req) => {
     const ipHash = hashString(clientIp);
     const promptHash = hashString(prompt.toLowerCase());
 
-    // Check cache: same prompt hash in last 24h
+    // Fetch configurable limits early for cache check
+    const { data: configRowsEarly } = await supabase
+      .from("site_config")
+      .select("key, value")
+      .in("key", ["ai_weekly_prompt_limit", "ai_cache_duration_hours", "ai_max_results"]);
+
+    const cfgMap: Record<string, string> = {};
+    (configRowsEarly || []).forEach((r: any) => { cfgMap[r.key] = r.value; });
+
+    const CACHE_HOURS = parseInt(cfgMap["ai_cache_duration_hours"] || "24", 10);
+    const MAX_AI_RESULTS = parseInt(cfgMap["ai_max_results"] || "20", 10);
+    const WEEKLY_LIMIT = parseInt(cfgMap["ai_weekly_prompt_limit"] || "5", 10);
+
+    // Check cache: same prompt hash in cache window
     const { data: cached } = await supabase
       .from("ai_requests")
       .select("product_ids, result_count")
       .eq("prompt_hash", promptHash)
-      .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .gte("created_at", new Date(Date.now() - CACHE_HOURS * 60 * 60 * 1000).toISOString())
       .gt("result_count", 0)
       .order("created_at", { ascending: false })
       .limit(1);
