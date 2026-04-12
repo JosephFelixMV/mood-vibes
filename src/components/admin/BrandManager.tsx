@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Pencil, Trash2, Plus, ExternalLink, Upload, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
-import { formatBrandName } from "@/lib/brand-utils";
+import { formatBrandName, formatBrandDescription } from "@/lib/brand-utils";
 
 const AVAILABLE_REGIONS = [
   { code: "US", label: "🇺🇸 United States" },

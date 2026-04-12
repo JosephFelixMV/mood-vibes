@@ -4,7 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRegion } from "@/contexts/RegionContext";
 import { useSEO } from "@/hooks/useSEO";
-import { formatBrandName } from "@/lib/brand-utils";
+import { formatBrandName, formatBrandDescription } from "@/lib/brand-utils";
 
 interface Brand {
   id: string;
