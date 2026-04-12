@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Pencil, Trash2, Plus, ExternalLink, Upload, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
-import { formatBrandName } from "@/lib/brand-utils";
+import { formatBrandName, formatBrandDescription } from "@/lib/brand-utils";
 
 const AVAILABLE_REGIONS = [
   { code: "US", label: "🇺🇸 United States" },
@@ -297,8 +297,8 @@ export default function BrandManager() {
                     <span className="text-[10px] rounded-full bg-muted px-2 py-0.5 text-muted-foreground">Hidden</span>
                   )}
                 </div>
-                {brand.description && (
-                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{brand.description}</p>
+{brand.description && (
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{formatBrandDescription(brand.description)}</p>
                 )}
                 <div className="flex items-center gap-2 mt-0.5">
                   <a
