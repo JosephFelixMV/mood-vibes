@@ -84,7 +84,7 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
         <Flag className="h-3.5 w-3.5" /> Reported
       </Button>
     ) : (
-      <Button variant="ghost" size="icon" disabled className="h-8 w-8 text-muted-foreground" title="Reported">
+      <Button variant="ghost" size="icon" disabled className="h-8 w-8 text-muted-foreground" aria-label="Already reported">
         <Flag className="h-3.5 w-3.5" />
       </Button>
     );
@@ -99,6 +99,7 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
         name="website"
         tabIndex={-1}
         autoComplete="off"
+        aria-hidden="true"
         style={{ position: "absolute", left: "-9999px", opacity: 0 }}
       />
       {/* Invisible Turnstile container */}
@@ -122,7 +123,7 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
           onClick={handleReport}
           disabled={cooldown}
           className="h-8 w-8 text-muted-foreground hover:text-destructive"
-          title="Report broken link"
+          aria-label="Report broken link"
         >
           <Flag className="h-3.5 w-3.5" />
         </Button>

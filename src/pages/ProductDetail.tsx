@@ -121,7 +121,7 @@ export default function ProductDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-label="Loading product">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -159,15 +159,17 @@ export default function ProductDetail() {
                     <>
                       <button
                         onClick={() => setCurrentImage((i) => (i - 1 + allImages.length) % allImages.length)}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        aria-label="Previous image"
                       >
-                        <ChevronLeft className="h-5 w-5" />
+                        <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => setCurrentImage((i) => (i + 1) % allImages.length)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        aria-label="Next image"
                       >
-                        <ChevronRight className="h-5 w-5" />
+                        <ChevronRight className="h-5 w-5" aria-hidden="true" />
                       </button>
                     </>
                   )}
@@ -180,9 +182,11 @@ export default function ProductDetail() {
             {allImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto p-3">
                 {allImages.map((url, i) => (
-                  <button
+                    <button
                     key={i}
                     onClick={() => setCurrentImage(i)}
+                    aria-label={`View image ${i + 1} of ${allImages.length}`}
+                    aria-current={i === currentImage ? "true" : undefined}
                     className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
                       i === currentImage ? "border-primary" : "border-transparent"
                     }`}

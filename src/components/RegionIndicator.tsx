@@ -36,8 +36,8 @@ export default function RegionIndicator({ region, detected, isOverridden, onSele
             size="sm"
             className="gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
-            <Globe className="h-3.5 w-3.5" />
-            <span>{getRegionLabel(region)}</span>
+            <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Region: {getRegionLabel(region)}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">

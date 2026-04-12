@@ -22,7 +22,7 @@
     --secondary-foreground: 262 20% 20%;
 
     --muted: 260 10% 95%;
-    --muted-foreground: 0 0% 45%;
+    --muted-foreground: 0 0% 37%;
 
     --accent: 330 80% 60%;
     --accent-foreground: 0 0% 100%;
@@ -61,7 +61,7 @@
     --secondary: 260 15% 15%;
     --secondary-foreground: 260 20% 90%;
     --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 55%;
+    --muted-foreground: 0 0% 65%;
     --accent: 330 80% 65%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
@@ -98,5 +98,23 @@
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     transform: translateZ(0);
+  }
+}
+
+/* Global focus-visible indicator for WCAG 2.4.7 */
+@layer base {
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* Respect prefers-reduced-motion (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

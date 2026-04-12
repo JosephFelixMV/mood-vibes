@@ -36,7 +36,7 @@ const App = () => (
           <div className="flex min-h-screen flex-col">
             <AffiliateDisclosureBanner />
             <Navbar />
-            <main className="flex-1">
+            <main id="main-content" className="flex-1">
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/categories" element={<Categories />} />

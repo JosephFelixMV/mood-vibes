@@ -142,7 +142,7 @@ export default function Index() {
           </div>
         </div>
         {isLoading ? (
-          <div className="flex justify-center">
+          <div className="flex justify-center" role="status" aria-label="Loading">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
         ) : displayedProduct ? (
