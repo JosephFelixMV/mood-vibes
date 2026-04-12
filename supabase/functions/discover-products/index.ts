@@ -169,7 +169,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Rate limit: 5 per week per IP
+    // Fetch configurable limits from site_config
+    const { data: configRows } = await supabase
+      .from("site_config")
+      .select("key, value")
+      .in("key", ["ai_weekly_prompt_limit", "ai_cache_duration_hours", "ai_max_results"]);
+
+    const configMap: Record<string, string> = {};
+    (configRows || []).forEach((r: any) => { configMap[r.key] = r.value; });
+
+    const WEEKLY_LIMIT = parseInt(configMap["ai_weekly_prompt_limit"] || "5", 10);
+    const CACHE_HOURS = parseInt(configMap["ai_cache_duration_hours"] || "24", 10);
+    const MAX_AI_RESULTS = parseInt(configMap["ai_max_results"] || "20", 10);
+
+    // Rate limit: configurable per week per IP
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - 7);
     const { data: recentRequests } = await supabase
@@ -180,9 +193,9 @@ Deno.serve(async (req) => {
 
     const requestCount = recentRequests?.length || 0;
 
-    if (requestCount >= 5) {
+    if (requestCount >= WEEKLY_LIMIT) {
       return new Response(JSON.stringify({
-        error: "You've used all 5 AI searches for this week. Check back next week for more!",
+        error: `You've used all ${WEEKLY_LIMIT} AI searches for this week. Check back next week for more!`,
       }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
