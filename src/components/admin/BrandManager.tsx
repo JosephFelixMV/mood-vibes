@@ -36,6 +36,8 @@ export default function BrandManager() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const fileInputRef = useState<HTMLInputElement | null>(null);
 
   const { data: brands = [], isLoading } = useQuery({
     queryKey: ["admin-brands"],
