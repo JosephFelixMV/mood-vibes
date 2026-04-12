@@ -113,7 +113,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
             {product.name}
           </Link>
           {product.company_name && (
-            <p className="mt-0.5 text-xs text-muted-foreground">by {product.company_name}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{product.company_name}</p>
           )}
         </div>
 
