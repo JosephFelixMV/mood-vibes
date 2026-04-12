@@ -28,6 +28,30 @@ const LINK_CONFIG_KEYS = [
     min: 1,
     max: 20,
   },
+  {
+    key: "link_check_vendor_cap",
+    label: "Per-Vendor Cap",
+    help: "Maximum number of products from the same vendor (domain) that will be checked in a single batch run. Prevents hammering one site with too many requests. Additional products from that vendor are skipped and re-queued for the next run.",
+    type: "number",
+    min: 1,
+    max: 50,
+  },
+  {
+    key: "link_check_min_delay_ms",
+    label: "Min Delay Between Requests (ms)",
+    help: "Minimum wait time in milliseconds between requests. The actual delay is randomized between the min and max values to avoid pattern detection by vendor CDNs.",
+    type: "number",
+    min: 500,
+    max: 10000,
+  },
+  {
+    key: "link_check_max_delay_ms",
+    label: "Max Delay Between Requests (ms)",
+    help: "Maximum wait time in milliseconds between requests. Together with the min delay, this creates a jitter window that makes request timing appear more natural.",
+    type: "number",
+    min: 1000,
+    max: 15000,
+  },
 ];
 
 export default function AutomatedLinkCheckConfig() {
@@ -206,10 +230,12 @@ export default function AutomatedLinkCheckConfig() {
             <ul className="list-disc pl-4 space-y-1">
               <li><strong>Selection order:</strong> Products are checked oldest-first — whichever products haven't been checked for the longest time are prioritized. Products that have never been checked are processed first.</li>
               <li><strong>What it checks:</strong> The checker fetches each product's source URL and verifies it returns a valid page (not a 404, not redirected to the homepage, not redirected to a different domain).</li>
-              <li><strong>Rate limiting:</strong> Requests are throttled to 3 seconds between calls to the same vendor and 1 second between any requests to avoid being blocked.</li>
+              <li><strong>Per-vendor cap:</strong> No single vendor (domain) will be checked more than the configured cap per batch run. This prevents hammering one site when many of your products come from the same store. Excess products are skipped and re-queued for the next run.</li>
+              <li><strong>Randomized timing:</strong> Delays between requests are randomized within a configurable min/max jitter window (default 2–5 seconds) so request patterns appear natural and avoid CDN bot detection.</li>
+              <li><strong>Soft-block detection:</strong> After fetching a page, the response body is scanned for CAPTCHA challenges, "access denied" messages, unusual traffic warnings, and suspiciously small page sizes. Soft-blocks are flagged as warnings but don't count toward deactivation — they indicate the vendor may be blocking the checker.</li>
               <li><strong>Failure tracking:</strong> Each failed check increments a counter. When a product reaches the deactivation threshold of consecutive failures, it's automatically set to inactive.</li>
               <li><strong>Recovery:</strong> A single successful check resets the failure counter to zero, so intermittent issues won't deactivate products.</li>
-              <li><strong>Error types detected:</strong> HTTP 4xx/5xx errors (except 403), domain mismatches (redirected to different site), and home-page redirects (product page removed but domain still active).</li>
+              <li><strong>Error types detected:</strong> HTTP 4xx/5xx errors (except 403), domain mismatches (redirected to different site), home-page redirects (product page removed but domain still active), and soft-blocks (CAPTCHA, access denied, tiny pages).</li>
             </ul>
           </div>
         </CardContent>

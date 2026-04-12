@@ -6,12 +6,29 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Defaults – overridden by site_config at runtime
 let AUTO_DEACTIVATE_THRESHOLD = 3;
-const PER_VENDOR_DELAY_MS = 3000;
-const GLOBAL_DELAY_MS = 1000;
 let BATCH_SIZE = 25;
+let PER_VENDOR_CAP = 5;         // max checks per vendor per batch run
+let MIN_DELAY_MS = 2000;        // jitter range lower bound
+let MAX_DELAY_MS = 5000;        // jitter range upper bound
 
-function delay(ms: number) {
+// Soft-block detection patterns in response body
+const SOFT_BLOCK_PATTERNS = [
+  /captcha/i,
+  /cf-challenge/i,
+  /access\s*denied/i,
+  /blocked/i,
+  /verify\s+you\s+are\s+(a\s+)?human/i,
+  /please\s+enable\s+(javascript|cookies)/i,
+  /unusual\s+traffic/i,
+  /rate\s+limit/i,
+];
+
+const MIN_PAGE_SIZE = 1500; // bytes – a real product page should be larger
+
+function jitterDelay(min: number, max: number): Promise<void> {
+  const ms = Math.floor(Math.random() * (max - min + 1)) + min;
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -21,6 +38,18 @@ function getHostname(url: string): string {
   } catch {
     return "unknown";
   }
+}
+
+function detectSoftBlock(body: string): string | null {
+  if (body.length < MIN_PAGE_SIZE) {
+    return "suspicious_small_page";
+  }
+  for (const pattern of SOFT_BLOCK_PATTERNS) {
+    if (pattern.test(body.slice(0, 10000))) {
+      return `soft_block_detected: ${pattern.source}`;
+    }
+  }
+  return null;
 }
 
 Deno.serve(async (req) => {
@@ -36,15 +65,24 @@ Deno.serve(async (req) => {
   const { data: configRows } = await supabase
     .from("site_config")
     .select("key, value")
-    .in("key", ["link_check_batch_size", "link_check_deactivation_threshold"]);
+    .in("key", [
+      "link_check_batch_size",
+      "link_check_deactivation_threshold",
+      "link_check_vendor_cap",
+      "link_check_min_delay_ms",
+      "link_check_max_delay_ms",
+    ]);
 
   const cfgMap: Record<string, string> = {};
   (configRows || []).forEach((r: any) => { cfgMap[r.key] = r.value; });
 
   BATCH_SIZE = parseInt(cfgMap["link_check_batch_size"] || "25", 10);
   AUTO_DEACTIVATE_THRESHOLD = parseInt(cfgMap["link_check_deactivation_threshold"] || "3", 10);
+  PER_VENDOR_CAP = parseInt(cfgMap["link_check_vendor_cap"] || "5", 10);
+  MIN_DELAY_MS = parseInt(cfgMap["link_check_min_delay_ms"] || "2000", 10);
+  MAX_DELAY_MS = parseInt(cfgMap["link_check_max_delay_ms"] || "5000", 10);
 
-  // Parse options: batch mode (scheduled) vs full check, optional product_ids filter
+  // Parse options
   let batchMode = false;
   let productIds: string[] | null = null;
   try {
@@ -63,10 +101,8 @@ Deno.serve(async (req) => {
     .eq("is_active", true);
 
   if (productIds) {
-    // Manual trigger with specific product IDs
     query = query.in("id", productIds);
   } else if (batchMode) {
-    // In batch mode: check oldest-checked products first, limited batch
     query = query
       .order("last_checked_at", { ascending: true, nullsFirst: true })
       .limit(BATCH_SIZE);
@@ -81,10 +117,12 @@ Deno.serve(async (req) => {
     });
   }
 
-  const results: { id: string; name: string; status: string; error: boolean; deactivated?: boolean }[] = [];
+  const results: { id: string; name: string; status: string; error: boolean; deactivated?: boolean; skipped?: boolean }[] = [];
   const vendorLastRequest: Record<string, number> = {};
+  const vendorHitCount: Record<string, number> = {};
 
   for (const product of products || []) {
+    // --- Missing URL checks ---
     const missingSource = !product.source_url || product.source_url.trim() === "";
     const missingAffiliate = !product.affiliate_url || product.affiliate_url.trim() === "";
 
@@ -108,13 +146,29 @@ Deno.serve(async (req) => {
       continue;
     }
 
-    // Per-vendor rate limiting: wait if we recently hit this vendor
+    // --- Per-vendor cap: skip if we've hit this vendor too many times ---
     const vendor = getHostname(product.source_url);
+    vendorHitCount[vendor] = (vendorHitCount[vendor] || 0) + 1;
+
+    if (batchMode && vendorHitCount[vendor] > PER_VENDOR_CAP) {
+      results.push({ id: product.id, name: product.name, status: "skipped_vendor_cap", error: false, skipped: true });
+      // Still update last_checked_at so it doesn't stay at the front of the queue forever
+      await supabase.from("products").update({
+        last_checked_at: new Date().toISOString(),
+      }).eq("id", product.id);
+      continue;
+    }
+
+    // --- Randomized jitter delay ---
     const now = Date.now();
     const lastHit = vendorLastRequest[vendor] || 0;
-    const vendorWait = Math.max(0, PER_VENDOR_DELAY_MS - (now - lastHit));
-    const globalWait = GLOBAL_DELAY_MS;
-    await delay(Math.max(vendorWait, globalWait));
+    const timeSinceLast = now - lastHit;
+    if (timeSinceLast < MIN_DELAY_MS) {
+      await jitterDelay(MIN_DELAY_MS - timeSinceLast, MAX_DELAY_MS - timeSinceLast);
+    } else {
+      // Still add a small random pause between any requests
+      await jitterDelay(500, 1500);
+    }
 
     try {
       const response = await fetch(product.source_url, {
@@ -131,6 +185,15 @@ Deno.serve(async (req) => {
 
       const finalUrl = response.url;
       const hasHttpError = response.status >= 400 && response.status !== 403;
+
+      // --- Soft-block detection: read body and scan ---
+      let softBlockStatus: string | null = null;
+      try {
+        const bodyText = await response.text();
+        softBlockStatus = detectSoftBlock(bodyText);
+      } catch {
+        // body read failure is non-fatal
+      }
 
       const sourceUrlObj = new URL(product.source_url);
       const finalUrlObj = new URL(finalUrl);
@@ -159,16 +222,19 @@ Deno.serve(async (req) => {
       } else if (redirectedAway) {
         isError = true;
         status = `redirected_to_home: ${finalUrl}`;
+      } else if (softBlockStatus) {
+        // Soft-block is flagged but NOT counted as a hard error —
+        // it doesn't increment failure count or deactivate, just warns
+        status = softBlockStatus;
       }
 
-      // Update failure count
       const newCount = isError ? (product.check_failure_count || 0) + 1 : 0;
       const shouldDeactivate = isError && newCount >= AUTO_DEACTIVATE_THRESHOLD;
 
       results.push({ id: product.id, name: product.name, status, error: isError, deactivated: shouldDeactivate });
       await supabase.from("products").update({
         page_error: isError,
-        page_error_detail: isError ? status : null,
+        page_error_detail: isError || softBlockStatus ? status : null,
         check_failure_count: newCount,
         last_checked_at: new Date().toISOString(),
         ...(shouldDeactivate ? { is_active: false } : {}),
@@ -192,12 +258,14 @@ Deno.serve(async (req) => {
 
   const deactivated = results.filter((r) => r.deactivated).length;
   const errors = results.filter((r) => r.error).length;
+  const skipped = results.filter((r) => (r as any).skipped).length;
 
   return new Response(JSON.stringify({
     results,
     checked: results.length,
     errors,
     deactivated,
+    skipped,
     mode: batchMode ? "batch" : "full",
   }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
