@@ -137,7 +137,7 @@ export default function Products() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-20">
+        <div className="flex justify-center py-20" role="status" aria-label="Loading products">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : regionProducts.length === 0 ? (

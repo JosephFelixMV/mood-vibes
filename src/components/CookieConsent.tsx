@@ -108,7 +108,7 @@ export default function CookieConsent() {
           : "We require your consent before setting non-essential cookies.";
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[100] p-4 md:p-6">
+    <div className="fixed inset-x-0 bottom-0 z-[100] p-4 md:p-6" role="dialog" aria-label="Cookie consent" aria-live="polite">
       <div className="mx-auto max-w-2xl rounded-2xl border bg-card/95 p-5 shadow-2xl backdrop-blur-md">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -118,8 +118,8 @@ export default function CookieConsent() {
               {regionLabel}
             </span>
           </div>
-          <button onClick={handleEssentialOnly} className="shrink-0 text-muted-foreground hover:text-foreground">
-            <X className="h-4 w-4" />
+          <button onClick={handleEssentialOnly} className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Dismiss cookie banner (essential cookies only)">
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 

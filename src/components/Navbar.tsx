@@ -20,7 +20,7 @@ export default function Navbar() {
   const { region, detected, isOverridden, setRegion, clearOverride } = useRegion();
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md" aria-label="Main navigation">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight">
           <Sparkles className="h-6 w-6 text-primary" />
@@ -56,7 +56,9 @@ export default function Navbar() {
         {/* Mobile toggle */}
         <button
           onClick={() => setOpen(!open)}
-          className="rounded-lg p-2 text-muted-foreground md:hidden"
+          className="rounded-lg p-2 text-muted-foreground md:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
