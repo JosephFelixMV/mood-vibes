@@ -11,6 +11,7 @@ import { Save, Loader2, ExternalLink, BarChart3, MousePointer, Search, Globe, Fi
 import { toast } from "sonner";
 import CategoryVibeManager from "./CategoryVibeManager";
 import AutomatedLinkCheckConfig from "./AutomatedLinkCheckConfig";
+import AIDiscoverConfig from "./AIDiscoverConfig";
 
 interface ConfigItem {
   id: string;
@@ -165,6 +166,9 @@ export default function SiteConfiguration() {
 
       {/* Category & Vibe Manager */}
       <CategoryVibeManager />
+
+      {/* AI Discover Config */}
+      <AIDiscoverConfig />
 
       {/* Automated Link Check */}
       <AutomatedLinkCheckConfig />
