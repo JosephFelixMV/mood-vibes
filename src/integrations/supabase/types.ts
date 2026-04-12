@@ -278,6 +278,41 @@ export type Database = {
           },
         ]
       }
+      product_reports: {
+        Row: {
+          honeypot_triggered: boolean
+          id: string
+          product_id: string
+          reported_at: string
+          reporter_fingerprint: string
+          turnstile_passed: boolean
+        }
+        Insert: {
+          honeypot_triggered?: boolean
+          id?: string
+          product_id: string
+          reported_at?: string
+          reporter_fingerprint: string
+          turnstile_passed?: boolean
+        }
+        Update: {
+          honeypot_triggered?: boolean
+          id?: string
+          product_id?: string
+          reported_at?: string
+          reporter_fingerprint?: string
+          turnstile_passed?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reports_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_specifications: {
         Row: {
           created_at: string
@@ -329,14 +364,19 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           last_checked_at: string | null
+          last_click_at: string | null
+          last_status_code: number | null
+          last_verified_at: string | null
           mood: string | null
           name: string
           page_error: boolean
           page_error_detail: string | null
           price: number
           regions: string[]
+          report_count: number
           slug: string
           source_url: string
+          status: string
           updated_at: string
           vibe_category: string | null
           video_url: string | null
@@ -356,14 +396,19 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           last_checked_at?: string | null
+          last_click_at?: string | null
+          last_status_code?: number | null
+          last_verified_at?: string | null
           mood?: string | null
           name: string
           page_error?: boolean
           page_error_detail?: string | null
           price: number
           regions?: string[]
+          report_count?: number
           slug: string
           source_url?: string
+          status?: string
           updated_at?: string
           vibe_category?: string | null
           video_url?: string | null
@@ -383,14 +428,19 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           last_checked_at?: string | null
+          last_click_at?: string | null
+          last_status_code?: number | null
+          last_verified_at?: string | null
           mood?: string | null
           name?: string
           page_error?: boolean
           page_error_detail?: string | null
           price?: number
           regions?: string[]
+          report_count?: number
           slug?: string
           source_url?: string
+          status?: string
           updated_at?: string
           vibe_category?: string | null
           video_url?: string | null
