@@ -18,3 +18,11 @@ export function formatBrandName(name: string): string {
 export function formatBrandDescription(desc: string): string {
   return decodeHtmlEntities(desc).trim();
 }
+
+/** Strip all HTML/XML tags from a string and decode entities */
+export function stripHtml(html: string): string {
+  if (!html) return "";
+  // Remove tags, then decode entities, then normalize whitespace
+  const stripped = html.replace(/<[^>]*>/g, " ");
+  return decodeHtmlEntities(stripped).replace(/\s+/g, " ").trim();
+}

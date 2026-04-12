@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, FileUp, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { generateSlug } from "@/lib/slug-utils";
+import { stripHtml } from "@/lib/brand-utils";
 
 interface UploadResult {
   fileName: string;
@@ -73,7 +74,7 @@ export default function BulkUpload() {
           .from("products")
           .insert([{
             name: data.name.trim(),
-            description: data.description || "",
+            description: stripHtml(data.description || ""),
             price: parsedPrice,
             image_url: data.image_url || null,
             affiliate_url: data.affiliate_url.trim(),
