@@ -230,10 +230,12 @@ export default function AutomatedLinkCheckConfig() {
             <ul className="list-disc pl-4 space-y-1">
               <li><strong>Selection order:</strong> Products are checked oldest-first — whichever products haven't been checked for the longest time are prioritized. Products that have never been checked are processed first.</li>
               <li><strong>What it checks:</strong> The checker fetches each product's source URL and verifies it returns a valid page (not a 404, not redirected to the homepage, not redirected to a different domain).</li>
-              <li><strong>Rate limiting:</strong> Requests are throttled to 3 seconds between calls to the same vendor and 1 second between any requests to avoid being blocked.</li>
+              <li><strong>Per-vendor cap:</strong> No single vendor (domain) will be checked more than the configured cap per batch run. This prevents hammering one site when many of your products come from the same store. Excess products are skipped and re-queued for the next run.</li>
+              <li><strong>Randomized timing:</strong> Delays between requests are randomized within a configurable min/max jitter window (default 2–5 seconds) so request patterns appear natural and avoid CDN bot detection.</li>
+              <li><strong>Soft-block detection:</strong> After fetching a page, the response body is scanned for CAPTCHA challenges, "access denied" messages, unusual traffic warnings, and suspiciously small page sizes. Soft-blocks are flagged as warnings but don't count toward deactivation — they indicate the vendor may be blocking the checker.</li>
               <li><strong>Failure tracking:</strong> Each failed check increments a counter. When a product reaches the deactivation threshold of consecutive failures, it's automatically set to inactive.</li>
               <li><strong>Recovery:</strong> A single successful check resets the failure counter to zero, so intermittent issues won't deactivate products.</li>
-              <li><strong>Error types detected:</strong> HTTP 4xx/5xx errors (except 403), domain mismatches (redirected to different site), and home-page redirects (product page removed but domain still active).</li>
+              <li><strong>Error types detected:</strong> HTTP 4xx/5xx errors (except 403), domain mismatches (redirected to different site), home-page redirects (product page removed but domain still active), and soft-blocks (CAPTCHA, access denied, tiny pages).</li>
             </ul>
           </div>
         </CardContent>
