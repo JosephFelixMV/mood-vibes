@@ -375,6 +375,7 @@ export type Database = {
           page_error: boolean
           page_error_detail: string | null
           price: number
+          price_below_msrp: boolean
           regions: string[]
           report_count: number
           slug: string
@@ -407,6 +408,7 @@ export type Database = {
           page_error?: boolean
           page_error_detail?: string | null
           price: number
+          price_below_msrp?: boolean
           regions?: string[]
           report_count?: number
           slug: string
@@ -439,6 +441,7 @@ export type Database = {
           page_error?: boolean
           page_error_detail?: string | null
           price?: number
+          price_below_msrp?: boolean
           regions?: string[]
           report_count?: number
           slug?: string

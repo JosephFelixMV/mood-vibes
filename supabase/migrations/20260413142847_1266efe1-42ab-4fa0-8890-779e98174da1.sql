@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN price_below_msrp boolean NOT NULL DEFAULT false;
