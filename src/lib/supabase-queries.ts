@@ -51,9 +51,21 @@ export async function getProducts(options?: {
       query = query.order("date_added", { ascending: false });
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return data;
+  // Paginate to bypass the 1000-row default limit
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data: page, error } = await query.range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(page || []);
+    hasMore = (page?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
+
+  return allData;
 }
 
 export async function getProduct(idOrSlug: string) {
@@ -90,15 +102,25 @@ export async function getCategories(type?: "core" | "vibe" | "mood") {
 }
 
 export async function getProductCountByCategory() {
-  const { data, error } = await supabase
-    .from("products")
-    .select("category")
-    .eq("is_active", true);
-  if (error) throw error;
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("products")
+      .select("category")
+      .eq("is_active", true)
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(data || []);
+    hasMore = (data?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
 
   const counts: Record<string, number> = {};
-  data.forEach((p) => {
-    p.category.split(",").forEach((c) => {
+  allData.forEach((p) => {
+    p.category.split(",").forEach((c: string) => {
       const trimmed = c.trim();
       if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
     });
@@ -107,17 +129,27 @@ export async function getProductCountByCategory() {
 }
 
 export async function getProductCountByVibe() {
-  const { data, error } = await supabase
-    .from("products")
-    .select("vibe_category")
-    .eq("is_active", true)
-    .not("vibe_category", "is", null);
-  if (error) throw error;
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("products")
+      .select("vibe_category")
+      .eq("is_active", true)
+      .not("vibe_category", "is", null)
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(data || []);
+    hasMore = (data?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
 
   const counts: Record<string, number> = {};
-  data.forEach((p) => {
+  allData.forEach((p) => {
     if (p.vibe_category) {
-      p.vibe_category.split(",").forEach((v) => {
+      p.vibe_category.split(",").forEach((v: string) => {
         const trimmed = v.trim();
         if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
       });
@@ -184,25 +216,45 @@ export function getRandomProduct(products: Product[], excludeId?: string): Produ
 }
 
 export async function getProductClickCounts(): Promise<Record<string, number>> {
-  const { data, error } = await supabase
-    .from("product_clicks")
-    .select("product_id");
-  if (error) throw error;
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("product_clicks")
+      .select("product_id")
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(data || []);
+    hasMore = (data?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
   const counts: Record<string, number> = {};
-  (data || []).forEach((row) => {
+  allData.forEach((row) => {
     counts[row.product_id] = (counts[row.product_id] || 0) + 1;
   });
   return counts;
 }
 
 export async function getProductViewCounts(): Promise<Record<string, number>> {
-  const { data, error } = await supabase
-    .from("product_events")
-    .select("product_id")
-    .eq("event_type", "view");
-  if (error) throw error;
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("product_events")
+      .select("product_id")
+      .eq("event_type", "view")
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(data || []);
+    hasMore = (data?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
   const counts: Record<string, number> = {};
-  (data || []).forEach((row: any) => {
+  allData.forEach((row: any) => {
     counts[row.product_id] = (counts[row.product_id] || 0) + 1;
   });
   return counts;
