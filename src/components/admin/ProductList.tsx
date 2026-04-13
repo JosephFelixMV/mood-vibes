@@ -69,7 +69,7 @@ export default function ProductList({ onEdit }: Props) {
   const qc = useQueryClient();
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterVibe, setFilterVibe] = useState("all");
-  const [filterBrand, setFilterBrand] = useState("all");
+  const [filterVendor, setFilterVendor] = useState("all");
   const [filterMood, setFilterMood] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterError, setFilterError] = useState("all");
@@ -100,6 +100,13 @@ export default function ProductList({ onEdit }: Props) {
   const { data: moodCategories = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
+  });
+  const { data: brandsList = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name").eq("is_active", true).order("name");
+      return data || [];
+    },
   });
 
   const { data: clickCounts = {} } = useQuery({
@@ -203,6 +210,40 @@ export default function ProductList({ onEdit }: Props) {
       setCheckingLinks(false);
     }
   };
+
+  const [matchingVendors, setMatchingVendors] = useState(false);
+  const handleAutoMatchVendors = async () => {
+    setMatchingVendors(true);
+    try {
+      const unmatched = products.filter((p) => !(p as any).vendor_id && p.source_url);
+      let matched = 0;
+      for (const product of unmatched) {
+        try {
+          const sourceHost = new URL(product.source_url).hostname.replace(/^www\./, "");
+          const brand = brandsList.find((b: any) => {
+            try {
+              const brandHost = new URL(b.affiliate_url || "").hostname.replace(/^www\./, "");
+              return sourceHost.includes(brandHost) || brandHost.includes(sourceHost);
+            } catch { return false; }
+          });
+          if (brand) {
+            await supabase.from("products").update({ vendor_id: brand.id }).eq("id", product.id);
+            matched++;
+          }
+        } catch { /* skip invalid URLs */ }
+      }
+      if (matched > 0) {
+        qc.invalidateQueries({ queryKey: ["admin-products"] });
+        toast.success(`Matched ${matched} product(s) to vendors`);
+      } else {
+        toast.info("No new vendor matches found");
+      }
+    } catch (err: any) {
+      toast.error("Vendor matching failed: " + err.message);
+    } finally {
+      setMatchingVendors(false);
+    }
+  };
   const toggleSort = (col: "views" | "clicks" | "updated") => {
     if (sortColumn === col) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -221,8 +262,8 @@ export default function ProductList({ onEdit }: Props) {
       const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
       if (!matchName && !matchCompany && !matchCategory && !matchVibe) return false;
     }
-    if (filterBrand !== "all") {
-      if ((p.company_name || "").toLowerCase() !== filterBrand.toLowerCase()) return false;
+    if (filterVendor !== "all") {
+      if ((p as any).vendor_id !== filterVendor) return false;
     }
     if (filterCategory !== "all") {
       const cats = parseTaxonomyString(p.category);
@@ -317,14 +358,24 @@ export default function ProductList({ onEdit }: Props) {
             </Tooltip>
           </TooltipProvider>
         </div>
-        <Select value={filterBrand} onValueChange={handleFilterChange(setFilterBrand)}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleAutoMatchVendors}
+          disabled={matchingVendors}
+          className="gap-1.5"
+        >
+          {matchingVendors ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "🏷️"}
+          {matchingVendors ? "Matching…" : "Auto-match Vendors"}
+        </Button>
+        <Select value={filterVendor} onValueChange={handleFilterChange(setFilterVendor)}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Brand" />
+            <SelectValue placeholder="Vendor" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Brands</SelectItem>
-            {Array.from(new Set(products.map((p) => p.company_name).filter(Boolean))).sort().map((name) => (
-              <SelectItem key={name} value={name!}>{name}</SelectItem>
+            <SelectItem value="all">All Vendors</SelectItem>
+            {brandsList.map((b: any) => (
+              <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -426,7 +477,7 @@ export default function ProductList({ onEdit }: Props) {
             Clear dates
           </Button>
         )}
-        {(filterCategory !== "all" || filterVibe !== "all" || filterMood !== "all" || filterBrand !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
+        {(filterCategory !== "all" || filterVibe !== "all" || filterMood !== "all" || filterVendor !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
           <Button
             variant="outline"
             size="sm"
@@ -436,7 +487,7 @@ export default function ProductList({ onEdit }: Props) {
               setFilterCategory("all");
               setFilterVibe("all");
               setFilterMood("all");
-              setFilterBrand("all");
+              setFilterVendor("all");
               setFilterStatus("all");
               setFilterError("all");
               setDateFrom(undefined);

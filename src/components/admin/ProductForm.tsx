@@ -80,6 +80,7 @@ const empty = {
   fashion_warmth: "" as string,
   fashion_occasions: [] as string[],
   price_below_msrp: false,
+  vendor_id: "" as string,
 };
 
 export default function ProductForm({ editId, onDone, savedState }: Props) {
@@ -100,6 +101,13 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     queryKey: ["product", editId],
     queryFn: () => getProduct(editId!),
     enabled: !!editId,
+  });
+  const { data: brandsList = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name, affiliate_url").eq("is_active", true).order("name");
+      return data || [];
+    },
   });
   const { data: allKeywords = [] } = useQuery({
     queryKey: ["keywords"],
@@ -161,6 +169,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           fashion_warmth: (existing as any).fashion_warmth || "",
           fashion_occasions: (existing as any).fashion_occasions || [],
           price_below_msrp: (existing as any).price_below_msrp || false,
+          vendor_id: (existing as any).vendor_id || "",
         });
       });
     } else if (!editId && !savedState?.current) {
@@ -365,6 +374,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         fashion_season: isFashion ? form.fashion_season || null : null,
         fashion_warmth: isFashion ? form.fashion_warmth || null : null,
         fashion_occasions: isFashion ? form.fashion_occasions : [],
+        vendor_id: form.vendor_id || null,
       };
 
       let productId = editId;
@@ -472,6 +482,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     last_verified_at: null,
     last_status_code: null,
     price_below_msrp: form.price_below_msrp,
+    vendor_id: form.vendor_id || null,
   };
 
   return (
@@ -503,6 +514,42 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         <div>
           <Label>Company Name</Label>
           <Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
+        </div>
+        <div>
+          <Label>Vendor</Label>
+          <Select value={form.vendor_id || "none"} onValueChange={(v) => set("vendor_id", v === "none" ? "" : v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select vendor…" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— No Vendor —</SelectItem>
+              {brandsList.map((b: any) => (
+                <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="mt-1 text-xs text-muted-foreground">Select the vendor/retailer from the brands list</p>
+          {form.source_url && !form.vendor_id && brandsList.length > 0 && (() => {
+            try {
+              const sourceHost = new URL(form.source_url).hostname.replace(/^www\./, "");
+              const match = brandsList.find((b: any) => {
+                try {
+                  const brandHost = new URL(b.affiliate_url).hostname.replace(/^www\./, "");
+                  return sourceHost.includes(brandHost) || brandHost.includes(sourceHost);
+                } catch { return false; }
+              });
+              if (match) return (
+                <button
+                  type="button"
+                  onClick={() => set("vendor_id", match.id)}
+                  className="mt-1 text-xs text-primary hover:underline"
+                >
+                  ✨ Auto-detected: {match.name} — click to apply
+                </button>
+              );
+            } catch { /* invalid URL */ }
+            return null;
+          })()}
         </div>
         <div>
           <Label>Affiliate Link</Label>
