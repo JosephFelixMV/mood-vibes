@@ -9,7 +9,7 @@ const corsHeaders = {
 const CORE_CATEGORIES = [
   "Automotive", "Cleaning", "Garden", "Health & Wellness", "Office & Stationery",
   "Books", "Crafting & DIY", "Fitness & Sports", "Gaming", "Pets",
-  "Accessories", "Bags & Totes", "Jewelry", "Watches",
+  "Accessories", "Bags & Totes", "Eyewear", "Jewelry", "Watches",
   "Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear",
   "Baby", "Kids", "Toys", "Parenting & Maternity",
   "Cookware & Bakeware", "Coffee & Tea", "Dining & Entertaining", "Kitchen Storage",
@@ -74,7 +74,7 @@ const dedupeStrings = (values: string[] = []) => {
 const VENDOR_HINTS: Record<string, { match: (url: string, name: string) => boolean; hint: string }> = {
   caddis: {
     match: (url, name) => url.includes("caddislife.com") || name.toLowerCase().includes("caddis"),
-    hint: "This product is from Caddis Eyewear — an eyewear brand. Always include 'Accessories' in core categories. The product is almost certainly eyewear (glasses, sunglasses, readers).",
+    hint: "This product is from Caddis Eyewear — an eyewear brand. Always include 'Eyewear' in core categories. The product is almost certainly eyewear (glasses, sunglasses, readers).",
   },
   containerstore: {
     match: (url, name) => url.includes("containerstore.com") || name.toLowerCase().includes("container store"),
