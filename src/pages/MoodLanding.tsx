@@ -86,21 +86,19 @@ export default function MoodLanding() {
 
       {/* Random pick */}
       {regionProducts.length > 0 && (
-        <div className="mb-10 rounded-2xl border bg-muted/30 p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-heading text-lg font-semibold">🎲 Discover Something Random</h2>
+        <div className="mb-10">
+          {randomPick && <ProductCard product={randomPick} featured />}
+          <div className="mt-6 flex justify-center">
             <Button
-              variant="outline"
-              size="sm"
+              size="lg"
               onClick={handleRandom}
               disabled={cooldown || regionProducts.length === 0}
-              className="gap-1.5 rounded-full"
+              className="gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105"
             >
-              <Shuffle className="h-4 w-4" />
-              {cooldown ? "Wait…" : "Random Pick"}
+              <Sparkles className="h-5 w-5" />
+              {cooldown ? "Wait…" : "Discover"}
             </Button>
           </div>
-          {randomPick && <ProductCard product={randomPick} featured />}
         </div>
       )}
 
