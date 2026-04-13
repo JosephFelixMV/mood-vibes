@@ -51,9 +51,21 @@ export async function getProducts(options?: {
       query = query.order("date_added", { ascending: false });
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return data;
+  // Paginate to bypass the 1000-row default limit
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data: page, error } = await query.range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(page || []);
+    hasMore = (page?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
+
+  return allData;
 }
 
 export async function getProduct(idOrSlug: string) {
