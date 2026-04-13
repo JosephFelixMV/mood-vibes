@@ -253,14 +253,14 @@ export default function CategoryLanding() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="font-heading text-lg font-semibold">All {categoryName} Products</h2>
           <div className="flex gap-3">
-            <Select value={filterBrand || "all"} onValueChange={(v) => setFilterBrand(v === "all" ? "" : v)}>
+            <Select value={filterVendor || "all"} onValueChange={(v) => setFilterVendor(v === "all" ? "" : v)}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Brand" />
+                <SelectValue placeholder="Vendor" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Brands</SelectItem>
-                {availableBrands.map((name) => (
-                  <SelectItem key={name} value={name}>{name}</SelectItem>
+                <SelectItem value="all">All Vendors</SelectItem>
+                {availableVendors.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
