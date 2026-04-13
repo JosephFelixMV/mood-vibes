@@ -18,6 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
 
 /* ── Inline‑editable cell ── */
 function InlineEdit({ value, onSave, type = "text", className }: { value: string; onSave: (v: string) => void; type?: "text" | "number"; className?: string }) {
@@ -113,7 +114,13 @@ export default function ProductList({ onEdit }: Props) {
 
   const inlineUpdateMut = useMutation({
     mutationFn: async ({ id, field, value }: { id: string; field: "name" | "price" | "category" | "vibe_category" | "mood"; value: string }) => {
-      const update = field === "price" ? { price: Number(value) } : { [field]: value };
+      const update = field === "price"
+        ? { price: Number(value) }
+        : {
+            [field]: field === "category"
+              ? stringifyTaxonomyValues(value.split(","))
+              : stringifyTaxonomyValues(value.split(",")) || null,
+          };
       const { error } = await supabase.from("products").update(update).eq("id", id);
       if (error) throw error;
     },
@@ -218,15 +225,15 @@ export default function ProductList({ onEdit }: Props) {
       if ((p.company_name || "").toLowerCase() !== filterBrand.toLowerCase()) return false;
     }
     if (filterCategory !== "all") {
-      const cats = p.category.split(",").map((c) => c.trim());
+      const cats = parseTaxonomyString(p.category);
       if (!cats.includes(filterCategory)) return false;
     }
     if (filterVibe !== "all") {
-      const vibes = (p.vibe_category || "").split(",").filter(Boolean);
+      const vibes = parseTaxonomyString(p.vibe_category || "");
       if (!vibes.includes(filterVibe)) return false;
     }
     if (filterMood !== "all") {
-      const moods = (p.mood || "").split(",").map((m) => m.trim()).filter(Boolean);
+      const moods = parseTaxonomyString(p.mood || "");
       if (!moods.includes(filterMood)) return false;
     }
     if (filterStatus === "active" && !p.is_active) return false;

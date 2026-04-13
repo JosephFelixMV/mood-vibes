@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
 
 interface MultiTagSelectProps {
   value: string; // comma-separated
@@ -10,10 +11,7 @@ interface MultiTagSelectProps {
 }
 
 export function MultiTagSelect({ value, options, onSave, className }: MultiTagSelectProps) {
-  const tags = value
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
+  const tags = parseTaxonomyString(value);
 
   const [editing, setEditing] = useState(false);
   const [search, setSearch] = useState("");
@@ -37,13 +35,13 @@ export function MultiTagSelect({ value, options, onSave, className }: MultiTagSe
   }, [editing]);
 
   const removeTag = (tag: string) => {
-    const next = tags.filter((t) => t !== tag).join(", ");
+    const next = stringifyTaxonomyValues(tags.filter((t) => t !== tag));
     onSave(next);
   };
 
   const addTag = (tag: string) => {
     if (tags.includes(tag)) return;
-    const next = [...tags, tag].join(", ");
+    const next = stringifyTaxonomyValues([...tags, tag]);
     onSave(next);
     setSearch("");
   };

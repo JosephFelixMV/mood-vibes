@@ -55,6 +55,20 @@ const MOOD_CATEGORIES: Record<string, string> = {
   "Fresh Start": "clean, organize, declutter, storage, bins, baskets, closet, laundry, desk, tidy, renewal, fresh, spray, supplies, recycling, dividers, marie kondo, minimalism",
 };
 
+const dedupeStrings = (values: string[] = []) => {
+  const seen = new Set<string>();
+
+  return values
+    .map((value) => value.trim())
+    .filter((value) => {
+      if (!value) return false;
+      const key = value.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -130,11 +144,11 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     
     const suggestions = JSON.parse(jsonMatch[0]);
     
-    let validCore = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
-    let validVibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
+    let validCore = dedupeStrings((suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c))).slice(0, 5);
+    let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
     const moodNames = Object.keys(MOOD_CATEGORIES);
-    let validMoods = (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3);
-    const validKeywords = (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 8);
+    let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
+    const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 8);
 
     // Auto-assign "The Atelier" vibe and "Luxe" mood for fashion items over $1000
     const FASHION_CATEGORIES = ["Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear", "Accessories", "Bags & Totes", "Jewelry", "Watches"];
@@ -164,6 +178,9 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     if (isFreshStart && !validMoods.includes("Fresh Start")) {
       validMoods = [...validMoods, "Fresh Start"].slice(0, 3);
     }
+
+    validVibes = dedupeStrings(validVibes).slice(0, 4);
+    validMoods = dedupeStrings(validMoods).slice(0, 3);
 
     console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
 
