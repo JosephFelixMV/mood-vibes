@@ -250,7 +250,7 @@ export default function ProductDetail() {
               <span className="font-heading text-3xl font-bold text-primary">
                 {formatPrice(product.price)}
               </span>
-              <p className="text-xs text-muted-foreground">Price at retailer may vary</p>
+              <p className="text-xs text-muted-foreground">{product.price_below_msrp ? "Seller often offers deals below MSRP" : "Price at retailer may vary"}</p>
             </div>
 
             <div className="flex flex-wrap gap-3 pt-2">

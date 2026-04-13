@@ -78,6 +78,7 @@ const empty = {
   fashion_season: "" as string,
   fashion_warmth: "" as string,
   fashion_occasions: [] as string[],
+  price_below_msrp: false,
 };
 
 export default function ProductForm({ editId, onDone, savedState }: Props) {
@@ -158,6 +159,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           fashion_season: (existing as any).fashion_season || "",
           fashion_warmth: (existing as any).fashion_warmth || "",
           fashion_occasions: (existing as any).fashion_occasions || [],
+          price_below_msrp: (existing as any).price_below_msrp || false,
         });
       });
     } else if (!editId && !savedState?.current) {
@@ -354,6 +356,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         video_url: form.video_url || null,
         regions: form.regions.length > 0 ? form.regions : ["US"],
         slug: generateSlug(form.name),
+        price_below_msrp: form.price_below_msrp,
         fashion_season: isFashion ? form.fashion_season || null : null,
         fashion_warmth: isFashion ? form.fashion_warmth || null : null,
         fashion_occasions: isFashion ? form.fashion_occasions : [],
@@ -463,6 +466,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     last_click_at: null,
     last_verified_at: null,
     last_status_code: null,
+    price_below_msrp: form.price_below_msrp,
   };
 
   return (
@@ -559,6 +563,15 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         <div>
           <Label>Price</Label>
           <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => set("price", e.target.value)} required placeholder="29.99" />
+          <label className="mt-2 flex items-start gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.price_below_msrp}
+              onChange={(e) => set("price_below_msrp", e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-primary accent-primary"
+            />
+            <span className="text-xs text-muted-foreground">Check to override text — <em>Seller often offers deals below MSRP</em></span>
+          </label>
         </div>
         <div>
           <Label>Description</Label>

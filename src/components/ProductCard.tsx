@@ -129,7 +129,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
             <span className="font-heading text-xl font-bold text-primary">
               {formatPrice(product.price)}
             </span>
-            <p className="text-[10px] text-muted-foreground">Price at retailer may vary</p>
+            <p className="text-[10px] text-muted-foreground">{product.price_below_msrp ? "Seller often offers deals below MSRP" : "Price at retailer may vary"}</p>
           </div>
           <div className="flex items-center gap-1.5">
             <ReportBrokenLink productId={product.id} />
