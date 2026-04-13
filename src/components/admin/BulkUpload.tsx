@@ -77,6 +77,22 @@ export default function BulkUpload() {
           ? parseFloat(data.price.replace(/[^0-9.]/g, "")) || 0
           : (data.price || 0);
 
+        // Auto-match vendor from source_url
+        let vendorId: string | null = null;
+        const sourceUrl = data.source_url || data.affiliate_url || "";
+        if (sourceUrl && brandsList.length > 0) {
+          try {
+            const sourceHost = new URL(sourceUrl).hostname.replace(/^www\./, "");
+            const match = brandsList.find((b: any) => {
+              try {
+                const brandHost = new URL(b.affiliate_url).hostname.replace(/^www\./, "");
+                return sourceHost.includes(brandHost) || brandHost.includes(sourceHost);
+              } catch { return false; }
+            });
+            if (match) vendorId = match.id;
+          } catch { /* invalid URL */ }
+        }
+
         // Insert product as draft (is_active = false)
         const { data: inserted, error } = await supabase
           .from("products")
@@ -93,6 +109,7 @@ export default function BulkUpload() {
             vibe_category: stringifyTaxonomyValues((data.vibe_category || "").split(",")) || null,
             video_url: data.video_url || null,
             slug: generateSlug(data.name.trim()),
+            vendor_id: vendorId,
           }])
           .select("id")
           .single();
