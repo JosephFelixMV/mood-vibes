@@ -30,6 +30,19 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
     staleTime: 1000 * 60 * 10,
   });
 
+  const { data: allBrands = [] } = useQuery({
+    queryKey: ["brands-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name");
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const vendorName = product.vendor_id
+    ? allBrands.find((b: any) => b.id === product.vendor_id)?.name
+    : null;
+
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
   useEffect(() => {
@@ -149,11 +162,16 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
           <div className="flex items-center gap-1.5">
             <ReportBrokenLink productId={product.id} />
             <ShareButton product={product} />
-            <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
-              <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`Buy ${product.name} (opens in new tab)`}>
-                Buy Now <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-              </a>
-            </Button>
+            <div className="flex flex-col items-end gap-0.5">
+              <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
+                <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`Buy ${product.name} (opens in new tab)`}>
+                  Buy Now <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                </a>
+              </Button>
+              {vendorName && (
+                <span className="text-[10px] text-muted-foreground">via {vendorName}</span>
+              )}
+            </div>
           </div>
         </div>
       </div>

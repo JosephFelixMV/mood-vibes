@@ -53,6 +53,7 @@ const MOOD_CATEGORIES: Record<string, string> = {
   "Spring Reset": "fresh, clean, pastel, renewal, decluttering, light, floral, garden, new beginnings",
   "I Love Milo": "pet, animal, dog, cat, pet beds, toys, feeding, treats, grooming",
   "Fresh Start": "clean, organize, declutter, storage, bins, baskets, closet, laundry, desk, tidy, renewal, fresh, spray, supplies, recycling, dividers, marie kondo, minimalism",
+  "Low-Key Logic": "practical, functional, efficient, smart, unpretentious, everyday, reliable, no-fuss, bulk, basics, sensible, durable, utility, multipurpose, straightforward",
 };
 
 const dedupeStrings = (values: string[] = []) => {
