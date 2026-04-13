@@ -10,7 +10,7 @@ export function filterByRegion(products: Product[], region?: VisitorRegion): Pro
   if (!region) return products;
   return products.filter((p) => {
     const regions = (p as any).regions as string[] | null;
-    if (!regions || regions.length === 0) return true; // no regions = show everywhere
+    if (!regions || regions.length === 0) return true;
     return regions.includes(region) || regions.includes("Intl");
   });
 }
@@ -20,19 +20,23 @@ export interface PaginatedResult<T> {
   count: number;
 }
 
-export async function getProducts(options?: {
+type SortOption = "newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc";
+
+export interface ProductQueryOptions {
   category?: string;
   vibeCategory?: string;
-  sort?: "newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc";
+  sort?: SortOption;
   activeOnly?: boolean;
   brand?: string;
-  page?: number;
-  pageSize?: number;
-}): Promise<PaginatedResult<Product>> {
-  const pageSize = options?.pageSize ?? 30;
-  const page = options?.page ?? 1;
+}
 
-  let query = supabase.from("products").select("*", { count: "exact" });
+function applyProductFilters(
+  options?: ProductQueryOptions,
+  withCount = false,
+) {
+  let query = withCount
+    ? supabase.from("products").select("*", { count: "exact" })
+    : supabase.from("products").select("*");
 
   if (options?.activeOnly !== false) {
     query = query.eq("is_active", true);
@@ -64,11 +68,37 @@ export async function getProducts(options?: {
     default:
       query = query.order("date_added", { ascending: false });
   }
+  return query;
+}
 
+/** Server-side paginated product fetch — returns one page + total count */
+export async function getProductsPaginated(
+  options?: ProductQueryOptions & { page?: number; pageSize?: number },
+): Promise<PaginatedResult<Product>> {
+  const pageSize = options?.pageSize ?? 30;
+  const page = options?.page ?? 1;
+  const query = applyProductFilters(options, true);
   const from = (page - 1) * pageSize;
   const { data, error, count } = await query.range(from, from + pageSize - 1);
   if (error) throw error;
   return { data: data || [], count: count ?? 0 };
+}
+
+/** Fetch ALL products (paginating internally past the 1000-row cap). Returns Product[]. */
+export async function getProducts(options?: ProductQueryOptions): Promise<Product[]> {
+  const PAGE_SIZE = 1000;
+  let allData: Product[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const query = applyProductFilters(options);
+    const { data: page, error } = await query.range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat((page || []) as Product[]);
+    hasMore = (page?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
+  return allData;
 }
 
 /** Fetch all distinct brand names for filter dropdowns */
@@ -182,11 +212,6 @@ export async function getProductCountByVibe() {
   return counts;
 }
 
-/**
- * Product of the Day — deterministic, 31-day no-repeat rotation.
- * Uses a hash of today's date as a seed. Cycles through products
- * ensuring no product repeats within 31 days (unless fewer products exist).
- */
 /**
  * Server-side Product of the Day — same product for all visitors.
  * Calls a DB function that creates/returns today's pick.

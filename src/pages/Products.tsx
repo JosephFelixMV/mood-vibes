@@ -1,12 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { getProducts, getCategories, filterByRegion } from "@/lib/supabase-queries";
+import { getProductsPaginated, getCategories, getActiveBrands, filterByRegion } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
 import { useRegion } from "@/contexts/RegionContext";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+
+const PAGE_SIZE = 30;
 
 export default function Products() {
   const { region } = useRegion();
@@ -22,8 +26,13 @@ export default function Products() {
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
   });
+  const { data: brands = [] } = useQuery({
+    queryKey: ["active-brands"],
+    queryFn: getActiveBrands,
+  });
 
   const [filterBrand, setFilterBrand] = useState("");
+  const [page, setPage] = useState(1);
 
   const categoryName = coreCategories.find((c) => c.slug === categorySlug)?.name || "";
   const vibeName = vibeCategories.find((c) => c.slug === vibeSlug)?.name || "";
@@ -35,25 +44,27 @@ export default function Products() {
 
   const [sort, setSort] = useState<"newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc">("newest");
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["products", categoryName, vibeName, sort],
-    queryFn: () => getProducts({
-      category: categoryName || undefined,
-      vibeCategory: vibeName || undefined,
-      sort,
-      activeOnly: true,
-    }),
+  const { data: result, isLoading } = useQuery({
+    queryKey: ["products-paginated", categoryName, vibeName, sort, filterBrand, page],
+    queryFn: () =>
+      getProductsPaginated({
+        category: categoryName || undefined,
+        vibeCategory: vibeName || undefined,
+        sort,
+        activeOnly: true,
+        brand: filterBrand || undefined,
+        page,
+        pageSize: PAGE_SIZE,
+      }),
   });
 
-  const regionFiltered = filterByRegion(products, region);
-  const availableBrands = useMemo(() =>
-    Array.from(new Set(regionFiltered.map((p) => p.company_name).filter(Boolean) as string[])).sort(),
-    [regionFiltered]
-  );
-  const regionProducts = regionFiltered.filter((p) => {
-    if (!filterBrand) return true;
-    return (p.company_name || "").toLowerCase() === filterBrand.toLowerCase();
-  });
+  const products = result?.data ?? [];
+  const totalCount = result?.count ?? 0;
+  const regionProducts = filterByRegion(products, region);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  // Reset page when filters change
+  const resetPage = useCallback(() => setPage(1), []);
 
   const setCategory = (slug: string) => {
     if (slug === "all") {
@@ -63,6 +74,7 @@ export default function Products() {
     }
     searchParams.delete("vibe");
     setSearchParams(searchParams);
+    resetPage();
   };
 
   const setVibe = (slug: string) => {
@@ -73,6 +85,7 @@ export default function Products() {
     }
     searchParams.delete("category");
     setSearchParams(searchParams);
+    resetPage();
   };
 
   return (
@@ -81,7 +94,9 @@ export default function Products() {
         {categoryName || vibeName || "All Products"}
       </h1>
       <p className="mb-8 text-muted-foreground">
-        {categoryName || vibeName ? `Browsing ${categoryName || vibeName}` : "Browse everything we've found"}
+        {categoryName || vibeName
+          ? `Browsing ${categoryName || vibeName}`
+          : `Browse everything we've found — ${totalCount.toLocaleString()} products`}
       </p>
 
       {/* Filters */}
@@ -93,7 +108,9 @@ export default function Products() {
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
             {coreCategories.map((c) => (
-              <SelectItem key={c.id} value={c.slug}>{c.icon} {c.name}</SelectItem>
+              <SelectItem key={c.id} value={c.slug}>
+                {c.icon} {c.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -105,24 +122,40 @@ export default function Products() {
           <SelectContent>
             <SelectItem value="all">All Vibes</SelectItem>
             {vibeCategories.map((c) => (
-              <SelectItem key={c.id} value={c.slug}>{c.icon} {c.name}</SelectItem>
+              <SelectItem key={c.id} value={c.slug}>
+                {c.icon} {c.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        <Select value={filterBrand || "all"} onValueChange={(v) => setFilterBrand(v === "all" ? "" : v)}>
+        <Select
+          value={filterBrand || "all"}
+          onValueChange={(v) => {
+            setFilterBrand(v === "all" ? "" : v);
+            resetPage();
+          }}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Brand" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Brands</SelectItem>
-            {availableBrands.map((name) => (
-              <SelectItem key={name} value={name}>{name}</SelectItem>
+            {brands.map((name) => (
+              <SelectItem key={name} value={name}>
+                {name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+        <Select
+          value={sort}
+          onValueChange={(v) => {
+            setSort(v as typeof sort);
+            resetPage();
+          }}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue />
           </SelectTrigger>
@@ -143,18 +176,74 @@ export default function Products() {
       ) : regionProducts.length === 0 ? (
         <p className="py-20 text-center text-muted-foreground">No products available in your region.</p>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {regionProducts.map((p, i) => (
-            <motion.div
-              key={p.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
+        <>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {regionProducts.map((p, i) => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+              >
+                <ProductCard product={p} />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <nav
+              className="mt-10 flex items-center justify-center gap-2"
+              aria-label="Product pagination"
             >
-              <ProductCard product={p} />
-            </motion.div>
-          ))}
-        </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setPage(1)}
+                disabled={page === 1}
+                aria-label="First page"
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              <span className="px-3 text-sm text-muted-foreground">
+                Page <strong className="text-foreground">{page}</strong> of{" "}
+                <strong className="text-foreground">{totalPages}</strong>
+                <span className="ml-2 hidden sm:inline">
+                  ({totalCount.toLocaleString()} products)
+                </span>
+              </span>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                aria-label="Next page"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setPage(totalPages)}
+                disabled={page === totalPages}
+                aria-label="Last page"
+              >
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </nav>
+          )}
+        </>
       )}
     </div>
   );
