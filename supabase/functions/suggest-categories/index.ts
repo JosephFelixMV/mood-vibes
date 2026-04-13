@@ -52,6 +52,7 @@ const MOOD_CATEGORIES: Record<string, string> = {
   "Motivated": "active, pumped, energized, gym, fitness, sports, workout, bright colors, productivity",
   "Spring Reset": "fresh, clean, pastel, renewal, decluttering, light, floral, garden, new beginnings",
   "I Love Milo": "pet, animal, dog, cat, pet beds, toys, feeding, treats, grooming",
+  "Fresh Start": "clean, organize, declutter, storage, bins, baskets, closet, laundry, desk, tidy, renewal, fresh, spray, supplies, recycling, dividers, marie kondo, minimalism",
 };
 
 serve(async (req) => {
@@ -155,6 +156,13 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     if (isPureRoutine) {
       if (!validMoods.includes("Calm")) validMoods = [...validMoods, "Calm"].slice(0, 3);
       if (!validMoods.includes("Summer Glow")) validMoods = [...validMoods, "Summer Glow"].slice(0, 3);
+    }
+
+    // Auto-assign "Fresh Start" mood for cleaning & organizing products
+    const FRESH_START_CATEGORIES = ["Cleaning", "Office & Stationery"];
+    const isFreshStart = validCore.some((c: string) => FRESH_START_CATEGORIES.includes(c));
+    if (isFreshStart && !validMoods.includes("Fresh Start")) {
+      validMoods = [...validMoods, "Fresh Start"].slice(0, 3);
     }
 
     console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
