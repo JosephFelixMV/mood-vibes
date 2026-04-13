@@ -25,12 +25,11 @@ const VIBE_CATEGORIES = [
   "Eclectic Maximalist", "Geek & Gamer", "Get Sporty", "Little Ones",
   "Organized Life", "Quiet Luxury", "Soft Academia", "Sustainable Futurism",
   "The Wellness Era", "Urban Tech-Wear", "Whimsigoth", "Work-From-Anywhere",
-  "Tis the Season", "Sneakerheads", "Main Character Energy", "Sunday Reset",
-  "Kitchen Flex", "Off-Duty Model", "In My Zone", "Coastal Cool",
-  "Going Out Era", "That Girl / That Guy", "Touch Grass", "Pet Parent Life",
-  "Content Creator Kit", "Corporate Core", "Jet Set", "Clean Girl / Clean Guy",
-  "Stay-In Cinema", "Aura Farming", "Ballin' on a Budget", "Icy Minimal",
-  "Hot Mess Express", "The Atelier", "Pure Routine"
+  "Tis the Season", "Sneakerheads", "Kitchen Flex", "Off-Duty Model",
+  "In My Zone", "Coastal Cool", "Going Out Era", "Touch Grass",
+  "Pet Parent Life", "Content Creator Kit", "Corporate Core", "Jet Set",
+  "Stay-In Cinema", "Aura Farming", "Ballin' on a Budget",
+  "Hot Mess Express", "The Atelier", "Pure Routine", "Sleek Minimal and Casual"
 ];
 
 // Mood categories with anchor keywords baked in for cost-efficient AI matching.
