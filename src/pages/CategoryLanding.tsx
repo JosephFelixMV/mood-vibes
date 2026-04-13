@@ -289,7 +289,7 @@ export default function CategoryLanding() {
             variant="outline"
             size="sm"
             className="mt-4"
-            onClick={() => { setFilterSeason(""); setFilterWarmth(""); setFilterBrand(""); }}
+            onClick={() => { setFilterSeason(""); setFilterWarmth(""); setFilterVendor(""); }}
           >
             Clear all filters
           </Button>
