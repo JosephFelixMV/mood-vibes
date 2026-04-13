@@ -382,6 +382,7 @@ export type Database = {
           source_url: string
           status: string
           updated_at: string
+          vendor_id: string | null
           vibe_category: string | null
           video_url: string | null
         }
@@ -415,6 +416,7 @@ export type Database = {
           source_url?: string
           status?: string
           updated_at?: string
+          vendor_id?: string | null
           vibe_category?: string | null
           video_url?: string | null
         }
@@ -448,10 +450,19 @@ export type Database = {
           source_url?: string
           status?: string
           updated_at?: string
+          vendor_id?: string | null
           vibe_category?: string | null
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_config: {
         Row: {
