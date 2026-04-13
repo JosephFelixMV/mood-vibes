@@ -134,7 +134,7 @@ KEYWORD RULES — this is the most important part:
    - e.g. "chunky wool turtleneck sweater", "lightweight linen summer blouse"
 
 Product Name: ${name || "Unknown"}
-Description: ${description || "No description"}
+${vendorHints}Description: ${description || "No description"}
 Price: ${price || "Unknown"}
 
 IMPORTANT: Return only raw JSON. No markdown, no explanation. Format:
