@@ -69,7 +69,7 @@ export default function ProductList({ onEdit }: Props) {
   const qc = useQueryClient();
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterVibe, setFilterVibe] = useState("all");
-  const [filterBrand, setFilterBrand] = useState("all");
+  const [filterVendor, setFilterVendor] = useState("all");
   const [filterMood, setFilterMood] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterError, setFilterError] = useState("all");
@@ -100,6 +100,13 @@ export default function ProductList({ onEdit }: Props) {
   const { data: moodCategories = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
+  });
+  const { data: brandsList = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name").eq("is_active", true).order("name");
+      return data || [];
+    },
   });
 
   const { data: clickCounts = {} } = useQuery({
@@ -221,8 +228,8 @@ export default function ProductList({ onEdit }: Props) {
       const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
       if (!matchName && !matchCompany && !matchCategory && !matchVibe) return false;
     }
-    if (filterBrand !== "all") {
-      if ((p.company_name || "").toLowerCase() !== filterBrand.toLowerCase()) return false;
+    if (filterVendor !== "all") {
+      if ((p as any).vendor_id !== filterVendor) return false;
     }
     if (filterCategory !== "all") {
       const cats = parseTaxonomyString(p.category);
@@ -317,14 +324,14 @@ export default function ProductList({ onEdit }: Props) {
             </Tooltip>
           </TooltipProvider>
         </div>
-        <Select value={filterBrand} onValueChange={handleFilterChange(setFilterBrand)}>
+        <Select value={filterVendor} onValueChange={handleFilterChange(setFilterVendor)}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Brand" />
+            <SelectValue placeholder="Vendor" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Brands</SelectItem>
-            {Array.from(new Set(products.map((p) => p.company_name).filter(Boolean))).sort().map((name) => (
-              <SelectItem key={name} value={name!}>{name}</SelectItem>
+            <SelectItem value="all">All Vendors</SelectItem>
+            {brandsList.map((b: any) => (
+              <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
