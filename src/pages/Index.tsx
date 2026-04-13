@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useSEO } from "@/hooks/useSEO";
-import { motion, AnimatePresence } from "framer-motion";
-import { Shuffle, Sparkles, Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import { Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, getDailyPick, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
-import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
+import { getProducts, getDailyPick, filterByRegion } from "@/lib/supabase-queries";
 import { useRegion } from "@/contexts/RegionContext";
+import { Link } from "react-router-dom";
 
 function useCountdownToMidnightUTC() {
   const getRemaining = () => {
@@ -47,22 +47,11 @@ export default function Index() {
     refetchInterval: countdown.expired ? 5000 : false,
   });
 
-  const [surprise, setSurprise] = useState<typeof dailyPick>(null);
-  const [key, setKey] = useState(0);
   const isLoading = productsLoading || pickLoading;
-  const { trigger, cooldown } = useRateLimitedAction(2000);
 
   const displayedProduct = dailyPick;
 
   const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region);
-
-  const handleSurprise = () => {
-    trigger(() => {
-      const next = getRandomProduct(healthyProducts, surprise?.id);
-      setSurprise(next);
-      setKey((k) => k + 1);
-    });
-  };
 
   return (
     <div className="flex flex-col">
@@ -92,11 +81,12 @@ export default function Index() {
           >
             <Button
               size="lg"
-              onClick={handleSurprise}
-              disabled={isLoading || healthyProducts.length === 0 || cooldown}
+              asChild
               className="gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105"
             >
-              <Shuffle className="h-5 w-5" /> {cooldown ? "Wait…" : "Surprise Me"}
+              <Link to="/discover">
+                <Sparkles className="h-5 w-5" /> Discover
+              </Link>
             </Button>
           </motion.div>
         </div>
@@ -105,27 +95,6 @@ export default function Index() {
         <div className="pointer-events-none absolute -left-32 -top-32 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
       </section>
-
-      {/* Surprise result */}
-      <AnimatePresence mode="wait">
-        {surprise && (
-          <section className="container -mt-6 mb-12" key={key}>
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            >
-              <div className="mx-auto max-w-3xl">
-                <div className="mb-4 flex items-center gap-2 text-sm font-medium text-primary">
-                  <Sparkles className="h-4 w-4" /> Your surprise pick
-                </div>
-                <ProductCard product={surprise} featured />
-              </div>
-            </motion.div>
-          </section>
-        )}
-      </AnimatePresence>
 
       {/* Product of the Day */}
       <section className="container py-16">
