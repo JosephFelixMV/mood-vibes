@@ -205,11 +205,15 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       });
       if (error) throw error;
       if (data?.core?.length || data?.vibes?.length || data?.moods?.length || data?.keywords?.length) {
+        const suggestionKeywords = Array.isArray(data?.keywords)
+          ? data.keywords.map((k: string) => k.toLowerCase().trim()).filter(Boolean)
+          : [];
+
         const suggestions = {
           core: dedupeTaxonomyValues(data.core || []),
           vibes: dedupeTaxonomyValues(data.vibes || []),
           moods: dedupeTaxonomyValues(data.moods || []),
-          keywords: [...new Set((data.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean))],
+          keywords: [...new Set(suggestionKeywords)] as string[],
         };
         setAiSuggestions(suggestions);
         const updatedCategory = suggestions.core.length ? stringifyTaxonomyValues(suggestions.core) : stringifyTaxonomyValues(parseTaxonomyString(form.category));
