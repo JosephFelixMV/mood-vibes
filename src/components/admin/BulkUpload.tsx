@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Upload, FileUp, CheckCircle, XCircle, Loader2 } from "lucide-react";
@@ -20,6 +20,13 @@ export default function BulkUpload() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [results, setResults] = useState<UploadResult[]>([]);
+  const { data: brandsList = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name, affiliate_url").eq("is_active", true).order("name");
+      return data || [];
+    },
+  });
 
   const processFiles = async (files: FileList) => {
     setUploading(true);
