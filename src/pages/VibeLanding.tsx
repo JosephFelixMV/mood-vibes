@@ -95,23 +95,6 @@ export default function VibeLanding() {
 
       {!isLoading && products.length > 0 && (
         <section className="mb-12">
-          <div className="mb-4 flex items-center gap-4">
-            <h2 className="font-heading text-xl font-semibold">
-              <Sparkles className="mr-2 inline h-5 w-5 text-primary" />
-              Discover Something Random
-            </h2>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleRandomPick}
-              disabled={cooldown || healthyProducts.length === 0}
-              className="gap-2 rounded-full"
-            >
-              <Shuffle className="h-4 w-4" />
-              {cooldown ? "Wait…" : randomPick ? "Try Another" : "Pick One"}
-            </Button>
-          </div>
-
           <AnimatePresence mode="wait">
             {randomPick && (
               <motion.div
@@ -126,6 +109,18 @@ export default function VibeLanding() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          <div className="mt-6 flex justify-center">
+            <Button
+              size="lg"
+              onClick={handleRandomPick}
+              disabled={cooldown || healthyProducts.length === 0}
+              className="gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105"
+            >
+              <Sparkles className="h-5 w-5" />
+              {cooldown ? "Wait…" : "Discover"}
+            </Button>
+          </div>
         </section>
       )}
 
