@@ -102,6 +102,13 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     queryFn: () => getProduct(editId!),
     enabled: !!editId,
   });
+  const { data: brandsList = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name, affiliate_url").eq("is_active", true).order("name");
+      return data || [];
+    },
+  });
   const { data: allKeywords = [] } = useQuery({
     queryKey: ["keywords"],
     queryFn: async () => {
@@ -367,6 +374,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         fashion_season: isFashion ? form.fashion_season || null : null,
         fashion_warmth: isFashion ? form.fashion_warmth || null : null,
         fashion_occasions: isFashion ? form.fashion_occasions : [],
+        vendor_id: form.vendor_id || null,
       };
 
       let productId = editId;
