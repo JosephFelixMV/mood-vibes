@@ -81,11 +81,12 @@ export default function Index() {
           >
             <Button
               size="lg"
-              onClick={handleSurprise}
-              disabled={isLoading || healthyProducts.length === 0 || cooldown}
+              asChild
               className="gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105"
             >
-              <Shuffle className="h-5 w-5" /> {cooldown ? "Wait…" : "Surprise Me"}
+              <Link to="/discover">
+                <Sparkles className="h-5 w-5" /> Discover
+              </Link>
             </Button>
           </motion.div>
         </div>
@@ -94,27 +95,6 @@ export default function Index() {
         <div className="pointer-events-none absolute -left-32 -top-32 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
       </section>
-
-      {/* Surprise result */}
-      <AnimatePresence mode="wait">
-        {surprise && (
-          <section className="container -mt-6 mb-12" key={key}>
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            >
-              <div className="mx-auto max-w-3xl">
-                <div className="mb-4 flex items-center gap-2 text-sm font-medium text-primary">
-                  <Sparkles className="h-4 w-4" /> Your surprise pick
-                </div>
-                <ProductCard product={surprise} featured />
-              </div>
-            </motion.div>
-          </section>
-        )}
-      </AnimatePresence>
 
       {/* Product of the Day */}
       <section className="container py-16">
