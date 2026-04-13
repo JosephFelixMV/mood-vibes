@@ -89,17 +89,32 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
           </div>
         )}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1">
-          {[...new Set(product.category.split(",").map(c => c.trim()).filter(Boolean))].map((trimmed) => {
-            const cat = categorySlugMap[trimmed];
-            const to = cat ? (cat.type === "vibe" ? `/vibes/${cat.slug}` : `/category/${cat.slug}`) : "#";
-            return (
-              <Link key={trimmed} to={to} onClick={(e) => e.stopPropagation()}>
-                <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm hover:bg-primary cursor-pointer">
-                  {trimmed}
-                </Badge>
-              </Link>
-            );
-          })}
+          {(() => {
+            const coreSet = [...new Set(product.category.split(",").map(c => c.trim()).filter(Boolean))];
+            const vibeSet = [...new Set((product.vibe_category || "").split(",").map(v => v.trim()).filter(Boolean))];
+            const moodSet = [...new Set((product.mood || "").split(",").map(m => m.trim()).filter(Boolean))];
+            const pickRandom = (arr: string[]) => arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
+            const picks: { name: string; type: string }[] = [];
+            const core = pickRandom(coreSet);
+            if (core) picks.push({ name: core, type: "core" });
+            const vibe = pickRandom(vibeSet);
+            if (vibe) picks.push({ name: vibe, type: "vibe" });
+            const mood = pickRandom(moodSet);
+            if (mood) picks.push({ name: mood, type: "mood" });
+            return picks.map(({ name, type }) => {
+              const cat = categorySlugMap[name];
+              const to = cat
+                ? type === "vibe" ? `/vibes/${cat.slug}` : type === "mood" ? `/moods/${cat.slug}` : `/category/${cat.slug}`
+                : "#";
+              return (
+                <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
+                  <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm hover:bg-primary cursor-pointer">
+                    {name}
+                  </Badge>
+                </Link>
+              );
+            });
+          })()}
         </div>
       </Link>
 
