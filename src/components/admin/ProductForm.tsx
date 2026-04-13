@@ -16,6 +16,7 @@ import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
 import { formatPrice } from "@/lib/supabase-queries";
+import { dedupeTaxonomyValues, parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
 
 interface Props {
   editId: string | null;
@@ -143,9 +144,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           image_url: existing.image_url || "",
           affiliate_url: existing.affiliate_url,
           source_url: existing.source_url || "",
-          category: existing.category,
-          vibe_category: existing.vibe_category || "",
-          mood: existing.mood || "",
+          category: stringifyTaxonomyValues(parseTaxonomyString(existing.category)),
+          vibe_category: stringifyTaxonomyValues(parseTaxonomyString(existing.vibe_category || "")),
+          mood: stringifyTaxonomyValues(parseTaxonomyString(existing.mood || "")),
           company_name: existing.company_name || "",
           video_url: existing.video_url || "",
           is_active: existing.is_active,
@@ -205,15 +206,15 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       if (error) throw error;
       if (data?.core?.length || data?.vibes?.length || data?.moods?.length || data?.keywords?.length) {
         const suggestions = {
-          core: data.core || [],
-          vibes: data.vibes || [],
-          moods: data.moods || [],
-          keywords: data.keywords || [],
+          core: dedupeTaxonomyValues(data.core || []),
+          vibes: dedupeTaxonomyValues(data.vibes || []),
+          moods: dedupeTaxonomyValues(data.moods || []),
+          keywords: [...new Set((data.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean))],
         };
         setAiSuggestions(suggestions);
-        const updatedCategory = suggestions.core.length ? suggestions.core.join(",") : form.category;
+        const updatedCategory = suggestions.core.length ? stringifyTaxonomyValues(suggestions.core) : stringifyTaxonomyValues(parseTaxonomyString(form.category));
         const updatedKeywords = suggestions.keywords.length
-          ? [...new Set([...form.keywords, ...suggestions.keywords.map((k: string) => k.toLowerCase())])]
+          ? [...new Set([...form.keywords, ...suggestions.keywords])]
           : form.keywords;
         const isFashion = FASHION_SUBCATEGORIES.some((sub) => updatedCategory?.toLowerCase().includes(sub.toLowerCase()));
         const fashionUpdates: Record<string, any> = {};
@@ -224,9 +225,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         }
         setForm((prev: any) => ({
           ...prev,
-          category: suggestions.core.length ? suggestions.core.join(",") : prev.category,
-          vibe_category: suggestions.vibes.length ? suggestions.vibes.join(",") : prev.vibe_category,
-          mood: suggestions.moods.length ? suggestions.moods.join(",") : prev.mood,
+          category: suggestions.core.length ? stringifyTaxonomyValues(suggestions.core) : stringifyTaxonomyValues(parseTaxonomyString(prev.category)),
+          vibe_category: suggestions.vibes.length ? stringifyTaxonomyValues(suggestions.vibes) : stringifyTaxonomyValues(parseTaxonomyString(prev.vibe_category)),
+          mood: suggestions.moods.length ? stringifyTaxonomyValues(suggestions.moods) : stringifyTaxonomyValues(parseTaxonomyString(prev.mood)),
           keywords: updatedKeywords,
           ...fashionUpdates,
         }));
@@ -263,9 +264,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           video_url: data.video_url || prev.video_url,
           price: parsedPrice,
           description: stripHtml(data.description || "") || prev.description,
-          category: data.category || prev.category,
-          vibe_category: data.vibe_category || prev.vibe_category,
-          mood: data.mood || prev.mood,
+          category: stringifyTaxonomyValues(parseTaxonomyString(data.category ?? prev.category ?? "")),
+          vibe_category: stringifyTaxonomyValues(parseTaxonomyString(data.vibe_category ?? prev.vibe_category ?? "")),
+          mood: stringifyTaxonomyValues(parseTaxonomyString(data.mood ?? prev.mood ?? "")),
           specifications: Array.isArray(data.specifications) && data.specifications.length > 0
             ? data.specifications
             : prev.specifications,
@@ -348,11 +349,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         image_url: form.image_url,
         affiliate_url: form.affiliate_url,
         source_url: form.source_url,
-        category: form.category,
+        category: stringifyTaxonomyValues(parseTaxonomyString(form.category)),
         company_name: form.company_name,
         is_active: form.is_active,
-        vibe_category: form.vibe_category || null,
-        mood: form.mood || null,
+        vibe_category: stringifyTaxonomyValues(parseTaxonomyString(form.vibe_category)) || null,
+        mood: stringifyTaxonomyValues(parseTaxonomyString(form.mood)) || null,
         video_url: form.video_url || null,
         regions: form.regions.length > 0 ? form.regions : ["US"],
         slug: generateSlug(form.name),
@@ -581,7 +582,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Label>Category (Core Lifestyle — up to 5) {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>}</Label>
           <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
             {coreCategories.filter((c) => !!c.parent_slug).map((c) => {
-              const selected = (form.category || "").split(",").filter(Boolean);
+              const selected = parseTaxonomyString(form.category);
               const isChecked = selected.includes(c.name);
               const atLimit = selected.length >= 5 && !isChecked;
               return (
@@ -594,7 +595,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                       const updated = isChecked
                         ? selected.filter((v: string) => v !== c.name)
                         : [...selected, c.name];
-                      set("category", updated.join(","));
+                      set("category", stringifyTaxonomyValues(updated));
                     }}
                     className="rounded"
                   />
@@ -650,7 +651,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
             {vibeCategories.map((c) => {
-              const selected = (form.vibe_category || "").split(",").filter(Boolean);
+              const selected = parseTaxonomyString(form.vibe_category);
               const isChecked = selected.includes(c.name);
               return (
                 <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
@@ -661,7 +662,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                       const updated = isChecked
                         ? selected.filter((v: string) => v !== c.name)
                         : [...selected, c.name];
-                      set("vibe_category", updated.join(","));
+                      set("vibe_category", stringifyTaxonomyValues(updated));
                     }}
                     className="rounded"
                   />
@@ -718,7 +719,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
             {moodCategories.map((c) => {
-              const selected = (form.mood || "").split(",").filter(Boolean);
+              const selected = parseTaxonomyString(form.mood);
               const isChecked = selected.includes(c.name);
               return (
                 <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
@@ -729,7 +730,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                       const updated = isChecked
                         ? selected.filter((v: string) => v !== c.name)
                         : [...selected, c.name];
-                      set("mood", updated.join(","));
+                      set("mood", stringifyTaxonomyValues(updated));
                     }}
                     className="rounded"
                   />

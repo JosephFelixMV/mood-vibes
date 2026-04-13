@@ -6,6 +6,7 @@ import { Upload, FileUp, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { generateSlug } from "@/lib/slug-utils";
 import { stripHtml } from "@/lib/brand-utils";
+import { stringifyTaxonomyValues, dedupeTaxonomyValues } from "@/lib/taxonomy-utils";
 
 interface UploadResult {
   fileName: string;
@@ -79,10 +80,10 @@ export default function BulkUpload() {
             image_url: data.image_url || null,
             affiliate_url: data.affiliate_url.trim(),
             source_url: data.source_url || "",
-            category: data.category || "",
+            category: stringifyTaxonomyValues((data.category || "").split(",")),
             company_name: data.company_name || null,
             is_active: false, // Draft
-            vibe_category: data.vibe_category || null,
+            vibe_category: stringifyTaxonomyValues((data.vibe_category || "").split(",")) || null,
             video_url: data.video_url || null,
             slug: generateSlug(data.name.trim()),
           }])
@@ -99,8 +100,8 @@ export default function BulkUpload() {
             });
             if (aiData) {
               const updates: { category?: string; vibe_category?: string } = {};
-              if (aiData.core?.length) updates.category = aiData.core.join(", ");
-              if (aiData.vibes?.length) updates.vibe_category = aiData.vibes.join(", ");
+              if (aiData.core?.length) updates.category = stringifyTaxonomyValues(dedupeTaxonomyValues(aiData.core));
+              if (aiData.vibes?.length) updates.vibe_category = stringifyTaxonomyValues(dedupeTaxonomyValues(aiData.vibes));
               if (Object.keys(updates).length > 0) {
                 await supabase.from("products").update(updates).eq("id", inserted.id);
               }
