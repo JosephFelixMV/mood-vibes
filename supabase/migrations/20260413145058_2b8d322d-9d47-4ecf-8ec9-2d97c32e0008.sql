@@ -1,0 +1,2 @@
+INSERT INTO public.categories (name, slug, type, icon, description)
+VALUES ('Fresh Start', 'fresh-start', 'mood', '🧹', 'That satisfying clean-slate feeling — organizing, decluttering, and making everything fresh again.');
