@@ -52,6 +52,7 @@ const MOOD_CATEGORIES: Record<string, string> = {
   "Motivated": "active, pumped, energized, gym, fitness, sports, workout, bright colors, productivity",
   "Spring Reset": "fresh, clean, pastel, renewal, decluttering, light, floral, garden, new beginnings",
   "I Love Milo": "pet, animal, dog, cat, pet beds, toys, feeding, treats, grooming",
+  "Fresh Start": "clean, organize, declutter, storage, bins, baskets, closet, laundry, desk, tidy, renewal, fresh, spray, supplies, recycling, dividers, marie kondo, minimalism",
 };
 
 serve(async (req) => {
