@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { getProductsPaginated, getCategories, getActiveBrands, filterByRegion } from "@/lib/supabase-queries";
+import { getProductsPaginated, getCategories, filterByRegion } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,12 @@ export default function Products() {
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
   });
-  const { data: brands = [] } = useQuery({
-    queryKey: ["active-brands"],
-    queryFn: getActiveBrands,
+  const { data: moodCategories = [] } = useQuery({
+    queryKey: ["categories", "mood"],
+    queryFn: () => getCategories("mood"),
   });
 
-  const [filterBrand, setFilterBrand] = useState("");
+  const [filterMood, setFilterMood] = useState("");
   const [page, setPage] = useState(1);
 
   const categoryName = coreCategories.find((c) => c.slug === categorySlug)?.name || "";
@@ -44,15 +44,18 @@ export default function Products() {
 
   const [sort, setSort] = useState<"newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc">("newest");
 
+  const moodSlug = searchParams.get("mood") || "";
+  const moodName = moodCategories.find((c) => c.slug === moodSlug)?.name || filterMood;
+
   const { data: result, isLoading } = useQuery({
-    queryKey: ["products-paginated", categoryName, vibeName, sort, filterBrand, page],
+    queryKey: ["products-paginated", categoryName, vibeName, moodName, sort, page],
     queryFn: () =>
       getProductsPaginated({
         category: categoryName || undefined,
         vibeCategory: vibeName || undefined,
+        mood: moodName || undefined,
         sort,
         activeOnly: true,
-        brand: filterBrand || undefined,
         page,
         pageSize: PAGE_SIZE,
       }),
@@ -130,20 +133,30 @@ export default function Products() {
         </Select>
 
         <Select
-          value={filterBrand || "all"}
+          value={moodSlug || filterMood || "all"}
           onValueChange={(v) => {
-            setFilterBrand(v === "all" ? "" : v);
+            if (v === "all") {
+              searchParams.delete("mood");
+              setFilterMood("");
+            } else {
+              const cat = moodCategories.find((c) => c.slug === v);
+              if (cat) {
+                searchParams.set("mood", v);
+                setFilterMood(cat.name);
+              }
+            }
+            setSearchParams(searchParams);
             resetPage();
           }}
         >
           <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Brand" />
+            <SelectValue placeholder="Mood" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Brands</SelectItem>
-            {brands.map((name) => (
-              <SelectItem key={name} value={name}>
-                {name}
+            <SelectItem value="all">All Moods</SelectItem>
+            {moodCategories.map((c) => (
+              <SelectItem key={c.id} value={c.slug}>
+                {c.icon} {c.name}
               </SelectItem>
             ))}
           </SelectContent>
