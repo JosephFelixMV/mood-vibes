@@ -374,9 +374,14 @@ export default function ProductList({ onEdit }: Props) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Vendors</SelectItem>
-            {brandsList.map((b: any) => (
-              <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-            ))}
+            {(() => {
+              const vendorIdsInUse = new Set(products.map((p: any) => p.vendor_id).filter(Boolean));
+              return brandsList
+                .filter((b: any) => vendorIdsInUse.has(b.id))
+                .map((b: any) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ));
+            })()}
           </SelectContent>
         </Select>
 
