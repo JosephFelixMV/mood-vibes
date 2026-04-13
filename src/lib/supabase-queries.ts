@@ -15,13 +15,24 @@ export function filterByRegion(products: Product[], region?: VisitorRegion): Pro
   });
 }
 
+export interface PaginatedResult<T> {
+  data: T[];
+  count: number;
+}
+
 export async function getProducts(options?: {
   category?: string;
   vibeCategory?: string;
   sort?: "newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc";
   activeOnly?: boolean;
-}) {
-  let query = supabase.from("products").select("*");
+  brand?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<PaginatedResult<Product>> {
+  const pageSize = options?.pageSize ?? 30;
+  const page = options?.page ?? 1;
+
+  let query = supabase.from("products").select("*", { count: "exact" });
 
   if (options?.activeOnly !== false) {
     query = query.eq("is_active", true);
@@ -31,6 +42,9 @@ export async function getProducts(options?: {
   }
   if (options?.vibeCategory) {
     query = query.ilike("vibe_category", `%${options.vibeCategory}%`);
+  }
+  if (options?.brand) {
+    query = query.ilike("company_name", options.brand);
   }
 
   switch (options?.sort) {
@@ -51,21 +65,31 @@ export async function getProducts(options?: {
       query = query.order("date_added", { ascending: false });
   }
 
-  // Paginate to bypass the 1000-row default limit
+  const from = (page - 1) * pageSize;
+  const { data, error, count } = await query.range(from, from + pageSize - 1);
+  if (error) throw error;
+  return { data: data || [], count: count ?? 0 };
+}
+
+/** Fetch all distinct brand names for filter dropdowns */
+export async function getActiveBrands(): Promise<string[]> {
   const PAGE_SIZE = 1000;
   let allData: any[] = [];
   let from = 0;
   let hasMore = true;
-
   while (hasMore) {
-    const { data: page, error } = await query.range(from, from + PAGE_SIZE - 1);
+    const { data, error } = await supabase
+      .from("products")
+      .select("company_name")
+      .eq("is_active", true)
+      .not("company_name", "is", null)
+      .range(from, from + PAGE_SIZE - 1);
     if (error) throw error;
-    allData = allData.concat(page || []);
-    hasMore = (page?.length || 0) === PAGE_SIZE;
+    allData = allData.concat(data || []);
+    hasMore = (data?.length || 0) === PAGE_SIZE;
     from += PAGE_SIZE;
   }
-
-  return allData;
+  return Array.from(new Set(allData.map((p) => p.company_name).filter(Boolean) as string[])).sort();
 }
 
 export async function getProduct(idOrSlug: string) {
