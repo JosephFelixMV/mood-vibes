@@ -162,6 +162,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           fashion_warmth: (existing as any).fashion_warmth || "",
           fashion_occasions: (existing as any).fashion_occasions || [],
           price_below_msrp: (existing as any).price_below_msrp || false,
+          vendor_id: (existing as any).vendor_id || "",
         });
       });
     } else if (!editId && !savedState?.current) {
