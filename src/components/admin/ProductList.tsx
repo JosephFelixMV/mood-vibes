@@ -433,7 +433,7 @@ export default function ProductList({ onEdit }: Props) {
             Clear dates
           </Button>
         )}
-        {(filterCategory !== "all" || filterVibe !== "all" || filterMood !== "all" || filterBrand !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
+        {(filterCategory !== "all" || filterVibe !== "all" || filterMood !== "all" || filterVendor !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
           <Button
             variant="outline"
             size="sm"
@@ -443,7 +443,7 @@ export default function ProductList({ onEdit }: Props) {
               setFilterCategory("all");
               setFilterVibe("all");
               setFilterMood("all");
-              setFilterBrand("all");
+              setFilterVendor("all");
               setFilterStatus("all");
               setFilterError("all");
               setDateFrom(undefined);
