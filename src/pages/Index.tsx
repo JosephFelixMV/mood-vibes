@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useSEO } from "@/hooks/useSEO";
-import { motion, AnimatePresence } from "framer-motion";
-import { Shuffle, Sparkles, Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import { Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, getDailyPick, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
-import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
+import { getProducts, getDailyPick, filterByRegion } from "@/lib/supabase-queries";
 import { useRegion } from "@/contexts/RegionContext";
+import { Link } from "react-router-dom";
 
 function useCountdownToMidnightUTC() {
   const getRemaining = () => {
