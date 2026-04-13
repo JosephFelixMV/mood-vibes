@@ -102,15 +102,25 @@ export async function getCategories(type?: "core" | "vibe" | "mood") {
 }
 
 export async function getProductCountByCategory() {
-  const { data, error } = await supabase
-    .from("products")
-    .select("category")
-    .eq("is_active", true);
-  if (error) throw error;
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("products")
+      .select("category")
+      .eq("is_active", true)
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(data || []);
+    hasMore = (data?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
 
   const counts: Record<string, number> = {};
-  data.forEach((p) => {
-    p.category.split(",").forEach((c) => {
+  allData.forEach((p) => {
+    p.category.split(",").forEach((c: string) => {
       const trimmed = c.trim();
       if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
     });
@@ -119,17 +129,27 @@ export async function getProductCountByCategory() {
 }
 
 export async function getProductCountByVibe() {
-  const { data, error } = await supabase
-    .from("products")
-    .select("vibe_category")
-    .eq("is_active", true)
-    .not("vibe_category", "is", null);
-  if (error) throw error;
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("products")
+      .select("vibe_category")
+      .eq("is_active", true)
+      .not("vibe_category", "is", null)
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(data || []);
+    hasMore = (data?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
 
   const counts: Record<string, number> = {};
-  data.forEach((p) => {
+  allData.forEach((p) => {
     if (p.vibe_category) {
-      p.vibe_category.split(",").forEach((v) => {
+      p.vibe_category.split(",").forEach((v: string) => {
         const trimmed = v.trim();
         if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
       });
