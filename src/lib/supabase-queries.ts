@@ -25,9 +25,11 @@ type SortOption = "newest" | "price-low" | "price-high" | "updated-desc" | "upda
 export interface ProductQueryOptions {
   category?: string;
   vibeCategory?: string;
+  mood?: string;
   sort?: SortOption;
   activeOnly?: boolean;
   brand?: string;
+  vendorId?: string;
 }
 
 function applyProductFilters(
@@ -46,6 +48,12 @@ function applyProductFilters(
   }
   if (options?.vibeCategory) {
     query = query.ilike("vibe_category", `%${options.vibeCategory}%`);
+  }
+  if (options?.mood) {
+    query = query.ilike("mood", `%${options.mood}%`);
+  }
+  if (options?.vendorId) {
+    query = query.eq("vendor_id", options.vendorId);
   }
   if (options?.brand) {
     query = query.ilike("company_name", options.brand);
