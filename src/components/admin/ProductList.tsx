@@ -210,6 +210,40 @@ export default function ProductList({ onEdit }: Props) {
       setCheckingLinks(false);
     }
   };
+
+  const [matchingVendors, setMatchingVendors] = useState(false);
+  const handleAutoMatchVendors = async () => {
+    setMatchingVendors(true);
+    try {
+      const unmatched = products.filter((p) => !(p as any).vendor_id && p.source_url);
+      let matched = 0;
+      for (const product of unmatched) {
+        try {
+          const sourceHost = new URL(product.source_url).hostname.replace(/^www\./, "");
+          const brand = brandsList.find((b: any) => {
+            try {
+              const brandHost = new URL(b.affiliate_url || "").hostname.replace(/^www\./, "");
+              return sourceHost.includes(brandHost) || brandHost.includes(sourceHost);
+            } catch { return false; }
+          });
+          if (brand) {
+            await supabase.from("products").update({ vendor_id: brand.id }).eq("id", product.id);
+            matched++;
+          }
+        } catch { /* skip invalid URLs */ }
+      }
+      if (matched > 0) {
+        qc.invalidateQueries({ queryKey: ["admin-products"] });
+        toast.success(`Matched ${matched} product(s) to vendors`);
+      } else {
+        toast.info("No new vendor matches found");
+      }
+    } catch (err: any) {
+      toast.error("Vendor matching failed: " + err.message);
+    } finally {
+      setMatchingVendors(false);
+    }
+  };
   const toggleSort = (col: "views" | "clicks" | "updated") => {
     if (sortColumn === col) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
