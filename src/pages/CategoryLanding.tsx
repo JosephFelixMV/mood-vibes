@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shuffle, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { getProducts, getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +12,9 @@ import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
+
+const toTitleCase = (s: string) =>
+  s.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 
 const FASHION_SLUGS = ["fashion-style", "womens-fashion", "mens-fashion", "womens-shoes", "mens-shoes", "activewear"];
 
@@ -70,17 +74,31 @@ export default function CategoryLanding() {
     enabled: !!categoryName,
   });
 
-  const [filterBrand, setFilterBrand] = useState("");
+  const [filterVendor, setFilterVendor] = useState("");
   const [filterSeason, setFilterSeason] = useState("");
   const [filterWarmth, setFilterWarmth] = useState("");
 
+  const { data: brandsList = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name").eq("is_active", true).order("name");
+      return data || [];
+    },
+  });
+
   const regionFiltered = filterByRegion(products.filter((p) => !p.page_error), region);
-  const availableBrands = useMemo(() =>
-    Array.from(new Set(regionFiltered.map((p) => p.company_name).filter(Boolean) as string[])).sort(),
-    [regionFiltered]
-  );
+
+  // Only show vendors that have products in this category
+  const availableVendors = useMemo(() => {
+    const vendorIds = new Set(regionFiltered.map((p) => p.vendor_id).filter(Boolean));
+    return brandsList
+      .filter((b: any) => vendorIds.has(b.id))
+      .map((b: any) => ({ id: b.id, name: toTitleCase(b.name) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [regionFiltered, brandsList]);
+
   const healthyProducts = regionFiltered.filter((p) => {
-    if (filterBrand && (p.company_name || "").toLowerCase() !== filterBrand.toLowerCase()) return false;
+    if (filterVendor && p.vendor_id !== filterVendor) return false;
     if (filterSeason && p.fashion_season !== filterSeason) return false;
     if (filterWarmth && p.fashion_warmth !== filterWarmth) return false;
     return true;
@@ -235,14 +253,14 @@ export default function CategoryLanding() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="font-heading text-lg font-semibold">All {categoryName} Products</h2>
           <div className="flex gap-3">
-            <Select value={filterBrand || "all"} onValueChange={(v) => setFilterBrand(v === "all" ? "" : v)}>
+            <Select value={filterVendor || "all"} onValueChange={(v) => setFilterVendor(v === "all" ? "" : v)}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Brand" />
+                <SelectValue placeholder="Vendor" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Brands</SelectItem>
-                {availableBrands.map((name) => (
-                  <SelectItem key={name} value={name}>{name}</SelectItem>
+                <SelectItem value="all">All Vendors</SelectItem>
+                {availableVendors.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -271,7 +289,7 @@ export default function CategoryLanding() {
             variant="outline"
             size="sm"
             className="mt-4"
-            onClick={() => { setFilterSeason(""); setFilterWarmth(""); setFilterBrand(""); }}
+            onClick={() => { setFilterSeason(""); setFilterWarmth(""); setFilterVendor(""); }}
           >
             Clear all filters
           </Button>
