@@ -80,6 +80,7 @@ const empty = {
   fashion_warmth: "" as string,
   fashion_occasions: [] as string[],
   price_below_msrp: false,
+  vendor_id: "" as string,
 };
 
 export default function ProductForm({ editId, onDone, savedState }: Props) {
