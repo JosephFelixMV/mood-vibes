@@ -47,22 +47,11 @@ export default function Index() {
     refetchInterval: countdown.expired ? 5000 : false,
   });
 
-  const [surprise, setSurprise] = useState<typeof dailyPick>(null);
-  const [key, setKey] = useState(0);
   const isLoading = productsLoading || pickLoading;
-  const { trigger, cooldown } = useRateLimitedAction(2000);
 
   const displayedProduct = dailyPick;
 
   const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region);
-
-  const handleSurprise = () => {
-    trigger(() => {
-      const next = getRandomProduct(healthyProducts, surprise?.id);
-      setSurprise(next);
-      setKey((k) => k + 1);
-    });
-  };
 
   return (
     <div className="flex flex-col">
