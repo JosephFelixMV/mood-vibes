@@ -218,8 +218,7 @@ export default function ProductDetail() {
                 );
               })}
               {product.vibe_category &&
-                product.vibe_category.split(",").map((v) => {
-                  const trimmed = v.trim();
+                [...new Set(product.vibe_category.split(",").map((v) => v.trim()).filter(Boolean))].map((trimmed) => {
                   const cat = categorySlugMap[trimmed];
                   const to = cat ? `/vibes/${cat.slug}` : "#";
                   return (
@@ -231,8 +230,7 @@ export default function ProductDetail() {
                   );
                 })}
               {product.mood &&
-                product.mood.split(",").map((m) => {
-                  const trimmed = m.trim();
+                [...new Set(product.mood.split(",").map((m) => m.trim()).filter(Boolean))].map((trimmed) => {
                   const cat = categorySlugMap[trimmed];
                   const to = cat ? `/moods/${cat.slug}` : "#";
                   return (
