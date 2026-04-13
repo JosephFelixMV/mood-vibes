@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shuffle } from "lucide-react";
+import { Shuffle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import { CategoryIcon } from "@/components/CategoryIcon";
