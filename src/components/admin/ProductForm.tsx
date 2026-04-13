@@ -473,6 +473,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     last_verified_at: null,
     last_status_code: null,
     price_below_msrp: form.price_below_msrp,
+    vendor_id: form.vendor_id || null,
   };
 
   return (
