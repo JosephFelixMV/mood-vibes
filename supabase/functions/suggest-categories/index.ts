@@ -158,6 +158,13 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
       if (!validMoods.includes("Summer Glow")) validMoods = [...validMoods, "Summer Glow"].slice(0, 3);
     }
 
+    // Auto-assign "Fresh Start" mood for cleaning & organizing products
+    const FRESH_START_CATEGORIES = ["Cleaning", "Office & Stationery"];
+    const isFreshStart = validCore.some((c: string) => FRESH_START_CATEGORIES.includes(c));
+    if (isFreshStart && !validMoods.includes("Fresh Start")) {
+      validMoods = [...validMoods, "Fresh Start"].slice(0, 3);
+    }
+
     console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
 
     return new Response(JSON.stringify({ core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords }), {
