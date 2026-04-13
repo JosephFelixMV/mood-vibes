@@ -516,6 +516,42 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Input value={form.company_name} onChange={(e) => set("company_name", e.target.value)} />
         </div>
         <div>
+          <Label>Vendor</Label>
+          <Select value={form.vendor_id || "none"} onValueChange={(v) => set("vendor_id", v === "none" ? "" : v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select vendor…" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— No Vendor —</SelectItem>
+              {brandsList.map((b: any) => (
+                <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="mt-1 text-xs text-muted-foreground">Select the vendor/retailer from the brands list</p>
+          {form.source_url && !form.vendor_id && brandsList.length > 0 && (() => {
+            try {
+              const sourceHost = new URL(form.source_url).hostname.replace(/^www\./, "");
+              const match = brandsList.find((b: any) => {
+                try {
+                  const brandHost = new URL(b.affiliate_url).hostname.replace(/^www\./, "");
+                  return sourceHost.includes(brandHost) || brandHost.includes(sourceHost);
+                } catch { return false; }
+              });
+              if (match) return (
+                <button
+                  type="button"
+                  onClick={() => set("vendor_id", match.id)}
+                  className="mt-1 text-xs text-primary hover:underline"
+                >
+                  ✨ Auto-detected: {match.name} — click to apply
+                </button>
+              );
+            } catch { /* invalid URL */ }
+            return null;
+          })()}
+        </div>
+        <div>
           <Label>Affiliate Link</Label>
           <Input value={form.affiliate_url} onChange={(e) => set("affiliate_url", e.target.value)} required placeholder="https://..." />
         </div>
