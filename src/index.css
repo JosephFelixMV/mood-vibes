@@ -34,6 +34,11 @@
     --input: 0 0% 91%;
     --ring: 262 83% 58%;
 
+    --badge-vibe: 24 90% 55%;
+    --badge-vibe-foreground: 0 0% 100%;
+    --badge-mood: 190 60% 50%;
+    --badge-mood-foreground: 0 0% 100%;
+
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
@@ -69,6 +74,11 @@
     --border: 0 0% 18%;
     --input: 0 0% 18%;
     --ring: 262 83% 65%;
+
+    --badge-vibe: 24 85% 60%;
+    --badge-vibe-foreground: 0 0% 100%;
+    --badge-mood: 190 55% 55%;
+    --badge-mood-foreground: 0 0% 100%;
   }
 }
 

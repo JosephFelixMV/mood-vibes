@@ -119,9 +119,15 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
               const to = cat
                 ? type === "vibe" ? `/vibes/${cat.slug}` : type === "mood" ? `/moods/${cat.slug}` : `/category/${cat.slug}`
                 : "#";
+              const badgeColor =
+                type === "vibe"
+                  ? "bg-[hsl(var(--badge-vibe))] text-[hsl(var(--badge-vibe-foreground))] hover:bg-[hsl(var(--badge-vibe))]/90"
+                  : type === "mood"
+                  ? "bg-[hsl(var(--badge-mood))] text-[hsl(var(--badge-mood-foreground))] hover:bg-[hsl(var(--badge-mood))]/90"
+                  : "bg-primary/90 text-primary-foreground hover:bg-primary";
               return (
                 <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
-                  <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm hover:bg-primary cursor-pointer">
+                  <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer`}>
                     {name}
                   </Badge>
                 </Link>
