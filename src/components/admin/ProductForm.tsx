@@ -531,12 +531,15 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <p className="mt-1 text-xs text-muted-foreground">Select the vendor/retailer from the brands list</p>
           {form.source_url && !form.vendor_id && brandsList.length > 0 && (() => {
             try {
-              const sourceHost = new URL(form.source_url).hostname.replace(/^www\./, "");
+              const sourceHost = new URL(form.source_url).hostname.replace(/^www\./, "").toLowerCase();
               const match = brandsList.find((b: any) => {
                 try {
-                  const brandHost = new URL(b.affiliate_url).hostname.replace(/^www\./, "");
-                  return sourceHost.includes(brandHost) || brandHost.includes(sourceHost);
-                } catch { return false; }
+                  const brandHost = new URL(b.affiliate_url).hostname.replace(/^www\./, "").toLowerCase();
+                  if (sourceHost.includes(brandHost) || brandHost.includes(sourceHost)) return true;
+                } catch { /* skip */ }
+                const brandName = (b.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+                const domainBase = sourceHost.split(".")[0];
+                return brandName === domainBase || domainBase.includes(brandName);
               });
               if (match) return (
                 <button

@@ -82,12 +82,15 @@ export default function BulkUpload() {
         const sourceUrl = data.source_url || data.affiliate_url || "";
         if (sourceUrl && brandsList.length > 0) {
           try {
-            const sourceHost = new URL(sourceUrl).hostname.replace(/^www\./, "");
+            const sourceHost = new URL(sourceUrl).hostname.replace(/^www\./, "").toLowerCase();
             const match = brandsList.find((b: any) => {
               try {
-                const brandHost = new URL(b.affiliate_url).hostname.replace(/^www\./, "");
-                return sourceHost.includes(brandHost) || brandHost.includes(sourceHost);
-              } catch { return false; }
+                const brandHost = new URL(b.affiliate_url).hostname.replace(/^www\./, "").toLowerCase();
+                if (sourceHost.includes(brandHost) || brandHost.includes(sourceHost)) return true;
+              } catch { /* skip */ }
+              const brandName = (b.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+              const domainBase = sourceHost.split(".")[0];
+              return brandName === domainBase || domainBase.includes(brandName);
             });
             if (match) vendorId = match.id;
           } catch { /* invalid URL */ }

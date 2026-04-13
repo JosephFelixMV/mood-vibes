@@ -219,12 +219,16 @@ export default function ProductList({ onEdit }: Props) {
       let matched = 0;
       for (const product of unmatched) {
         try {
-          const sourceHost = new URL(product.source_url).hostname.replace(/^www\./, "");
+          const sourceHost = new URL(product.source_url).hostname.replace(/^www\./, "").toLowerCase();
           const brand = brandsList.find((b: any) => {
             try {
-              const brandHost = new URL(b.affiliate_url || "").hostname.replace(/^www\./, "");
-              return sourceHost.includes(brandHost) || brandHost.includes(sourceHost);
-            } catch { return false; }
+              const brandHost = new URL(b.affiliate_url || "").hostname.replace(/^www\./, "").toLowerCase();
+              if (sourceHost.includes(brandHost) || brandHost.includes(sourceHost)) return true;
+            } catch { /* skip invalid affiliate URLs */ }
+            // Also match brand name against the source domain (e.g. "Target" matches "target.com")
+            const brandName = (b.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+            const domainBase = sourceHost.split(".")[0];
+            return brandName === domainBase || domainBase.includes(brandName);
           });
           if (brand) {
             await supabase.from("products").update({ vendor_id: brand.id }).eq("id", product.id);
