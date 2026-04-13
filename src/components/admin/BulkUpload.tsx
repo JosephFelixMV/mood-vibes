@@ -122,8 +122,9 @@ export default function BulkUpload() {
         // AI category suggestion — update product with suggested categories
         if (inserted) {
           try {
+            const matchedVendorName = vendorId ? brandsList.find((b: any) => b.id === vendorId)?.name : undefined;
             const { data: aiData } = await supabase.functions.invoke("suggest-categories", {
-              body: { name: data.name.trim(), description: data.description || "", price: parsedPrice },
+              body: { name: data.name.trim(), description: data.description || "", price: parsedPrice, source_url: sourceUrl, vendor_name: matchedVendorName },
             });
             if (aiData) {
               const updates: { category?: string; vibe_category?: string } = {};

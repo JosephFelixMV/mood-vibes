@@ -58,7 +58,6 @@ const MOOD_CATEGORIES: Record<string, string> = {
 
 const dedupeStrings = (values: string[] = []) => {
   const seen = new Set<string>();
-
   return values
     .map((value) => value.trim())
     .filter((value) => {
@@ -70,6 +69,29 @@ const dedupeStrings = (values: string[] = []) => {
     });
 };
 
+// Vendor-aware category hints — biases the AI toward sensible defaults
+// while still allowing product-specific overrides
+const VENDOR_HINTS: Record<string, { match: (url: string, name: string) => boolean; hint: string }> = {
+  caddis: {
+    match: (url, name) => url.includes("caddislife.com") || name.toLowerCase().includes("caddis"),
+    hint: "This product is from Caddis Eyewear — an eyewear brand. Always include 'Accessories' in core categories. The product is almost certainly eyewear (glasses, sunglasses, readers).",
+  },
+  containerstore: {
+    match: (url, name) => url.includes("containerstore.com") || name.toLowerCase().includes("container store"),
+    hint: "This product is from The Container Store — a home organization retailer. Strongly consider 'Cleaning' in core categories, 'Organized Life' in vibes, and 'Fresh Start' in moods. However, still evaluate the specific product details — some items may fit other categories like 'Kitchen Storage', 'Office & Stationery', or 'Décor & Artwork'.",
+  },
+};
+
+function buildVendorHints(sourceUrl?: string, vendorName?: string): string {
+  const url = (sourceUrl || "").toLowerCase();
+  const name = (vendorName || "").toLowerCase();
+  const hints: string[] = [];
+  for (const v of Object.values(VENDOR_HINTS)) {
+    if (v.match(url, name)) hints.push(v.hint);
+  }
+  return hints.length > 0 ? `\nVENDOR CONTEXT:\n${hints.join("\n")}\n` : "";
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -77,7 +99,10 @@ serve(async (req) => {
 
   try {
     const body = await req.text();
-    const { name, description, price } = JSON.parse(body);
+    const { name, description, price, source_url, vendor_name } = JSON.parse(body);
+
+    // Vendor-specific category hints injected into the prompt
+    const vendorHints = buildVendorHints(source_url, vendor_name);
 
     const moodList = Object.entries(MOOD_CATEGORIES)
       .map(([mood, anchors]) => `- ${mood}: ${anchors}`)
@@ -109,7 +134,7 @@ KEYWORD RULES — this is the most important part:
    - e.g. "chunky wool turtleneck sweater", "lightweight linen summer blouse"
 
 Product Name: ${name || "Unknown"}
-Description: ${description || "No description"}
+${vendorHints}Description: ${description || "No description"}
 Price: ${price || "Unknown"}
 
 IMPORTANT: Return only raw JSON. No markdown, no explanation. Format:
