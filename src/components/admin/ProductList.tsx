@@ -358,6 +358,16 @@ export default function ProductList({ onEdit }: Props) {
             </Tooltip>
           </TooltipProvider>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleAutoMatchVendors}
+          disabled={matchingVendors}
+          className="gap-1.5"
+        >
+          {matchingVendors ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "🏷️"}
+          {matchingVendors ? "Matching…" : "Auto-match Vendors"}
+        </Button>
         <Select value={filterVendor} onValueChange={handleFilterChange(setFilterVendor)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Vendor" />
