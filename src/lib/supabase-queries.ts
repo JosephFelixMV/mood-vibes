@@ -216,25 +216,45 @@ export function getRandomProduct(products: Product[], excludeId?: string): Produ
 }
 
 export async function getProductClickCounts(): Promise<Record<string, number>> {
-  const { data, error } = await supabase
-    .from("product_clicks")
-    .select("product_id");
-  if (error) throw error;
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("product_clicks")
+      .select("product_id")
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(data || []);
+    hasMore = (data?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
   const counts: Record<string, number> = {};
-  (data || []).forEach((row) => {
+  allData.forEach((row) => {
     counts[row.product_id] = (counts[row.product_id] || 0) + 1;
   });
   return counts;
 }
 
 export async function getProductViewCounts(): Promise<Record<string, number>> {
-  const { data, error } = await supabase
-    .from("product_events")
-    .select("product_id")
-    .eq("event_type", "view");
-  if (error) throw error;
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("product_events")
+      .select("product_id")
+      .eq("event_type", "view")
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat(data || []);
+    hasMore = (data?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
   const counts: Record<string, number> = {};
-  (data || []).forEach((row: any) => {
+  allData.forEach((row: any) => {
     counts[row.product_id] = (counts[row.product_id] || 0) + 1;
   });
   return counts;
