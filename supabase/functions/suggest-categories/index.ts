@@ -77,7 +77,10 @@ serve(async (req) => {
 
   try {
     const body = await req.text();
-    const { name, description, price } = JSON.parse(body);
+    const { name, description, price, source_url, vendor_name } = JSON.parse(body);
+
+    // Vendor-specific category hints injected into the prompt
+    const vendorHints = buildVendorHints(source_url, vendor_name);
 
     const moodList = Object.entries(MOOD_CATEGORIES)
       .map(([mood, anchors]) => `- ${mood}: ${anchors}`)
