@@ -86,7 +86,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       <Link to={`/product/${(product as any).slug || product.id}`} aria-label={`View ${product.name}`} className={`relative block overflow-hidden ${
         featured ? "md:w-1/2" : ""
       }`}>
-        <div className={`${featured ? "aspect-[4/3] md:aspect-auto md:h-full" : "aspect-[4/5]"} bg-[#F2F0EA] flex items-center justify-center`}>
+        <div className={`${featured ? "aspect-[4/3] md:aspect-auto md:h-full" : "aspect-[4/5]"} bg-[#f5f5f5] flex items-center justify-center`}>
           {proxiedImage ? (
             <img
               src={proxiedImage}
