@@ -338,6 +338,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
+      if (!form.affiliate_url?.trim()) {
+        throw new Error("Affiliate URL is required. Please add a valid link before saving.");
+      }
       if (!editId) {
         const { data: dupes } = await supabase
           .from("products")
