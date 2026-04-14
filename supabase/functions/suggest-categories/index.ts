@@ -181,6 +181,9 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
     const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 8);
+    const confidence = typeof suggestions.confidence === "number"
+      ? Math.min(1, Math.max(0, suggestions.confidence))
+      : 0.6;
 
     // Auto-assign "The Atelier" vibe and "Luxe" mood for fashion items over $1000
     const FASHION_CATEGORIES = ["Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear", "Accessories", "Bags & Totes", "Jewelry", "Watches"];
