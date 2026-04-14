@@ -1,60 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Sub-categories (ones with parent_slug) from the categories table
-const CORE_CATEGORIES = [
-  "Automotive", "Cleaning", "Garden", "Health & Wellness", "Office & Stationery",
-  "Books", "Crafting & DIY", "Fitness & Sports", "Gaming", "Pets",
-  "Accessories", "Bags & Totes", "Eyewear", "Jewelry", "Watches",
-  "Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear",
-  "Baby", "Kids", "Toys", "Parenting & Maternity",
-  "Cookware & Bakeware", "Coffee & Tea", "Dining & Entertaining", "Kitchen Storage",
-  "Décor & Artwork", "Textiles", "Candles & Home Fragrance", "Lighting", "Furniture",
-  "Audio & Visual", "Phones & Accessories", "Smart Home", "Tech & Gadgets",
-  "Skin Care", "Hair Care", "Makeup", "Body Care", "Fragrance", "Beauty Tools & Devices",
-  "Luggage & Bags", "Outdoor & Camping", "Travel Essentials",
-  "Hand Tools", "Power Tools", "Tool Accessories"
-];
+async function loadCategories(sb: any) {
+  const { data } = await sb
+    .from("categories")
+    .select("name, type, description, parent_slug")
+    .order("name");
+  const rows = data || [];
 
-const VIBE_CATEGORIES = [
-  "Bloom & Glow", "Build Mode", "Dress to Impress", "Drip & Shine",
-  "Eclectic Maximalist", "Geek & Gamer", "Get Sporty", "Little Ones",
-  "Organized Life", "Quiet Luxury", "Soft Academia", "Sustainable Futurism",
-  "The Wellness Era", "Urban Tech-Wear", "Whimsigoth", "Work-From-Anywhere",
-  "Tis the Season", "Sneakerheads", "Kitchen Flex", "Off-Duty Model",
-  "In My Zone", "Coastal Cool", "Going Out Era", "Touch Grass",
-  "Pet Parent Life", "Content Creator Kit", "Corporate Core", "Jet Set",
-  "Stay-In Cinema", "Aura Farming", "Ballin' on a Budget",
-  "Hot Mess Express", "The Atelier", "Pure Routine", "Sleek Minimal and Casual"
-];
+  const core = rows
+    .filter((r: any) => r.type === "core" && r.parent_slug)
+    .map((r: any) => r.name);
 
-// Mood categories with anchor keywords baked in for cost-efficient AI matching.
-// The descriptions serve as few-shot guidance — no extra tokens needed.
-// FUTURE: At ~500+ categorized products, switch to embedding cosine similarity
-// for near-zero marginal cost. Only fall back to LLM for low-confidence matches.
-const MOOD_CATEGORIES: Record<string, string> = {
-  "Cozy": "warm, soft, comfort, blankets, candles, slippers, mugs, loungewear, plush, fleece, knit",
-  "Minimal": "clean, calm, uncluttered, white, simple, organizers, neutral, streamlined, scandinavian",
-  "Luxe": "elevated, indulgent, rich, silk, gold, high-end, skincare, velvet, premium, designer",
-  "Earthy": "grounded, natural, organic, wood, linen, clay, plants, neutral, terracotta, botanical",
-  "Playful": "fun, bright, lighthearted, toys, colorful, kitchenware, novelty, quirky, cheerful, vibrant",
-  "Bold": "statement, confident, bright, fashion, graphic, art, maximalist, loud, dramatic, eye-catching",
-  "Calm": "soothing, de-stressing, diffusers, weighted, blankets, bath, aromatherapy, zen, peaceful, tranquil",
-  "Romantic": "soft, intimate, warm, candles, lingerie, rose, flowers, date night, love, elegant",
-  "Adventurous": "outdoorsy, curious, daring, camping, travel, rugged, explorer, hiking, wanderlust",
-  "Festive": "celebratory, seasonal, joyful, holiday, decor, party, supplies, gift wrap, christmas, birthday",
-  "Focused": "productive, clear-headed, desk, organizers, planners, workwear, office, study, concentration",
-  "Summer Glow": "bright, breezy, outdoor, sunglasses, beach, swimwear, sandals, tropical, warm weather",
-  "Motivated": "active, pumped, energized, gym, fitness, sports, workout, bright colors, productivity",
-  "Spring Reset": "fresh, clean, pastel, renewal, decluttering, light, floral, garden, new beginnings",
-  "I Love Milo": "pet, animal, dog, cat, pet beds, toys, feeding, treats, grooming",
-  "Fresh Start": "clean, organize, declutter, storage, bins, baskets, closet, laundry, desk, tidy, renewal, fresh, spray, supplies, recycling, dividers, marie kondo, minimalism",
-  "Low-Key Logic": "practical, functional, efficient, smart, unpretentious, everyday, reliable, no-fuss, bulk, basics, sensible, durable, utility, multipurpose, straightforward",
-};
+  const vibes = rows
+    .filter((r: any) => r.type === "vibe")
+    .map((r: any) => r.name);
+
+  const moods: Record<string, string> = {};
+  rows
+    .filter((r: any) => r.type === "mood")
+    .forEach((r: any) => {
+      moods[r.name] = r.description || r.name;
+    });
+
+  return { core, vibes, moods };
+}
 
 const dedupeStrings = (values: string[] = []) => {
   const seen = new Set<string>();
@@ -98,6 +73,13 @@ serve(async (req) => {
   }
 
   try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    const { core: CORE_CATEGORIES, vibes: VIBE_CATEGORIES, moods: MOOD_CATEGORIES } = await loadCategories(supabase);
+
     const body = await req.text();
     const { name, description, price, source_url, vendor_name } = JSON.parse(body);
 
@@ -170,9 +152,9 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     
     const suggestions = JSON.parse(jsonMatch[0]);
     
+    const moodNames = Object.keys(MOOD_CATEGORIES);
     let validCore = dedupeStrings((suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c))).slice(0, 5);
     let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
-    const moodNames = Object.keys(MOOD_CATEGORIES);
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
     const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 8);
 
