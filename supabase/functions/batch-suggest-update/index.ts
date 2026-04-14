@@ -6,47 +6,46 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const CORE_CATEGORIES = [
-  "Beauty", "Automotive", "Cleaning", "Garden", "Health", "Office",
-  "Fashion", "Men's Fashion", "Women's Fashion", "Home", "Accessories",
-  "Handbags", "Jewelry", "Watches", "Men's Watches", "Women's Watches",
-  "Baby", "Family", "Kids", "Kitchen", "Books", "Fitness & Sports", "Gaming",
-  "Pets", "Toys", "Electronics", "Tech", "Hand Tools", "Power Tools",
-  "Tool Accessories", "Outdoors", "Travel"
-];
+async function loadCategories(sb: any) {
+  const { data } = await sb
+    .from("categories")
+    .select("name, type, description, parent_slug")
+    .order("name");
+  const rows = data || [];
 
-const VIBE_CATEGORIES = [
-  "Bloom & Glow", "Build Mode", "Dress to Impress", "Drip & Shine",
-  "Eclectic Maximalist", "Geek & Gamer", "Get Sporty", "Little Ones",
-  "Organized Life", "Quiet Luxury", "Soft Academia", "Sustainable Futurism",
-  "The Wellness Era", "Urban Tech-Wear", "Whimsigoth", "Work-From-Anywhere",
-  "Tis the Season", "Sneakerheads", "Main Character Energy", "Sunday Reset",
-  "Kitchen Flex", "Off-Duty Model", "In My Zone", "Coastal Cool",
-  "Going Out Era", "That Girl / That Guy", "Touch Grass", "Pet Parent Life",
-  "Content Creator Kit", "Corporate Core", "Jet Set", "Clean Girl / Clean Guy",
-  "Stay-In Cinema", "Aura Farming", "Ballin' on a Budget", "Icy Minimal",
-  "Hot Mess Express", "The Atelier", "Pure Routine"
-];
+  const core = rows
+    .filter((r: any) => r.type === "core" && r.parent_slug)
+    .map((r: any) => r.name);
 
-const MOOD_CATEGORIES: Record<string, string> = {
-  "Cozy": "warm, soft, comfort, blankets, candles, slippers, mugs, loungewear, plush, fleece, knit",
-  "Minimal": "clean, calm, uncluttered, white, simple, organizers, neutral, streamlined, scandinavian",
-  "Luxe": "elevated, indulgent, rich, silk, gold, high-end, skincare, velvet, premium, designer",
-  "Earthy": "grounded, natural, organic, wood, linen, clay, plants, neutral, terracotta, botanical",
-  "Playful": "fun, bright, lighthearted, toys, colorful, kitchenware, novelty, quirky, cheerful, vibrant",
-  "Bold": "statement, confident, bright, fashion, graphic, art, maximalist, loud, dramatic, eye-catching",
-  "Calm": "soothing, de-stressing, diffusers, weighted, blankets, bath, aromatherapy, zen, peaceful, tranquil",
-  "Romantic": "soft, intimate, warm, candles, lingerie, rose, flowers, date night, love, elegant",
-  "Adventurous": "outdoorsy, curious, daring, camping, travel, rugged, explorer, hiking, wanderlust",
-  "Festive": "celebratory, seasonal, joyful, holiday, decor, party, supplies, gift wrap, christmas, birthday",
-  "Focused": "productive, clear-headed, desk, organizers, planners, workwear, office, study, concentration",
-  "Summer Glow": "bright, breezy, outdoor, sunglasses, beach, swimwear, sandals, tropical, warm weather",
-  "Motivated": "active, pumped, energized, gym, fitness, sports, workout, bright colors, productivity",
-  "Spring Reset": "fresh, clean, pastel, renewal, decluttering, light, floral, garden, new beginnings",
-  "I Love Milo": "pet, animal, dog, cat, pet beds, toys, feeding, treats, grooming",
-};
+  const vibes = rows
+    .filter((r: any) => r.type === "vibe")
+    .map((r: any) => r.name);
 
-async function suggestForProduct(name: string, description: string, price: number, apiKey: string) {
+  const moods: Record<string, string> = {};
+  rows
+    .filter((r: any) => r.type === "mood")
+    .forEach((r: any) => {
+      moods[r.name] = r.description || r.name;
+    });
+
+  return { core, vibes, moods };
+}
+
+interface CategoryLists {
+  core: string[];
+  vibes: string[];
+  moods: Record<string, string>;
+}
+
+async function suggestForProduct(
+  name: string,
+  description: string,
+  price: number,
+  apiKey: string,
+  categories: CategoryLists,
+) {
+  const { core: CORE_CATEGORIES, vibes: VIBE_CATEGORIES, moods: MOOD_CATEGORIES } = categories;
+
   const moodList = Object.entries(MOOD_CATEGORIES)
     .map(([mood, anchors]) => `- ${mood}: ${anchors}`)
     .join("\n");
@@ -136,6 +135,9 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Load categories from the database
+    const categories = await loadCategories(supabase);
+
     const body = await req.json().catch(() => ({}));
     const offset = body.offset || 0;
     const limit = body.limit || 10;
@@ -167,7 +169,8 @@ serve(async (req) => {
           product.name,
           product.description || "",
           product.price,
-          LOVABLE_API_KEY!
+          LOVABLE_API_KEY!,
+          categories,
         );
 
         // Build update object - merge AI suggestions with existing data
