@@ -98,7 +98,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.35 }}
         onClick={handleCardClick}
-        className={`group overflow-hidden rounded-sm border border-border transition-all hover:border-foreground/20 hover:-translate-y-0.5 cursor-pointer ${
+        className={`group overflow-hidden rounded-sm border border-border bg-background transition-all hover:border-foreground/20 hover:-translate-y-0.5 cursor-pointer ${
           featured ? "md:flex md:items-stretch" : ""
         }`}
       >
