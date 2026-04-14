@@ -95,8 +95,8 @@ serve(async (req) => {
     const body = await req.text();
     const { name, description, price, source_url, vendor_name } = JSON.parse(body);
 
-    // Vendor-specific category hints injected into the prompt
-    const vendorHints = buildVendorHints(source_url, vendor_name);
+    // Brand-specific category hints from brand_lookup table
+    const vendorHints = await getBrandHint(supabase, source_url, vendor_name);
 
     const moodList = Object.entries(MOOD_CATEGORIES)
       .map(([mood, anchors]) => `- ${mood}: ${anchors}`)
