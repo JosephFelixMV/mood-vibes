@@ -620,7 +620,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
         <div>
           <Label>Price</Label>
-          <Input type="number" step="0.01" min="0" value={form.price} onChange={(e) => set("price", e.target.value)} onWheel={(e) => (e.target as HTMLInputElement).blur()} required placeholder="29.99" />
+          <Input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={form.price} onChange={(e) => set("price", e.target.value)} required placeholder="29.99" />
           <label className="mt-2 flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
