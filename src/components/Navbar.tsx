@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import RegionIndicator from "@/components/RegionIndicator";
 import { useRegion } from "@/contexts/RegionContext";
