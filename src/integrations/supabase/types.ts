@@ -50,6 +50,48 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_lookup: {
+        Row: {
+          brand: string
+          core: string[] | null
+          created_at: string
+          group_name: string | null
+          hint: string | null
+          id: string
+          match_aliases: string[]
+          moods: string[] | null
+          source: string | null
+          url_match: string
+          vibes: string[] | null
+        }
+        Insert: {
+          brand: string
+          core?: string[] | null
+          created_at?: string
+          group_name?: string | null
+          hint?: string | null
+          id?: string
+          match_aliases?: string[]
+          moods?: string[] | null
+          source?: string | null
+          url_match?: string
+          vibes?: string[] | null
+        }
+        Update: {
+          brand?: string
+          core?: string[] | null
+          created_at?: string
+          group_name?: string | null
+          hint?: string | null
+          id?: string
+          match_aliases?: string[]
+          moods?: string[] | null
+          source?: string | null
+          url_match?: string
+          vibes?: string[] | null
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           affiliate_url: string
