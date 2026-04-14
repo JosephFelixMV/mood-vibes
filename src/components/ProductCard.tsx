@@ -116,7 +116,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
                 decoding="async"
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-4xl text-muted-foreground">
+              <div className="absolute inset-0 flex items-center justify-center text-4xl text-muted-foreground">
                 🛍️
               </div>
             )}

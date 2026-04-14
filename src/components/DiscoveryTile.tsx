@@ -15,16 +15,16 @@ interface DiscoveryTileProps {
 function TileImage({ product }: { product: Product }) {
   const proxiedImage = useProxiedImage(product.image_url);
   return (
-    <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#f5f5f5] flex items-center justify-center">
+    <div className="relative w-full overflow-hidden bg-[#f7f7f5]" style={{ paddingTop: '100%' }}>
       {proxiedImage ? (
         <img
           src={proxiedImage}
           alt={product.name}
-          className="h-full w-full object-contain"
+          className="absolute inset-0 h-full w-full object-contain object-center p-2"
           loading="eager"
         />
       ) : (
-        <div className="flex h-full items-center justify-center text-4xl text-muted-foreground">🛍️</div>
+        <div className="absolute inset-0 flex items-center justify-center text-4xl text-muted-foreground">🛍️</div>
       )}
     </div>
   );
