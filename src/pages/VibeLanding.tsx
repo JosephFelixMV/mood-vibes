@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Shuffle, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { getProducts, getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
+import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSEO } from "@/hooks/useSEO";
@@ -44,30 +44,7 @@ export default function VibeLanding() {
   });
 
   const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region);
-  const [randomPick, setRandomPick] = useState<typeof products[0] | null>(null);
-  const [animKey, setAnimKey] = useState(0);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
-  const { trigger, cooldown } = useRateLimitedAction(2000);
-
-  const sortedProducts = [...healthyProducts].sort((a, b) => {
-    const dateA = new Date(a.date_added).getTime();
-    const dateB = new Date(b.date_added).getTime();
-    return sort === "newest" ? dateB - dateA : dateA - dateB;
-  });
-
-  useEffect(() => {
-    if (healthyProducts.length > 0 && !randomPick) {
-      setRandomPick(getRandomProduct(healthyProducts));
-    }
-  }, [healthyProducts]);
-
-  const handleRandomPick = () => {
-    trigger(() => {
-      const next = getRandomProduct(healthyProducts, randomPick?.id);
-      setRandomPick(next);
-      setAnimKey((k) => k + 1);
-    });
-  };
 
   if (!vibe && !isLoading) {
     return (
@@ -93,35 +70,8 @@ export default function VibeLanding() {
         </p>
       </div>
 
-      {!isLoading && products.length > 0 && (
-        <section className="mb-12">
-          <AnimatePresence mode="wait">
-            {randomPick && (
-              <motion.div
-                key={animKey}
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className="mx-auto max-w-3xl"
-              >
-                <ProductCard product={randomPick} featured />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div className="mt-6 flex justify-center">
-            <Button
-              size="lg"
-              onClick={handleRandomPick}
-              disabled={cooldown || healthyProducts.length === 0}
-              className="gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105"
-            >
-              <Sparkles className="h-5 w-5" />
-              {cooldown ? "Wait…" : "Discover"}
-            </Button>
-          </div>
-        </section>
+      {!isLoading && healthyProducts.length > 0 && (
+        <DiscoveryTile products={healthyProducts} getRandomProduct={getRandomProduct} />
       )}
 
       {!isLoading && products.length > 0 && (

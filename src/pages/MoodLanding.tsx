@@ -2,9 +2,9 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shuffle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
+import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
@@ -48,22 +48,6 @@ export default function MoodLanding() {
 
   const regionProducts = filterByRegion(products, region);
 
-  const [randomPick, setRandomPick] = useState<Product | null>(null);
-  const { trigger, cooldown } = useRateLimitedAction(2000);
-  const hasAutoLoaded = useState(false);
-
-  // Auto-load a random pick when products are available
-  if (regionProducts.length > 0 && !randomPick && !hasAutoLoaded[0]) {
-    hasAutoLoaded[1](true);
-    setRandomPick(getRandomProduct(regionProducts));
-  }
-
-  const handleRandom = () => {
-    trigger(() => {
-      const pick = getRandomProduct(regionProducts, randomPick?.id);
-      setRandomPick(pick);
-    });
-  };
 
   useSEO({
     title: mood?.name || "Mood",
@@ -84,22 +68,9 @@ export default function MoodLanding() {
         </div>
       </div>
 
-      {/* Random pick */}
+      {/* Discovery tile */}
       {regionProducts.length > 0 && (
-        <div className="mb-10">
-          {randomPick && <ProductCard product={randomPick} featured />}
-          <div className="mt-6 flex justify-center">
-            <Button
-              size="lg"
-              onClick={handleRandom}
-              disabled={cooldown || regionProducts.length === 0}
-              className="gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105"
-            >
-              <Sparkles className="h-5 w-5" />
-              {cooldown ? "Wait…" : "Discover"}
-            </Button>
-          </div>
-        </div>
+        <DiscoveryTile products={regionProducts} getRandomProduct={getRandomProduct} />
       )}
 
       {/* Sort */}
