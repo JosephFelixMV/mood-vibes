@@ -31,6 +31,27 @@ async function loadCategories(sb: any) {
   return { core, vibes, moods };
 }
 
+async function getBrandHint(sb: any, sourceUrl?: string): Promise<string> {
+  const url = (sourceUrl || "").toLowerCase();
+  if (!url) return "";
+
+  const { data: byUrl } = await sb
+    .from("brand_lookup")
+    .select("core, vibes, moods, hint")
+    .neq("url_match", "")
+    .limit(100);
+
+  const match = (byUrl || []).find((r: any) => r.url_match && url.includes(r.url_match));
+  if (!match) return "";
+
+  const parts = [];
+  if (match.hint) parts.push(`Brand context: ${match.hint}`);
+  if (match.core?.length) parts.push(`Typical core categories: ${match.core.join(", ")}`);
+  if (match.vibes?.length) parts.push(`Typical vibes: ${match.vibes.join(", ")}`);
+  if (match.moods?.length) parts.push(`Typical moods: ${match.moods.join(", ")}`);
+  return parts.length ? `\nBRAND CONTEXT:\n${parts.join("\n")}\n` : "";
+}
+
 interface CategoryLists {
   core: string[];
   vibes: string[];
@@ -43,6 +64,7 @@ async function suggestForProduct(
   price: number,
   apiKey: string,
   categories: CategoryLists,
+  brandHint = "",
 ) {
   const { core: CORE_CATEGORIES, vibes: VIBE_CATEGORIES, moods: MOOD_CATEGORIES } = categories;
 
@@ -62,7 +84,7 @@ MOOD CATEGORIES (pick 1-3 that best describe the feeling/emotion this product ev
 ${moodList}
 
 Product Name: ${name || "Unknown"}
-Description: ${description || "No description"}
+${brandHint}Description: ${description || "No description"}
 Price: ${price || "Unknown"}
 
 Respond ONLY with valid JSON in this exact format, no other text:
@@ -145,7 +167,7 @@ serve(async (req) => {
     // Fetch active products with pagination
     const { data: products, error: fetchError } = await supabase
       .from("products")
-      .select("id, name, description, price, category, vibe_category, mood")
+      .select("id, name, description, price, category, vibe_category, mood, source_url, vendor_id")
       .eq("is_active", true)
       .order("created_at", { ascending: true })
       .range(offset, offset + limit - 1);
@@ -165,12 +187,14 @@ serve(async (req) => {
     for (const product of products) {
       try {
         console.log(`Processing: ${product.name}`);
+        const brandHint = await getBrandHint(supabase, product.source_url);
         const suggestions = await suggestForProduct(
           product.name,
           product.description || "",
           product.price,
           LOVABLE_API_KEY!,
           categories,
+          brandHint,
         );
 
         // Build update object - merge AI suggestions with existing data
