@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { getProducts, getDailyPick, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
@@ -74,10 +74,10 @@ export default function Index() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="font-heading text-4xl font-extrabold leading-tight tracking-tight md:text-6xl lg:text-7xl">
+            <h1 className="font-heading text-4xl font-medium leading-tight tracking-tight md:text-6xl lg:text-7xl">
               Find your mood.
               <br />
-              <span className="text-gradient">Shop the vibe.</span>
+              <span className="italic">Shop the vibe.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-md text-lg text-muted-foreground">
               Discover products that match your mood and aesthetic.
@@ -94,16 +94,15 @@ export default function Index() {
               size="lg"
               onClick={handleSurprise}
               disabled={isLoading || healthyProducts.length === 0 || cooldown}
-              className="gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-transform hover:scale-105"
+              className="gap-2 rounded-sm px-8 text-base font-medium tracking-wide uppercase transition-colors"
             >
-              <Sparkles className="h-5 w-5" /> {cooldown ? "Wait…" : "Discover"}
+              {cooldown ? "Wait…" : "Discover"}
             </Button>
           </motion.div>
         </div>
 
         {/* Decorative elements */}
-        <div className="pointer-events-none absolute -left-32 -top-32 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
+        {/* removed decorative blobs */}
       </section>
 
       {/* Surprise result */}
@@ -117,9 +116,9 @@ export default function Index() {
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
               <div className="mx-auto max-w-3xl">
-                <div className="mb-4 flex items-center gap-2 text-sm font-medium text-primary">
-                  <Sparkles className="h-4 w-4" /> Your surprise pick
-                </div>
+                <p className="mb-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                  Your surprise pick
+                </p>
                 <ProductCard product={surprise} featured />
               </div>
             </motion.div>

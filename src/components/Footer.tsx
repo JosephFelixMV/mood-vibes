@@ -3,10 +3,9 @@ import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
-    <footer className="border-t bg-card" aria-label="Site footer">
+    <footer className="border-t bg-background" aria-label="Site footer">
       <div className="container flex flex-col items-center gap-4 py-8 text-center text-sm text-muted-foreground md:flex-row md:justify-between md:text-left">
         <div className="flex items-center gap-2 font-heading font-semibold text-foreground">
-          <Sparkles className="h-5 w-5 text-primary" />
           Mood & Vibes
         </div>
         <nav aria-label="Footer navigation" className="flex gap-6">

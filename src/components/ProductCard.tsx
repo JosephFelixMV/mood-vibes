@@ -78,7 +78,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.35 }}
-      className={`group overflow-hidden rounded-2xl border bg-card transition-shadow hover:shadow-lg ${
+      className={`group overflow-hidden rounded-sm border bg-card transition-colors hover:border-foreground/20 ${
         featured ? "md:flex md:items-stretch" : ""
       }`}
     >
@@ -169,7 +169,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
             <ReportBrokenLink productId={product.id} />
             <ShareButton product={product} />
             <div className="flex flex-col items-end gap-0.5">
-              <Button asChild size="sm" className="gap-1.5 rounded-full" onClick={handleBuyClick}>
+              <Button asChild size="sm" className="gap-1.5 rounded-sm" onClick={handleBuyClick}>
                 <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`Buy ${product.name} (opens in new tab)`}>
                   Buy Now <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                 </a>
