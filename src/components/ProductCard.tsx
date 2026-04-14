@@ -98,25 +98,25 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.35 }}
         onClick={handleCardClick}
-        className={`group overflow-hidden rounded-sm border border-border transition-all hover:border-foreground/20 hover:-translate-y-0.5 cursor-pointer ${
+        className={`group overflow-hidden rounded-sm border border-border bg-background transition-all hover:border-foreground/20 hover:-translate-y-0.5 cursor-pointer ${
           featured ? "md:flex md:items-stretch" : ""
         }`}
       >
         {/* Image */}
         <div className={`relative block overflow-hidden ${featured ? "md:w-1/2" : ""}`}>
-          <div className={`${featured ? "aspect-[4/3] md:aspect-auto md:h-full" : "aspect-[4/5]"} bg-[#f5f5f5] flex items-center justify-center`}>
+          <div className={`relative ${featured ? "aspect-[4/3] md:aspect-auto md:h-full" : ""} bg-[#f7f7f5]`} style={featured ? undefined : { paddingTop: '100%' }}>
             {proxiedImage ? (
               <img
                 src={proxiedImage}
                 srcSet={`${proxiedImage} 1x, ${proxiedImage} 2x`}
                 sizes={featured ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"}
                 alt={product.name}
-                className="sharp-image h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                className="sharp-image absolute inset-0 h-full w-full object-contain object-center p-2 transition-transform duration-500 group-hover:scale-[1.02]"
                 loading="lazy"
                 decoding="async"
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-4xl text-muted-foreground">
+              <div className="absolute inset-0 flex items-center justify-center text-4xl text-muted-foreground">
                 🛍️
               </div>
             )}

@@ -19,11 +19,11 @@ interface ProductDrawerProps {
 
 function GalleryImage({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="w-full aspect-[4/5] bg-[#f5f5f5] flex items-center justify-center">
+    <div className="relative w-full bg-[#f7f7f5]" style={{ paddingTop: '100%' }}>
       <img
         src={src}
         alt={alt}
-        className="h-full w-full object-contain"
+        className="absolute inset-0 h-full w-full object-contain object-center p-2"
       />
     </div>
   );
