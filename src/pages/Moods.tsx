@@ -1,21 +1,13 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Shuffle } from "lucide-react";
-import { getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
+import { getCategories } from "@/lib/supabase-queries";
 import { supabase } from "@/integrations/supabase/client";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import ProductCard from "@/components/ProductCard";
 import { useSEO } from "@/hooks/useSEO";
-import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
-import { useRegion } from "@/contexts/RegionContext";
-import type { Product } from "@/lib/supabase-queries";
 
 export default function Moods() {
-  const { region } = useRegion();
   useSEO({
     title: "Shop by Mood",
     description: "Find products that match your mood on Mood & Vibes.",
@@ -48,7 +40,6 @@ export default function Moods() {
     },
   });
 
-
   return (
     <div className="container py-12">
       <h1 className="mb-2 font-heading text-3xl font-bold tracking-tight md:text-4xl">
@@ -57,26 +48,6 @@ export default function Moods() {
       <p className="mb-10 text-muted-foreground">
         Find products that match how you're feeling
       </p>
-
-      {/* Random Discovery */}
-      {regionMoodProducts.length > 0 && (
-        <div className="mb-10 rounded-2xl border bg-muted/30 p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-heading text-lg font-semibold">🎲 Discover Something New</h2>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRandom}
-              disabled={cooldown || regionMoodProducts.length === 0}
-              className="gap-1.5 rounded-full"
-            >
-              <Shuffle className="h-4 w-4" />
-              {cooldown ? "Wait…" : "Random Pick"}
-            </Button>
-          </div>
-          {randomPick && <ProductCard product={randomPick} featured />}
-        </div>
-      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {moods.map((mood, i) => (
