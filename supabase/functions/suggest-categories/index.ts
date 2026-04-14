@@ -44,27 +44,39 @@ const dedupeStrings = (values: string[] = []) => {
     });
 };
 
-// Vendor-aware category hints — biases the AI toward sensible defaults
-// while still allowing product-specific overrides
-const VENDOR_HINTS: Record<string, { match: (url: string, name: string) => boolean; hint: string }> = {
-  caddis: {
-    match: (url, name) => url.includes("caddislife.com") || name.toLowerCase().includes("caddis"),
-    hint: "This product is from Caddis Eyewear — an eyewear brand. Always include 'Eyewear' in core categories. The product is almost certainly eyewear (glasses, sunglasses, readers).",
-  },
-  containerstore: {
-    match: (url, name) => url.includes("containerstore.com") || name.toLowerCase().includes("container store"),
-    hint: "This product is from The Container Store — a home organization retailer. Strongly consider 'Cleaning' in core categories, 'Organized Life' in vibes, and 'Fresh Start' in moods. However, still evaluate the specific product details — some items may fit other categories like 'Kitchen Storage', 'Office & Stationery', or 'Décor & Artwork'.",
-  },
-};
-
-function buildVendorHints(sourceUrl?: string, vendorName?: string): string {
+async function getBrandHint(sb: any, sourceUrl?: string, vendorName?: string): Promise<string> {
   const url = (sourceUrl || "").toLowerCase();
-  const name = (vendorName || "").toLowerCase();
-  const hints: string[] = [];
-  for (const v of Object.values(VENDOR_HINTS)) {
-    if (v.match(url, name)) hints.push(v.hint);
-  }
-  return hints.length > 0 ? `\nVENDOR CONTEXT:\n${hints.join("\n")}\n` : "";
+  const name = (vendorName || "").toLowerCase().trim();
+  if (!url && !name) return "";
+
+  // Try URL match first
+  const { data: byUrl } = await sb
+    .from("brand_lookup")
+    .select("core, vibes, moods, hint, brand")
+    .neq("url_match", "")
+    .limit(100);
+
+  const urlMatch = (byUrl || []).find((r: any) => r.url_match && url.includes(r.url_match));
+  if (urlMatch) return formatBrandHint(urlMatch);
+
+  // Fall back to alias match
+  const { data: byAlias } = await sb
+    .from("brand_lookup")
+    .select("core, vibes, moods, hint, brand")
+    .contains("match_aliases", [name]);
+
+  if (byAlias?.[0]) return formatBrandHint(byAlias[0]);
+
+  return "";
+}
+
+function formatBrandHint(row: any): string {
+  const parts = [];
+  if (row.hint) parts.push(`Brand context: ${row.hint}`);
+  if (row.core?.length) parts.push(`Typical core categories for this brand: ${row.core.join(", ")}`);
+  if (row.vibes?.length) parts.push(`Typical vibes for this brand: ${row.vibes.join(", ")}`);
+  if (row.moods?.length) parts.push(`Typical moods for this brand: ${row.moods.join(", ")}`);
+  return parts.length ? `\nBRAND CONTEXT:\n${parts.join("\n")}\n` : "";
 }
 
 serve(async (req) => {
