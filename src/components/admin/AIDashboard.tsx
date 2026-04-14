@@ -98,7 +98,29 @@ export default function AIDashboard() {
         <h2 className="font-heading text-xl font-semibold flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" /> AI Discover Analytics
         </h2>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>Refresh</Button>
+        <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleSeedBrandLookup(file);
+            }}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={seeding}
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-1"
+          >
+            {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+            Seed Brand Lookup
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>Refresh</Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
