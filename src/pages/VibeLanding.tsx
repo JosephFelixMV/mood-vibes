@@ -1,7 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 import { getProducts, getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -11,6 +12,9 @@ import { useSEO } from "@/hooks/useSEO";
 import { useRegion } from "@/contexts/RegionContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
+
+const toTitleCase = (s: string) =>
+  s.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 
 export default function VibeLanding() {
   const { region } = useRegion();
@@ -43,8 +47,31 @@ export default function VibeLanding() {
     enabled: !!vibeName,
   });
 
-  const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region);
+  const [filterVendor, setFilterVendor] = useState("");
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
+
+  const { data: brandsList = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name").eq("is_active", true).order("name");
+      return data || [];
+    },
+  });
+
+  const regionFiltered = filterByRegion(products.filter((p) => !p.page_error), region);
+
+  const availableVendors = useMemo(() => {
+    const vendorIds = new Set(regionFiltered.map((p) => p.vendor_id).filter(Boolean));
+    return brandsList
+      .filter((b: any) => vendorIds.has(b.id))
+      .map((b: any) => ({ id: b.id, name: toTitleCase(b.name) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [regionFiltered, brandsList]);
+
+  const healthyProducts = regionFiltered.filter((p) => {
+    if (filterVendor && p.vendor_id !== filterVendor) return false;
+    return true;
+  });
 
   const sortedProducts = [...healthyProducts].sort((a, b) => {
     const dateA = new Date(a.date_added).getTime();
@@ -83,15 +110,28 @@ export default function VibeLanding() {
       {!isLoading && products.length > 0 && (
         <div className="mb-6 flex items-center justify-between">
           <h2 className="font-heading text-lg font-semibold">All {vibeName} Products</h2>
-          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-3">
+            <Select value={filterVendor || "all"} onValueChange={(v) => setFilterVendor(v === "all" ? "" : v)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Vendor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Vendors</SelectItem>
+                {availableVendors.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
       {isLoading ? (

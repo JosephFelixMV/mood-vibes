@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 import { getProductsPaginated, getCategories, filterByRegion } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
 import { useRegion } from "@/contexts/RegionContext";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+
+const toTitleCase = (s: string) =>
+  s.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 
 const PAGE_SIZE = 30;
 
@@ -32,7 +36,16 @@ export default function Products() {
   });
 
   const [filterMood, setFilterMood] = useState("");
+  const [filterVendor, setFilterVendor] = useState("");
   const [page, setPage] = useState(1);
+
+  const { data: brandsList = [] } = useQuery({
+    queryKey: ["brands"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name").eq("is_active", true).order("name");
+      return data || [];
+    },
+  });
 
   const categoryName = coreCategories.find((c) => c.slug === categorySlug)?.name || "";
   const vibeName = vibeCategories.find((c) => c.slug === vibeSlug)?.name || "";
@@ -48,12 +61,13 @@ export default function Products() {
   const moodName = moodCategories.find((c) => c.slug === moodSlug)?.name || filterMood;
 
   const { data: result, isLoading } = useQuery({
-    queryKey: ["products-paginated", categoryName, vibeName, moodName, sort, page],
+    queryKey: ["products-paginated", categoryName, vibeName, moodName, sort, page, filterVendor],
     queryFn: () =>
       getProductsPaginated({
         category: categoryName || undefined,
         vibeCategory: vibeName || undefined,
         mood: moodName || undefined,
+        vendorId: filterVendor || undefined,
         sort,
         activeOnly: true,
         page,
@@ -65,6 +79,12 @@ export default function Products() {
   const totalCount = result?.count ?? 0;
   const regionProducts = filterByRegion(products, region);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  const availableVendors = useMemo(() => {
+    return brandsList
+      .map((b: any) => ({ id: b.id, name: toTitleCase(b.name) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [brandsList]);
 
   // Reset page when filters change
   const resetPage = useCallback(() => setPage(1), []);
@@ -158,6 +178,24 @@ export default function Products() {
               <SelectItem key={c.id} value={c.slug}>
                 {c.icon} {c.name}
               </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filterVendor || "all"}
+          onValueChange={(v) => {
+            setFilterVendor(v === "all" ? "" : v);
+            resetPage();
+          }}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Vendor" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Vendors</SelectItem>
+            {availableVendors.map((v) => (
+              <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
