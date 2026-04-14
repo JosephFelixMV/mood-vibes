@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertTriangle, Activity, Search, Shield, Sparkles } from "lucide-react";
+import { Loader2, AlertTriangle, Activity, Search, Shield, Sparkles, Upload } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "@/hooks/use-toast";
 
 type SortKey = "created_at" | "result_count";
 
@@ -23,6 +24,29 @@ export default function AIDashboard() {
   const [sortBy, setSortBy] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [showFlagged, setShowFlagged] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSeedBrandLookup = async (file: File) => {
+    setSeeding(true);
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      const brands = json.brands || json;
+      if (!Array.isArray(brands)) throw new Error("Expected a 'brands' array in JSON");
+
+      const { data, error } = await supabase.functions.invoke("seed-brand-lookup", {
+        body: { brands },
+      });
+      if (error) throw error;
+      toast({ title: "Brand lookup seeded", description: `${data.inserted} brands processed` });
+    } catch (e: any) {
+      toast({ title: "Seed failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSeeding(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const { data: requests = [], isLoading, refetch } = useQuery({
     queryKey: ["ai-requests"],
@@ -74,7 +98,29 @@ export default function AIDashboard() {
         <h2 className="font-heading text-xl font-semibold flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" /> AI Discover Analytics
         </h2>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>Refresh</Button>
+        <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleSeedBrandLookup(file);
+            }}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={seeding}
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-1"
+          >
+            {seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+            Seed Brand Lookup
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>Refresh</Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
