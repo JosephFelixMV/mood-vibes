@@ -102,8 +102,8 @@ export default function MoodLanding() {
 
       {/* Sort + Vendor filter */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="font-heading text-xl font-semibold">All {mood.name} Products ({filteredProducts.length})</h2>
-        <div className="flex flex-wrap gap-3">
+        <h2 className="min-w-0 font-heading text-xl font-semibold leading-snug sm:flex-1">All {mood.name} Products ({filteredProducts.length})</h2>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
           <Select value={filterVendor || "all"} onValueChange={(v) => setFilterVendor(v === "all" ? "" : v)}>
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="Vendor" />
@@ -115,12 +115,12 @@ export default function MoodLanding() {
               ))}
             </SelectContent>
           </Select>
-          <div className="flex gap-2">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
             <Button
               variant={sort === "newest" ? "default" : "outline"}
               size="sm"
               onClick={() => setSort("newest")}
-              className="rounded-full"
+              className="w-full rounded-full sm:w-auto"
             >
               Newest
             </Button>
@@ -128,7 +128,7 @@ export default function MoodLanding() {
               variant={sort === "oldest" ? "default" : "outline"}
               size="sm"
               onClick={() => setSort("oldest")}
-              className="rounded-full"
+              className="w-full rounded-full sm:w-auto"
             >
               Oldest
             </Button>
