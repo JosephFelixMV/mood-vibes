@@ -125,7 +125,7 @@ export default function Products() {
       {/* Filters */}
       <div className="mb-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
         <Select value={categorySlug || "all"} onValueChange={setCategory}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
