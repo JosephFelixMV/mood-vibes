@@ -38,7 +38,7 @@ function slugify(text: string) {
 
 export default function CategoryVibeManager() {
   const qc = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"core" | "vibe" | "mood">("core");
+  const [activeTab, setActiveTab] = useState<"core" | "vibe" | "mood" | "brands">("core");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
