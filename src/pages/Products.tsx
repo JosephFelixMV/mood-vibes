@@ -123,7 +123,7 @@ export default function Products() {
       </p>
 
       {/* Filters */}
-      <div className="mb-8 flex flex-wrap gap-3">
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
         <Select value={categorySlug || "all"} onValueChange={setCategory}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Category" />

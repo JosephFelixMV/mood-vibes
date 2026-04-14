@@ -101,11 +101,11 @@ export default function MoodLanding() {
       )}
 
       {/* Sort + Vendor filter */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="font-heading text-xl font-semibold">All {mood.name} Products ({filteredProducts.length})</h2>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Select value={filterVendor || "all"} onValueChange={(v) => setFilterVendor(v === "all" ? "" : v)}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="Vendor" />
             </SelectTrigger>
             <SelectContent>

@@ -108,11 +108,11 @@ export default function VibeLanding() {
       )}
 
       {!isLoading && products.length > 0 && (
-        <div className="mb-6 flex items-center justify-between">
+         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="font-heading text-lg font-semibold">All {vibeName} Products</h2>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Select value={filterVendor || "all"} onValueChange={(v) => setFilterVendor(v === "all" ? "" : v)}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Vendor" />
               </SelectTrigger>
               <SelectContent>
@@ -123,7 +123,7 @@ export default function VibeLanding() {
               </SelectContent>
             </Select>
             <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
