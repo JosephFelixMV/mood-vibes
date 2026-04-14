@@ -108,9 +108,9 @@ export default function VibeLanding() {
       )}
 
       {!isLoading && products.length > 0 && (
-         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="font-heading text-lg font-semibold">All {vibeName} Products</h2>
-          <div className="flex flex-wrap gap-3">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="min-w-0 font-heading text-lg font-semibold leading-snug sm:flex-1">All {vibeName} Products</h2>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
             <Select value={filterVendor || "all"} onValueChange={(v) => setFilterVendor(v === "all" ? "" : v)}>
               <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Vendor" />
