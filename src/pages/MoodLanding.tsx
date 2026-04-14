@@ -103,7 +103,7 @@ export default function MoodLanding() {
       ) : regionProducts.length === 0 ? (
         <p className="py-20 text-center text-muted-foreground">No products available in your region for this mood.</p>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {regionProducts.map((p, i) => (
             <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
               <ProductCard product={p} />

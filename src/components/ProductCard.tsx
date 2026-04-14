@@ -78,29 +78,31 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.35 }}
-      className={`group overflow-hidden rounded-sm border bg-card transition-colors hover:border-foreground/20 ${
+      className={`group overflow-hidden rounded-sm border border-border transition-all hover:border-foreground/20 hover:-translate-y-0.5 ${
         featured ? "md:flex md:items-stretch" : ""
       }`}
     >
       {/* Image */}
-      <Link to={`/product/${(product as any).slug || product.id}`} aria-label={`View ${product.name}`} className={`relative block overflow-hidden bg-muted ${
-        featured ? "md:w-1/2" : "aspect-[4/3]"
+      <Link to={`/product/${(product as any).slug || product.id}`} aria-label={`View ${product.name}`} className={`relative block overflow-hidden ${
+        featured ? "md:w-1/2" : ""
       }`}>
-        {proxiedImage ? (
-          <img
-            src={proxiedImage}
-            srcSet={`${proxiedImage} 1x, ${proxiedImage} 2x`}
-            sizes={featured ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"}
-            alt={product.name}
-            className="sharp-image h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="flex h-full min-h-[200px] items-center justify-center text-4xl text-muted-foreground">
-            🛍️
-          </div>
-        )}
+        <div className={`${featured ? "aspect-[4/3] md:aspect-auto md:h-full" : "aspect-[4/5]"} bg-[#F2F0EA] flex items-center justify-center`}>
+          {proxiedImage ? (
+            <img
+              src={proxiedImage}
+              srcSet={`${proxiedImage} 1x, ${proxiedImage} 2x`}
+              sizes={featured ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"}
+              alt={product.name}
+              className="sharp-image h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-4xl text-muted-foreground">
+              🛍️
+            </div>
+          )}
+        </div>
         <div className="absolute left-3 top-3 flex flex-wrap gap-1">
           {(() => {
             const coreSet = [...new Set(product.category.split(",").map(c => c.trim()).filter(Boolean))];
@@ -138,48 +140,32 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       </Link>
 
       {/* Content */}
-      <div className={`flex flex-col gap-3 p-5 ${featured ? "md:w-1/2 md:justify-center md:p-8" : ""}`}>
-        <div>
-          <Link
-            to={`/product/${(product as any).slug || product.id}`}
-            className="font-heading text-lg font-semibold leading-tight transition-colors hover:text-primary"
-          >
-            {product.name}
-          </Link>
-          {product.company_name && (
-            <p className="mt-0.5 text-xs text-muted-foreground">{product.company_name}</p>
-          )}
-        </div>
+      <div className={`flex flex-col gap-2 p-4 ${featured ? "md:w-1/2 md:justify-center md:p-8" : ""}`}>
+        <Link
+          to={`/product/${(product as any).slug || product.id}`}
+          className="font-heading text-sm font-semibold leading-snug transition-colors hover:text-primary"
+        >
+          {product.name}
+        </Link>
 
-        {product.description && (
-          <div
-            className={`text-sm text-muted-foreground [&_p]:inline [&_p]:m-0 [&_br]:hidden ${featured ? "line-clamp-3" : "line-clamp-2"}`}
-            dangerouslySetInnerHTML={{ __html: product.description }}
-          />
-        )}
-
-        <div className="mt-auto flex items-center justify-between pt-2">
-          <div>
-            <span className="font-heading text-xl font-bold text-primary">
-              {formatPrice(product.price)}
-            </span>
-            <p className="text-[10px] text-muted-foreground">{product.price_below_msrp ? "Seller often offers deals below MSRP" : "Price at retailer may vary"}</p>
-          </div>
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between">
+          <span className="font-heading text-base font-bold text-primary">
+            {formatPrice(product.price)}
+          </span>
+          <div className="flex items-center gap-1">
             <ReportBrokenLink productId={product.id} />
             <ShareButton product={product} />
-            <div className="flex flex-col items-end gap-0.5">
-              <Button asChild size="sm" className="gap-1.5 rounded-sm" onClick={handleBuyClick}>
-                <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`Buy ${product.name} (opens in new tab)`}>
-                  Buy Now <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                </a>
-              </Button>
-              {vendorName && (
-                <span className="text-[10px] text-muted-foreground">via {vendorName}</span>
-              )}
-            </div>
+            <Button asChild size="sm" className="h-7 gap-1 rounded-sm text-xs" onClick={handleBuyClick}>
+              <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`Buy ${product.name} (opens in new tab)`}>
+                Buy <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              </a>
+            </Button>
           </div>
         </div>
+
+        {vendorName && (
+          <span className="text-[10px] text-muted-foreground">via {vendorName}</span>
+        )}
       </div>
     </motion.div>
   );

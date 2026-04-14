@@ -22,12 +22,12 @@ interface DiscoveryTileProps {
 function TileImage({ product }: { product: Product }) {
   const proxiedImage = useProxiedImage(product.image_url);
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+    <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#F2F0EA]">
       {proxiedImage ? (
         <img
           src={proxiedImage}
           alt={product.name}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain"
           loading="eager"
         />
       ) : (
