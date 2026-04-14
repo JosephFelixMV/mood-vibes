@@ -46,6 +46,12 @@ export default function VibeLanding() {
   const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region);
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
 
+  const sortedProducts = [...healthyProducts].sort((a, b) => {
+    const dateA = new Date(a.date_added).getTime();
+    const dateB = new Date(b.date_added).getTime();
+    return sort === "newest" ? dateB - dateA : dateA - dateB;
+  });
+
   if (!vibe && !isLoading) {
     return (
       <div className="container py-20 text-center">
