@@ -217,9 +217,9 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     validVibes = dedupeStrings(validVibes).slice(0, 4);
     validMoods = dedupeStrings(validMoods).slice(0, 3);
 
-    console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
+    console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords, confidence });
 
-    return new Response(JSON.stringify({ core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords }), {
+    return new Response(JSON.stringify({ core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords, confidence }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
