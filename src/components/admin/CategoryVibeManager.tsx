@@ -14,7 +14,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, Loader2, Layers, Sparkles, Upload, X, ImageIcon, Info, Heart } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Layers, Sparkles, Upload, X, ImageIcon, Info, Heart, Tag } from "lucide-react";
+import BrandLookupTab from "./BrandLookupTab";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Category } from "@/lib/supabase-queries";
