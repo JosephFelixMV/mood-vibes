@@ -139,7 +139,7 @@ export default function Products() {
         </Select>
 
         <Select value={vibeSlug || "all"} onValueChange={setVibe}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Vibe" />
           </SelectTrigger>
           <SelectContent>
@@ -169,7 +169,7 @@ export default function Products() {
             resetPage();
           }}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Mood" />
           </SelectTrigger>
           <SelectContent>
@@ -189,7 +189,7 @@ export default function Products() {
             resetPage();
           }}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Vendor" />
           </SelectTrigger>
           <SelectContent>
@@ -207,7 +207,7 @@ export default function Products() {
             resetPage();
           }}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
