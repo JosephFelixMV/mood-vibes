@@ -84,7 +84,7 @@ MOOD CATEGORIES (pick 1-3 that best describe the feeling/emotion this product ev
 ${moodList}
 
 Product Name: ${name || "Unknown"}
-Description: ${description || "No description"}
+${brandHint}Description: ${description || "No description"}
 Price: ${price || "Unknown"}
 
 Respond ONLY with valid JSON in this exact format, no other text:
@@ -167,7 +167,7 @@ serve(async (req) => {
     // Fetch active products with pagination
     const { data: products, error: fetchError } = await supabase
       .from("products")
-      .select("id, name, description, price, category, vibe_category, mood")
+      .select("id, name, description, price, category, vibe_category, mood, source_url, vendor_id")
       .eq("is_active", true)
       .order("created_at", { ascending: true })
       .range(offset, offset + limit - 1);
@@ -187,12 +187,14 @@ serve(async (req) => {
     for (const product of products) {
       try {
         console.log(`Processing: ${product.name}`);
+        const brandHint = await getBrandHint(supabase, product.source_url);
         const suggestions = await suggestForProduct(
           product.name,
           product.description || "",
           product.price,
           LOVABLE_API_KEY!,
           categories,
+          brandHint,
         );
 
         // Build update object - merge AI suggestions with existing data
