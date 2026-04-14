@@ -249,7 +249,7 @@ export default function CategoryVibeManager() {
         <CardDescription>Manage your product taxonomy — core categories, vibe collections, and mood tags.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "core" | "vibe" | "mood")}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
           <div className="flex items-center justify-between mb-4">
             <TabsList>
               <TabsTrigger value="core" className="gap-1.5">
@@ -261,10 +261,15 @@ export default function CategoryVibeManager() {
               <TabsTrigger value="mood" className="gap-1.5">
                 <Heart className="h-3.5 w-3.5" /> Moods ({moodCategories.length})
               </TabsTrigger>
+              <TabsTrigger value="brands" className="gap-1.5">
+                <Tag className="h-3.5 w-3.5" /> Brand Lookup
+              </TabsTrigger>
             </TabsList>
-            <Button size="sm" className="gap-1.5" onClick={() => openAdd(activeTab)}>
-              <Plus className="h-4 w-4" /> Add {getTabLabel()}
-            </Button>
+            {activeTab !== "brands" && (
+              <Button size="sm" className="gap-1.5" onClick={() => openAdd(activeTab as "core" | "vibe" | "mood")}>
+                <Plus className="h-4 w-4" /> Add {getTabLabel()}
+              </Button>
+            )}
           </div>
 
           <TabsContent value="core" className="space-y-2 mt-0">
