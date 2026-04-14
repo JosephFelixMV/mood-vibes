@@ -24,6 +24,29 @@ export default function AIDashboard() {
   const [sortBy, setSortBy] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [showFlagged, setShowFlagged] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSeedBrandLookup = async (file: File) => {
+    setSeeding(true);
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      const brands = json.brands || json;
+      if (!Array.isArray(brands)) throw new Error("Expected a 'brands' array in JSON");
+
+      const { data, error } = await supabase.functions.invoke("seed-brand-lookup", {
+        body: { brands },
+      });
+      if (error) throw error;
+      toast({ title: "Brand lookup seeded", description: `${data.inserted} brands processed` });
+    } catch (e: any) {
+      toast({ title: "Seed failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSeeding(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const { data: requests = [], isLoading, refetch } = useQuery({
     queryKey: ["ai-requests"],
