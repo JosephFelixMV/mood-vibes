@@ -294,6 +294,10 @@ export default function CategoryVibeManager() {
           <TabsContent value="mood" className="space-y-1.5 mt-0">
             {moodCategories.map((m) => renderCategoryRow(m))}
           </TabsContent>
+
+          <TabsContent value="brands" className="mt-0">
+            <BrandLookupTab />
+          </TabsContent>
         </Tabs>
       </CardContent>
 
