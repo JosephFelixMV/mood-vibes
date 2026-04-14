@@ -31,6 +31,27 @@ async function loadCategories(sb: any) {
   return { core, vibes, moods };
 }
 
+async function getBrandHint(sb: any, sourceUrl?: string): Promise<string> {
+  const url = (sourceUrl || "").toLowerCase();
+  if (!url) return "";
+
+  const { data: byUrl } = await sb
+    .from("brand_lookup")
+    .select("core, vibes, moods, hint")
+    .neq("url_match", "")
+    .limit(100);
+
+  const match = (byUrl || []).find((r: any) => r.url_match && url.includes(r.url_match));
+  if (!match) return "";
+
+  const parts = [];
+  if (match.hint) parts.push(`Brand context: ${match.hint}`);
+  if (match.core?.length) parts.push(`Typical core categories: ${match.core.join(", ")}`);
+  if (match.vibes?.length) parts.push(`Typical vibes: ${match.vibes.join(", ")}`);
+  if (match.moods?.length) parts.push(`Typical moods: ${match.moods.join(", ")}`);
+  return parts.length ? `\nBRAND CONTEXT:\n${parts.join("\n")}\n` : "";
+}
+
 interface CategoryLists {
   core: string[];
   vibes: string[];
@@ -43,6 +64,7 @@ async function suggestForProduct(
   price: number,
   apiKey: string,
   categories: CategoryLists,
+  brandHint = "",
 ) {
   const { core: CORE_CATEGORIES, vibes: VIBE_CATEGORIES, moods: MOOD_CATEGORIES } = categories;
 
