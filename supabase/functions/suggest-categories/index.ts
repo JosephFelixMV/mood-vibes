@@ -44,27 +44,39 @@ const dedupeStrings = (values: string[] = []) => {
     });
 };
 
-// Vendor-aware category hints — biases the AI toward sensible defaults
-// while still allowing product-specific overrides
-const VENDOR_HINTS: Record<string, { match: (url: string, name: string) => boolean; hint: string }> = {
-  caddis: {
-    match: (url, name) => url.includes("caddislife.com") || name.toLowerCase().includes("caddis"),
-    hint: "This product is from Caddis Eyewear — an eyewear brand. Always include 'Eyewear' in core categories. The product is almost certainly eyewear (glasses, sunglasses, readers).",
-  },
-  containerstore: {
-    match: (url, name) => url.includes("containerstore.com") || name.toLowerCase().includes("container store"),
-    hint: "This product is from The Container Store — a home organization retailer. Strongly consider 'Cleaning' in core categories, 'Organized Life' in vibes, and 'Fresh Start' in moods. However, still evaluate the specific product details — some items may fit other categories like 'Kitchen Storage', 'Office & Stationery', or 'Décor & Artwork'.",
-  },
-};
-
-function buildVendorHints(sourceUrl?: string, vendorName?: string): string {
+async function getBrandHint(sb: any, sourceUrl?: string, vendorName?: string): Promise<string> {
   const url = (sourceUrl || "").toLowerCase();
-  const name = (vendorName || "").toLowerCase();
-  const hints: string[] = [];
-  for (const v of Object.values(VENDOR_HINTS)) {
-    if (v.match(url, name)) hints.push(v.hint);
-  }
-  return hints.length > 0 ? `\nVENDOR CONTEXT:\n${hints.join("\n")}\n` : "";
+  const name = (vendorName || "").toLowerCase().trim();
+  if (!url && !name) return "";
+
+  // Try URL match first
+  const { data: byUrl } = await sb
+    .from("brand_lookup")
+    .select("core, vibes, moods, hint, brand")
+    .neq("url_match", "")
+    .limit(100);
+
+  const urlMatch = (byUrl || []).find((r: any) => r.url_match && url.includes(r.url_match));
+  if (urlMatch) return formatBrandHint(urlMatch);
+
+  // Fall back to alias match
+  const { data: byAlias } = await sb
+    .from("brand_lookup")
+    .select("core, vibes, moods, hint, brand")
+    .contains("match_aliases", [name]);
+
+  if (byAlias?.[0]) return formatBrandHint(byAlias[0]);
+
+  return "";
+}
+
+function formatBrandHint(row: any): string {
+  const parts = [];
+  if (row.hint) parts.push(`Brand context: ${row.hint}`);
+  if (row.core?.length) parts.push(`Typical core categories for this brand: ${row.core.join(", ")}`);
+  if (row.vibes?.length) parts.push(`Typical vibes for this brand: ${row.vibes.join(", ")}`);
+  if (row.moods?.length) parts.push(`Typical moods for this brand: ${row.moods.join(", ")}`);
+  return parts.length ? `\nBRAND CONTEXT:\n${parts.join("\n")}\n` : "";
 }
 
 serve(async (req) => {
@@ -83,8 +95,8 @@ serve(async (req) => {
     const body = await req.text();
     const { name, description, price, source_url, vendor_name } = JSON.parse(body);
 
-    // Vendor-specific category hints injected into the prompt
-    const vendorHints = buildVendorHints(source_url, vendor_name);
+    // Brand-specific category hints from brand_lookup table
+    const vendorHints = await getBrandHint(supabase, source_url, vendor_name);
 
     const moodList = Object.entries(MOOD_CATEGORIES)
       .map(([mood, anchors]) => `- ${mood}: ${anchors}`)
@@ -115,12 +127,24 @@ KEYWORD RULES — this is the most important part:
    - Materials like "wool", "cashmere", "puffer", "fleece" → include them in keyword phrases, not standalone
    - e.g. "chunky wool turtleneck sweater", "lightweight linen summer blouse"
 
+DISAMBIGUATION:
+- Personal fragrance (perfume, cologne, body mist) → use "Fragrance" core.
+  Candles, diffusers, room spray → use "Candles & Home Fragrance". Never confuse these.
+- "Aura Farming" vibe = cinematic main character energy, effortless status,
+  leather, chrome, oversized tailored, polarized sunglasses. NOT spiritual/crystals
+  (that is "Whimsigoth"). NOT understated old-money (that is "Quiet Luxury").
+
 Product Name: ${name || "Unknown"}
 ${vendorHints}Description: ${description || "No description"}
 Price: ${price || "Unknown"}
 
+CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when:
+brand context strongly matched (0.85+), product description is specific and
+detailed (+0.1), category choice is unambiguous (+0.1). Score lower when:
+no brand match, vague description, or multiple equally valid categories.
+
 IMPORTANT: Return only raw JSON. No markdown, no explanation. Format:
-{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["long-tail keyword phrase", ...]}
+{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["long-tail keyword phrase", ...], "confidence": 0.92}
 
 Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.`;
 
@@ -157,6 +181,9 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
     const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 8);
+    const confidence = typeof suggestions.confidence === "number"
+      ? Math.min(1, Math.max(0, suggestions.confidence))
+      : 0.6;
 
     // Auto-assign "The Atelier" vibe and "Luxe" mood for fashion items over $1000
     const FASHION_CATEGORIES = ["Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear", "Accessories", "Bags & Totes", "Jewelry", "Watches"];
@@ -190,9 +217,9 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     validVibes = dedupeStrings(validVibes).slice(0, 4);
     validMoods = dedupeStrings(validMoods).slice(0, 3);
 
-    console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords });
+    console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords, confidence });
 
-    return new Response(JSON.stringify({ core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords }), {
+    return new Response(JSON.stringify({ core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords, confidence }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
