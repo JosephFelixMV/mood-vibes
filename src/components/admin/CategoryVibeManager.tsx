@@ -14,7 +14,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, Loader2, Layers, Sparkles, Upload, X, ImageIcon, Info, Heart } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Layers, Sparkles, Upload, X, ImageIcon, Info, Heart, Tag } from "lucide-react";
+import BrandLookupTab from "./BrandLookupTab";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Category } from "@/lib/supabase-queries";
@@ -37,7 +38,7 @@ function slugify(text: string) {
 
 export default function CategoryVibeManager() {
   const qc = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"core" | "vibe" | "mood">("core");
+  const [activeTab, setActiveTab] = useState<"core" | "vibe" | "mood" | "brands">("core");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -248,7 +249,7 @@ export default function CategoryVibeManager() {
         <CardDescription>Manage your product taxonomy — core categories, vibe collections, and mood tags.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "core" | "vibe" | "mood")}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
           <div className="flex items-center justify-between mb-4">
             <TabsList>
               <TabsTrigger value="core" className="gap-1.5">
@@ -260,10 +261,15 @@ export default function CategoryVibeManager() {
               <TabsTrigger value="mood" className="gap-1.5">
                 <Heart className="h-3.5 w-3.5" /> Moods ({moodCategories.length})
               </TabsTrigger>
+              <TabsTrigger value="brands" className="gap-1.5">
+                <Tag className="h-3.5 w-3.5" /> Brand Lookup
+              </TabsTrigger>
             </TabsList>
-            <Button size="sm" className="gap-1.5" onClick={() => openAdd(activeTab)}>
-              <Plus className="h-4 w-4" /> Add {getTabLabel()}
-            </Button>
+            {activeTab !== "brands" && (
+              <Button size="sm" className="gap-1.5" onClick={() => openAdd(activeTab as "core" | "vibe" | "mood")}>
+                <Plus className="h-4 w-4" /> Add {getTabLabel()}
+              </Button>
+            )}
           </div>
 
           <TabsContent value="core" className="space-y-2 mt-0">
@@ -287,6 +293,10 @@ export default function CategoryVibeManager() {
 
           <TabsContent value="mood" className="space-y-1.5 mt-0">
             {moodCategories.map((m) => renderCategoryRow(m))}
+          </TabsContent>
+
+          <TabsContent value="brands" className="mt-0">
+            <BrandLookupTab />
           </TabsContent>
         </Tabs>
       </CardContent>
