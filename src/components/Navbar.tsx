@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import RegionIndicator from "@/components/RegionIndicator";
 import { useRegion } from "@/contexts/RegionContext";
@@ -20,10 +20,9 @@ export default function Navbar() {
   const { region, detected, isOverridden, setRegion, clearOverride } = useRegion();
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md" aria-label="Main navigation">
+    <nav className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur-md" aria-label="Main navigation">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight">
-          <Sparkles className="h-6 w-6 text-primary" />
+        <Link to="/" className="flex items-center gap-2 font-heading text-xl font-semibold tracking-tight">
           <span>Mood & Vibes</span>
         </Link>
 
@@ -33,9 +32,9 @@ export default function Navbar() {
             <Link
               key={l.to}
               to={l.to}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              className={`px-3 py-2 text-xs font-medium uppercase tracking-widest transition-colors ${
                 location.pathname === l.to
-                  ? "bg-primary/10 text-primary"
+                  ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
