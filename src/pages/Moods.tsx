@@ -48,31 +48,6 @@ export default function Moods() {
     },
   });
 
-  // Fetch all mood-tagged products for random discovery
-  const { data: allMoodProducts = [] } = useQuery({
-    queryKey: ["all-mood-products"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("is_active", true)
-        .not("mood", "is", null);
-      if (error) throw error;
-      return data as Product[];
-    },
-  });
-
-  const regionMoodProducts = filterByRegion(allMoodProducts, region);
-
-  const [randomPick, setRandomPick] = useState<Product | null>(null);
-  const { trigger, cooldown } = useRateLimitedAction(2000);
-
-  const handleRandom = () => {
-    trigger(() => {
-      const pick = getRandomProduct(regionMoodProducts, randomPick?.id);
-      setRandomPick(pick);
-    });
-  };
 
   return (
     <div className="container py-12">
