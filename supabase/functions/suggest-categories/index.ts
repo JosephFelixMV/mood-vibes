@@ -127,12 +127,24 @@ KEYWORD RULES — this is the most important part:
    - Materials like "wool", "cashmere", "puffer", "fleece" → include them in keyword phrases, not standalone
    - e.g. "chunky wool turtleneck sweater", "lightweight linen summer blouse"
 
+DISAMBIGUATION:
+- Personal fragrance (perfume, cologne, body mist) → use "Fragrance" core.
+  Candles, diffusers, room spray → use "Candles & Home Fragrance". Never confuse these.
+- "Aura Farming" vibe = cinematic main character energy, effortless status,
+  leather, chrome, oversized tailored, polarized sunglasses. NOT spiritual/crystals
+  (that is "Whimsigoth"). NOT understated old-money (that is "Quiet Luxury").
+
 Product Name: ${name || "Unknown"}
 ${vendorHints}Description: ${description || "No description"}
 Price: ${price || "Unknown"}
 
+CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when:
+brand context strongly matched (0.85+), product description is specific and
+detailed (+0.1), category choice is unambiguous (+0.1). Score lower when:
+no brand match, vague description, or multiple equally valid categories.
+
 IMPORTANT: Return only raw JSON. No markdown, no explanation. Format:
-{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["long-tail keyword phrase", ...]}
+{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["long-tail keyword phrase", ...], "confidence": 0.92}
 
 Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.`;
 
