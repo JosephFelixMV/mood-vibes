@@ -1,13 +1,13 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { getProducts, getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSEO } from "@/hooks/useSEO";
-import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
+
 import { useRegion } from "@/contexts/RegionContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";

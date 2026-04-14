@@ -9,7 +9,7 @@ import { CategoryIcon } from "@/components/CategoryIcon";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { useSEO } from "@/hooks/useSEO";
-import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
+
 import { useRegion } from "@/contexts/RegionContext";
 import type { Product } from "@/lib/supabase-queries";
 
