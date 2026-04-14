@@ -104,14 +104,14 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
       >
         {/* Image */}
         <div className={`relative block overflow-hidden ${featured ? "md:w-1/2" : ""}`}>
-          <div className={`${featured ? "aspect-[4/3] md:aspect-auto md:h-full" : "aspect-[4/5]"} bg-[#f5f5f5] flex items-center justify-center`}>
+          <div className={`relative ${featured ? "aspect-[4/3] md:aspect-auto md:h-full" : ""} bg-[#f7f7f5]`} style={featured ? undefined : { paddingTop: '100%' }}>
             {proxiedImage ? (
               <img
                 src={proxiedImage}
                 srcSet={`${proxiedImage} 1x, ${proxiedImage} 2x`}
                 sizes={featured ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"}
                 alt={product.name}
-                className="sharp-image h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                className="sharp-image absolute inset-0 h-full w-full object-contain object-center p-2 transition-transform duration-500 group-hover:scale-[1.02]"
                 loading="lazy"
                 decoding="async"
               />
