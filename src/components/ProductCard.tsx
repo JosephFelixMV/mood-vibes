@@ -145,16 +145,17 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                 : "#";
               const badgeStyle: React.CSSProperties =
                 type === "vibe"
-                  ? { background: "linear-gradient(135deg, #F5D061 0%, #D9732B 100%)", color: "#1C1209" }
+                  ? { background: "linear-gradient(135deg, #F5D061 0%, #D9732B 100%)", backgroundSize: "200% 200%", backgroundPosition: "left center", color: "#1C1209" }
                   : type === "mood"
-                  ? { background: "linear-gradient(135deg, #121212 0%, #3F3F46 100%)", color: "#FFFFFF", border: "1.5px solid #D9732B" }
-                  : { background: "linear-gradient(135deg, #D9732B 0%, #F2A154 100%)", color: "#FFFFFF" };
-              const haloShadow =
+                  ? { background: "linear-gradient(135deg, #121212 0%, #3F3F46 100%)", backgroundSize: "200% 200%", backgroundPosition: "left center", color: "#FFFFFF", border: "1.5px solid #D9732B" }
+                  : { background: "linear-gradient(135deg, #D9732B 0%, #F2A154 100%)", backgroundSize: "200% 200%", backgroundPosition: "left center", color: "#FFFFFF" };
+              const glowColor =
                 type === "vibe"
-                  ? "0 4px 20px rgba(245, 208, 97, 0.4)"
+                  ? "rgba(245, 208, 97, 0.3)"
                   : type === "mood"
-                  ? "0 4px 20px rgba(217, 115, 43, 0.3)"
-                  : "0 4px 20px rgba(242, 161, 84, 0.4)";
+                  ? "rgba(217, 115, 43, 0.3)"
+                  : "rgba(242, 161, 84, 0.3)";
+              const haloShadow = `0 0 24px 4px ${glowColor}`;
               const isMood = type === "mood";
               const shimmerGradient = isMood
                 ? "linear-gradient(120deg, transparent 0%, transparent 25%, rgba(217,115,43,0.35) 45%, rgba(242,161,84,0.3) 55%, transparent 75%, transparent 100%)"
@@ -165,15 +166,15 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                   <motion.div
                     className="relative overflow-hidden rounded-full will-change-transform"
                     style={badgeStyle}
-                    initial={{ y: 0, scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)" }}
-                    whileHover={{ y: -5, scale: 1.03, boxShadow: haloShadow }}
+                    initial={{ y: 0, scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)", backgroundPosition: "left center" }}
+                    whileHover={{ y: -3, scale: 1.05, boxShadow: haloShadow, backgroundPosition: "right center" }}
                     whileTap={{ scale: 0.97 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                   >
                     <motion.div
                       initial={{ letterSpacing: "0.12em" }}
                       whileHover={{ letterSpacing: "0.18em" }}
-                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                      transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                     >
                       <Badge className="bg-transparent border-0 backdrop-blur-sm cursor-pointer uppercase text-[11px] font-medium tracking-[0.12em] px-5 py-2 whitespace-nowrap" style={{ color: "inherit" }}>
                         {name}
