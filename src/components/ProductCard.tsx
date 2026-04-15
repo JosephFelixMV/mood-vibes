@@ -155,12 +155,18 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                   : type === "mood"
                   ? "0 4px 20px rgba(180, 180, 190, 0.35)"
                   : "0 4px 20px rgba(255, 255, 255, 0.5)";
+              const isMood = type === "mood";
+              const shimmerGradient = isMood
+                ? "linear-gradient(120deg, transparent 0%, transparent 25%, rgba(192,206,226,0.4) 45%, rgba(220,220,235,0.4) 55%, transparent 75%, transparent 100%)"
+                : "linear-gradient(120deg, transparent 0%, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%, transparent 100%)";
+              const shimmerDuration = isMood ? 0.5 : 0.6;
               return (
                 <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
                   <motion.div
-                    className="relative overflow-hidden rounded-full"
-                    initial={{ y: 0, boxShadow: "0 0 0 rgba(0,0,0,0)" }}
-                    whileHover={{ y: -3, boxShadow: haloShadow }}
+                    className="relative overflow-hidden rounded-full will-change-transform"
+                    initial={{ y: 0, scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)" }}
+                    whileHover={{ y: -5, scale: 1.03, boxShadow: haloShadow }}
+                    whileTap={{ scale: 0.97 }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
                   >
                     <motion.div
@@ -176,11 +182,11 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                     <motion.div
                       className="pointer-events-none absolute inset-0 rounded-full"
                       style={{
-                        background: "linear-gradient(120deg, transparent 0%, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%, transparent 100%)",
+                        background: shimmerGradient,
                         x: "-100%",
                       }}
                       whileHover={{ x: "100%" }}
-                      transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                      transition={{ duration: shimmerDuration, ease: [0.4, 0, 0.2, 1] }}
                     />
                   </motion.div>
                 </Link>
