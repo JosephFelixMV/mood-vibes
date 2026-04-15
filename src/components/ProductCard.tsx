@@ -145,20 +145,43 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                 : "#";
               const badgeColor =
                 type === "vibe"
-                  ? "bg-[hsl(var(--badge-vibe))] border border-[hsl(var(--badge-vibe-border))] text-[hsl(var(--badge-vibe-foreground))] hover:bg-[hsl(var(--badge-vibe))]/90"
+                  ? "bg-[hsl(var(--badge-vibe))] border border-[hsl(var(--badge-vibe-border))] text-[hsl(var(--badge-vibe-foreground))]"
                   : type === "mood"
-                  ? "bg-[hsl(var(--badge-mood))] text-[hsl(var(--badge-mood-foreground))] hover:bg-[hsl(var(--badge-mood))]/90"
-                  : "bg-[hsl(var(--badge-core))] border border-[hsl(var(--badge-core-border))] text-[hsl(var(--badge-core-foreground))] hover:bg-[hsl(var(--badge-core))]/90";
+                  ? "bg-[hsl(var(--badge-mood))] text-[hsl(var(--badge-mood-foreground))]"
+                  : "bg-[hsl(var(--badge-core))] border border-[hsl(var(--badge-core-border))] text-[hsl(var(--badge-core-foreground))]";
+              const haloShadow =
+                type === "vibe"
+                  ? "0 4px 20px rgba(209, 198, 170, 0.45)"
+                  : type === "mood"
+                  ? "0 4px 20px rgba(180, 180, 190, 0.35)"
+                  : "0 4px 20px rgba(255, 255, 255, 0.5)";
               return (
                 <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
                   <motion.div
-                    initial={{ letterSpacing: "0.12em" }}
-                    whileHover={{ letterSpacing: "0.18em" }}
-                    transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    className="relative overflow-hidden rounded-full"
+                    initial={{ y: 0, boxShadow: "0 0 0 rgba(0,0,0,0)" }}
+                    whileHover={{ y: -3, boxShadow: haloShadow }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
                   >
-                    <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer uppercase text-[10px] font-medium tracking-[0.12em] px-5 py-2 whitespace-nowrap`}>
-                      {name}
-                    </Badge>
+                    <motion.div
+                      initial={{ letterSpacing: "0.12em" }}
+                      whileHover={{ letterSpacing: "0.18em" }}
+                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                      <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer uppercase text-[10px] font-medium tracking-[0.12em] px-5 py-2 whitespace-nowrap`}>
+                        {name}
+                      </Badge>
+                    </motion.div>
+                    {/* Satin shimmer sweep */}
+                    <motion.div
+                      className="pointer-events-none absolute inset-0 rounded-full"
+                      style={{
+                        background: "linear-gradient(120deg, transparent 0%, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%, transparent 100%)",
+                        x: "-100%",
+                      }}
+                      whileHover={{ x: "100%" }}
+                      transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                    />
                   </motion.div>
                 </Link>
               );
