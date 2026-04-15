@@ -122,38 +122,25 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
             )}
           </div>
           <div className="absolute left-3 top-3 flex flex-wrap gap-1">
-            {(() => {
-              const coreSet = [...new Set(product.category.split(",").map(c => c.trim()).filter(Boolean))];
-              const vibeSet = [...new Set((product.vibe_category || "").split(",").map(v => v.trim()).filter(Boolean))];
-              const moodSet = [...new Set((product.mood || "").split(",").map(m => m.trim()).filter(Boolean))];
-              const pickRandom = (arr: string[]) => arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
-              const picks: { name: string; type: string }[] = [];
-              const core = pickRandom(coreSet);
-              if (core) picks.push({ name: core, type: "core" });
-              const vibe = pickRandom(vibeSet);
-              if (vibe) picks.push({ name: vibe, type: "vibe" });
-              const mood = pickRandom(moodSet);
-              if (mood) picks.push({ name: mood, type: "mood" });
-              return picks.map(({ name, type }) => {
-                const cat = categorySlugMap[name];
-                const to = cat
-                  ? type === "vibe" ? `/vibes/${cat.slug}` : type === "mood" ? `/moods/${cat.slug}` : `/category/${cat.slug}`
-                  : "#";
-                const badgeColor =
-                  type === "vibe"
-                    ? "bg-[hsl(var(--badge-vibe))] text-[hsl(var(--badge-vibe-foreground))] hover:bg-[hsl(var(--badge-vibe))]/90"
-                    : type === "mood"
-                    ? "bg-[hsl(var(--badge-mood))] text-[hsl(var(--badge-mood-foreground))] hover:bg-[hsl(var(--badge-mood))]/90"
-                    : "bg-primary/90 text-primary-foreground hover:bg-primary";
-                return (
-                  <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
-                    <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer`}>
-                      {name}
-                    </Badge>
-                  </Link>
-                );
-              });
-            })()}
+            {tagPicks.map(({ name, type }) => {
+              const cat = categorySlugMap[name];
+              const to = cat
+                ? type === "vibe" ? `/vibes/${cat.slug}` : type === "mood" ? `/moods/${cat.slug}` : `/category/${cat.slug}`
+                : "#";
+              const badgeColor =
+                type === "vibe"
+                  ? "bg-[hsl(var(--badge-vibe))] text-[hsl(var(--badge-vibe-foreground))] hover:bg-[hsl(var(--badge-vibe))]/90"
+                  : type === "mood"
+                  ? "bg-[hsl(var(--badge-mood))] text-[hsl(var(--badge-mood-foreground))] hover:bg-[hsl(var(--badge-mood))]/90"
+                  : "bg-primary/90 text-primary-foreground hover:bg-primary";
+              return (
+                <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
+                  <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer`}>
+                    {name}
+                  </Badge>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
