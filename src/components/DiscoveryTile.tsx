@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
 import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
@@ -40,6 +42,19 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
   const [animKey, setAnimKey] = useState(0);
   const [sourcing, setSourcing] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const { data: allBrands = [] } = useQuery({
+    queryKey: ["brands-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name");
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const vendorName = pick?.vendor_id
+    ? allBrands.find((b: any) => b.id === pick.vendor_id)?.name
+    : null;
 
   // Sync pick if products load after mount
   if (products.length > 0 && !pick) {
@@ -101,6 +116,9 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
               {ctaLabel || "Discover Brand"} <ExternalLink className="h-3.5 w-3.5" />
             </a>
           </Button>
+          {vendorName && (
+            <span className="mt-1.5 block text-[10px] text-muted-foreground">via {vendorName}</span>
+          )}
         </div>
       </div>
 
