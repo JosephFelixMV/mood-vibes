@@ -1,12 +1,11 @@
 import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
 import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
-import { Button } from "@/components/ui/button";
+import ExternalCTA from "@/components/ExternalCTA";
 import ProductDrawer from "@/components/ProductDrawer";
 
 const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
@@ -106,31 +105,24 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
           <p className="mt-1.5 font-heading text-lg font-bold text-primary">
             {formatPrice(pick.price)}
           </p>
-          <Button asChild size="sm" className="mt-2.5 w-full gap-2 rounded-sm">
-            <a
-              href={pick.affiliate_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {ctaLabel || "Discover Brand"} <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          </Button>
+          <div onClick={(e) => e.stopPropagation()}>
+            <ExternalCTA href={pick.affiliate_url} label={ctaLabel || "Discover Brand"} size="sm" fullWidth className="mt-2.5" />
+          </div>
           {vendorName && (
             <span className="mt-1 block text-[10px] text-muted-foreground">via {vendorName}</span>
           )}
         </div>
       </div>
 
-      {/* Discover More button */}
       <div className="mt-4 flex justify-center">
-        <button
+        <ExternalCTA
+          as="button"
+          label={sourcing ? "Sourcing…" : "Discover More"}
           onClick={handleDiscover}
           disabled={sourcing || products.length === 0}
-          className="rounded-sm border border-primary/30 bg-primary/5 px-10 py-2.5 text-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/10 hover:border-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {sourcing ? "Sourcing…" : "Discover More"}
-        </button>
+          size="md"
+          showIcon={false}
+        />
       </div>
 
       {/* Drawer */}

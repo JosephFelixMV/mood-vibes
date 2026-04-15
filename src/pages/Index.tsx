@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import ExternalCTA from "@/components/ExternalCTA";
 import ProductCard from "@/components/ProductCard";
 import { getProducts, getDailyPick, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
@@ -90,14 +90,14 @@ export default function Index() {
             transition={{ delay: 0.3, duration: 0.4 }}
             className="mt-10"
           >
-            <Button
-              size="lg"
+            <ExternalCTA
+              as="button"
+              label={cooldown ? "Wait…" : "Discover More Brands"}
               onClick={handleSurprise}
               disabled={isLoading || healthyProducts.length === 0 || cooldown}
-              className="gap-2 rounded-sm px-8 text-base font-medium tracking-wide uppercase transition-colors"
-            >
-              {cooldown ? "Wait…" : "Discover More Brands"}
-            </Button>
+              size="lg"
+              showIcon={false}
+            />
           </motion.div>
         </div>
 
