@@ -16,6 +16,7 @@ import type { Product } from "@/lib/supabase-queries";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProductDrawer from "@/components/ProductDrawer";
+import fallbackImage from "@/assets/fallback-product.png";
 
 interface ProductCardProps {
   product: Product;
