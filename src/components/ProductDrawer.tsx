@@ -206,7 +206,7 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                 })}
               </div>
 
-              {/* Price */}
+              {/* Price + CTA */}
               <div>
                 <span className="font-heading text-2xl font-bold text-primary">
                   {formatPrice(product.price)}
@@ -215,6 +215,16 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                   {product.price_below_msrp ? "Seller often offers deals below MSRP" : "Price at retailer may vary"}
                 </p>
               </div>
+
+              <Button asChild size="lg" className="w-full gap-2 rounded-sm">
+                <a
+                  href={product.affiliate_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {ctaLabel} <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
 
               {/* Description */}
               {product.description && (
@@ -238,17 +248,6 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                   </div>
                 </div>
               )}
-
-              {/* CTA */}
-              <Button asChild size="lg" className="w-full gap-2 rounded-sm">
-                <a
-                  href={product.affiliate_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {ctaLabel} <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
             </div>
           </div>
         </ScrollArea>
