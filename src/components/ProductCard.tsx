@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
+
 import ShareButton from "@/components/ShareButton";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
 import { Link, useNavigate } from "react-router-dom";
