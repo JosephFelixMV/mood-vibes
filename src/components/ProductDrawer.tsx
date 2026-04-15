@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import { Link } from "react-router-dom";
+import fallbackImage from "@/assets/fallback-product.png";
 
 interface ProductDrawerProps {
   product: Product;
@@ -25,6 +26,7 @@ function GalleryImage({ src, alt }: { src: string; alt: string }) {
         src={src}
         alt={alt}
         className="absolute inset-0 h-full w-full object-contain object-center p-2"
+        onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
       />
     </div>
   );
