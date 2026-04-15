@@ -145,13 +145,13 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                 : "#";
               const badgeColor =
                 type === "vibe"
-                  ? "bg-[hsl(var(--badge-vibe))] text-[hsl(var(--badge-vibe-foreground))] hover:bg-[hsl(var(--badge-vibe))]/90"
+                  ? "bg-[hsl(var(--badge-vibe))] border border-[hsl(var(--badge-vibe-border))] text-[hsl(var(--badge-vibe-foreground))] hover:bg-[hsl(var(--badge-vibe))]/90"
                   : type === "mood"
                   ? "bg-[hsl(var(--badge-mood))] text-[hsl(var(--badge-mood-foreground))] hover:bg-[hsl(var(--badge-mood))]/90"
-                  : "bg-primary/90 text-primary-foreground hover:bg-primary";
+                  : "bg-[hsl(var(--badge-core))] border border-[hsl(var(--badge-core-border))] text-[hsl(var(--badge-core-foreground))] hover:bg-[hsl(var(--badge-core))]/90";
               return (
                 <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
-                  <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer`}>
+                  <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer uppercase text-[10px] font-medium tracking-[0.12em] px-5 py-2`}>
                     {name}
                   </Badge>
                 </Link>
