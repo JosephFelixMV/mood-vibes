@@ -120,7 +120,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
       >
         {/* Image */}
         <div className={`relative block overflow-hidden ${featured ? "md:w-1/2" : ""}`}>
-          <div className={`relative ${featured ? "aspect-[4/3] md:aspect-auto md:h-full" : ""} bg-[#f7f7f5]`} style={featured ? undefined : { paddingTop: '100%' }}>
+          <div className={`relative ${featured ? "aspect-[4/5] md:aspect-auto md:h-full md:min-h-[360px]" : ""} bg-[#f7f7f5]`} style={featured ? undefined : { paddingTop: '100%' }}>
             {proxiedImage ? (
               <img
                 src={proxiedImage}
@@ -166,24 +166,23 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
             {product.name}
           </span>
 
-          <div className="flex items-center justify-between">
-            <span className="font-heading text-base font-bold text-primary">
-              {formatPrice(product.price)}
-            </span>
-            <div className="flex items-center gap-1">
-              <ReportBrokenLink productId={product.id} />
-              <ShareButton product={product} />
-              <Button asChild size="sm" className="h-7 gap-1 rounded-sm text-xs" onClick={handleBuyClick}>
-                <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`${ctaLabel} ${product.name} (opens in new tab)`}>
-                  {ctaLabel} <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                </a>
-              </Button>
-            </div>
-          </div>
+          <span className="font-heading text-base font-bold text-primary">
+            {formatPrice(product.price)}
+          </span>
 
           {vendorName && (
             <span className="text-[10px] text-muted-foreground">via {vendorName}</span>
           )}
+
+          <div className="flex items-center gap-1 mt-1">
+            <Button asChild size="sm" className="h-7 gap-1 rounded-sm text-xs" onClick={handleBuyClick}>
+              <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`${ctaLabel} ${product.name} (opens in new tab)`}>
+                {ctaLabel} <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              </a>
+            </Button>
+            <ReportBrokenLink productId={product.id} />
+            <ShareButton product={product} />
+          </div>
         </div>
       </motion.div>
 
