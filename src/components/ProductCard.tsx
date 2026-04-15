@@ -128,6 +128,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                 className="sharp-image absolute inset-0 h-full w-full object-contain object-center p-2 transition-transform duration-500 group-hover:scale-[1.02]"
                 loading="lazy"
                 decoding="async"
+                onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-4xl text-muted-foreground">

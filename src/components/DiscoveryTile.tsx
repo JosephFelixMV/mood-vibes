@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductDrawer from "@/components/ProductDrawer";
+import fallbackImage from "@/assets/fallback-product.png";
 
 const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
 
@@ -25,6 +26,7 @@ function TileImage({ product }: { product: Product }) {
           alt={product.name}
           className="absolute inset-0 h-full w-full object-contain object-center p-2"
           loading="eager"
+          onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center text-4xl text-muted-foreground">🛍️</div>
