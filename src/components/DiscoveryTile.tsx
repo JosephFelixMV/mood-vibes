@@ -75,10 +75,10 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
   if (!pick) return null;
 
   return (
-    <section className="mb-12">
+    <section className="mb-10">
       {/* Tile – click opens drawer */}
       <div
-        className="mx-auto max-w-2xl cursor-pointer overflow-hidden rounded-sm border border-border bg-card transition-colors hover:border-foreground/20"
+        className="mx-auto max-w-md cursor-pointer overflow-hidden rounded-sm border border-border bg-card transition-colors hover:border-foreground/20"
         onClick={() => setDrawerOpen(true)}
         role="button"
         tabIndex={0}
@@ -98,15 +98,15 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
           </AnimatePresence>
         </div>
 
-        <div className="p-5">
-          <h3 className="font-heading text-lg font-semibold leading-tight">{pick.name}</h3>
+        <div className="p-4">
+          <h3 className="font-heading text-base font-semibold leading-tight">{pick.name}</h3>
           {pick.company_name && (
             <p className="mt-0.5 text-xs text-muted-foreground">{pick.company_name}</p>
           )}
-          <p className="mt-2 font-heading text-xl font-bold text-primary">
+          <p className="mt-1.5 font-heading text-lg font-bold text-primary">
             {formatPrice(pick.price)}
           </p>
-          <Button asChild size="sm" className="mt-3 w-full gap-2 rounded-sm">
+          <Button asChild size="sm" className="mt-2.5 w-full gap-2 rounded-sm">
             <a
               href={pick.affiliate_url}
               target="_blank"
@@ -117,19 +117,19 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
             </a>
           </Button>
           {vendorName && (
-            <span className="mt-1.5 block text-[10px] text-muted-foreground">via {vendorName}</span>
+            <span className="mt-1 block text-[10px] text-muted-foreground">via {vendorName}</span>
           )}
         </div>
       </div>
 
-      {/* Recessed Discover button */}
-      <div className="mt-6 flex justify-center">
+      {/* Discover More button */}
+      <div className="mt-4 flex justify-center">
         <button
           onClick={handleDiscover}
           disabled={sourcing || products.length === 0}
-          className="rounded-sm border border-border bg-muted/50 px-8 py-2.5 text-sm font-medium tracking-wide text-foreground/70 transition-all hover:bg-muted hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-sm border border-primary/30 bg-primary/5 px-10 py-2.5 text-sm font-semibold tracking-wide text-primary transition-all hover:bg-primary/10 hover:border-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {sourcing ? "Sourcing…" : "Discover"}
+          {sourcing ? "Sourcing…" : "Discover More"}
         </button>
       </div>
 
