@@ -151,9 +151,15 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                   : "bg-[hsl(var(--badge-core))] border border-[hsl(var(--badge-core-border))] text-[hsl(var(--badge-core-foreground))] hover:bg-[hsl(var(--badge-core))]/90";
               return (
                 <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
-                  <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer uppercase text-[10px] font-medium tracking-[0.12em] px-5 py-2`}>
-                    {name}
-                  </Badge>
+                  <motion.div
+                    initial={{ letterSpacing: "0.12em" }}
+                    whileHover={{ letterSpacing: "0.18em" }}
+                    transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                    <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer uppercase text-[10px] font-medium tracking-[0.12em] px-5 py-2 whitespace-nowrap`}>
+                      {name}
+                    </Badge>
+                  </motion.div>
                 </Link>
               );
             })}
