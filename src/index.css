@@ -132,6 +132,15 @@ body::after {
   background-size: 256px 256px;
 }
 
+/* Mood tag border pulse */
+@keyframes mood-border-pulse {
+  0%, 100% { border-color: #D9732B; }
+  50% { border-color: #F5D061; }
+}
+.mood-tag-pulse {
+  animation: mood-border-pulse 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 /* Global focus-visible indicator for WCAG 2.4.7 */
 @layer base {
   *:focus-visible {
