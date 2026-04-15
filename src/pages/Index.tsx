@@ -67,7 +67,7 @@ export default function Index() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative overflow-hidden py-24 md:py-36">
+      <section className="relative overflow-hidden py-16 md:py-24">
         <div className="container flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -108,7 +108,7 @@ export default function Index() {
       {/* Surprise result */}
       <AnimatePresence mode="wait">
         {surprise && (
-          <section className="container -mt-6 mb-12" key={key}>
+          <section className="container -mt-6 mb-6" key={key}>
             <motion.div
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -127,7 +127,7 @@ export default function Index() {
       </AnimatePresence>
 
       {/* Product of the Day */}
-      <section className="container py-16">
+      <section className="container py-10">
         <div className="mb-8 flex flex-col items-center gap-3">
           <h2 className="text-center font-heading text-2xl font-bold tracking-tight md:text-3xl">
             🎁 Today's Pick
