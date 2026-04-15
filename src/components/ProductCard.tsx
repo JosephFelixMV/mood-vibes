@@ -6,7 +6,7 @@ import ShareButton from "@/components/ShareButton";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import ExternalCTA from "@/components/ExternalCTA";
 import { useQuery } from "@tanstack/react-query";
 import { trackProductClick } from "@/lib/track-click";
 import { trackEvent } from "@/lib/track-event";
@@ -258,11 +258,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
           )}
 
           <div className="flex items-center gap-1 mt-1">
-            <Button asChild size="sm" className="h-7 gap-1 rounded-sm text-xs" onClick={handleBuyClick}>
-              <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`${ctaLabel} ${product.name} (opens in new tab)`}>
-                {ctaLabel} <ExternalLink className="h-3 w-3" aria-hidden="true" />
-              </a>
-            </Button>
+            <ExternalCTA href={product.affiliate_url} label={ctaLabel} onClick={handleBuyClick} size="sm" />
             <ReportBrokenLink productId={product.id} />
             <ShareButton product={product} />
           </div>
