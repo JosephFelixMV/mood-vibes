@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useProxiedImage } from "@/hooks/useProxiedImage";
+
 import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import ExternalCTA from "@/components/ExternalCTA";
@@ -17,12 +17,11 @@ interface DiscoveryTileProps {
 }
 
 function TileImage({ product }: { product: Product }) {
-  const proxiedImage = useProxiedImage(product.image_url);
   return (
     <div className="relative w-full overflow-hidden bg-[#f7f7f5]" style={{ paddingTop: 'min(100%, 320px)' }}>
-      {proxiedImage ? (
+      {product.image_url ? (
         <img
-          src={proxiedImage}
+          src={product.image_url}
           alt={product.name}
           className="absolute inset-0 h-full w-full object-contain object-center p-2"
           loading="eager"

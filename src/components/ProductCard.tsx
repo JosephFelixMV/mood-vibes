@@ -13,7 +13,7 @@ import { trackEvent } from "@/lib/track-event";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
-import { useProxiedImage } from "@/hooks/useProxiedImage";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProductDrawer from "@/components/ProductDrawer";
 
@@ -25,7 +25,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, featured, ctaLabel = "Buy" }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const proxiedImage = useProxiedImage(product.image_url);
+  const proxiedImage = product.image_url;
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
