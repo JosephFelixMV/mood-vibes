@@ -20,8 +20,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
-import { useProxiedImage } from "@/hooks/useProxiedImage";
-import ProxiedImg from "@/components/ProxiedImg";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
