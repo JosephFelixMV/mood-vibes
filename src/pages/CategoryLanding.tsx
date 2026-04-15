@@ -89,6 +89,14 @@ export default function CategoryLanding() {
   const regionFiltered = filterByRegion(products.filter((p) => !p.page_error), region);
 
   // Only show vendors that have products in this category
+  const vendorCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    regionFiltered.forEach((p) => {
+      if (p.vendor_id) counts[p.vendor_id] = (counts[p.vendor_id] || 0) + 1;
+    });
+    return counts;
+  }, [regionFiltered]);
+
   const availableVendors = useMemo(() => {
     const vendorIds = new Set(regionFiltered.map((p) => p.vendor_id).filter(Boolean));
     return brandsList
@@ -211,7 +219,7 @@ export default function CategoryLanding() {
               <SelectContent>
                 <SelectItem value="all">All Vendors</SelectItem>
                 {availableVendors.map((v) => (
-                  <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+                  <SelectItem key={v.id} value={v.id}>{v.name} ({vendorCounts[v.id] || 0})</SelectItem>
                 ))}
               </SelectContent>
             </Select>

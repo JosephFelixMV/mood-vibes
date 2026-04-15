@@ -62,6 +62,14 @@ export default function MoodLanding() {
 
   const regionProducts = filterByRegion(products, region);
 
+  const vendorCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    regionProducts.forEach((p) => {
+      if (p.vendor_id) counts[p.vendor_id] = (counts[p.vendor_id] || 0) + 1;
+    });
+    return counts;
+  }, [regionProducts]);
+
   const availableVendors = useMemo(() => {
     const vendorIds = new Set(regionProducts.map((p) => p.vendor_id).filter(Boolean));
     return brandsList
@@ -111,7 +119,7 @@ export default function MoodLanding() {
             <SelectContent>
               <SelectItem value="all">All Vendors</SelectItem>
               {availableVendors.map((v) => (
-                <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+                <SelectItem key={v.id} value={v.id}>{v.name} ({vendorCounts[v.id] || 0})</SelectItem>
               ))}
             </SelectContent>
           </Select>
