@@ -1,10 +1,12 @@
+import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { RegionProvider } from "@/contexts/RegionContext";
+import { RegionProvider, useRegion } from "@/contexts/RegionContext";
 import Navbar from "@/components/Navbar";
+import RegionNoticeDialog, { wasRegionNoticeDismissed, markRegionNoticeDismissed } from "@/components/RegionNoticeDialog";
 import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
@@ -26,16 +28,35 @@ import CookieConsent from "@/components/CookieConsent";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <RegionProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="flex min-h-screen flex-col">
-            <AffiliateDisclosureBanner />
-            <Navbar />
+function AppShell() {
+  const { detected, setRegion, loading } = useRegion();
+  const [showNotice, setShowNotice] = useState(false);
+
+  useEffect(() => {
+    if (loading) return;
+    if (detected !== "US" && !wasRegionNoticeDismissed()) {
+      setShowNotice(true);
+    }
+  }, [detected, loading]);
+
+  const handleContinueUS = () => {
+    setRegion("US");
+    markRegionNoticeDismissed();
+    setShowNotice(false);
+  };
+
+  const handleDismiss = () => {
+    // Keep detected region (CA or Intl)
+    markRegionNoticeDismissed();
+    setShowNotice(false);
+  };
+
+  return (
+    <>
+      <RegionNoticeDialog open={showNotice} onContinueUS={handleContinueUS} onDismiss={handleDismiss} />
+      <div className="flex min-h-screen flex-col">
+        <AffiliateDisclosureBanner />
+        <Navbar />
             <main id="main-content" className="flex-1">
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -55,9 +76,21 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
-            <Footer />
-            <CookieConsent />
-          </div>
+          <Footer />
+          <CookieConsent />
+        </div>
+      </>
+    );
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <RegionProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppShell />
         </BrowserRouter>
       </RegionProvider>
     </TooltipProvider>
