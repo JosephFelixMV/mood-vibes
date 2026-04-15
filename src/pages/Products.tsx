@@ -47,6 +47,33 @@ export default function Products() {
     },
   });
 
+  const { data: vendorCounts = {} } = useQuery({
+    queryKey: ["vendor-product-counts"],
+    queryFn: async () => {
+      const PAGE_SIZE = 1000;
+      let allData: any[] = [];
+      let from = 0;
+      let hasMore = true;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from("products")
+          .select("vendor_id")
+          .eq("is_active", true)
+          .not("vendor_id", "is", null)
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        allData = allData.concat(data || []);
+        hasMore = (data?.length || 0) === PAGE_SIZE;
+        from += PAGE_SIZE;
+      }
+      const counts: Record<string, number> = {};
+      allData.forEach((row) => {
+        counts[row.vendor_id] = (counts[row.vendor_id] || 0) + 1;
+      });
+      return counts;
+    },
+  });
+
   const categoryName = coreCategories.find((c) => c.slug === categorySlug)?.name || "";
   const vibeName = vibeCategories.find((c) => c.slug === vibeSlug)?.name || "";
 
@@ -195,7 +222,9 @@ export default function Products() {
           <SelectContent>
             <SelectItem value="all">All Vendors</SelectItem>
             {availableVendors.map((v) => (
-              <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+              <SelectItem key={v.id} value={v.id}>
+                {v.name} ({vendorCounts[v.id] || 0})
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
