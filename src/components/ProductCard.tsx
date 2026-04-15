@@ -138,7 +138,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
             )}
           </div>
           <div className="absolute left-3 top-3 flex flex-wrap gap-1">
-            {tagPicks.map(({ name, type }) => {
+            {tagPicks.map(({ name, type }, tagIndex) => {
               const cat = categorySlugMap[name];
               const to = cat
                 ? type === "vibe" ? `/vibes/${cat.slug}` : type === "mood" ? `/moods/${cat.slug}` : `/category/${cat.slug}`
@@ -177,18 +177,31 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                 if (lightLeak) lightLeak.style.background = "transparent";
               } : undefined;
 
+              // Buoyancy: staggered drift per tag
+              const driftAmount = 1.5 + tagIndex * 0.5;
+              const driftDuration = 2.8 + tagIndex * 0.6;
+
               return (
                 <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
                   <motion.div
-                    className={`relative overflow-hidden rounded-full will-change-transform ${isMood ? "mood-tag-pulse" : ""}`}
-                    style={badgeStyle}
-                    initial={{ y: 0, scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)", backgroundPosition: "left center" }}
-                    whileHover={{ y: -3, scale: 1.05, boxShadow: haloShadow, backgroundPosition: "right center" }}
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-                    onMouseMove={handleMouseMove}
-                    onMouseLeave={handleMouseLeave}
+                    animate={{ y: [0, -driftAmount, 0, driftAmount * 0.5, 0] }}
+                    whileHover={{ y: -3, scale: 1.05 }}
+                    transition={{
+                      y: { duration: driftDuration, repeat: Infinity, ease: "easeInOut" },
+                      scale: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+                    }}
+                    className="will-change-transform"
                   >
+                    <motion.div
+                      className={`relative overflow-hidden rounded-full ${isMood ? "mood-tag-pulse" : ""}`}
+                      style={badgeStyle}
+                      initial={{ scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)", backgroundPosition: "left center" }}
+                      whileHover={{ boxShadow: haloShadow, backgroundPosition: "right center" }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                      onMouseMove={handleMouseMove}
+                      onMouseLeave={handleMouseLeave}
+                    >
                     <motion.div
                       initial={{ letterSpacing: "0.12em", textShadow: "none" }}
                       whileHover={{
