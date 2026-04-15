@@ -20,9 +20,10 @@ import ProductDrawer from "@/components/ProductDrawer";
 interface ProductCardProps {
   product: Product;
   featured?: boolean;
+  ctaLabel?: string;
 }
 
-export default function ProductCard({ product, featured }: ProductCardProps) {
+export default function ProductCard({ product, featured, ctaLabel = "Buy" }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const proxiedImage = useProxiedImage(product.image_url);
   const isMobile = useIsMobile();
@@ -173,8 +174,8 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
               <ReportBrokenLink productId={product.id} />
               <ShareButton product={product} />
               <Button asChild size="sm" className="h-7 gap-1 rounded-sm text-xs" onClick={handleBuyClick}>
-                <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`Buy ${product.name} (opens in new tab)`}>
-                  Buy <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer" aria-label={`${ctaLabel} ${product.name} (opens in new tab)`}>
+                  {ctaLabel} <ExternalLink className="h-3 w-3" aria-hidden="true" />
                 </a>
               </Button>
             </div>
@@ -188,7 +189,7 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
 
       {/* Mobile drawer */}
       {isMobile && (
-        <ProductDrawer product={product} open={drawerOpen} onOpenChange={setDrawerOpen} />
+        <ProductDrawer product={product} open={drawerOpen} onOpenChange={setDrawerOpen} ctaLabel={ctaLabel === "Buy" ? undefined : ctaLabel} />
       )}
     </>
   );

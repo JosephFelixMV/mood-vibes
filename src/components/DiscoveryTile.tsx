@@ -10,6 +10,7 @@ const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
 interface DiscoveryTileProps {
   products: Product[];
   getRandomProduct: (pool: Product[], excludeId?: string) => Product | null;
+  ctaLabel?: string;
 }
 
 function TileImage({ product }: { product: Product }) {
@@ -30,7 +31,7 @@ function TileImage({ product }: { product: Product }) {
   );
 }
 
-export default function DiscoveryTile({ products, getRandomProduct: getRandom }: DiscoveryTileProps) {
+export default function DiscoveryTile({ products, getRandomProduct: getRandom, ctaLabel }: DiscoveryTileProps) {
   const [pick, setPick] = useState<Product | null>(() =>
     products.length > 0 ? getRandom(products) : null
   );
@@ -103,7 +104,7 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom }:
       </div>
 
       {/* Drawer */}
-      <ProductDrawer product={pick} open={drawerOpen} onOpenChange={setDrawerOpen} />
+      <ProductDrawer product={pick} open={drawerOpen} onOpenChange={setDrawerOpen} ctaLabel={ctaLabel} />
     </section>
   );
 }

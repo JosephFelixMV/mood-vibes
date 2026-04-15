@@ -15,6 +15,7 @@ interface ProductDrawerProps {
   product: Product;
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  ctaLabel?: string;
 }
 
 function GalleryImage({ src, alt }: { src: string; alt: string }) {
@@ -29,7 +30,7 @@ function GalleryImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function ProductDrawer({ product, open, onOpenChange }: ProductDrawerProps) {
+export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = "View at Source" }: ProductDrawerProps) {
   const proxiedImage = useProxiedImage(product.image_url);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -245,7 +246,7 @@ export default function ProductDrawer({ product, open, onOpenChange }: ProductDr
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  View at Source <ExternalLink className="h-4 w-4" />
+                  {ctaLabel} <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>
             </div>
