@@ -286,7 +286,7 @@ export default function Discover() {
                   exit={{ opacity: 0, x: -40 }}
                   transition={{ type: "spring", stiffness: 300, damping: 28 }}
                 >
-                  <ProductCard product={currentProduct} featured />
+                  <ProductCard product={currentProduct} featured ctaLabel="Discover Brand" />
                 </motion.div>
               </AnimatePresence>
 

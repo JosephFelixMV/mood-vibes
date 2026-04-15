@@ -119,7 +119,7 @@ export default function Index() {
                 <p className="mb-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
                   Your surprise pick
                 </p>
-                <ProductCard product={surprise} featured />
+                <ProductCard product={surprise} featured ctaLabel="Discover Brand" />
               </div>
             </motion.div>
           </section>
@@ -146,7 +146,7 @@ export default function Index() {
           </div>
         ) : displayedProduct ? (
           <div className="mx-auto max-w-3xl">
-            <ProductCard product={displayedProduct} featured />
+            <ProductCard product={displayedProduct} featured ctaLabel="Discover Brand" />
           </div>
         ) : (
           <p className="text-center text-muted-foreground">

@@ -254,7 +254,7 @@ export default function ProductDetail() {
             <div className="flex flex-wrap gap-3 pt-2">
               <Button asChild size="lg" className="gap-2 rounded-full" onClick={handleBuyClick}>
                 <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
-                  Buy Now <ExternalLink className="h-4 w-4" />
+                  Discover Brand <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>
               <ShareButton product={product} variant="full" />

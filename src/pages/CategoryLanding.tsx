@@ -196,7 +196,7 @@ export default function CategoryLanding() {
 
       {/* Discovery tile */}
       {!isLoading && healthyProducts.length > 0 && (
-        <DiscoveryTile products={healthyProducts} getRandomProduct={getRandomProduct} />
+        <DiscoveryTile products={healthyProducts} getRandomProduct={getRandomProduct} ctaLabel="Discover Brand" />
       )}
 
       {/* Sort + Product grid */}
@@ -254,7 +254,7 @@ export default function CategoryLanding() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
-              <ProductCard product={p} />
+              <ProductCard product={p} ctaLabel="Discover Brand" />
             </motion.div>
           ))}
         </div>

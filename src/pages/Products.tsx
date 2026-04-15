@@ -265,7 +265,7 @@ export default function Products() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
               >
-                <ProductCard product={p} />
+                <ProductCard product={p} ctaLabel="Discover Brand" />
               </motion.div>
             ))}
           </div>

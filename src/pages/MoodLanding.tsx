@@ -97,7 +97,7 @@ export default function MoodLanding() {
 
       {/* Discovery tile */}
       {filteredProducts.length > 0 && (
-        <DiscoveryTile products={filteredProducts} getRandomProduct={getRandomProduct} />
+        <DiscoveryTile products={filteredProducts} getRandomProduct={getRandomProduct} ctaLabel="Lock in Mood" />
       )}
 
       {/* Sort + Vendor filter */}
@@ -146,7 +146,7 @@ export default function MoodLanding() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map((p, i) => (
             <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <ProductCard product={p} />
+              <ProductCard product={p} ctaLabel="Lock in Mood" />
             </motion.div>
           ))}
         </div>

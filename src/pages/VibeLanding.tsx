@@ -104,7 +104,7 @@ export default function VibeLanding() {
       </div>
 
       {!isLoading && healthyProducts.length > 0 && (
-        <DiscoveryTile products={healthyProducts} getRandomProduct={getRandomProduct} />
+        <DiscoveryTile products={healthyProducts} getRandomProduct={getRandomProduct} ctaLabel="Vibe with It" />
       )}
 
       {!isLoading && products.length > 0 && (
@@ -149,7 +149,7 @@ export default function VibeLanding() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
-              <ProductCard product={p} />
+              <ProductCard product={p} ctaLabel="Vibe with It" />
             </motion.div>
           ))}
         </div>
