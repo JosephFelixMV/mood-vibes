@@ -143,27 +143,28 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
               const to = cat
                 ? type === "vibe" ? `/vibes/${cat.slug}` : type === "mood" ? `/moods/${cat.slug}` : `/category/${cat.slug}`
                 : "#";
-              const badgeColor =
+              const badgeStyle: React.CSSProperties =
                 type === "vibe"
-                  ? "bg-[hsl(var(--badge-vibe))] border border-[hsl(var(--badge-vibe-border))] text-[hsl(var(--badge-vibe-foreground))]"
+                  ? { background: "linear-gradient(135deg, #F5D061 0%, #D9732B 100%)", color: "#1C1209" }
                   : type === "mood"
-                  ? "bg-[hsl(var(--badge-mood))] text-[hsl(var(--badge-mood-foreground))]"
-                  : "bg-[hsl(var(--badge-core))] border border-[hsl(var(--badge-core-border))] text-[hsl(var(--badge-core-foreground))]";
+                  ? { background: "linear-gradient(135deg, #121212 0%, #3F3F46 100%)", color: "#FFFFFF", border: "1.5px solid #D9732B" }
+                  : { background: "linear-gradient(135deg, #D9732B 0%, #F2A154 100%)", color: "#FFFFFF" };
               const haloShadow =
                 type === "vibe"
-                  ? "0 4px 20px rgba(209, 198, 170, 0.45)"
+                  ? "0 4px 20px rgba(245, 208, 97, 0.4)"
                   : type === "mood"
-                  ? "0 4px 20px rgba(180, 180, 190, 0.35)"
-                  : "0 4px 20px rgba(255, 255, 255, 0.5)";
+                  ? "0 4px 20px rgba(217, 115, 43, 0.3)"
+                  : "0 4px 20px rgba(242, 161, 84, 0.4)";
               const isMood = type === "mood";
               const shimmerGradient = isMood
-                ? "linear-gradient(120deg, transparent 0%, transparent 25%, rgba(192,206,226,0.4) 45%, rgba(220,220,235,0.4) 55%, transparent 75%, transparent 100%)"
-                : "linear-gradient(120deg, transparent 0%, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%, transparent 100%)";
+                ? "linear-gradient(120deg, transparent 0%, transparent 25%, rgba(217,115,43,0.35) 45%, rgba(242,161,84,0.3) 55%, transparent 75%, transparent 100%)"
+                : "linear-gradient(120deg, transparent 0%, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%, transparent 100%)";
               const shimmerDuration = isMood ? 0.5 : 0.6;
               return (
                 <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
                   <motion.div
                     className="relative overflow-hidden rounded-full will-change-transform"
+                    style={badgeStyle}
                     initial={{ y: 0, scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)" }}
                     whileHover={{ y: -5, scale: 1.03, boxShadow: haloShadow }}
                     whileTap={{ scale: 0.97 }}
@@ -174,7 +175,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                       whileHover={{ letterSpacing: "0.18em" }}
                       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <Badge className={`${badgeColor} backdrop-blur-sm cursor-pointer uppercase text-[10px] font-medium tracking-[0.12em] px-5 py-2 whitespace-nowrap`}>
+                      <Badge className="bg-transparent border-0 backdrop-blur-sm cursor-pointer uppercase text-[11px] font-medium tracking-[0.12em] px-5 py-2 whitespace-nowrap" style={{ color: "inherit" }}>
                         {name}
                       </Badge>
                     </motion.div>
