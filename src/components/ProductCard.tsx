@@ -50,6 +50,21 @@ export default function ProductCard({ product, featured }: ProductCardProps) {
 
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
+  // Pick one random tag per taxonomy type, stable across re-renders
+  const tagPicks = useMemo(() => {
+    const pickRandom = (arr: string[]) => arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
+    const coreSet = [...new Set(product.category.split(",").map(c => c.trim()).filter(Boolean))];
+    const vibeSet = [...new Set((product.vibe_category || "").split(",").map(v => v.trim()).filter(Boolean))];
+    const moodSet = [...new Set((product.mood || "").split(",").map(m => m.trim()).filter(Boolean))];
+    const picks: { name: string; type: string }[] = [];
+    const core = pickRandom(coreSet);
+    if (core) picks.push({ name: core, type: "core" });
+    const vibe = pickRandom(vibeSet);
+    if (vibe) picks.push({ name: vibe, type: "vibe" });
+    const mood = pickRandom(moodSet);
+    if (mood) picks.push({ name: mood, type: "mood" });
+    return picks;
+  }, [product.id]); // stable per product instance
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
