@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import ExternalCTA from "@/components/ExternalCTA";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -216,15 +216,7 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                 </p>
               </div>
 
-              <Button asChild size="lg" className="w-full gap-2 rounded-sm">
-                <a
-                  href={product.affiliate_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {ctaLabel} <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
+              <ExternalCTA href={product.affiliate_url} label={ctaLabel} size="lg" fullWidth />
 
               {/* Description */}
               {product.description && (

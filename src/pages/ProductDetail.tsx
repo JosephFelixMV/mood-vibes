@@ -1,7 +1,8 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import ExternalCTA from "@/components/ExternalCTA";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
 import ShareButton from "@/components/ShareButton";
 import { useState } from "react";
@@ -252,11 +253,7 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <Button asChild size="lg" className="gap-2 rounded-full" onClick={handleBuyClick}>
-                <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
-                  Discover Brand <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
+              <ExternalCTA href={product.affiliate_url} label="Discover Brand" onClick={handleBuyClick} size="lg" />
               <ShareButton product={product} variant="full" />
               <Button
                 variant="outline"
