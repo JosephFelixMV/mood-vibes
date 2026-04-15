@@ -161,25 +161,50 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                 ? "linear-gradient(120deg, transparent 0%, transparent 25%, rgba(217,115,43,0.35) 45%, rgba(242,161,84,0.3) 55%, transparent 75%, transparent 100%)"
                 : "linear-gradient(120deg, transparent 0%, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%, transparent 100%)";
               const shimmerDuration = isMood ? 0.5 : 0.6;
+
+              const handleMouseMove = isMood ? (e: React.MouseEvent<HTMLDivElement>) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const lightLeak = e.currentTarget.querySelector<HTMLDivElement>("[data-light-leak]");
+                if (lightLeak) {
+                  lightLeak.style.background = `radial-gradient(circle 40px at ${x}px ${y}px, rgba(217,115,43,0.45) 0%, transparent 100%)`;
+                }
+              } : undefined;
+
+              const handleMouseLeave = isMood ? (e: React.MouseEvent<HTMLDivElement>) => {
+                const lightLeak = e.currentTarget.querySelector<HTMLDivElement>("[data-light-leak]");
+                if (lightLeak) lightLeak.style.background = "transparent";
+              } : undefined;
+
               return (
                 <Link key={name} to={to} onClick={(e) => e.stopPropagation()}>
                   <motion.div
-                    className="relative overflow-hidden rounded-full will-change-transform"
+                    className={`relative overflow-hidden rounded-full will-change-transform ${isMood ? "mood-tag-pulse" : ""}`}
                     style={badgeStyle}
                     initial={{ y: 0, scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)", backgroundPosition: "left center" }}
                     whileHover={{ y: -3, scale: 1.05, boxShadow: haloShadow, backgroundPosition: "right center" }}
                     whileTap={{ scale: 0.97 }}
                     transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={handleMouseLeave}
                   >
                     <motion.div
-                      initial={{ letterSpacing: "0.12em" }}
-                      whileHover={{ letterSpacing: "0.18em" }}
+                      initial={{ letterSpacing: "0.12em", textShadow: "none" }}
+                      whileHover={{
+                        letterSpacing: "0.18em",
+                        ...(isMood ? { textShadow: "0 2px 8px rgba(255,255,255,0.3)" } : {}),
+                      }}
                       transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                     >
                       <Badge className="bg-transparent border-0 backdrop-blur-sm cursor-pointer uppercase text-[11px] font-medium tracking-[0.12em] px-5 py-2 whitespace-nowrap" style={{ color: "inherit" }}>
                         {name}
                       </Badge>
                     </motion.div>
+                    {/* Light-leak layer for Mood */}
+                    {isMood && (
+                      <div data-light-leak className="pointer-events-none absolute inset-0 rounded-full transition-none" />
+                    )}
                     {/* Satin shimmer sweep */}
                     <motion.div
                       className="pointer-events-none absolute inset-0 rounded-full"
