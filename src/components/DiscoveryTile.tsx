@@ -20,7 +20,7 @@ interface DiscoveryTileProps {
 function TileImage({ product }: { product: Product }) {
   const proxiedImage = useProxiedImage(product.image_url);
   return (
-    <div className="relative w-full overflow-hidden bg-[#f7f7f5]" style={{ paddingTop: '100%' }}>
+    <div className="relative w-full overflow-hidden bg-[#f7f7f5]" style={{ paddingTop: 'min(100%, 320px)' }}>
       {proxiedImage ? (
         <img
           src={proxiedImage}
