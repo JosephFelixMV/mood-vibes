@@ -4,7 +4,7 @@ import ExternalCTA from "@/components/ExternalCTA";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useProxiedImage } from "@/hooks/useProxiedImage";
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
@@ -31,7 +31,7 @@ function GalleryImage({ src, alt }: { src: string; alt: string }) {
 }
 
 export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = "View at Source" }: ProductDrawerProps) {
-  const proxiedImage = useProxiedImage(product.image_url);
+  const proxiedImage = product.image_url;
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const { data: extraImages = [] } = useQuery({

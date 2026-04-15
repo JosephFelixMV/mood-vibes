@@ -20,8 +20,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
-import { useProxiedImage } from "@/hooks/useProxiedImage";
-import ProxiedImg from "@/components/ProxiedImg";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -150,7 +148,7 @@ export default function ProductDetail() {
             <div className="relative aspect-square w-full overflow-hidden bg-muted">
               {allImages.length > 0 ? (
                 <>
-                  <ProxiedImg
+                  <img
                     src={allImages[currentImage]}
                     sizes="(min-width: 768px) 50vw, 100vw"
                     alt={product.name}
@@ -192,7 +190,7 @@ export default function ProductDetail() {
                       i === currentImage ? "border-primary" : "border-transparent"
                     }`}
                   >
-                    <ProxiedImg src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
