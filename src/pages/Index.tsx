@@ -96,7 +96,7 @@ export default function Index() {
               disabled={isLoading || healthyProducts.length === 0 || cooldown}
               className="gap-2 rounded-sm px-8 text-base font-medium tracking-wide uppercase transition-colors"
             >
-              {cooldown ? "Wait…" : "Discover"}
+              {cooldown ? "Wait…" : "Discover More Brands"}
             </Button>
           </motion.div>
         </div>
