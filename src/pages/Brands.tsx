@@ -36,6 +36,33 @@ export default function Brands() {
     },
   });
 
+  const { data: vendorCounts = {} } = useQuery({
+    queryKey: ["vendor-product-counts"],
+    queryFn: async () => {
+      const PAGE_SIZE = 1000;
+      let allData: any[] = [];
+      let from = 0;
+      let hasMore = true;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from("products")
+          .select("vendor_id")
+          .eq("is_active", true)
+          .not("vendor_id", "is", null)
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        allData = allData.concat(data || []);
+        hasMore = (data?.length || 0) === PAGE_SIZE;
+        from += PAGE_SIZE;
+      }
+      const counts: Record<string, number> = {};
+      allData.forEach((row) => {
+        counts[row.vendor_id] = (counts[row.vendor_id] || 0) + 1;
+      });
+      return counts;
+    },
+  });
+
   const filteredBrands = brands.filter((b) => {
     const regions = b.regions || ["US"];
     return regions.includes(region) || regions.includes("Intl");
@@ -77,9 +104,16 @@ export default function Brands() {
                 className="group flex flex-col gap-1 rounded-2xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-heading text-lg font-semibold group-hover:text-primary transition-colors">
-                    {formatBrandName(brand.name)}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-heading text-lg font-semibold group-hover:text-primary transition-colors">
+                      {formatBrandName(brand.name)}
+                    </span>
+                    {(vendorCounts[brand.id] || 0) > 0 && (
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        {vendorCounts[brand.id]}
+                      </span>
+                    )}
+                  </div>
                   <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
 {brand.description && (
