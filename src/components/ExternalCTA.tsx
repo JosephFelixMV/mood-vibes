@@ -93,7 +93,7 @@ export default function ExternalCTA(props: ExternalCTAProps) {
       textShadow: "0 2px 8px rgba(255,255,255,0.3)",
     },
     whileTap: { scale: 0.96 },
-    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as const },
   };
 
   const inner = (
