@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ExternalLink } from "lucide-react";
 import { useProxiedImage } from "@/hooks/useProxiedImage";
 import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
+import { Button } from "@/components/ui/button";
 import ProductDrawer from "@/components/ProductDrawer";
 
 const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
@@ -89,6 +91,16 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
           <p className="mt-2 font-heading text-xl font-bold text-primary">
             {formatPrice(pick.price)}
           </p>
+          <Button asChild size="sm" className="mt-3 w-full gap-2 rounded-sm">
+            <a
+              href={pick.affiliate_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {ctaLabel || "Discover Brand"} <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </Button>
         </div>
       </div>
 
