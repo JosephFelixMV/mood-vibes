@@ -54,18 +54,15 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
   // Pick one random tag per taxonomy type, stable across re-renders
   const tagPicks = useMemo(() => {
     const pickRandom = (arr: string[]) => arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
-    const coreSet = [...new Set(product.category.split(",").map(c => c.trim()).filter(Boolean))];
     const vibeSet = [...new Set((product.vibe_category || "").split(",").map(v => v.trim()).filter(Boolean))];
     const moodSet = [...new Set((product.mood || "").split(",").map(m => m.trim()).filter(Boolean))];
     const picks: { name: string; type: string }[] = [];
-    const core = pickRandom(coreSet);
-    if (core) picks.push({ name: core, type: "core" });
     const vibe = pickRandom(vibeSet);
     if (vibe) picks.push({ name: vibe, type: "vibe" });
     const mood = pickRandom(moodSet);
     if (mood) picks.push({ name: mood, type: "mood" });
     return picks;
-  }, [product.id]); // stable per product instance
+  }, [product.id]);
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
@@ -217,7 +214,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                       }}
                       transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <Badge className="bg-transparent border-0 backdrop-blur-sm cursor-pointer uppercase text-[11px] font-medium tracking-[0.12em] px-5 py-2 whitespace-nowrap" style={{ color: "inherit" }}>
+                      <Badge className="bg-transparent border-0 backdrop-blur-sm cursor-pointer uppercase text-[9px] font-medium tracking-[0.12em] px-3 py-1 whitespace-nowrap" style={{ color: "inherit" }}>
                         {name}
                       </Badge>
                     </motion.div>
