@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
+import fallbackImage from "@/assets/fallback-product.png";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -153,6 +154,7 @@ export default function ProductDetail() {
                     sizes="(min-width: 768px) 50vw, 100vw"
                     alt={product.name}
                     className="sharp-image h-full w-full object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
                   />
                   {allImages.length > 1 && (
                     <>
@@ -190,7 +192,7 @@ export default function ProductDetail() {
                       i === currentImage ? "border-primary" : "border-transparent"
                     }`}
                   >
-                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" />
+                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }} />
                   </button>
                 ))}
               </div>
