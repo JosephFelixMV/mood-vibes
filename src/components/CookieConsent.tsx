@@ -2,32 +2,46 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { X, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  getStoredConsent,
+  loadGoogleAnalytics,
+  loadHotjar,
+  removeAnalyticsScripts,
+} from "@/lib/consent-utils";
 
 type Region = "us" | "ca" | "eu" | "other";
 type ConsentState = { accepted: boolean; analytics: boolean; region: Region; timestamp: number };
 
 const STORAGE_KEY = "cookie_consent";
 
-function getStoredConsent(): ConsentState | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    // Expire after 365 days
-    if (Date.now() - parsed.timestamp > 365 * 24 * 60 * 60 * 1000) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
 function storeConsent(consent: ConsentState) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
 }
 
-// Dispatch a custom event so analytics scripts can listen
 function dispatchConsentEvent(analytics: boolean) {
   window.dispatchEvent(new CustomEvent("cookie_consent_update", { detail: { analytics } }));
+}
+
+/**
+ * Fetch GA / Hotjar IDs from site_config and inject scripts
+ * ONLY when the user has given explicit analytics consent.
+ */
+async function activateAnalytics() {
+  try {
+    const { data } = await supabase
+      .from("site_config")
+      .select("key, value")
+      .in("key", ["google_analytics_id", "hotjar_id"]);
+
+    const cfg: Record<string, string> = {};
+    data?.forEach((r) => { cfg[r.key] = r.value; });
+
+    if (cfg.google_analytics_id) loadGoogleAnalytics(cfg.google_analytics_id);
+    if (cfg.hotjar_id) loadHotjar(cfg.hotjar_id);
+  } catch {
+    // Non-critical — never block the user experience
+  }
 }
 
 export default function CookieConsent() {
@@ -40,10 +54,13 @@ export default function CookieConsent() {
     const existing = getStoredConsent();
     if (existing) {
       dispatchConsentEvent(existing.analytics);
-      return; // Already consented
+      // Only inject scripts if the user previously accepted analytics
+      if (existing.analytics) activateAnalytics();
+      return;
     }
 
-    // Detect region via free IP API
+    // No stored consent → scripts stay BLOCKED until user acts
+
     fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(5000) })
       .then((r) => r.json())
       .then((data) => {
@@ -60,12 +77,10 @@ export default function CookieConsent() {
 
         setRegion(detected);
         setVisible(true);
-        // US uses opt-out model — analytics on by default
-        // EU/CA/Other — analytics off by default (opt-in)
-        setAnalyticsChecked(detected === "us");
+        // All regions default to analytics OFF until explicit consent (Quebec Law 25 / GDPR)
+        setAnalyticsChecked(false);
       })
       .catch(() => {
-        // Fallback: treat as international (strictest)
         setRegion("eu");
         setVisible(true);
         setAnalyticsChecked(false);
@@ -76,6 +91,7 @@ export default function CookieConsent() {
     const consent: ConsentState = { accepted: true, analytics: true, region: region || "other", timestamp: Date.now() };
     storeConsent(consent);
     dispatchConsentEvent(true);
+    activateAnalytics();
     setVisible(false);
   };
 
@@ -83,6 +99,7 @@ export default function CookieConsent() {
     const consent: ConsentState = { accepted: true, analytics: false, region: region || "other", timestamp: Date.now() };
     storeConsent(consent);
     dispatchConsentEvent(false);
+    removeAnalyticsScripts();
     setVisible(false);
   };
 
@@ -90,6 +107,11 @@ export default function CookieConsent() {
     const consent: ConsentState = { accepted: true, analytics: analyticsChecked, region: region || "other", timestamp: Date.now() };
     storeConsent(consent);
     dispatchConsentEvent(analyticsChecked);
+    if (analyticsChecked) {
+      activateAnalytics();
+    } else {
+      removeAnalyticsScripts();
+    }
     setVisible(false);
   };
 
@@ -102,7 +124,7 @@ export default function CookieConsent() {
     region === "us"
       ? "Under US law (CCPA), you can opt out of analytics tracking."
       : region === "ca"
-        ? "Under Canadian law (PIPEDA), we require your consent for analytics cookies."
+        ? "Under Quebec Law 25 and PIPEDA, we require your explicit consent before setting non-essential cookies or tracking scripts."
         : region === "eu"
           ? "Under GDPR, we require your explicit consent before setting non-essential cookies."
           : "We require your consent before setting non-essential cookies.";
@@ -124,7 +146,7 @@ export default function CookieConsent() {
         </div>
 
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          We use essential cookies to make this site work. We'd also like to use analytics cookies to understand how you use our site so we can improve it.{" "}
+          We use essential cookies to make this site work. Analytics scripts (Google Analytics, Hotjar) are <strong>blocked by default</strong> and only activated after you give explicit consent.{" "}
           <Link to="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>
         </p>
 
@@ -145,7 +167,7 @@ export default function CookieConsent() {
                 className="rounded"
               />
               <span className="font-medium">Analytics</span>
-              <span className="text-muted-foreground">— Google Analytics, Hotjar</span>
+              <span className="text-muted-foreground">— Google Analytics, Hotjar (blocked until consent)</span>
             </label>
           </div>
         )}
