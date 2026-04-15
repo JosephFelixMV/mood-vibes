@@ -195,8 +195,13 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                     <motion.div
                       className={`relative overflow-hidden rounded-full ${isMood ? "mood-tag-pulse" : ""}`}
                       style={badgeStyle}
-                      initial={{ scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)", backgroundPosition: "left center" }}
-                      whileHover={{ boxShadow: haloShadow, backgroundPosition: "right center" }}
+                      initial={{ scale: 1, boxShadow: "0 0 0 rgba(0,0,0,0)", backgroundPosition: "left center", filter: "brightness(1)" }}
+                      whileHover={{
+                        boxShadow: type === "vibe" ? "0 0 20px rgba(245,208,97,0.3)" : haloShadow,
+                        backgroundPosition: "right center",
+                        filter: type === "vibe" ? "brightness(1.05)" : "brightness(1)",
+                        background: type === "vibe" ? "linear-gradient(135deg, #FFFFFF 0%, #FDFCF0 100%)" : undefined,
+                      }}
                       whileTap={{ scale: 0.97 }}
                       transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                       onMouseMove={handleMouseMove}
