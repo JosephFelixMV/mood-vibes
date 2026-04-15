@@ -228,6 +228,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                       whileHover={{ x: "100%" }}
                       transition={{ duration: shimmerDuration, ease: [0.4, 0, 0.2, 1] }}
                     />
+                    </motion.div>
                   </motion.div>
                 </Link>
               );
