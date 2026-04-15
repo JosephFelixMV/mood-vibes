@@ -21,7 +21,7 @@ const EXAMPLE_PROMPTS = [
 ];
 
 function fireGaEvent(action: string, params: Record<string, string>) {
-  if (typeof window !== "undefined" && (window as any).gtag) {
+  if (typeof window !== "undefined" && (window as any).gtag && localStorage.getItem("cookie_consent")?.includes('"analytics":true')) {
     (window as any).gtag("event", action, { ...params, source: "ai_prompt" });
   }
 }
