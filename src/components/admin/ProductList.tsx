@@ -379,11 +379,15 @@ export default function ProductList({ onEdit }: Props) {
           <SelectContent>
             <SelectItem value="all">All Vendors</SelectItem>
             {(() => {
+              const vendorCounts: Record<string, number> = {};
+              products.forEach((p: any) => {
+                if (p.vendor_id && p.is_active) vendorCounts[p.vendor_id] = (vendorCounts[p.vendor_id] || 0) + 1;
+              });
               const vendorIdsInUse = new Set(products.map((p: any) => p.vendor_id).filter(Boolean));
               return brandsList
                 .filter((b: any) => vendorIdsInUse.has(b.id))
                 .map((b: any) => (
-                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  <SelectItem key={b.id} value={b.id}>{b.name} ({vendorCounts[b.id] || 0})</SelectItem>
                 ));
             })()}
           </SelectContent>
