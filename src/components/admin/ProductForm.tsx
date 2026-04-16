@@ -342,8 +342,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         throw new Error("Affiliate URL is required. Please add a valid link before saving.");
       }
       const numericPrice = Number(form.price);
-      if (!form.price || isNaN(numericPrice) || numericPrice < 5) {
-        throw new Error("Price is required and must be at least $5.00.");
+      const hasValidPrice = form.price !== "" && form.price !== null && !isNaN(numericPrice) && numericPrice >= 5;
+      // Block publishing if price is missing or below $5 — force draft instead
+      if (form.is_active && !hasValidPrice) {
+        throw new Error("Price must be at least $5.00 to publish. Save as draft (toggle off Active) to upload without a valid price.");
       }
       if (!editId) {
         const { data: dupes } = await supabase
