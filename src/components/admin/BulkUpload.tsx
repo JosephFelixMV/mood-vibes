@@ -77,6 +77,11 @@ export default function BulkUpload() {
           ? parseFloat(data.price.replace(/[^0-9.]/g, "")) || 0
           : (data.price || 0);
 
+        if (!parsedPrice || parsedPrice < 5) {
+          uploadResults.push({ fileName: file.name, success: false, productName: data.name, error: "Price must be at least $5.00" });
+          continue;
+        }
+
         // Auto-match vendor from source_url
         let vendorId: string | null = null;
         const sourceUrl = data.source_url || data.affiliate_url || "";
