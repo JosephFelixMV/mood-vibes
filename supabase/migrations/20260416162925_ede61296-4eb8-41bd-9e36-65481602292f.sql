@@ -1,0 +1,1 @@
+UPDATE site_config SET value = 'G-CLM6SYLZHK', updated_at = now() WHERE key = 'google_analytics_id';
