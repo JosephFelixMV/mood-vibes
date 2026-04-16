@@ -37,7 +37,18 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
     staleTime: 1000 * 60 * 10,
   });
 
+  const { data: allBrands = [] } = useQuery({
+    queryKey: ["brands-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name");
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
 
+  const vendorName = product.vendor_id
+    ? allBrands.find((b: any) => b.id === product.vendor_id)?.name
+    : null;
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
   // Pick one random tag per taxonomy type, stable across re-renders
@@ -251,6 +262,9 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
             <ReportBrokenLink productId={product.id} />
             <ShareButton product={product} />
           </div>
+          {vendorName && (
+            <span className="mt-0.5 block text-[10px] text-muted-foreground">via {vendorName}</span>
+          )}
         </div>
       </motion.div>
 
