@@ -7,8 +7,11 @@ import {
   getStoredConsent,
   loadGoogleAnalytics,
   loadHotjar,
+  loadContentsquare,
   removeAnalyticsScripts,
 } from "@/lib/consent-utils";
+
+const CONTENTSQUARE_SCRIPT_URL = "https://t.contentsquare.net/uxa/0702892ec5334.js";
 
 type Region = "us" | "ca" | "eu" | "other";
 type ConsentState = { accepted: boolean; analytics: boolean; region: Region; timestamp: number };
@@ -39,6 +42,7 @@ async function activateAnalytics() {
 
     if (cfg.google_analytics_id) loadGoogleAnalytics(cfg.google_analytics_id);
     if (cfg.hotjar_id) loadHotjar(cfg.hotjar_id);
+    loadContentsquare(CONTENTSQUARE_SCRIPT_URL);
   } catch {
     // Non-critical — never block the user experience
   }
