@@ -40,7 +40,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
   const { data: allBrands = [] } = useQuery({
     queryKey: ["brands-list"],
     queryFn: async () => {
-      const { data } = await sb.from("brands").select("id, name");
+      const { data } = await supabase.from("brands").select("id, name");
       return data || [];
     },
     staleTime: 1000 * 60 * 10,
