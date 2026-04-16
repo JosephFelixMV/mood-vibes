@@ -91,9 +91,34 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
     setCurrentIndex(0);
   }
 
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    // Swipe right: horizontal > 60px and dominant over vertical
+    if (dx > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      onOpenChange(false);
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[40vw] sm:max-w-none p-0 border-l border-border">
+      <SheetContent
+        side="right"
+        className="w-full sm:w-[40vw] sm:max-w-none p-0 border-l border-border"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <ScrollArea className="h-full">
           <div className="flex flex-col">
             {/* Video */}
