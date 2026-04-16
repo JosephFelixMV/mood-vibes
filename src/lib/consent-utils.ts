@@ -61,10 +61,19 @@ export function loadHotjar(siteId: string) {
 }
 
 /**
+ * Load Contentsquare (UXA) tag.
+ * Blocked until explicit consent.
+ */
+export function loadContentsquare(scriptUrl: string) {
+  if (!scriptUrl) return;
+  injectScript(scriptUrl, "cs-script");
+}
+
+/**
  * Remove injected analytics scripts and clear their globals.
  */
 export function removeAnalyticsScripts() {
-  ["ga-script", "hj-script"].forEach((id) => {
+  ["ga-script", "hj-script", "cs-script"].forEach((id) => {
     document.getElementById(id)?.remove();
   });
   const w = window as any;
@@ -72,4 +81,5 @@ export function removeAnalyticsScripts() {
   delete w.dataLayer;
   delete w.hj;
   delete w._hjSettings;
+  delete w._uxa;
 }
