@@ -210,7 +210,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     setAiSuggestions(null);
     try {
       const { data, error } = await supabase.functions.invoke("suggest-categories", {
-        body: { name: productName, description, price, source_url: form.source_url, vendor_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name },
+        body: { name: productName, description, price, source_url: form.source_url, vendor_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name, company_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name },
       });
       if (error) throw error;
       if (data?.core?.length || data?.vibes?.length || data?.moods?.length || data?.keywords?.length) {
@@ -838,7 +838,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                 setSuggestingCategories(true);
                 try {
                   const { data, error } = await supabase.functions.invoke("suggest-categories", {
-                    body: { name: form.name, description: form.description, price: form.price, source_url: form.source_url, vendor_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name },
+                    body: { name: form.name, description: form.description, price: form.price, source_url: form.source_url, vendor_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name, company_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name },
                   });
                   if (error) throw error;
                   const suggested = (data?.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean);

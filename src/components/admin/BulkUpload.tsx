@@ -126,7 +126,7 @@ export default function BulkUpload() {
           try {
             const matchedVendorName = vendorId ? brandsList.find((b: any) => b.id === vendorId)?.name : undefined;
             const { data: aiData } = await supabase.functions.invoke("suggest-categories", {
-              body: { name: data.name.trim(), description: data.description || "", price: parsedPrice, source_url: sourceUrl, vendor_name: matchedVendorName },
+              body: { name: data.name.trim(), description: data.description || "", price: parsedPrice, source_url: sourceUrl, vendor_name: matchedVendorName, company_name: matchedVendorName },
             });
             if (aiData) {
               const updates: { category?: string; vibe_category?: string } = {};
