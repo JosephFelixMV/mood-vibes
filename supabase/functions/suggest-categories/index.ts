@@ -117,12 +117,32 @@ ${moodList}
 KEYWORD RULES — this is the most important part:
 1. NEVER return broad category terms as keywords (e.g. "men's watch", "luxury watch", "women's top"). These are category names, not tags.
 2. NEVER return generic specs as keywords (e.g. "stainless steel", "43mm", "water resistant"). These belong in the Specifications field, not keywords.
-3. ALWAYS return long-tail, intent-driven keywords that describe:
-   - Style / aesthetic (e.g. "bauhaus minimalist watch", "oversized boyfriend fit top")
-   - Material + form (e.g. "brushed titanium case watch", "heavyweight french terry hoodie")
-   - Occasion + intent (e.g. "anniversary gift watch for him", "workwear blazer for petite women")
-   - Vibe / search phrase (e.g. "quiet luxury accessories", "old money aesthetic watch")
-4. Return 6–8 keywords. Each should be 2–5 words. Think: what would someone actually type into Google to find this exact product?
+3. Generate keywords across FIVE dimensions. Cover as many as genuinely apply:
+
+   A) Product type – literal item descriptors with style/material qualifiers:
+      e.g. "bauhaus minimalist watch", "heavyweight french terry hoodie", "brushed titanium case watch"
+
+   B) Mood + Vibe – aesthetic and feeling keywords:
+      e.g. "quiet luxury accessories", "old money aesthetic watch", "cottagecore kitchen decor"
+
+   C) Recipient persona – who the product suits:
+      - Gender signals: "gift for him", "gift for her", "gender neutral gift"
+      - Life stage: "gift for new mom", "gift for teen girl", "gift for dad"
+      - Relationship: "gift for partner", "gift for best friend", "gift for coworker"
+
+   D) Personality & lifestyle – defining interests of the ideal buyer:
+      e.g. "for fitness lovers", "homebody essentials", "gift for bookworm",
+      "wellness obsessed", "outdoorsy gift", "for minimalists", "plant parent gift"
+
+   E) Occasion & intent – when and why someone buys it:
+      e.g. "birthday gift for her", "treat yourself", "self care gift",
+      "housewarming gift", "mothers day gift", "valentines day for him",
+      "graduation gift", "just because gift", "new year reset"
+
+   Optional — Age bracket (only when clearly applicable from product context):
+      e.g. "gift for her in her 20s", "young professional essentials", "40s style upgrade"
+
+4. Return 8–12 keywords. Each should be 2–6 words. Think: what would someone actually type into Google to find this exact product or gift?
 5. For fashion products, also include seasonal/warmth signals where applicable:
    - Materials like "wool", "cashmere", "puffer", "fleece" → include them in keyword phrases, not standalone
    - e.g. "chunky wool turtleneck sweater", "lightweight linen summer blouse"
@@ -144,7 +164,7 @@ detailed (+0.1), category choice is unambiguous (+0.1). Score lower when:
 no brand match, vague description, or multiple equally valid categories.
 
 IMPORTANT: Return only raw JSON. No markdown, no explanation. Format:
-{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["long-tail keyword phrase", ...], "confidence": 0.92}
+{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["product type phrase", "vibe phrase", "gift for him", "for fitness lovers", "birthday gift idea", ...], "confidence": 0.92}
 
 Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.`;
 
@@ -180,7 +200,7 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     let validCore = dedupeStrings((suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c))).slice(0, 5);
     let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
-    const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 8);
+    const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 12);
     const confidence = typeof suggestions.confidence === "number"
       ? Math.min(1, Math.max(0, suggestions.confidence))
       : 0.6;
