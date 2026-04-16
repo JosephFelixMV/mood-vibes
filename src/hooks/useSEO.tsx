@@ -36,8 +36,8 @@ export function useSEO({ title, description, image, url, keywords, rawTitle }: S
       setMeta("name", "twitter:description", description);
     }
     if (title) {
-      setMeta("property", "og:title", `${title} | ${suffix}`);
-      setMeta("name", "twitter:title", `${title} | ${suffix}`);
+      setMeta("property", "og:title", fullTitle);
+      setMeta("name", "twitter:title", fullTitle);
     }
     if (image) {
       setMeta("property", "og:image", image);
@@ -49,5 +49,5 @@ export function useSEO({ title, description, image, url, keywords, rawTitle }: S
     if (keywords && keywords.length > 0) {
       setMeta("name", "keywords", keywords.join(", "));
     }
-  }, [title, description, image, url, keywords]);
+  }, [title, description, image, url, keywords, rawTitle]);
 }
