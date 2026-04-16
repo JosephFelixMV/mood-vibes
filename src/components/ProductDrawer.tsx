@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ExternalCTA from "@/components/ExternalCTA";
 import { Badge } from "@/components/ui/badge";
