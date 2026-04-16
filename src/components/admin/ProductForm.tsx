@@ -628,7 +628,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <Label>Price</Label>
           <Input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={form.price} onChange={(e) => set("price", e.target.value)} placeholder="29.99" min="5" />
           {form.price !== "" && (Number(form.price) < 5 || isNaN(Number(form.price))) && (
-            <p className="text-xs text-amber-600 mt-1">Price below $5.00 — product can be saved as a draft but cannot be published.</p>
+            <p className="text-xs text-destructive mt-1">Price below $5.00 — product can be saved as a draft but cannot be published.</p>
           )}
           {form.price === "" && (
             <p className="text-xs text-muted-foreground mt-1">Optional for drafts — required (≥ $5.00) to publish.</p>
