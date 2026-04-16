@@ -341,6 +341,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       if (!form.affiliate_url?.trim()) {
         throw new Error("Affiliate URL is required. Please add a valid link before saving.");
       }
+      const numericPrice = Number(form.price);
+      if (!form.price || isNaN(numericPrice) || numericPrice < 5) {
+        throw new Error("Price is required and must be at least $5.00.");
+      }
       if (!editId) {
         const { data: dupes } = await supabase
           .from("products")
@@ -620,7 +624,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
         <div>
           <Label>Price</Label>
-          <Input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={form.price} onChange={(e) => set("price", e.target.value)} required placeholder="29.99" />
+          <Input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={form.price} onChange={(e) => set("price", e.target.value)} required placeholder="29.99" min="5" />
+          {form.price !== "" && (Number(form.price) < 5 || isNaN(Number(form.price))) && (
+            <p className="text-xs text-destructive mt-1">Minimum price is $5.00</p>
+          )}
           <label className="mt-2 flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
