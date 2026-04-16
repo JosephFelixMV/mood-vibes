@@ -164,7 +164,7 @@ detailed (+0.1), category choice is unambiguous (+0.1). Score lower when:
 no brand match, vague description, or multiple equally valid categories.
 
 IMPORTANT: Return only raw JSON. No markdown, no explanation. Format:
-{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["long-tail keyword phrase", ...], "confidence": 0.92}
+{"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["product type phrase", "vibe phrase", "gift for him", "for fitness lovers", "birthday gift idea", ...], "confidence": 0.92}
 
 Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.`;
 
@@ -200,7 +200,7 @@ Use exact category/vibe/mood names from the lists above. Pick categories that ge
     let validCore = dedupeStrings((suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c))).slice(0, 5);
     let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
-    const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 8);
+    const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 12);
     const confidence = typeof suggestions.confidence === "number"
       ? Math.min(1, Math.max(0, suggestions.confidence))
       : 0.6;
