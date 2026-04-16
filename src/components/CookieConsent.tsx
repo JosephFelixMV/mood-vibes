@@ -44,6 +44,10 @@ async function activateAnalytics() {
   }
 }
 
+export function useCookieConsentTrigger() {
+  return () => window.dispatchEvent(new Event("open_cookie_consent"));
+}
+
 export default function CookieConsent() {
   const [region, setRegion] = useState<Region | null>(null);
   const [visible, setVisible] = useState(false);
