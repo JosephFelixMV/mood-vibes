@@ -59,7 +59,7 @@ export default function CookieConsent() {
       return;
     }
 
-    // No stored consent → scripts stay BLOCKED until user acts
+    // No stored consent → detect region to decide consent model
 
     fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(5000) })
       .then((r) => r.json())
@@ -77,10 +77,19 @@ export default function CookieConsent() {
 
         setRegion(detected);
         setVisible(true);
-        // All regions default to analytics OFF until explicit consent (Quebec Law 25 / GDPR)
-        setAnalyticsChecked(false);
+
+        // CCPA (US) = opt-out model → load analytics immediately, user can decline later
+        if (detected === "us") {
+          setAnalyticsChecked(true);
+          dispatchConsentEvent(true);
+          activateAnalytics();
+        } else {
+          // EU (GDPR) / CA (Law 25) / Other = opt-in model → block until explicit consent
+          setAnalyticsChecked(false);
+        }
       })
       .catch(() => {
+        // Fallback to strictest model (EU opt-in)
         setRegion("eu");
         setVisible(true);
         setAnalyticsChecked(false);
