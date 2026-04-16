@@ -248,13 +248,15 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
             {product.name}
           </span>
 
+          {product.company_name && (
+            <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground font-medium">
+              {product.company_name}
+            </span>
+          )}
+
           <span className="font-heading text-base font-bold text-primary">
             {formatPrice(product.price)}
           </span>
-
-          {vendorName && (
-            <span className="text-[10px] text-muted-foreground">via {vendorName}</span>
-          )}
 
           <div className="flex items-center gap-1 mt-1">
             <ExternalCTA href={product.affiliate_url} label={ctaLabel} onClick={handleBuyClick} size="sm" />
