@@ -44,11 +44,21 @@ async function activateAnalytics() {
   }
 }
 
+export function useCookieConsentTrigger() {
+  return () => window.dispatchEvent(new Event("open_cookie_consent"));
+}
+
 export default function CookieConsent() {
   const [region, setRegion] = useState<Region | null>(null);
   const [visible, setVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [analyticsChecked, setAnalyticsChecked] = useState(true);
+
+  useEffect(() => {
+    const handleReopen = () => { setVisible(true); setShowDetails(true); };
+    window.addEventListener("open_cookie_consent", handleReopen);
+    return () => window.removeEventListener("open_cookie_consent", handleReopen);
+  }, []);
 
   useEffect(() => {
     const existing = getStoredConsent();
