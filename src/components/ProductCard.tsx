@@ -12,7 +12,6 @@ import { trackProductClick } from "@/lib/track-click";
 import { trackEvent } from "@/lib/track-event";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
-import { supabase as sb } from "@/integrations/supabase/client";
 import type { Product } from "@/lib/supabase-queries";
 
 import { useIsMobile } from "@/hooks/use-mobile";
