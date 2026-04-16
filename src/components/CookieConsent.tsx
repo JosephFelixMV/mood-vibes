@@ -131,7 +131,7 @@ export default function CookieConsent() {
 
   const regionNote =
     region === "us"
-      ? "Under US law (CCPA), you can opt out of analytics tracking."
+      ? "Under CCPA, analytics is active by default. You can opt out below."
       : region === "ca"
         ? "Under Quebec Law 25 and PIPEDA, we require your explicit consent before setting non-essential cookies or tracking scripts."
         : region === "eu"
