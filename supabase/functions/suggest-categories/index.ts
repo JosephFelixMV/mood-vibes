@@ -93,7 +93,7 @@ serve(async (req) => {
     const { core: CORE_CATEGORIES, vibes: VIBE_CATEGORIES, moods: MOOD_CATEGORIES } = await loadCategories(supabase);
 
     const body = await req.text();
-    const { name, description, price, source_url, vendor_name } = JSON.parse(body);
+    const { name, description, price, source_url, vendor_name, company_name } = JSON.parse(body);
 
     // Brand-specific category hints from brand_lookup table
     const vendorHints = await getBrandHint(supabase, source_url, vendor_name);
@@ -443,9 +443,77 @@ When multiple signals point to different vibes, use this priority order:
 
 Maximum 2 vibes and 2 moods regardless of how many signals are present. If three vibes are equally signaled, pick the two that are most differentiated from each other.
 
+═══════════════════════════════════════
+BRAND SIGNAL RULES
+═══════════════════════════════════════
+
+The company_name field provides brand context. Use it as a categorical signal, not a lookup table — reason about the brand type rather than matching specific names.
+
+─────────────────────────────────────
+LUXURY & INDEPENDENT DESIGNER brands
+─────────────────────────────────────
+Signals: brand is a known luxury house, independent fashion designer, or artisan maker. Often single-name or founder-named brands. Products typically $200+.
+→ Vibe lean: The Atelier or Old Money
+→ Confirm with price signal — if price is under $100 despite luxury brand name, treat brand signal as weak
+→ Examples of brand type (not exhaustive): single-name European fashion houses, independent New York or LA designers, Japanese craft brands
+
+─────────────────────────────────────
+PERFORMANCE & ATHLETIC brands
+─────────────────────────────────────
+Signals: brand is known primarily for sportswear, athletic gear, outdoor performance, or fitness equipment. Applies regardless of price point.
+→ Vibe lean: Sporty Girl or Off Duty
+→ Mood lean: Motivated
+→ Override only if the specific product is clearly a lifestyle/fashion crossover with no performance function
+→ Brand types: running brands, yoga/studio brands, outdoor performance brands, gym equipment brands, athletic footwear
+
+─────────────────────────────────────
+STREETWEAR & HYPE brands
+─────────────────────────────────────
+Signals: brand operates in hype, drop, or streetwear culture. Associated with limited releases, collaborations, sneaker culture, or music/artist affiliations. Price is irrelevant — do NOT limit Street Style to low price points.
+→ Vibe lean: Street Style
+→ Mood lean: Bold or Playful
+→ Brand types: skate brands, sneaker brands, music-affiliated fashion labels, hype-adjacent streetwear
+
+─────────────────────────────────────
+MASS MARKET brands
+─────────────────────────────────────
+Signals: brand is widely distributed, high volume, broadly accessible. No strong aesthetic or cultural identity signal.
+→ No vibe default from brand alone
+→ Fall back entirely to price, material, and category signals
+→ Brand types: large retail chains, fast fashion brands, general merchandise brands
+
+─────────────────────────────────────
+BEAUTY & WELLNESS brands
+─────────────────────────────────────
+Signals: brand specializes in skincare, cosmetics, haircare, fragrance, or wellness products.
+→ Vibe lean: none by default — too varied within beauty
+→ Mood lean: Calm (skincare/wellness) or Romantic (fragrance/fine beauty)
+→ Exception: if brand is known for bold editorial makeup → Bold mood
+
+─────────────────────────────────────
+HOME & LIFESTYLE brands
+─────────────────────────────────────
+Signals: brand specializes in home décor, kitchen, or lifestyle objects.
+→ If brand is known for colorful, design-forward products (e.g. Le Creuset-type brands) → Dopamine Hits vibe
+→ If brand is known for minimalist Scandinavian or Japanese design → Minimal mood, Old Money or Effortless Chic vibe
+→ If brand is known for artisan or craft objects → Soft Academia or The Atelier vibe
+
+─────────────────────────────────────
+BRAND SIGNAL PRIORITY
+─────────────────────────────────────
+Brand signals are strong but not absolute. Override brand signal when:
+- The specific product clearly contradicts the brand's typical aesthetic
+- Price strongly conflicts with brand tier
+- Material signals are more specific than brand category
+
+Brand signal + price signal agreement = high confidence.
+Brand signal + material signal agreement = high confidence.
+Brand signal alone = moderate confidence, confirm with at least one other signal.
+
 Product Name: ${name || "Unknown"}
+Brand: ${company_name || "Unknown"}
 ${vendorHints}Description: ${description || "No description"}
-Price: ${price || "Unknown"}
+Price: $${price || "Unknown"}
 
 CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when brand context strongly matched (0.85+), product description is specific and detailed (+0.1), category choice is unambiguous (+0.1). Score lower when no brand match, vague description, or multiple equally valid categories.`;
 
