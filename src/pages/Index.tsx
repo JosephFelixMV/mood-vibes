@@ -32,7 +32,12 @@ function useCountdownToMidnightUTC() {
 
 export default function Index() {
   const { region } = useRegion();
-  useSEO({ title: "Home", description: "Discover products that match your mood and aesthetic. Curated finds for every vibe on Mood & Vibes." });
+  useSEO({
+    title: "Mood & Vibes | Find Your Mood. Shop the Vibe.",
+    rawTitle: true,
+    description:
+      "Daily curated product picks organized by mood, vibe, and lifestyle. Find your mood. Shop the vibe. Discover unique finds that match your aesthetic on Mood & Vibes.",
+  });
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => getProducts({ activeOnly: true }),
