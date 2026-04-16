@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
+import { stripHtml, truncateToMeta } from "@/lib/brand-utils";
 import fallbackImage from "@/assets/fallback-product.png";
 
 export default function ProductDetail() {
@@ -70,9 +71,26 @@ export default function ProductDetail() {
 
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
+  const primaryCategory = product?.category?.split(",")[0]?.trim() || "";
+  const primaryVibe = product?.vibe_category?.split(",")[0]?.trim() || "";
+  const seoTitle = product
+    ? `${product.name} | ${primaryCategory || "Curated Pick"} | Mood & Vibes`
+    : "Mood & Vibes";
+  const seoDescription = product
+    ? product.description
+      ? truncateToMeta(stripHtml(product.description), 155)
+      : truncateToMeta(
+          `"${product.name}" is a curated ${primaryCategory || "lifestyle"} pick${
+            primaryVibe ? ` for ${primaryVibe} vibes` : ""
+          }.${productKeywords.length > 0 ? ` ${productKeywords.slice(0, 3).join(", ")}.` : ""}`,
+          155,
+        )
+    : undefined;
+
   useSEO({
-    title: product?.name,
-    description: product?.description || `Check out ${product?.name} on Mood & Vibes.`,
+    title: seoTitle,
+    rawTitle: true,
+    description: seoDescription,
     image: product?.image_url || undefined,
     url: product ? `${window.location.origin}/product/${(product as any).slug || product.id}` : undefined,
     keywords: productKeywords.length > 0 ? productKeywords : undefined,
