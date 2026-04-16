@@ -71,10 +71,21 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
       turnstileWidgetIdRef.current = turnstile.render(turnstileContainerRef.current, {
         sitekey: turnstileSiteKey,
         callback: (token: string) => submitReport(token),
-        "error-callback": () => {
-          toast.error("Verification failed. Please try again.");
+        "error-callback": (errorCode?: string) => {
+          // Mobile networks often trigger transient errors — let Turnstile auto-retry
+          // instead of bouncing the user back. Only log for debugging.
+          console.warn("Turnstile transient error:", errorCode);
+        },
+        "expired-callback": () => {
+          toast.info("Verification expired — please try again.");
+        },
+        "timeout-callback": () => {
+          toast.error("Verification timed out. Please try again.");
           setStep("confirm");
         },
+        retry: "auto",
+        "retry-interval": 2000,
+        "refresh-expired": "auto",
         size: "normal",
         theme: "auto",
       });
