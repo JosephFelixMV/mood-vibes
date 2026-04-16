@@ -139,10 +139,19 @@ export default function ProductList({ onEdit }: Props) {
 
   const toggleMut = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      // Block publishing if price is missing or below $5
+      if (is_active) {
+        const product = products.find((p: any) => p.id === id);
+        const price = Number(product?.price);
+        if (!product?.price || isNaN(price) || price < 5) {
+          throw new Error("Cannot publish — set a price of at least $5.00 first.");
+        }
+      }
       const { error } = await supabase.from("products").update({ is_active }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
+    onError: (err: any) => toast.error(err.message || "Failed to update product"),
   });
 
   const deleteMut = useMutation({
