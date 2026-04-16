@@ -155,7 +155,11 @@ export default function CookieConsent() {
         </div>
 
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          We use essential cookies to make this site work. Analytics scripts (Google Analytics, Hotjar) are <strong>blocked by default</strong> and only activated after you give explicit consent.{" "}
+          We use essential cookies to make this site work.{" "}
+          {region === "us"
+            ? "Analytics (Google Analytics, Hotjar) is active by default under CCPA. You may opt out at any time."
+            : "Analytics scripts (Google Analytics, Hotjar) are blocked by default and only activated after you give explicit consent."
+          }{" "}
           <Link to="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>
         </p>
 
