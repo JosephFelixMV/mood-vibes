@@ -37,18 +37,6 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
     staleTime: 1000 * 60 * 10,
   });
 
-  const { data: allBrands = [] } = useQuery({
-    queryKey: ["brands-list"],
-    queryFn: async () => {
-      const { data } = await supabase.from("brands").select("id, name");
-      return data || [];
-    },
-    staleTime: 1000 * 60 * 10,
-  });
-
-  const vendorName = product.vendor_id
-    ? allBrands.find((b: any) => b.id === product.vendor_id)?.name
-    : null;
 
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
@@ -248,13 +236,15 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
             {product.name}
           </span>
 
+          {product.company_name && (
+            <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground font-medium">
+              {product.company_name}
+            </span>
+          )}
+
           <span className="font-heading text-base font-bold text-primary">
             {formatPrice(product.price)}
           </span>
-
-          {vendorName && (
-            <span className="text-[10px] text-muted-foreground">via {vendorName}</span>
-          )}
 
           <div className="flex items-center gap-1 mt-1">
             <ExternalCTA href={product.affiliate_url} label={ctaLabel} onClick={handleBuyClick} size="sm" />

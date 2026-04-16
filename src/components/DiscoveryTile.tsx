@@ -101,7 +101,7 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
         <div className="p-4">
           <h3 className="font-heading text-base font-semibold leading-tight">{pick.name}</h3>
           {pick.company_name && (
-            <p className="mt-0.5 text-xs text-muted-foreground">{pick.company_name}</p>
+            <p className="mt-0.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground font-medium">{pick.company_name}</p>
           )}
           <p className="mt-1.5 font-heading text-lg font-bold text-primary">
             {formatPrice(pick.price)}
