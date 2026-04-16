@@ -343,6 +343,106 @@ Under $80 → No default, signals decide
 Any price + activewear → Sporty Girl or Off Duty
 Any price + bold color → Dopamine Hits consideration
 
+═══════════════════════════════════════
+MATERIAL & AESTHETIC SIGNAL RULES
+═══════════════════════════════════════
+
+When these terms appear in the product name, description, or keywords — in any form, including partial matches — apply the corresponding vibe and mood signals. These override category defaults but can be overridden by price and brand rules when they conflict.
+
+─────────────────────────────────────
+THE ATELIER signals
+─────────────────────────────────────
+Material terms: cashmere, nappa leather, silk, hand-stitched, hand-crafted, patchwork, artisan, bespoke, couture, lambskin, suede, python, crocodile, shearling, bouclé, duchess satin
+→ Vibe: The Atelier
+→ Mood: Calm or Romantic
+
+─────────────────────────────────────
+OLD MONEY / EFFORTLESS CHIC signals
+─────────────────────────────────────
+Material terms: linen, cotton twill, unstructured, relaxed fit, heritage, classic cut, natural fiber, stone-washed, raw edge, wide-leg, tailored, merino
+Style terms: minimal hardware, tonal, monochrome, neutral, understated, clean line
+→ Vibe: Old Money (if price $300+) or Effortless Chic (if price under $300)
+→ Mood: Calm or Minimal
+
+─────────────────────────────────────
+STREET STYLE signals
+─────────────────────────────────────
+Style terms: oversized, vintage-wash, graphic, drop-shoulder, distressed, raw hem, graffiti, logo-heavy, colorblock, patchwork denim, cargo, utility
+Cultural terms: hype, limited drop, collab, streetwear, skate, bmx, sneaker, basketball
+→ Vibe: Street Style (regardless of price)
+→ Mood: Bold or Playful
+
+─────────────────────────────────────
+SPORTY GIRL / OFF DUTY signals
+─────────────────────────────────────
+Material terms: compression, moisture-wicking, performance, ribbed, seamless, recycled nylon, spandex, lycra, mesh panel, four-way stretch, breathable, quick-dry
+Style terms: racerback, sports bra, legging, bike short, windbreaker, track, athletic
+→ Vibe: Sporty Girl (performance focus) or Off Duty (lifestyle crossover)
+→ Mood: Motivated or Playful
+
+─────────────────────────────────────
+COZY HOMEBODY signals
+─────────────────────────────────────
+Material terms: sherpa, fleece, waffle knit, terry cloth, lounge, fuzzy, plush, slipper, robe, weighted
+Style terms: oversized fit, relaxed, loungewear, sleepwear, pajama, hoodie, sweatshirt
+→ Vibe: Cozy Homebody
+→ Mood: Cozy
+
+─────────────────────────────────────
+ECCENTRIC MAXIMALIST signals
+─────────────────────────────────────
+Material terms: feather trim, sequin, beaded, rhinestone, embellished, metallic, holographic, velvet (in fashion context)
+Style terms: sculptural, avant-garde, exaggerated silhouette, theatrical, oversized volume, deconstructed, asymmetric
+→ Vibe: Eccentric Maximalist
+→ Mood: Bold
+
+─────────────────────────────────────
+DOPAMINE HITS signals
+─────────────────────────────────────
+Color terms (as primary selling point): cobalt, electric blue, cherry red, sunshine yellow, fuchsia, tangerine, hot pink, grass green, neon, vivid, saturated, pop of color, statement color
+Object context: colorful cookware, bright stationery, vivid home accessory where color is clearly the product differentiator
+→ Vibe: Dopamine Hits
+→ Mood: Playful or Bold
+
+─────────────────────────────────────
+AURA FARMING signals
+─────────────────────────────────────
+Style terms: editorial, cool-girl, understated statement, monochrome with detail, considered, architectural, precise
+Cultural terms: model off-duty, fashion week, pop star, music video, avant-pop, clean girl (elevated version)
+→ Vibe: Aura Farming
+→ Mood: Calm or Bold
+→ Note: Aura Farming is outward-facing. If the product creates joy for the owner privately → Dopamine Hits. If it creates presence socially → Aura Farming.
+
+─────────────────────────────────────
+SOFT ACADEMIA signals
+─────────────────────────────────────
+Material terms (fashion): tweed, plaid, corduroy, wool blazer, beret, oxfords, loafer, leather satchel, cable knit
+Object terms (non-fashion): notebook, stationery, fountain pen, art supplies, reading lamp, leather journal, bookend, globe, magnifying glass, botanical print, wooden desk accessory, loose-leaf tea, ceramic mug (in study/library context)
+Color palette: warm browns, forest green, burgundy, cream, mustard, aged ivory
+→ Vibe: Soft Academia
+→ Mood: Focused or Romantic
+→ IMPORTANT: Apply this to home, stationery, and kitchen products, not only fashion. A leather-bound journal qualifies as strongly as a tweed blazer.
+
+─────────────────────────────────────
+MAIN CHARACTER signals
+─────────────────────────────────────
+Style terms: statement piece, showstopper, conversation piece, all eyes on, scene-stealing, one-of-a-kind, eye-catching, centerpiece (for home products)
+→ Vibe: Main Character
+→ Mood: Bold
+→ Use when the product is clearly designed to be the focal point of an outfit or room — not just colorful or unusual, but specifically dominant
+
+─────────────────────────────────────
+SIGNAL CONFLICT RESOLUTION
+─────────────────────────────────────
+When multiple signals point to different vibes, use this priority order:
+1. Brand signal (if strong and unambiguous)
+2. Price signal (for The Atelier specifically)
+3. Material signal (most specific material wins)
+4. Style/aesthetic signal
+5. Category default
+
+Maximum 2 vibes and 2 moods regardless of how many signals are present. If three vibes are equally signaled, pick the two that are most differentiated from each other.
+
 Product Name: ${name || "Unknown"}
 ${vendorHints}Description: ${description || "No description"}
 Price: ${price || "Unknown"}
