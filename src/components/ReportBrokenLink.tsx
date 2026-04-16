@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Flag } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Flag, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,11 +12,10 @@ interface ReportBrokenLinkProps {
 }
 
 export default function ReportBrokenLink({ productId, variant = "icon" }: ReportBrokenLinkProps) {
-  const [submitted, setSubmitted] = useState(false);
+  const [step, setStep] = useState<"idle" | "confirm" | "verifying" | "done">("idle");
   const honeypotRef = useRef<HTMLInputElement>(null);
   const { trigger, cooldown } = useRateLimitedAction(5000);
 
-  // Fetch Turnstile site key from config
   const { data: turnstileSiteKey } = useQuery({
     queryKey: ["turnstile-site-key"],
     queryFn: async () => {
@@ -31,54 +30,94 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
   });
 
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
-  const turnstileTokenRef = useRef<string>("");
+  const turnstileWidgetIdRef = useRef<string | null>(null);
 
-  // Load Turnstile widget if site key is set
+  const submitReport = useCallback(
+    (turnstileToken: string) => {
+      trigger(async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke("report-product", {
+            body: {
+              product_id: productId,
+              turnstile_token: turnstileToken || undefined,
+              honeypot: honeypotRef.current?.value || undefined,
+            },
+          });
+          if (error) throw error;
+          setStep("done");
+          toast.success(data?.message || "Thank you for your report!");
+        } catch {
+          setStep("confirm");
+          toast.error("Failed to submit report. Please try again.");
+        }
+      });
+    },
+    [productId, trigger],
+  );
+
+  // Render visible Turnstile widget when entering the verification step
   useEffect(() => {
-    if (!turnstileSiteKey || !turnstileContainerRef.current) return;
+    if (step !== "verifying" || !turnstileContainerRef.current) return;
 
-    // Load Turnstile script if not already loaded
+    const renderWidget = () => {
+      const turnstile = (window as any).turnstile;
+      if (!turnstile || !turnstileContainerRef.current) return;
+
+      // Reset any previous widget
+      if (turnstileWidgetIdRef.current) {
+        try { turnstile.remove(turnstileWidgetIdRef.current); } catch { /* noop */ }
+      }
+
+      turnstileWidgetIdRef.current = turnstile.render(turnstileContainerRef.current, {
+        sitekey: turnstileSiteKey,
+        callback: (token: string) => submitReport(token),
+        "error-callback": () => {
+          toast.error("Verification failed. Please try again.");
+          setStep("confirm");
+        },
+        size: "normal",
+        theme: "auto",
+      });
+    };
+
+    // Load Turnstile script if not already present
     if (!document.querySelector('script[src*="turnstile"]')) {
       const script = document.createElement("script");
       script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
       script.async = true;
+      script.onload = renderWidget;
       document.head.appendChild(script);
-      script.onload = () => renderWidget();
     } else {
-      renderWidget();
+      // Script loaded but API may not be ready yet
+      const waitForTurnstile = () => {
+        if ((window as any).turnstile) {
+          renderWidget();
+        } else {
+          setTimeout(waitForTurnstile, 100);
+        }
+      };
+      waitForTurnstile();
     }
 
-    function renderWidget() {
-      if (!(window as any).turnstile || !turnstileContainerRef.current) return;
-      (window as any).turnstile.render(turnstileContainerRef.current, {
-        sitekey: turnstileSiteKey,
-        callback: (token: string) => { turnstileTokenRef.current = token; },
-        size: "invisible",
-      });
-    }
-  }, [turnstileSiteKey]);
-
-  const handleReport = () => {
-    trigger(async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke("report-product", {
-          body: {
-            product_id: productId,
-            turnstile_token: turnstileTokenRef.current || undefined,
-            honeypot: honeypotRef.current?.value || undefined,
-          },
-        });
-
-        if (error) throw error;
-        setSubmitted(true);
-        toast.success(data?.message || "Thank you for your report!");
-      } catch {
-        toast.error("Failed to submit report. Please try again.");
+    return () => {
+      if (turnstileWidgetIdRef.current) {
+        try { (window as any).turnstile?.remove(turnstileWidgetIdRef.current); } catch { /* noop */ }
+        turnstileWidgetIdRef.current = null;
       }
-    });
+    };
+  }, [step, turnstileSiteKey, submitReport]);
+
+  // Fallback: if no Turnstile key configured, skip verification
+  const handleConfirmClick = () => {
+    if (turnstileSiteKey) {
+      setStep("verifying");
+    } else {
+      submitReport("");
+    }
   };
 
-  if (submitted) {
+  // — Done state —
+  if (step === "done") {
     return variant === "full" ? (
       <Button variant="ghost" size="sm" disabled className="gap-1.5 text-muted-foreground">
         <Flag className="h-3.5 w-3.5" /> Reported
@@ -91,7 +130,7 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
   }
 
   return (
-    <>
+    <div className="relative inline-flex flex-col items-end gap-1.5">
       {/* Hidden honeypot field */}
       <input
         ref={honeypotRef}
@@ -102,32 +141,76 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
         aria-hidden="true"
         style={{ position: "absolute", left: "-9999px", opacity: 0 }}
       />
-      {/* Invisible Turnstile container */}
-      <div ref={turnstileContainerRef} style={{ display: "none" }} />
 
-      {variant === "full" ? (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleReport}
-          disabled={cooldown}
-          className="gap-1.5 text-muted-foreground hover:text-destructive"
-          title="Report broken link"
-        >
-          <Flag className="h-3.5 w-3.5" /> Report Issue
-        </Button>
-      ) : (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleReport}
-          disabled={cooldown}
-          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-          aria-label="Report broken link"
-        >
-          <Flag className="h-3.5 w-3.5" />
-        </Button>
+      {/* Step 1: Flag icon button */}
+      {step === "idle" && (
+        variant === "full" ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setStep("confirm")}
+            disabled={cooldown}
+            className="gap-1.5 text-muted-foreground hover:text-destructive"
+            title="Report a problem with this product"
+          >
+            <Flag className="h-3.5 w-3.5" /> Report Issue
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setStep("confirm")}
+            disabled={cooldown}
+            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            aria-label="Report a problem with this product"
+          >
+            <Flag className="h-3.5 w-3.5" />
+          </Button>
+        )
       )}
-    </>
+
+      {/* Step 1b: Confirm intent */}
+      {step === "confirm" && (
+        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleConfirmClick}
+            disabled={cooldown}
+            className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 text-xs"
+          >
+            <Flag className="h-3 w-3" />
+            Report Broken Link
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setStep("idle")}
+            className="text-xs text-muted-foreground"
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
+
+      {/* Step 2: Turnstile verification */}
+      {step === "verifying" && (
+        <div className="flex flex-col items-center gap-2 animate-in fade-in duration-200 rounded-lg border bg-card p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span>Quick verification</span>
+          </div>
+          <div ref={turnstileContainerRef} />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setStep("confirm")}
+            className="text-xs text-muted-foreground"
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
