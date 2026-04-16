@@ -38,7 +38,18 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
     staleTime: 1000 * 60 * 10,
   });
 
+  const { data: allBrands = [] } = useQuery({
+    queryKey: ["brands-list"],
+    queryFn: async () => {
+      const { data } = await sb.from("brands").select("id, name");
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
 
+  const vendorName = product.vendor_id
+    ? allBrands.find((b: any) => b.id === product.vendor_id)?.name
+    : null;
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
   // Pick one random tag per taxonomy type, stable across re-renders
