@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useCookieConsentTrigger } from "@/components/CookieConsent";
 
 export default function Footer() {
+  const openCookiePrefs = useCookieConsentTrigger();
+
   return (
     <footer className="border-t bg-background" aria-label="Site footer">
       <div className="container flex flex-col items-center gap-4 py-8 text-center text-sm text-muted-foreground md:flex-row md:justify-between md:text-left">
@@ -18,6 +21,9 @@ export default function Footer() {
           <div className="flex gap-4">
             <Link to="/disclosure" className="hover:text-foreground">Affiliate Disclosure</Link>
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+            <button onClick={openCookiePrefs} className="hover:text-foreground underline-offset-2 hover:underline">
+              Manage Cookies
+            </button>
           </div>
           <p>© {new Date().getFullYear()} Mood & Vibes. All rights reserved.</p>
         </div>

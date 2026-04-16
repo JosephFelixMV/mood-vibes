@@ -55,6 +55,12 @@ export default function CookieConsent() {
   const [analyticsChecked, setAnalyticsChecked] = useState(true);
 
   useEffect(() => {
+    const handleReopen = () => { setVisible(true); setShowDetails(true); };
+    window.addEventListener("open_cookie_consent", handleReopen);
+    return () => window.removeEventListener("open_cookie_consent", handleReopen);
+  }, []);
+
+  useEffect(() => {
     const existing = getStoredConsent();
     if (existing) {
       dispatchConsentEvent(existing.analytics);
