@@ -19,8 +19,10 @@ export default function Brands() {
   const { region } = useRegion();
 
   useSEO({
-    title: "Our Brands",
-    description: "Browse our curated selection of affiliate brand partners on Mood & Vibes.",
+    title: "Our Brand Partners | Mood & Vibes",
+    rawTitle: true,
+    description:
+      "Explore the curated selection of partner brands behind our product picks. Find your mood. Shop the vibe on Mood & Vibes.",
   });
 
   const { data: brands = [], isLoading } = useQuery({

@@ -57,8 +57,11 @@ export default function CategoryLanding() {
   const isFashionCategory = FASHION_SLUGS.includes(slug || "");
 
   useSEO({
-    title: categoryName || "Category",
-    description: category?.description || `Browse ${categoryName} products on Surprise Shopper.`,
+    title: categoryName ? `${categoryName} | Curated Picks | Mood & Vibes` : "Category | Mood & Vibes",
+    rawTitle: true,
+    description: category?.description
+      ? category.description
+      : `Discover curated ${categoryName} products. Find your mood. Shop the vibe on Mood & Vibes.`,
   });
 
   const { data: products = [], isLoading } = useQuery({

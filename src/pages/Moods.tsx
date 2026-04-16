@@ -9,8 +9,10 @@ import { useSEO } from "@/hooks/useSEO";
 
 export default function Moods() {
   useSEO({
-    title: "Shop by Mood",
-    description: "Find products that match your mood on Mood & Vibes.",
+    title: "Shop by Mood | Mood & Vibes",
+    rawTitle: true,
+    description:
+      "Find products that match how you're feeling. Mood-curated collections for every moment. Find your mood. Shop the vibe.",
   });
 
   const { data: moods = [] } = useQuery({

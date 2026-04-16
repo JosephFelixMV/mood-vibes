@@ -8,8 +8,10 @@ import { useSEO } from "@/hooks/useSEO";
 
 export default function Vibes() {
   useSEO({
-    title: "Vibes",
-    description: "Shop by aesthetic and mood on Mood & Vibes.",
+    title: "Shop by Vibe | Aesthetic Finds | Mood & Vibes",
+    rawTitle: true,
+    description:
+      "Discover products curated by aesthetic and vibe — from cozy minimalist to bold maximalist. Find your mood. Shop the vibe.",
   });
 
   const { data: vibes = [] } = useQuery({

@@ -6,12 +6,19 @@ interface SEOProps {
   image?: string;
   url?: string;
   keywords?: string[];
+  /** When true, use title exactly as passed without appending the brand suffix. */
+  rawTitle?: boolean;
 }
 
-export function useSEO({ title, description, image, url, keywords }: SEOProps) {
+export function useSEO({ title, description, image, url, keywords, rawTitle }: SEOProps) {
   useEffect(() => {
-    const suffix = "Surprise Shopper";
-    document.title = title ? `${title} | ${suffix}` : suffix;
+    const suffix = "Mood & Vibes";
+    const fullTitle = title
+      ? rawTitle || title.includes(suffix)
+        ? title
+        : `${title} | ${suffix}`
+      : suffix;
+    document.title = fullTitle;
 
     const setMeta = (attr: string, key: string, content: string) => {
       let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
@@ -29,8 +36,8 @@ export function useSEO({ title, description, image, url, keywords }: SEOProps) {
       setMeta("name", "twitter:description", description);
     }
     if (title) {
-      setMeta("property", "og:title", `${title} | ${suffix}`);
-      setMeta("name", "twitter:title", `${title} | ${suffix}`);
+      setMeta("property", "og:title", fullTitle);
+      setMeta("name", "twitter:title", fullTitle);
     }
     if (image) {
       setMeta("property", "og:image", image);
@@ -42,5 +49,5 @@ export function useSEO({ title, description, image, url, keywords }: SEOProps) {
     if (keywords && keywords.length > 0) {
       setMeta("name", "keywords", keywords.join(", "));
     }
-  }, [title, description, image, url, keywords]);
+  }, [title, description, image, url, keywords, rawTitle]);
 }

@@ -84,9 +84,13 @@ export default function MoodLanding() {
   });
 
 
+  const moodProductCount = filteredProducts.length;
   useSEO({
-    title: mood?.name || "Mood",
-    description: mood?.description || `Shop ${mood?.name || "mood"} products on Mood & Vibes.`,
+    title: mood ? `Shop ${mood.name} | Products for Every Mood | Mood & Vibes` : "Mood | Mood & Vibes",
+    rawTitle: true,
+    description: mood?.description
+      ? mood.description
+      : `${moodProductCount} products curated for a ${mood?.name ?? ""} mood. Find your mood. Shop the vibe on Mood & Vibes.`,
   });
 
   if (!mood) {

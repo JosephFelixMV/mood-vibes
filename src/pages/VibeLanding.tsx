@@ -29,8 +29,11 @@ export default function VibeLanding() {
   const vibeName = vibe?.name || "";
 
   useSEO({
-    title: vibeName || "Vibe",
-    description: vibe?.description || `Browse ${vibeName} products on Surprise Shopper.`,
+    title: vibeName ? `${vibeName} Aesthetic | Curated Finds | Mood & Vibes` : "Vibe | Mood & Vibes",
+    rawTitle: true,
+    description: vibe?.description
+      ? vibe.description
+      : `Browse ${vibeName} products curated by aesthetic. Find your mood. Shop the vibe on Mood & Vibes.`,
   });
 
   const { data: products = [], isLoading } = useQuery({

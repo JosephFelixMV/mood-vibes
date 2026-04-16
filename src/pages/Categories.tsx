@@ -9,8 +9,10 @@ import { CategoryIcon } from "@/components/CategoryIcon";
 
 export default function Categories() {
   useSEO({
-    title: "Categories",
-    description: "Browse products by category on Mood & Vibes.",
+    title: "Shop by Category | Mood & Vibes",
+    rawTitle: true,
+    description:
+      "Browse curated product categories organized by lifestyle — home, fashion, wellness, and more. Find your mood. Shop the vibe.",
   });
 
   const { data: categories = [] } = useQuery({

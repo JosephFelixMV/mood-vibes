@@ -77,11 +77,6 @@ export default function Products() {
   const categoryName = coreCategories.find((c) => c.slug === categorySlug)?.name || "";
   const vibeName = vibeCategories.find((c) => c.slug === vibeSlug)?.name || "";
 
-  useSEO({
-    title: categoryName || vibeName || "All Products",
-    description: `Browse ${categoryName || vibeName || "all products"} on Mood & Vibes.`,
-  });
-
   const [sort, setSort] = useState<"newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc">("newest");
 
   const moodSlug = searchParams.get("mood") || "";
@@ -106,6 +101,26 @@ export default function Products() {
   const totalCount = result?.count ?? 0;
   const regionProducts = filterByRegion(products, region);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  // SEO — filter-aware, brand-free metadata
+  let seoTitle = `Shop All Products | ${totalCount.toLocaleString()} Curated Finds | Mood & Vibes`;
+  let seoDescription = `Browse ${totalCount.toLocaleString()} curated products organized by mood, vibe, and lifestyle category. Find your mood. Shop the vibe.`;
+  if (categoryName) {
+    seoTitle = `${categoryName} Products | Mood & Vibes`;
+    seoDescription = `Browse curated ${categoryName} products. Find your mood. Shop the vibe on Mood & Vibes.`;
+  } else if (vibeName) {
+    seoTitle = `${vibeName} Finds | Mood & Vibes`;
+    seoDescription = `Browse ${vibeName} aesthetic finds curated by vibe. Find your mood. Shop the vibe on Mood & Vibes.`;
+  } else if (moodName) {
+    seoTitle = `${moodName} Mood Picks | Mood & Vibes`;
+    seoDescription = `Products curated for a ${moodName} mood. Find your mood. Shop the vibe on Mood & Vibes.`;
+  }
+
+  useSEO({
+    title: seoTitle,
+    rawTitle: true,
+    description: seoDescription,
+  });
 
   const availableVendors = useMemo(() => {
     return brandsList
