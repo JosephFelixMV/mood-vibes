@@ -76,11 +76,8 @@ export default function BulkUpload() {
         const parsedPrice = typeof data.price === "string"
           ? parseFloat(data.price.replace(/[^0-9.]/g, "")) || 0
           : (data.price || 0);
-
-        if (!parsedPrice || parsedPrice < 5) {
-          uploadResults.push({ fileName: file.name, success: false, productName: data.name, error: "Price must be at least $5.00" });
-          continue;
-        }
+        // Price below $5 is allowed for drafts — the product just can't be published
+        // until an admin sets a valid price. No rejection here.
 
         // Auto-match vendor from source_url
         let vendorId: string | null = null;
