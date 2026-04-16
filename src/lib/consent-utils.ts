@@ -45,7 +45,7 @@ export function loadGoogleAnalytics(measurementId: string) {
   w.dataLayer = w.dataLayer || [];
   w.gtag = w.gtag || function gtag(...args: any[]) { w.dataLayer.push(args); };
   w.gtag("js", new Date());
-  w.gtag("config", measurementId, { anonymize_ip: true });
+  w.gtag("config", measurementId);
 }
 
 /**
