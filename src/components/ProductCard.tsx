@@ -263,6 +263,9 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
             <ReportBrokenLink productId={product.id} />
             <ShareButton product={product} />
           </div>
+          {vendorName && (
+            <span className="mt-0.5 block text-[10px] text-muted-foreground">via {vendorName}</span>
+          )}
         </div>
       </motion.div>
 
