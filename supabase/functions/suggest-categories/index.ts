@@ -117,12 +117,32 @@ ${moodList}
 KEYWORD RULES — this is the most important part:
 1. NEVER return broad category terms as keywords (e.g. "men's watch", "luxury watch", "women's top"). These are category names, not tags.
 2. NEVER return generic specs as keywords (e.g. "stainless steel", "43mm", "water resistant"). These belong in the Specifications field, not keywords.
-3. ALWAYS return long-tail, intent-driven keywords that describe:
-   - Style / aesthetic (e.g. "bauhaus minimalist watch", "oversized boyfriend fit top")
-   - Material + form (e.g. "brushed titanium case watch", "heavyweight french terry hoodie")
-   - Occasion + intent (e.g. "anniversary gift watch for him", "workwear blazer for petite women")
-   - Vibe / search phrase (e.g. "quiet luxury accessories", "old money aesthetic watch")
-4. Return 6–8 keywords. Each should be 2–5 words. Think: what would someone actually type into Google to find this exact product?
+3. Generate keywords across FIVE dimensions. Cover as many as genuinely apply:
+
+   A) Product type – literal item descriptors with style/material qualifiers:
+      e.g. "bauhaus minimalist watch", "heavyweight french terry hoodie", "brushed titanium case watch"
+
+   B) Mood + Vibe – aesthetic and feeling keywords:
+      e.g. "quiet luxury accessories", "old money aesthetic watch", "cottagecore kitchen decor"
+
+   C) Recipient persona – who the product suits:
+      - Gender signals: "gift for him", "gift for her", "gender neutral gift"
+      - Life stage: "gift for new mom", "gift for teen girl", "gift for dad"
+      - Relationship: "gift for partner", "gift for best friend", "gift for coworker"
+
+   D) Personality & lifestyle – defining interests of the ideal buyer:
+      e.g. "for fitness lovers", "homebody essentials", "gift for bookworm",
+      "wellness obsessed", "outdoorsy gift", "for minimalists", "plant parent gift"
+
+   E) Occasion & intent – when and why someone buys it:
+      e.g. "birthday gift for her", "treat yourself", "self care gift",
+      "housewarming gift", "mothers day gift", "valentines day for him",
+      "graduation gift", "just because gift", "new year reset"
+
+   Optional — Age bracket (only when clearly applicable from product context):
+      e.g. "gift for her in her 20s", "young professional essentials", "40s style upgrade"
+
+4. Return 8–12 keywords. Each should be 2–6 words. Think: what would someone actually type into Google to find this exact product or gift?
 5. For fashion products, also include seasonal/warmth signals where applicable:
    - Materials like "wool", "cashmere", "puffer", "fleece" → include them in keyword phrases, not standalone
    - e.g. "chunky wool turtleneck sweater", "lightweight linen summer blouse"
