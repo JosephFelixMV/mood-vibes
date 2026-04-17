@@ -10,13 +10,20 @@ export default function LaunchWelcomeModal() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-		if (loading) return;
-		  const alreadySeen = localStorage.getItem(STORAGE_KEY);
-		  const forceShow = new URLSearchParams(window.location.search).has("welcome_preview");
+    if (loading) return;
+    const params = new URLSearchParams(window.location.search);
+    const forceShow = params.has("welcome_preview");
+    const reset = params.has("welcome_reset");
 
-	  if (!alreadySeen && (detected === "US" || forceShow)) {
-		const t = setTimeout(() => setOpen(true), 1200);
-		return () => clearTimeout(t);
+    if (reset) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    const alreadySeen = localStorage.getItem(STORAGE_KEY);
+
+    if (!alreadySeen || forceShow) {
+      const t = setTimeout(() => setOpen(true), 1200);
+      return () => clearTimeout(t);
     }
   }, [loading, detected]);
 
