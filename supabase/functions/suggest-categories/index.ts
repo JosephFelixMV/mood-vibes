@@ -6,6 +6,39 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function callAnthropic(opts: {
+  apiKey: string;
+  system?: string;
+  user: string;
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+}): Promise<string> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": opts.apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: opts.model ?? "claude-haiku-4-5",
+      max_tokens: opts.maxTokens ?? 1024,
+      temperature: opts.temperature ?? 0.3,
+      ...(opts.system ? { system: opts.system } : {}),
+      messages: [{ role: "user", content: opts.user }],
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Anthropic API error ${res.status}: ${errText}`);
+  }
+  const data = await res.json();
+  const text = data?.content?.[0]?.text;
+  if (typeof text !== "string") throw new Error("No text in Anthropic response");
+  return text;
+}
+
 async function loadCategories(sb: any) {
   const { data } = await sb
     .from("categories")
