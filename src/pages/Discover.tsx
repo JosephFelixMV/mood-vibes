@@ -123,23 +123,20 @@ export default function Discover() {
     fireGaEvent("ai_discover_search", { prompt: trimmed });
 
     try {
-      const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/discover-products`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ prompt: trimmed }),
-        }
+      const { data, error: invokeError } = await supabase.functions.invoke(
+        "discover-products",
+        { body: { prompt: trimmed } }
       );
 
-      const data = await resp.json();
+      if (invokeError) {
+        setError(invokeError.message || "Something went wrong. Please try again.");
+        fireGaEvent("ai_discover_error", { prompt: trimmed, status: "invoke_error" });
+        return;
+      }
 
-      if (!resp.ok) {
-        setError(data.error || "Something went wrong. Please try again.");
-        fireGaEvent("ai_discover_error", { prompt: trimmed, status: String(resp.status) });
+      if (data?.error) {
+        setError(data.error);
+        fireGaEvent("ai_discover_error", { prompt: trimmed, status: "fn_error" });
         return;
       }
 
