@@ -8,7 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { getProducts, getDailyPick, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
-import LaunchWelcomeModal from "@/components/LaunchWelcomeModal";
+
 
 function useCountdownToMidnightUTC() {
   const getRemaining = () => {
