@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductDrawer from "@/components/ProductDrawer";
+import ReportBrokenLink from "@/components/ReportBrokenLink";
 import fallbackImage from "@/assets/fallback-product.png";
 
 const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
@@ -109,9 +110,14 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
           <div onClick={(e) => e.stopPropagation()}>
             <ExternalCTA href={pick.affiliate_url} label={ctaLabel || "Discover Brand"} size="sm" fullWidth className="mt-2.5" />
           </div>
-          {vendorName && (
-            <span className="mt-1 block text-[10px] text-muted-foreground">via {vendorName}</span>
-          )}
+          <div className="mt-1 flex items-center justify-between gap-2">
+            {vendorName ? (
+              <span className="text-[10px] text-muted-foreground">via {vendorName}</span>
+            ) : <span />}
+            <div onClick={(e) => e.stopPropagation()}>
+              <ReportBrokenLink productId={pick.id} />
+            </div>
+          </div>
         </div>
       </div>
 

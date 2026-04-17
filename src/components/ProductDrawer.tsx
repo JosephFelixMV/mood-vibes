@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ExternalCTA from "@/components/ExternalCTA";
+import ReportBrokenLink from "@/components/ReportBrokenLink";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -244,6 +245,10 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
               </div>
 
               <ExternalCTA href={product.affiliate_url} label={ctaLabel} size="lg" fullWidth />
+
+              <div className="flex justify-end">
+                <ReportBrokenLink productId={product.id} variant="full" />
+              </div>
 
               {/* Description */}
               {product.description && (
