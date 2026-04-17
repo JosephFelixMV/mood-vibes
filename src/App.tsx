@@ -18,6 +18,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Admin from "./pages/Admin";
 import Disclosure from "./pages/Disclosure";
 import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import CategoryLanding from "./pages/CategoryLanding";
 import Discover from "./pages/Discover";
 import VibeLanding from "./pages/VibeLanding";
@@ -73,6 +74,7 @@ function AppShell() {
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/disclosure" element={<Disclosure />} />
                 <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

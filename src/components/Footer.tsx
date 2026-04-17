@@ -21,6 +21,7 @@ export default function Footer() {
           <div className="flex gap-4">
             <Link to="/disclosure" className="hover:text-foreground">Affiliate Disclosure</Link>
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-foreground">Terms of Use</Link>
             <button onClick={openCookiePrefs} className="hover:text-foreground underline-offset-2 hover:underline">
               Manage Cookies
             </button>

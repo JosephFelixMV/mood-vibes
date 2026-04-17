@@ -2,42 +2,85 @@ import { useSEO } from "@/hooks/useSEO";
 
 export default function Privacy() {
   useSEO({
-    title: "Privacy Policy",
-    description: "Privacy and data notice for Mood & Vibes.",
+    title: "Privacy & Data Notice",
+    description: "Privacy and data notice for Mood & Vibes — global privacy-by-design practices.",
   });
 
   return (
     <div className="container max-w-3xl py-12">
-      <h1 className="mb-6 font-heading text-3xl font-bold tracking-tight md:text-4xl">
-        Privacy &amp; Data Notice
+      <h1 className="mb-2 font-heading text-3xl font-bold tracking-tight md:text-4xl">
+        Privacy &amp; Data Notice (Global)
       </h1>
+      <p className="mb-8 text-sm text-muted-foreground">Effective Date: April 17, 2026</p>
 
-      <div className="space-y-5 text-muted-foreground leading-relaxed">
-        <p>
-          This website may use cookies and third-party analytics tools (such as
-          Google Analytics) to understand how visitors use our site. No
-          personally identifiable information is collected by Mood & Vibes
-          directly.
-        </p>
+      <div className="space-y-8 text-muted-foreground leading-relaxed">
+        <section className="space-y-3">
+          <h2 className="font-heading text-xl font-semibold text-foreground">
+            1. Our Commitment to Data Minimization
+          </h2>
+          <p>
+            Mood &amp; Vibes operates on a "privacy-by-design" principle. We do not directly
+            collect, store, or sell personal identifiers such as your name, email address, or
+            phone number through the public-facing areas of this website.
+          </p>
+        </section>
 
-        <p>
-          Clicking affiliate links will take you to third-party websites, which
-          have their own privacy policies. We are not responsible for the privacy
-          practices of those sites.
-        </p>
+        <section className="space-y-3">
+          <h2 className="font-heading text-xl font-semibold text-foreground">
+            2. Information We Process
+          </h2>
+          <ul className="list-disc space-y-2 pl-5">
+            <li>
+              <span className="font-medium text-foreground">Localization Data:</span> We process
+              your IP address to determine your approximate geographic region. This ensures we
+              show you relevant affiliate links and products for your specific market (Canada,
+              USA, or International). This data is processed in real-time and not stored
+              permanently.
+            </li>
+            <li>
+              <span className="font-medium text-foreground">Analytics:</span> We use third-party
+              tools (such as Google Analytics 4) to analyze traffic patterns. This data is
+              anonymized and aggregated.
+            </li>
+            <li>
+              <span className="font-medium text-foreground">Cookies:</span> We use cookies to
+              remember your region and track referral commissions. You may manage these via our
+              Cookie Consent banner.
+            </li>
+          </ul>
+        </section>
 
-        <p>
-          This site complies with Canada's Personal Information Protection and
-          Electronic Documents Act (PIPEDA).
-        </p>
+        <section className="space-y-3">
+          <h2 className="font-heading text-xl font-semibold text-foreground">
+            Regional Privacy Rights
+          </h2>
+          <p>
+            <span className="font-medium text-foreground">Canada:</span> This site complies with
+            the Personal Information Protection and Electronic Documents Act (PIPEDA) and
+            Quebec's Law 25. We do not deploy non-essential cookies until you provide explicit
+            consent.
+          </p>
+          <p>
+            <span className="font-medium text-foreground">USA:</span> This site complies with US
+            federal and state standards, including the CCPA/CPRA. You have the right to know
+            what categories of data we process. We do not sell user data.
+          </p>
+        </section>
 
-        <p>
-          If you have questions about our privacy practices, please contact us at{" "}
-          <span className="font-medium text-foreground">
-            hello@moodandvibes.com
-          </span>
-          .
-        </p>
+        <section className="space-y-3">
+          <h2 className="font-heading text-xl font-semibold text-foreground">
+            Contact Our Privacy Officer
+          </h2>
+          <p>
+            Contact:{" "}
+            <a
+              href="mailto:Contact@mood-and-vibes.com"
+              className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
+            >
+              Contact@mood-and-vibes.com
+            </a>
+          </p>
+        </section>
       </div>
     </div>
   );
