@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";

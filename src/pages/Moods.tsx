@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getCategories } from "@/lib/supabase-queries";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/useSEO";

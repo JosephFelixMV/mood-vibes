@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import { Link } from "react-router-dom";

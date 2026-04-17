@@ -17,7 +17,7 @@ import {
   getCategories,
   formatPrice,
 } from "@/lib/supabase-queries";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 import { stripHtml, truncateToMeta } from "@/lib/brand-utils";

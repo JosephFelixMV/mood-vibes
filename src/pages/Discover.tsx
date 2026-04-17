@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import ProductCard from "@/components/ProductCard";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { useSEO } from "@/hooks/useSEO";
 import type { Product } from "@/lib/supabase-queries";
 
