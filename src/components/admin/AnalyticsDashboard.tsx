@@ -12,16 +12,12 @@ type SortOption = "views-desc" | "views-asc" | "clicks-desc" | "clicks-asc" | "p
 
 function getDefaultRange() {
   const now = new Date();
-  // Go back 5 months from current month
-  let fromMonth = now.getMonth() - 5;
-  let fromYear = now.getFullYear();
-  if (fromMonth < 0) {
-    fromMonth += 12;
-    fromYear -= 1;
-  }
+  // Default to last 30 days
+  const from = new Date(now);
+  from.setDate(from.getDate() - 30);
   return {
-    fromYear,
-    fromMonth,
+    fromYear: from.getFullYear(),
+    fromMonth: from.getMonth(),
     toYear: now.getFullYear(),
     toMonth: now.getMonth(),
   };
