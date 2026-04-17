@@ -8,16 +8,16 @@ interface SEOProps {
   keywords?: string[];
   /** When true, use title exactly as passed without appending the brand suffix. */
   rawTitle?: boolean;
+  /** Pass product price to enable JSON-LD Product schema (no brand, affiliate-safe) */
+  price?: number | null;
+  /** Pass product name separately for JSON-LD schema name field */
+  productName?: string;
 }
 
-export function useSEO({ title, description, image, url, keywords, rawTitle }: SEOProps) {
+export function useSEO({ title, description, image, url, keywords, rawTitle, price, productName }: SEOProps) {
   useEffect(() => {
     const suffix = "Mood & Vibes";
-    const fullTitle = title
-      ? rawTitle || title.includes(suffix)
-        ? title
-        : `${title} | ${suffix}`
-      : suffix;
+    const fullTitle = title ? (rawTitle || title.includes(suffix) ? title : `${title} | ${suffix}`) : suffix;
     document.title = fullTitle;
 
     const setMeta = (attr: string, key: string, content: string) => {
@@ -49,5 +49,39 @@ export function useSEO({ title, description, image, url, keywords, rawTitle }: S
     if (keywords && keywords.length > 0) {
       setMeta("name", "keywords", keywords.join(", "));
     }
-  }, [title, description, image, url, keywords, rawTitle]);
+
+    // JSON-LD Product schema — no brand field, affiliate-safe
+    const existingSchema = document.getElementById("seo-product-jsonld");
+    if (existingSchema) existingSchema.remove();
+
+    if (productName) {
+      const schema: Record<string, unknown> = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: productName,
+        ...(description && { description }),
+        ...(image && { image }),
+        ...(keywords && keywords.length > 0 && { keywords: keywords.join(", ") }),
+        ...(url && {
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "USD",
+            ...(price != null && { price: price.toFixed(2) }),
+            availability: "https://schema.org/InStock",
+            url,
+          },
+        }),
+      };
+
+      const script = document.createElement("script");
+      script.id = "seo-product-jsonld";
+      script.type = "application/ld+json";
+      script.text = JSON.stringify(schema);
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      document.getElementById("seo-product-jsonld")?.remove();
+    };
+  }, [title, description, image, url, keywords, rawTitle, price, productName]);
 }

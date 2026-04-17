@@ -73,9 +73,7 @@ export default function ProductDetail() {
 
   const primaryCategory = product?.category?.split(",")[0]?.trim() || "";
   const primaryVibe = product?.vibe_category?.split(",")[0]?.trim() || "";
-  const seoTitle = product
-    ? `${product.name} | ${primaryCategory || "Curated Pick"} | Mood & Vibes`
-    : "Mood & Vibes";
+  const seoTitle = product ? `${product.name} | ${primaryCategory || "Curated Pick"} | Mood & Vibes` : "Mood & Vibes";
   const seoDescription = product
     ? product.description
       ? truncateToMeta(stripHtml(product.description), 155)
@@ -94,6 +92,8 @@ export default function ProductDetail() {
     image: product?.image_url || undefined,
     url: product ? `${window.location.origin}/product/${(product as any).slug || product.id}` : undefined,
     keywords: productKeywords.length > 0 ? productKeywords : undefined,
+    productName: product?.name, // 👈 add this
+    price: product?.price ?? null, // 👈 add this
   });
 
   // Images only (no video in gallery)
@@ -131,9 +131,11 @@ export default function ProductDetail() {
     if (product) {
       trackProductClick(product.id);
       // Fire async click-time validation (non-blocking)
-      supabase.functions.invoke("validate-click", {
-        body: { product_id: product.id },
-      }).catch(() => {});
+      supabase.functions
+        .invoke("validate-click", {
+          body: { product_id: product.id },
+        })
+        .catch(() => {});
     }
   };
 
@@ -172,7 +174,9 @@ export default function ProductDetail() {
                     sizes="(min-width: 768px) 50vw, 100vw"
                     alt={product.name}
                     className="sharp-image h-full w-full object-contain"
-                    onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = fallbackImage;
+                    }}
                   />
                   {allImages.length > 1 && (
                     <>
@@ -201,7 +205,7 @@ export default function ProductDetail() {
             {allImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto p-3">
                 {allImages.map((url, i) => (
-                    <button
+                  <button
                     key={i}
                     onClick={() => setCurrentImage(i)}
                     aria-label={`View image ${i + 1} of ${allImages.length}`}
@@ -210,7 +214,14 @@ export default function ProductDetail() {
                       i === currentImage ? "border-primary" : "border-transparent"
                     }`}
                   >
-                    <img src={url} alt={`${product.name} ${i + 1}`} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }} />
+                    <img
+                      src={url}
+                      alt={`${product.name} ${i + 1}`}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = fallbackImage;
+                      }}
+                    />
                   </button>
                 ))}
               </div>
@@ -237,7 +248,14 @@ export default function ProductDetail() {
                 );
               })}
               {product.vibe_category &&
-                [...new Set(product.vibe_category.split(",").map((v) => v.trim()).filter(Boolean))].map((trimmed) => {
+                [
+                  ...new Set(
+                    product.vibe_category
+                      .split(",")
+                      .map((v) => v.trim())
+                      .filter(Boolean),
+                  ),
+                ].map((trimmed) => {
                   const cat = categorySlugMap[trimmed];
                   const to = cat ? `/vibes/${cat.slug}` : "#";
                   return (
@@ -249,7 +267,14 @@ export default function ProductDetail() {
                   );
                 })}
               {product.mood &&
-                [...new Set(product.mood.split(",").map((m) => m.trim()).filter(Boolean))].map((trimmed) => {
+                [
+                  ...new Set(
+                    product.mood
+                      .split(",")
+                      .map((m) => m.trim())
+                      .filter(Boolean),
+                  ),
+                ].map((trimmed) => {
                   const cat = categorySlugMap[trimmed];
                   const to = cat ? `/moods/${cat.slug}` : "#";
                   return (
@@ -264,10 +289,10 @@ export default function ProductDetail() {
             <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
             {product.company_name && <p className="text-sm text-muted-foreground">by {product.company_name}</p>}
             <div>
-              <span className="font-heading text-3xl font-bold text-primary">
-                {formatPrice(product.price)}
-              </span>
-              <p className="text-xs text-muted-foreground">{product.price_below_msrp ? "Seller often offers deals below MSRP" : "Price at retailer may vary"}</p>
+              <span className="font-heading text-3xl font-bold text-primary">{formatPrice(product.price)}</span>
+              <p className="text-xs text-muted-foreground">
+                {product.price_below_msrp ? "Seller often offers deals below MSRP" : "Price at retailer may vary"}
+              </p>
             </div>
 
             <div className="flex flex-wrap gap-3 pt-2">
