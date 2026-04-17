@@ -42,9 +42,12 @@ export default function Disclosure() {
         <p>
           If you have any questions about our affiliate relationships, please
           contact us at{" "}
-          <span className="font-medium text-foreground">
-            hello@moodandvibes.com
-          </span>
+          <a
+            href="mailto:Contact@mood-and-vibes.com"
+            className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
+          >
+            Contact@mood-and-vibes.com
+          </a>
           .
         </p>
       </div>
