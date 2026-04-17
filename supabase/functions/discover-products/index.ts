@@ -134,10 +134,10 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    if (!lovableApiKey) {
+    if (!anthropicApiKey) {
       return new Response(JSON.stringify({ error: "AI service not configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -316,26 +316,17 @@ RULES:
 PRODUCT CATALOG:
 ${catalogText}`;
 
-    // Call AI Gateway
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Find products matching: ${prompt}` },
-        ],
-        max_tokens: 1000,
-      }),
+    // Call Anthropic
+    const aiResult = await callAnthropic({
+      apiKey: anthropicApiKey,
+      system: systemPrompt,
+      user: `Find products matching: ${prompt}`,
+      maxTokens: 1000,
     });
 
-    if (!aiResponse.ok) {
-      const status = aiResponse.status;
-      console.error("AI gateway error:", status, await aiResponse.text());
+    if (!aiResult.ok) {
+      const status = aiResult.status;
+      console.error("Anthropic error:", status, aiResult.error);
 
       // Log failed request
       await supabase.from("ai_requests").insert({
@@ -360,8 +351,7 @@ ${catalogText}`;
       });
     }
 
-    const aiData = await aiResponse.json();
-    const rawContent = aiData.choices?.[0]?.message?.content || "[]";
+    const rawContent = aiResult.text || "[]";
 
     // Parse AI response — extract JSON array
     let productIds: string[] = [];
