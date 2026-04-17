@@ -285,12 +285,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             : prev.specifications,
           is_active: typeof data.is_active === "boolean" ? data.is_active : prev.is_active,
         }));
-        toast.success("Template loaded — suggesting categories...");
-        const productName = data.name || "";
-        const desc = data.description || "";
-        if (productName) {
-          suggestCategories(productName, desc, parsedPrice);
-        }
+        toast.success("Template loaded — run AI suggestions manually when ready");
       } catch {
         toast.error("Invalid JSON file");
       }

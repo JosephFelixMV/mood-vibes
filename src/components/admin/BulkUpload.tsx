@@ -121,25 +121,8 @@ export default function BulkUpload() {
 
         if (error) throw error;
 
-        // AI category suggestion — update product with suggested categories
-        if (inserted) {
-          try {
-            const matchedVendorName = vendorId ? brandsList.find((b: any) => b.id === vendorId)?.name : undefined;
-            const { data: aiData } = await supabase.functions.invoke("suggest-categories", {
-              body: { name: data.name.trim(), description: data.description || "", price: parsedPrice, source_url: sourceUrl, vendor_name: matchedVendorName, company_name: matchedVendorName },
-            });
-            if (aiData) {
-              const updates: { category?: string; vibe_category?: string } = {};
-              if (aiData.core?.length) updates.category = stringifyTaxonomyValues(dedupeTaxonomyValues(aiData.core));
-              if (aiData.vibes?.length) updates.vibe_category = stringifyTaxonomyValues(dedupeTaxonomyValues(aiData.vibes));
-              if (Object.keys(updates).length > 0) {
-                await supabase.from("products").update(updates).eq("id", inserted.id);
-              }
-            }
-          } catch {
-            // Silently continue — categories can be set manually
-          }
-        }
+        // AI category suggestion is intentionally NOT auto-run on bulk upload.
+        // Run it manually per product from the admin panel before publishing.
 
         // Insert additional images
         const images = Array.isArray(data.additional_images)
