@@ -169,44 +169,106 @@ VIBE DEFINITIONS
 
 Assign vibes based on these definitions. Never assign a vibe that does not match. When in doubt between two, pick the stronger match only.
 
-THE ATELIER
+The Atelier
 Luxury, artisan, or investment pieces. Designer brands, handcrafted items. Signals connoisseurship and craftsmanship. The choice of someone who buys fewer things but better things.
 
-OLD MONEY
-Quiet luxury. Understated, classic, heritage materials. No logos, no flash. Timeless over trendy. Linen, cashmere, neutral palette. The aesthetic of wealth that does not need to announce itself.
+Quiet Luxury
+Understated, classic, heritage materials. No logos, no flash. Timeless over trendy. Linen, cashmere, neutral palette. The aesthetic of wealth that does not need to announce itself.
 
-EFFORTLESS CHIC
+Minimal and Casual
 Elevated but wearable. Looks put-together without trying. Relaxed silhouettes in quality fabrics. Accessible luxury. The French-girl aesthetic applied to any category.
 
-STREET STYLE
+Drip & Shine
 Trend-forward, urban, culturally fluent. Do NOT treat this as a low-price vibe — street style spans all price points. A $600 hype drop and a $40 vintage find both qualify. The signal is cultural currency, not cost. Hip-hop, pop, skate, and sneaker culture all live here.
 
-SPORTY GIRL
+Get Sporty
 Performance meets lifestyle. Activewear worn beyond the gym. Elevated athletic aesthetic. Clean, functional, aspirational. The product looks as good in a coffee shop as in a workout.
 
-OFF DUTY
+Off-Duty Model
 Between sporty and chic. Elevated basics, comfortable but styled. The outfit — or object — for someone who is not trying but still looks good. Model-off-duty energy.
 
-COZY HOMEBODY
+Stay-In Cinema
 Comfort-first. Products for staying in intentionally. Soft textures, warm tones, enveloping materials. Candles, knit blankets, loungewear, weighted everything. The vibe of a Sunday that never ends.
 
-MAIN CHARACTER
-Bold, statement-making, conversation-starting. The thing people notice first. Dressing — or decorating — for the plot. More theatrical than Aura Farming, less chaotic than Hot Mess.
+Dress to Impress
+Bold, statement-making, conversation-starting. The thing people notice first. Dressing — or decorating — for the plot. More theatrical than Aura Farming, less chaotic than Hot Mess Express.
 
-HOT MESS
-Unapologetically chaotic. Clashing colours, mixed prints, maximalist layering — worn or displayed with full confidence. The aesthetic is the point. Distinguished from Eccentric Maximalist by being more spontaneous than deliberate.
+Hot Mess Express
+Unapologetically chaotic. Clashing colours, mixed prints, maximalist layering — worn or displayed with full confidence. The aesthetic is the point. Distinguished from Eclectic Maximalist by being more spontaneous than deliberate.
 
-ECCENTRIC MAXIMALIST
-Theatrical and deliberate. Heavy embellishment, sculptural silhouettes, unexpected material combinations. High-fashion chaos with clear intentionality and craft. Think Comme des Garçons or Iris Apfel. Distinguished from Hot Mess by intentionality.
+Eclectic Maximalist
+Theatrical and deliberate. Heavy embellishment, sculptural silhouettes, unexpected material combinations. High-fashion chaos with clear intentionality and craft. Think Comme des Garçons or Iris Apfel. Distinguished from Hot Mess Express by intentionality.
 
-DOPAMINE HITS
+Dopamine Hits
 Joy through color and form. The product exists to create an immediate emotional lift for its owner regardless of audience. A saturated cobalt vase, a cherry red Dutch oven, a sunshine yellow notebook. The color IS the value proposition. Applies equally to fashion, home, kitchen, and stationery. Inward-facing joy — not about how others see you.
 
-AURA FARMING
-Attention through mystique rather than volume. Cool, modern, slightly untouchable presence. The person — or space — that everyone notices but cannot explain why. Pop star and music video energy off-stage. Often minimal or monochrome with one unexpected element. Outward-facing and social — about the signal projected, not the feeling created. Distinct from Main Character which is dramatic; Aura Farming is magnetic.
+Aura Farming
+Attention through mystique rather than volume. Cool, modern, slightly untouchable presence. The person — or space — that everyone notices but cannot explain why. Pop star and music video energy off-stage. Often minimal or monochrome with one unexpected element. Outward-facing and social — about the signal projected, not the feeling created. Distinct from Dress to Impress which is dramatic; Aura Farming is magnetic.
 
-SOFT ACADEMIA
+Soft Academia
 The romance of intellectual and creative life. Curiosity, craft, and the feeling of a well-loved study or studio. Tweed, plaid, leather accessories, warm lighting, books, stationery, wooden desk objects, loose-leaf tea. NOT limited to fashion — this is one of the most cross-category vibes on the platform. A leather notebook, a reading lamp, a set of art pencils, or a vintage globe all qualify.
+
+Ballin' on a Budget
+Great style and finds at accessible price points. Savvy shopping, high-low mixing, deals that look expensive. The flex is getting it for less.
+
+Bloom & Glow
+Fresh, feminine, nature-inspired. Florals, soft pastels, skincare rituals, garden aesthetics. Spring energy all year round. Products that feel alive and nurturing.
+
+Build & Maintain
+Practical ownership and upkeep. Tools, home maintenance, DIY projects, organised garages and workshops. The satisfaction of fixing and building things yourself.
+
+Coastal Cool
+Relaxed beach-town aesthetic without being literal. Linen, washed blues, natural textures, sun-faded palette. Laid-back but considered. More surf town than resort wear.
+
+Content Creator Kit
+Products for building a personal brand, studio setup, or online presence. Ring lights, desk setups, cameras, microphones, aesthetic backgrounds. Creating as a lifestyle.
+
+Corporate Core
+Sharp, professional, put-together. Office-ready fashion and workspace products. The aesthetic of someone who takes their career seriously. Quiet ambition.
+
+Going Out Era
+Dressed for the night out. Sequins, heels, statement bags, elevated going-out looks. The ritual of getting ready and the products that make it happen.
+
+In My Zone
+Deep focus and flow state. Noise-cancelling headphones, productivity setups, ambient tools. Products for people who do their best work alone.
+
+Jet Set
+Travel as a lifestyle aesthetic. Luggage, passport holders, travel accessories, airport-ready fashion. The look of someone who is always on the way somewhere interesting.
+
+Kitchen Flex
+Elevated cooking and food culture. Statement cookware, premium ingredients, kitchen gadgets, hosting setups. Cooking as self-expression and social currency.
+
+Little Ones
+Products for babies, toddlers, and young children. Gifting for new parents, nursery aesthetics, developmental toys. The joy and chaos of early childhood.
+
+Organized Life
+Systems, storage, and the satisfaction of everything in its place. Label makers, drawer organisers, planners, clean aesthetic storage solutions.
+
+Pet Parent Life
+Products for people whose pets are family. Elevated pet accessories, treats, beds, toys. The aesthetic of a home where animals are very welcome.
+
+Pure Routine
+Skincare, wellness, and self-care rituals. The products that make up a morning or evening routine. Consistency and the small daily investments in yourself.
+
+Sneakerheads
+Sneaker culture and streetwear adjacent footwear. Limited releases, classics, care products. Both the collector and the casual wearer who takes shoes seriously.
+
+The Wellness Era
+Health-conscious living. Supplements, fitness recovery, sleep products, mindfulness tools, clean beauty. The lifestyle upgrade toward feeling better.
+
+Tis the Season
+Seasonal and holiday products. Christmas, Hanukkah, Halloween, Valentine's Day, Easter. Gifting, decorating, and celebrating. Time-sensitive and occasion-driven.
+
+Touch Grass
+Outdoors, nature, and getting away from screens. Hiking gear, camping, gardening, outdoor living. The antidote to too much time inside.
+
+Whimsigoth
+Playful dark aesthetic. Celestial motifs, crystals, dark florals, Halloween-adjacent decor that stays year-round. Not aggressively gothic — more witchy cottage core.
+
+Work-From-Anywhere
+Home office and remote work setup. Ergonomic chairs, desk accessories, cable management, aesthetic workspaces. Products for people whose office is wherever they are.
+
+IMPORTANT: Always use the exact vibe name as listed above when returning suggestions. The name must match exactly — including capitalisation, apostrophes, hyphens, and ampersands — because it is matched against the database. For example: "Drip & Shine" not "Drip and Shine", "Off-Duty Model" not "Off Duty Model", "Hot Mess Express" not "Hot Mess".
 
 ═══════════════════════════════════════
 MOOD DEFINITIONS
