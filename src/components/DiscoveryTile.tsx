@@ -8,6 +8,7 @@ import type { Product } from "@/lib/supabase-queries";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductDrawer from "@/components/ProductDrawer";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
+import ShareButton from "@/components/ShareButton";
 import fallbackImage from "@/assets/fallback-product.png";
 
 const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
@@ -114,7 +115,8 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
             {vendorName ? (
               <span className="text-[10px] text-muted-foreground">via {vendorName}</span>
             ) : <span />}
-            <div onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              <ShareButton product={pick} />
               <ReportBrokenLink productId={pick.id} />
             </div>
           </div>
