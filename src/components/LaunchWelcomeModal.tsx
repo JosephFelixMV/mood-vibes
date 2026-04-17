@@ -21,7 +21,7 @@ export default function LaunchWelcomeModal() {
 
     const alreadySeen = localStorage.getItem(STORAGE_KEY);
 
-    if (!alreadySeen && (detected === "US" || forceShow)) {
+    if (!alreadySeen || forceShow) {
       const t = setTimeout(() => setOpen(true), 1200);
       return () => clearTimeout(t);
     }
@@ -33,7 +33,12 @@ export default function LaunchWelcomeModal() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) handleClose();
+      }}
+    >
       <DialogContent
         className="sm:max-w-[440px] p-0 overflow-hidden"
         style={{ borderRadius: "20px", border: "0.5px solid var(--border)" }}
@@ -54,33 +59,23 @@ export default function LaunchWelcomeModal() {
             >
               Early access
             </span>
-            <h2
-              className="text-xl font-medium leading-snug"
-              style={{ color: "var(--foreground)" }}
-            >
+            <h2 className="text-xl font-medium leading-snug" style={{ color: "var(--foreground)" }}>
               Welcome to Mood and Vibes
             </h2>
           </div>
 
           {/* Body copy */}
           <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-            This is an early proof of concept — the collection is growing and
-            the experience is evolving. I built this to make product discovery
-            feel more intuitive and inspired.
+            This is an early proof of concept — the collection is growing and the experience is evolving. Would love
+            hear feedback to improve the categories and find the products that you love!
           </p>
 
-          <Button
-            className="w-full font-medium"
-            style={{ background: "#534AB7", color: "#fff" }}
-            onClick={handleClose}
-          >
+          <Button className="w-full font-medium" style={{ background: "#534AB7", color: "#fff" }} onClick={handleClose}>
             Start exploring
           </Button>
 
           {/* Footnote */}
-          <p className="text-[11.5px] text-muted-foreground text-center mt-3.5">
-            You'll only see this once.
-          </p>
+          <p className="text-[11.5px] text-muted-foreground text-center mt-3.5">You'll only see this once.</p>
         </div>
       </DialogContent>
     </Dialog>
