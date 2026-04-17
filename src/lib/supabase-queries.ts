@@ -272,16 +272,21 @@ export function getRandomProduct(products: Product[], excludeId?: string): Produ
   return filtered[Math.floor(Math.random() * filtered.length)];
 }
 
-export async function getProductClickCounts(): Promise<Record<string, number>> {
+export async function getProductClickCounts(sinceDays: number | null = 30): Promise<Record<string, number>> {
   const PAGE_SIZE = 1000;
   let allData: any[] = [];
   let from = 0;
   let hasMore = true;
+  const sinceIso = sinceDays != null
+    ? new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000).toISOString()
+    : null;
   while (hasMore) {
-    const { data, error } = await supabase
+    let q = supabase
       .from("product_clicks")
       .select("product_id")
       .range(from, from + PAGE_SIZE - 1);
+    if (sinceIso) q = q.gte("clicked_at", sinceIso);
+    const { data, error } = await q;
     if (error) throw error;
     allData = allData.concat(data || []);
     hasMore = (data?.length || 0) === PAGE_SIZE;
@@ -294,17 +299,22 @@ export async function getProductClickCounts(): Promise<Record<string, number>> {
   return counts;
 }
 
-export async function getProductViewCounts(): Promise<Record<string, number>> {
+export async function getProductViewCounts(sinceDays: number | null = 30): Promise<Record<string, number>> {
   const PAGE_SIZE = 1000;
   let allData: any[] = [];
   let from = 0;
   let hasMore = true;
+  const sinceIso = sinceDays != null
+    ? new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000).toISOString()
+    : null;
   while (hasMore) {
-    const { data, error } = await supabase
+    let q = supabase
       .from("product_events")
       .select("product_id")
       .eq("event_type", "view")
       .range(from, from + PAGE_SIZE - 1);
+    if (sinceIso) q = q.gte("created_at", sinceIso);
+    const { data, error } = await q;
     if (error) throw error;
     allData = allData.concat(data || []);
     hasMore = (data?.length || 0) === PAGE_SIZE;

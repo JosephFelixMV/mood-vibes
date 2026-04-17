@@ -77,7 +77,11 @@ export default function ProductList({ onEdit }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState<"views" | "clicks" | "updated" | null>("updated");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d;
+  });
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
@@ -110,13 +114,13 @@ export default function ProductList({ onEdit }: Props) {
   });
 
   const { data: clickCounts = {} } = useQuery({
-    queryKey: ["product-click-counts"],
-    queryFn: getProductClickCounts,
+    queryKey: ["product-click-counts", 30],
+    queryFn: () => getProductClickCounts(30),
   });
 
   const { data: viewCounts = {} } = useQuery({
-    queryKey: ["product-view-counts"],
-    queryFn: getProductViewCounts,
+    queryKey: ["product-view-counts", 30],
+    queryFn: () => getProductViewCounts(30),
   });
 
   const inlineUpdateMut = useMutation({
