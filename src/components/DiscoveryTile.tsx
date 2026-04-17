@@ -8,6 +8,7 @@ import type { Product } from "@/lib/supabase-queries";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductDrawer from "@/components/ProductDrawer";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
+import ShareButton from "@/components/ShareButton";
 import fallbackImage from "@/assets/fallback-product.png";
 
 const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
