@@ -26,6 +26,7 @@ import Brands from "./pages/Brands";
 import NotFound from "./pages/NotFound";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import CookieConsent from "@/components/CookieConsent";
+import LaunchWelcomeModal from "@/components/LaunchWelcomeModal";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ function AppShell() {
             </main>
           <Footer />
           <CookieConsent />
+          <LaunchWelcomeModal />
         </div>
       </>
     );
