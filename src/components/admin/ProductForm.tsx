@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, MutableRefObject } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { getProduct, getCategories } from "@/lib/supabase-queries";
 import { generateSlug } from "@/lib/slug-utils";
 import { stripHtml } from "@/lib/brand-utils";

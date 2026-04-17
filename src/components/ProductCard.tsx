@@ -10,7 +10,7 @@ import ExternalCTA from "@/components/ExternalCTA";
 import { useQuery } from "@tanstack/react-query";
 import { trackProductClick } from "@/lib/track-click";
 import { trackEvent } from "@/lib/track-event";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 
