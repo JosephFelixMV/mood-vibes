@@ -8,6 +8,9 @@ import ProductCard from "@/components/ProductCard";
 import { getProducts, getDailyPick, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
+import LaunchWelcomeModal from "@/components/LaunchWelcomeModal";
+
+<LaunchWelcomeModal />;
 
 function useCountdownToMidnightUTC() {
   const getRemaining = () => {
@@ -59,7 +62,10 @@ export default function Index() {
 
   const displayedProduct = dailyPick;
 
-  const healthyProducts = filterByRegion(products.filter((p) => !p.page_error), region);
+  const healthyProducts = filterByRegion(
+    products.filter((p) => !p.page_error),
+    region,
+  );
 
   const handleSurprise = () => {
     trigger(() => {
@@ -74,11 +80,7 @@ export default function Index() {
       {/* Hero */}
       <section className="relative overflow-hidden py-16 md:py-24">
         <div className="container flex flex-col items-center text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="font-heading text-4xl font-medium leading-tight tracking-tight md:text-6xl lg:text-7xl">
               Find your mood.
               <br />
@@ -134,9 +136,7 @@ export default function Index() {
       {/* Product of the Day */}
       <section className="container py-10">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <h2 className="text-center font-heading text-2xl font-bold tracking-tight md:text-3xl">
-            🎁 Today's Pick
-          </h2>
+          <h2 className="text-center font-heading text-2xl font-bold tracking-tight md:text-3xl">🎁 Today's Pick</h2>
           <div className="flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-medium text-muted-foreground shadow-sm">
             <Clock className="h-4 w-4 text-primary" />
             <span>Next pick in</span>
@@ -154,9 +154,7 @@ export default function Index() {
             <ProductCard product={displayedProduct} featured ctaLabel="Discover Brand" />
           </div>
         ) : (
-          <p className="text-center text-muted-foreground">
-            No products yet. Add some in the admin panel!
-          </p>
+          <p className="text-center text-muted-foreground">No products yet. Add some in the admin panel!</p>
         )}
       </section>
     </div>
