@@ -10,8 +10,6 @@ import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
 import LaunchWelcomeModal from "@/components/LaunchWelcomeModal";
 
-<LaunchWelcomeModal />;
-
 function useCountdownToMidnightUTC() {
   const getRemaining = () => {
     const now = new Date();
