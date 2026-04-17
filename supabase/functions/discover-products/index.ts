@@ -6,6 +6,39 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function callAnthropic(opts: {
+  apiKey: string;
+  system?: string;
+  user: string;
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+}): Promise<{ ok: true; text: string } | { ok: false; status: number; error: string }> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": opts.apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: opts.model ?? "claude-haiku-4-5",
+      max_tokens: opts.maxTokens ?? 1024,
+      ...(typeof opts.temperature === "number" ? { temperature: opts.temperature } : {}),
+      ...(opts.system ? { system: opts.system } : {}),
+      messages: [{ role: "user", content: opts.user }],
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    return { ok: false, status: res.status, error: errText };
+  }
+  const data = await res.json();
+  const text = data?.content?.[0]?.text;
+  if (typeof text !== "string") return { ok: false, status: 500, error: "No text in Anthropic response" };
+  return { ok: true, text };
+}
+
 // --- Helpers ---
 
 function hashString(str: string): string {
