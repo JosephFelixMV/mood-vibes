@@ -115,7 +115,8 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
             {vendorName ? (
               <span className="text-[10px] text-muted-foreground">via {vendorName}</span>
             ) : <span />}
-            <div onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              <ShareButton product={pick} />
               <ReportBrokenLink productId={pick.id} />
             </div>
           </div>
