@@ -155,7 +155,7 @@ ASSIGNMENT LIMITS — strictly enforced:
 - core: exactly 1 value
 - vibes: 1–2 values maximum
 - moods: 1–2 values maximum
-- keywords: 6–10 values
+- keywords: 4–6 values
 
 Use exact category/vibe/mood names from these lists:
 CORE CATEGORIES: ${CORE_CATEGORIES.join(", ")}
@@ -318,7 +318,7 @@ ALWAYS return:
 - Intent-driven phrases: "anniversary gift for him", "quiet luxury desk accessory", "soft academia reading lamp"
 - Style/aesthetic phrases: "bauhaus minimalist watch", "oversized boyfriend fit knit", "cottagecore ceramic mug"
 
-Return 6–10 keywords. Each should be something a real person would search.
+Return 4–6 keywords. Each should be something a real person would search.
 
 ═══════════════════════════════════════
 CATEGORY-BASED MOOD DEFAULTS
@@ -635,7 +635,7 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     let validCore = dedupeStrings((suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c))).slice(0, 5);
     let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
-    const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 12);
+    const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 6);
     const confidence = typeof suggestions.confidence === "number"
       ? Math.min(1, Math.max(0, suggestions.confidence))
       : 0.6;

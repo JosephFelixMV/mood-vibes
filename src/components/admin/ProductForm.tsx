@@ -188,6 +188,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   const addKeyword = async (term: string) => {
     const normalized = term.toLowerCase().trim();
     if (!normalized || form.keywords.includes(normalized)) return;
+    if (form.keywords.length >= 6) {
+      toast.error("Maximum of 6 keywords allowed");
+      return;
+    }
     const exists = allKeywords.find((k) => k.term === normalized);
     if (!exists) {
       await supabase.from("keywords").insert({ term: normalized });
@@ -227,7 +231,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         setAiSuggestions(suggestions);
         const updatedCategory = suggestions.core.length ? stringifyTaxonomyValues(suggestions.core) : stringifyTaxonomyValues(parseTaxonomyString(form.category));
         const updatedKeywords = suggestions.keywords.length
-          ? [...new Set([...form.keywords, ...suggestions.keywords])]
+          ? [...new Set([...form.keywords, ...suggestions.keywords])].slice(0, 6)
           : form.keywords;
         const isFashion = FASHION_SUBCATEGORIES.some((sub) => updatedCategory?.toLowerCase().includes(sub.toLowerCase()));
         const fashionUpdates: Record<string, any> = {};
@@ -823,7 +827,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         </div>
         <div ref={keywordRef}>
           <div className="flex items-center justify-between">
-            <Label>Keywords (for SEO & AI Discovery)</Label>
+            <Label>Keywords (for SEO & AI Discovery — up to 6) <span className="text-xs text-muted-foreground ml-1">{form.keywords.length}/6</span></Label>
             <Button
               type="button"
               variant="outline"
@@ -838,7 +842,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                   if (error) throw error;
                   const suggested = (data?.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean);
                   if (suggested.length) {
-                    const updatedKws = [...new Set([...form.keywords, ...suggested])];
+                    const updatedKws = [...new Set([...form.keywords, ...suggested])].slice(0, 6);
                     const isFashion = FASHION_SUBCATEGORIES.some((sub) => form.category?.toLowerCase().includes(sub.toLowerCase()));
                     const fashionUpdates: Record<string, any> = {};
                     if (isFashion) {
