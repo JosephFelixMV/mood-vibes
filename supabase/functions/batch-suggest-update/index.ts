@@ -216,7 +216,7 @@ serve(async (req) => {
           product.name,
           product.description || "",
           product.price,
-          LOVABLE_API_KEY!,
+          ANTHROPIC_API_KEY!,
           categories,
           brandHint,
         );
