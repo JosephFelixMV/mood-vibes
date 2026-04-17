@@ -550,32 +550,23 @@ Price: $${price || "Unknown"}
 
 CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when brand context strongly matched (0.85+), product description is specific and detailed (+0.1), category choice is unambiguous (+0.1). Score lower when no brand match, vague description, or multiple equally valid categories.`;
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.3,
-      }),
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not configured");
+
+    const content = await callAnthropic({
+      apiKey: ANTHROPIC_API_KEY,
+      user: prompt,
+      maxTokens: 1024,
+      temperature: 0.3,
     });
 
-    const rawText = await response.text();
-    console.log("AI raw response:", rawText.substring(0, 500));
-    
-    const data = JSON.parse(rawText);
-    const content = data.choices?.[0]?.message?.content || "{}";
-    
+    console.log("AI raw response:", content.substring(0, 500));
+
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("No JSON in response");
     }
-    
+
     const suggestions = JSON.parse(jsonMatch[0]);
     
     const moodNames = Object.keys(MOOD_CATEGORIES);
