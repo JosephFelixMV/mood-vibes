@@ -21,7 +21,7 @@ export default function LaunchWelcomeModal() {
 
     const alreadySeen = localStorage.getItem(STORAGE_KEY);
 
-    if (!alreadySeen || forceShow) {
+    if (!alreadySeen && (detected === "US" || forceShow)) {
       const t = setTimeout(() => setOpen(true), 1200);
       return () => clearTimeout(t);
     }
