@@ -73,7 +73,7 @@ export default function ProductList({ onEdit }: Props) {
   const [filterMood, setFilterMood] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterError, setFilterError] = useState("all");
-  const [pageSize, setPageSize] = useState(100);
+  const [pageSize, setPageSize] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState<"views" | "clicks" | "updated" | null>("updated");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
