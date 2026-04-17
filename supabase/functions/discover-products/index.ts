@@ -6,6 +6,39 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function callAnthropic(opts: {
+  apiKey: string;
+  system?: string;
+  user: string;
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+}): Promise<{ ok: true; text: string } | { ok: false; status: number; error: string }> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": opts.apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: opts.model ?? "claude-haiku-4-5",
+      max_tokens: opts.maxTokens ?? 1024,
+      ...(typeof opts.temperature === "number" ? { temperature: opts.temperature } : {}),
+      ...(opts.system ? { system: opts.system } : {}),
+      messages: [{ role: "user", content: opts.user }],
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    return { ok: false, status: res.status, error: errText };
+  }
+  const data = await res.json();
+  const text = data?.content?.[0]?.text;
+  if (typeof text !== "string") return { ok: false, status: 500, error: "No text in Anthropic response" };
+  return { ok: true, text };
+}
+
 // --- Helpers ---
 
 function hashString(str: string): string {
@@ -101,10 +134,10 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    if (!lovableApiKey) {
+    if (!anthropicApiKey) {
       return new Response(JSON.stringify({ error: "AI service not configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -283,26 +316,17 @@ RULES:
 PRODUCT CATALOG:
 ${catalogText}`;
 
-    // Call AI Gateway
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Find products matching: ${prompt}` },
-        ],
-        max_tokens: 1000,
-      }),
+    // Call Anthropic
+    const aiResult = await callAnthropic({
+      apiKey: anthropicApiKey,
+      system: systemPrompt,
+      user: `Find products matching: ${prompt}`,
+      maxTokens: 1000,
     });
 
-    if (!aiResponse.ok) {
-      const status = aiResponse.status;
-      console.error("AI gateway error:", status, await aiResponse.text());
+    if (!aiResult.ok) {
+      const status = aiResult.status;
+      console.error("Anthropic error:", status, aiResult.error);
 
       // Log failed request
       await supabase.from("ai_requests").insert({
@@ -327,8 +351,7 @@ ${catalogText}`;
       });
     }
 
-    const aiData = await aiResponse.json();
-    const rawContent = aiData.choices?.[0]?.message?.content || "[]";
+    const rawContent = aiResult.text || "[]";
 
     // Parse AI response — extract JSON array
     let productIds: string[] = [];

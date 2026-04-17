@@ -6,6 +6,39 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function callAnthropic(opts: {
+  apiKey: string;
+  system?: string;
+  user: string;
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+}): Promise<string> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": opts.apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: opts.model ?? "claude-haiku-4-5",
+      max_tokens: opts.maxTokens ?? 1024,
+      temperature: opts.temperature ?? 0.3,
+      ...(opts.system ? { system: opts.system } : {}),
+      messages: [{ role: "user", content: opts.user }],
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Anthropic API error ${res.status}: ${errText}`);
+  }
+  const data = await res.json();
+  const text = data?.content?.[0]?.text;
+  if (typeof text !== "string") throw new Error("No text in Anthropic response");
+  return text;
+}
+
 async function loadCategories(sb: any) {
   const { data } = await sb
     .from("categories")
@@ -517,32 +550,23 @@ Price: $${price || "Unknown"}
 
 CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when brand context strongly matched (0.85+), product description is specific and detailed (+0.1), category choice is unambiguous (+0.1). Score lower when no brand match, vague description, or multiple equally valid categories.`;
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.3,
-      }),
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not configured");
+
+    const content = await callAnthropic({
+      apiKey: ANTHROPIC_API_KEY,
+      user: prompt,
+      maxTokens: 1024,
+      temperature: 0.3,
     });
 
-    const rawText = await response.text();
-    console.log("AI raw response:", rawText.substring(0, 500));
-    
-    const data = JSON.parse(rawText);
-    const content = data.choices?.[0]?.message?.content || "{}";
-    
+    console.log("AI raw response:", content.substring(0, 500));
+
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("No JSON in response");
     }
-    
+
     const suggestions = JSON.parse(jsonMatch[0]);
     
     const moodNames = Object.keys(MOOD_CATEGORIES);

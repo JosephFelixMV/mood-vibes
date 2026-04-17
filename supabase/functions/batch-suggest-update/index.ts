@@ -6,6 +6,39 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function callAnthropic(opts: {
+  apiKey: string;
+  system?: string;
+  user: string;
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+}): Promise<string> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": opts.apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: opts.model ?? "claude-haiku-4-5",
+      max_tokens: opts.maxTokens ?? 1024,
+      temperature: opts.temperature ?? 0.3,
+      ...(opts.system ? { system: opts.system } : {}),
+      messages: [{ role: "user", content: opts.user }],
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Anthropic API error ${res.status}: ${errText}`);
+  }
+  const data = await res.json();
+  const text = data?.content?.[0]?.text;
+  if (typeof text !== "string") throw new Error("No text in Anthropic response");
+  return text;
+}
+
 async function loadCategories(sb: any) {
   const { data } = await sb
     .from("categories")
@@ -93,22 +126,13 @@ Respond ONLY with valid JSON in this exact format, no other text:
 Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.
 For keywords, suggest 5-8 lowercase search terms shoppers might use to find this product.`;
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash-lite",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
-    }),
+  const content = await callAnthropic({
+    apiKey,
+    user: prompt,
+    maxTokens: 1024,
+    temperature: 0.3,
   });
 
-  const rawText = await response.text();
-  const data = JSON.parse(rawText);
-  const content = data.choices?.[0]?.message?.content || "{}";
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("No JSON in response");
 
@@ -151,7 +175,7 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -192,7 +216,7 @@ serve(async (req) => {
           product.name,
           product.description || "",
           product.price,
-          LOVABLE_API_KEY!,
+          ANTHROPIC_API_KEY!,
           categories,
           brandHint,
         );
