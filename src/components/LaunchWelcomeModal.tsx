@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useRegion } from "@/context/RegionContext";
+import { useRegion } from "@/contexts/RegionContext";
 
 const STORAGE_KEY = "mv_welcome_shown";
 
