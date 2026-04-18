@@ -67,12 +67,18 @@ export default function CategoryLanding() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["category-products", slug, filterNames.join(",")],
     queryFn: async () => {
-      const all = await getProducts({ sort: "newest", activeOnly: true });
-      return all.filter((p) =>
-        filterNames.some((name) =>
-          p.category.split(",").map((c) => c.trim()).includes(name)
-        )
-      );
+      const orClause = filterNames
+        .map((n) => `category.ilike.%${encodeURIComponent(n).replace(/%20/g, " ")}%`)
+        .join(",");
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .or(orClause)
+        .order("date_added", { ascending: false })
+        .limit(300);
+      if (error) throw error;
+      return (data as Product[]).filter((p) => !p.page_error);
     },
     enabled: !!categoryName,
   });
