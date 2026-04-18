@@ -256,7 +256,8 @@ Deno.serve(async (req) => {
     const { data: allProducts, error: prodErr } = await supabase
       .from("products")
       .select("id, name, description, category, vibe_category, mood, price, company_name")
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .limit(600);
 
     if (prodErr || !allProducts?.length) {
       await supabase.from("ai_requests").insert({
@@ -271,7 +272,8 @@ Deno.serve(async (req) => {
     // Fetch product keywords for enrichment
     const { data: productKeywords } = await supabase
       .from("product_keywords")
-      .select("product_id, keywords(term)");
+      .select("product_id, keywords(term)")
+      .limit(3000);
     
     const keywordsByProduct: Record<string, string[]> = {};
     (productKeywords || []).forEach((pk: any) => {
