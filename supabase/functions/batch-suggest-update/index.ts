@@ -153,7 +153,7 @@ For keywords, suggest 4-6 lowercase search terms shoppers might use to find this
   let core = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
   let vibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
   let moods = (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3);
-  const keywords = (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 6);
+  const keywords = capKeywordsPreservingGiftFor((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean), 6);
 
   // Auto-assign "The Atelier" vibe and "Luxe" mood for fashion items over $1000
   const FASHION_CATEGORIES = ["Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear", "Accessories", "Bags & Totes", "Jewelry", "Watches"];
