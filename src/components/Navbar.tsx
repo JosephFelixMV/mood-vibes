@@ -11,7 +11,7 @@ const navLinks = [
   { to: "/vibes", label: "Vibes" },
   { to: "/moods", label: "Moods" },
   { to: "/brands", label: "Brands" },
-  { to: "/products", label: "All Products" },
+  { to: "/products", label: "Products" },
 ];
 
 export default function Navbar() {
@@ -33,9 +33,7 @@ export default function Navbar() {
               key={l.to}
               to={l.to}
               className={`px-3 py-2 text-xs font-medium uppercase tracking-widest transition-colors ${
-                location.pathname === l.to
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                location.pathname === l.to ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {l.label}
@@ -72,9 +70,7 @@ export default function Navbar() {
               to={l.to}
               onClick={() => setOpen(false)}
               className={`block rounded-lg px-4 py-3 text-sm font-medium ${
-                location.pathname === l.to
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground"
+                location.pathname === l.to ? "bg-primary/10 text-primary" : "text-muted-foreground"
               }`}
             >
               {l.label}
