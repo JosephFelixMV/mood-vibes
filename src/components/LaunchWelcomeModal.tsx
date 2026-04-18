@@ -57,7 +57,7 @@ export default function LaunchWelcomeModal() {
               className="inline-block text-[11px] font-medium tracking-[0.08em] uppercase px-2.5 py-1 rounded-full mb-3"
               style={{ color: "#534AB7", background: "#EEEDFE" }}
             >
-              Early access
+              This is a Proof of Concept.
             </span>
             <h2 className="text-xl font-medium leading-snug" style={{ color: "var(--foreground)" }}>
               Welcome to Mood and Vibes
@@ -66,8 +66,8 @@ export default function LaunchWelcomeModal() {
 
           {/* Body copy */}
           <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-            This is a proof of concept. We’re adding new finds daily. See a way we can improve? Want to see a specific
-            vibe? Let us know—we’re building this for you.
+            We’re adding new finds daily. See a way we can improve? Want to see a specific vibe? Let us know—we’re
+            building this for you.
           </p>
 
           <Button className="w-full font-medium" style={{ background: "#534AB7", color: "#fff" }} onClick={handleClose}>
