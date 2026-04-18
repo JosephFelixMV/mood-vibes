@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   getProduct,
-  getProducts,
   getRandomProduct,
   getProductImages,
   getProductSpecifications,
@@ -20,6 +19,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
+import { getDiscoveryContext } from "@/lib/discovery-context";
 import { stripHtml, truncateToMeta } from "@/lib/brand-utils";
 import fallbackImage from "@/assets/fallback-product.png";
 
@@ -59,8 +59,33 @@ export default function ProductDetail() {
   });
 
   const { data: allProducts = [] } = useQuery({
-    queryKey: ["products"],
-    queryFn: () => getProducts({ activeOnly: true }),
+    queryKey: ["related-products", product?.id],
+    queryFn: async () => {
+      if (!product) return [];
+      const ctx = getDiscoveryContext();
+      let query = supabase
+        .from("products")
+        .select("id, slug, category, vibe_category")
+        .eq("is_active", true)
+        .neq("id", product.id)
+        .limit(100);
+
+      if (ctx?.type === "category" && ctx.name) {
+        query = query.ilike("category", `%${ctx.name}%`);
+      } else if (ctx?.type === "vibe" && ctx.name) {
+        query = query.ilike("vibe_category", `%${ctx.name}%`);
+      } else if (ctx?.type === "mood" && ctx.name) {
+        query = query.ilike("mood", `%${ctx.name}%`);
+      } else {
+        query = query.order("date_added", { ascending: false });
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!product?.id,
+    staleTime: 1000 * 60 * 10,
   });
 
   const { data: allCategories = [] } = useQuery({

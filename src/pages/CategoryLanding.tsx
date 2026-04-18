@@ -1,9 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getCategories, getRandomProduct, filterByRegion, type Product } from "@/lib/supabase-queries";
+import { setDiscoveryContext } from "@/lib/discovery-context";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -55,6 +56,12 @@ export default function CategoryLanding() {
     : [categoryName];
 
   const isFashionCategory = FASHION_SLUGS.includes(slug || "");
+
+  useEffect(() => {
+    if (slug && categoryName) {
+      setDiscoveryContext({ type: "category", slug, name: categoryName });
+    }
+  }, [slug, categoryName]);
 
   useSEO({
     title: categoryName ? `${categoryName} | Curated Picks | Mood & Vibes` : "Category | Mood & Vibes",

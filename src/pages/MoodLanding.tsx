@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { useSEO } from "@/hooks/useSEO";
+import { setDiscoveryContext } from "@/lib/discovery-context";
 
 import { useRegion } from "@/contexts/RegionContext";
 import type { Product } from "@/lib/supabase-queries";
@@ -28,6 +29,12 @@ export default function MoodLanding() {
   });
 
   const mood = moods.find((m) => m.slug === slug);
+
+  useEffect(() => {
+    if (slug && mood?.name) {
+      setDiscoveryContext({ type: "mood", slug, name: mood.name });
+    }
+  }, [slug, mood?.name]);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["mood-products", mood?.name, sort],
