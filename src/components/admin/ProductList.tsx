@@ -730,17 +730,24 @@ export default function ProductList({ onEdit }: Props) {
           >
             <ChevronLeft className="h-4 w-4" /> Previous
           </Button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <Button
-              key={page}
-              variant={page === safePage ? "default" : "outline"}
-              size="sm"
-              className="w-9"
-              onClick={() => setCurrentPage(page)}
-            >
-              {page}
-            </Button>
-          ))}
+          {(() => {
+            const MAX = 10;
+            let start = Math.max(1, safePage - Math.floor(MAX / 2));
+            let end = Math.min(totalPages, start + MAX - 1);
+            start = Math.max(1, end - MAX + 1);
+            const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+            return pages.map((page) => (
+              <Button
+                key={page}
+                variant={page === safePage ? "default" : "outline"}
+                size="sm"
+                className="w-9"
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </Button>
+            ));
+          })()}
           <Button
             variant="outline"
             size="sm"
