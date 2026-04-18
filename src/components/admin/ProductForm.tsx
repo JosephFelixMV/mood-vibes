@@ -16,7 +16,7 @@ import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
 import { formatPrice } from "@/lib/supabase-queries";
-import { dedupeTaxonomyValues, parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
+import { capKeywordsPreservingGiftFor, dedupeTaxonomyValues, parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
 
 interface Props {
   editId: string | null;
