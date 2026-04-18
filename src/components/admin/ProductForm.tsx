@@ -231,7 +231,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         setAiSuggestions(suggestions);
         const updatedCategory = suggestions.core.length ? stringifyTaxonomyValues(suggestions.core) : stringifyTaxonomyValues(parseTaxonomyString(form.category));
         const updatedKeywords = suggestions.keywords.length
-          ? [...new Set([...form.keywords, ...suggestions.keywords])].slice(0, 6)
+          ? capKeywordsPreservingGiftFor([...form.keywords, ...suggestions.keywords], 6)
           : form.keywords;
         const isFashion = FASHION_SUBCATEGORIES.some((sub) => updatedCategory?.toLowerCase().includes(sub.toLowerCase()));
         const fashionUpdates: Record<string, any> = {};
