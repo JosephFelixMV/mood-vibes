@@ -118,6 +118,12 @@ Deno.serve(async (req) => {
         updateData.page_error_detail = `click_check_confirmed_broken_${statusCode}`;
       }
 
+      // Preserve updated_at unless this click actually changed product status,
+      // so routine click verification doesn't pollute the admin "Last Updated" sort.
+      if (!shouldFlag && preservedUpdatedAt) {
+        updateData.updated_at = preservedUpdatedAt;
+      }
+
       await supabase.from("products").update(updateData).eq("id", product_id);
 
       return new Response(JSON.stringify({
@@ -129,11 +135,13 @@ Deno.serve(async (req) => {
       });
     } catch (fetchErr) {
       clearTimeout(timeout);
-      // Fetch failed (timeout, DNS, etc.) — flag but don't auto-unpublish on network errors
+      // Fetch failed (timeout, DNS, etc.) — flag but don't auto-unpublish on network errors.
+      // Preserve updated_at to avoid polluting the admin "Last Updated" sort.
       await supabase.from("products").update({
         last_verified_at: new Date().toISOString(),
         last_status_code: 0,
         page_error_detail: `click_check_fetch_error`,
+        ...(preservedUpdatedAt ? { updated_at: preservedUpdatedAt } : {}),
       }).eq("id", product_id);
 
       return new Response(JSON.stringify({ validated: false, reason: "fetch_error" }), {
