@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getProducts, getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
+import { getCategories, getRandomProduct, filterByRegion, type Product } from "@/lib/supabase-queries";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -39,13 +39,15 @@ export default function VibeLanding() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["vibe-products", slug, vibeName],
     queryFn: async () => {
-      const all = await getProducts({ sort: "newest", activeOnly: true });
-      return all.filter((p) =>
-        p.vibe_category
-          ?.split(",")
-          .map((v) => v.trim())
-          .includes(vibeName)
-      );
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .ilike("vibe_category", `%${vibeName}%`)
+        .order("date_added", { ascending: false })
+        .limit(300);
+      if (error) throw error;
+      return (data as Product[]).filter((p) => !p.page_error);
     },
     enabled: !!vibeName,
   });

@@ -43,6 +43,7 @@ export default function MoodLanding() {
         ? query.order("date_added", { ascending: false })
         : query.order("date_added", { ascending: true });
 
+      query = query.limit(300);
       const { data, error } = await query;
       if (error) throw error;
       return data as Product[];

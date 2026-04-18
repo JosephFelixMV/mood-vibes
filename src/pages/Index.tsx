@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Clock } from "lucide-react";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, getDailyPick, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
+import { getDailyPick, getRandomProduct, filterByRegion, type Product } from "@/lib/supabase-queries";
+import { supabase } from "@/lib/supabase";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
 
@@ -41,7 +42,17 @@ export default function Index() {
   });
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ["products"],
-    queryFn: () => getProducts({ activeOnly: true }),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .eq("page_error", false)
+        .order("date_added", { ascending: false })
+        .limit(150);
+      if (error) throw error;
+      return data as Product[];
+    },
   });
 
   const countdown = useCountdownToMidnightUTC();
