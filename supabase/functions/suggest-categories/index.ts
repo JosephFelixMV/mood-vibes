@@ -640,7 +640,8 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     let validCore = dedupeStrings((suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c))).slice(0, 5);
     let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
-    const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 6);
+    const rawKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()));
+    const validKeywords = capKeywordsPreservingGiftFor(rawKeywords, 6);
     const confidence = typeof suggestions.confidence === "number"
       ? Math.min(1, Math.max(0, suggestions.confidence))
       : 0.6;
