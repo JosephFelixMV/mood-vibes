@@ -130,9 +130,10 @@ export default function Products() {
 
   const availableVendors = useMemo(() => {
     return brandsList
+      .filter((b: any) => (vendorCounts[b.id] || 0) > 0)
       .map((b: any) => ({ id: b.id, name: toTitleCase(b.name) }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [brandsList]);
+  }, [brandsList, vendorCounts]);
 
   // Reset page when filters change
   const resetPage = useCallback(() => setPage(1), []);
