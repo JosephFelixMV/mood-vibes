@@ -272,7 +272,8 @@ Deno.serve(async (req) => {
     // Fetch product keywords for enrichment
     const { data: productKeywords } = await supabase
       .from("product_keywords")
-      .select("product_id, keywords(term)");
+      .select("product_id, keywords(term)")
+      .limit(3000);
     
     const keywordsByProduct: Record<string, string[]> = {};
     (productKeywords || []).forEach((pk: any) => {
