@@ -318,7 +318,12 @@ ALWAYS return:
 - Intent-driven phrases: "anniversary gift for him", "quiet luxury desk accessory", "soft academia reading lamp"
 - Style/aesthetic phrases: "bauhaus minimalist watch", "oversized boyfriend fit knit", "cottagecore ceramic mug"
 
-Return 4–6 keywords. Each should be something a real person would search.
+GIFTING TAGS (IMPORTANT):
+- Whenever the product is plausibly giftable (most are), include AT LEAST ONE "gift for ..." phrase among the 6 tags.
+- Examples: "gift for home chef", "gift for new homeowner", "gift for coffee lover", "gift for him", "gift for her", "gift for new mom".
+- Pick the recipient that best matches the product's actual use case. Do not invent unrelated audiences.
+
+Return 4–6 keywords (one of which should be a "gift for ..." phrase when applicable). Each should be something a real person would search.
 
 ═══════════════════════════════════════
 CATEGORY-BASED MOOD DEFAULTS
