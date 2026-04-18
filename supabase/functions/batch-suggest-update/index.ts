@@ -6,6 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Cap keyword tags at `max` while preserving any "gift for ..." phrase.
+function capKeywordsPreservingGiftFor(values: string[], max = 6): string[] {
+  const deduped = Array.from(new Set(values.map((v) => v.toLowerCase().trim()).filter(Boolean)));
+  if (deduped.length <= max) return deduped;
+  const giftIdx = deduped.findIndex((k) => k.includes("gift for"));
+  if (giftIdx === -1 || giftIdx < max) return deduped.slice(0, max);
+  const kept = deduped.slice(0, max - 1);
+  kept.push(deduped[giftIdx]);
+  return kept;
+}
+
 async function callAnthropic(opts: {
   apiKey: string;
   system?: string;
