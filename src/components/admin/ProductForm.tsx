@@ -842,7 +842,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                   if (error) throw error;
                   const suggested = (data?.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean);
                   if (suggested.length) {
-                    const updatedKws = [...new Set([...form.keywords, ...suggested])].slice(0, 6);
+                    const updatedKws = capKeywordsPreservingGiftFor([...form.keywords, ...suggested], 6);
                     const isFashion = FASHION_SUBCATEGORIES.some((sub) => form.category?.toLowerCase().includes(sub.toLowerCase()));
                     const fashionUpdates: Record<string, any> = {};
                     if (isFashion) {
