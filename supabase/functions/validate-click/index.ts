@@ -30,9 +30,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Update last_click_at immediately
+    // Read current updated_at so we can preserve it (click tracking should not
+    // bump the "Last Updated" timestamp shown in the admin product list).
+    const { data: currentRow } = await supabase
+      .from("products")
+      .select("updated_at")
+      .eq("id", product_id)
+      .single();
+    const preservedUpdatedAt = currentRow?.updated_at;
+
+    // Update last_click_at immediately (preserve updated_at)
     await supabase.from("products").update({
       last_click_at: new Date().toISOString(),
+      ...(preservedUpdatedAt ? { updated_at: preservedUpdatedAt } : {}),
     }).eq("id", product_id);
 
     // Check if click validation is enabled
