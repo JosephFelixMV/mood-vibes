@@ -24,7 +24,18 @@ export default function Categories() {
     queryFn: getProductCountByCategory,
   });
 
-  const parents = categories.filter((c) => !c.parent_slug);
+  const ORDER = ["home-living", "beauty-wellness", "everyday-goods", "jewel-box", "fashion-style"];
+  const parents = categories
+    .filter((c) => !c.parent_slug)
+    .slice()
+    .sort((a, b) => {
+      const ai = ORDER.indexOf(a.slug);
+      const bi = ORDER.indexOf(b.slug);
+      if (ai === -1 && bi === -1) return a.name.localeCompare(b.name);
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
   const childrenOf = (parentSlug: string) =>
     categories.filter((c) => c.parent_slug === parentSlug);
 
