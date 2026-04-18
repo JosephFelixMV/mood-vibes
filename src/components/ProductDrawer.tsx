@@ -69,6 +69,19 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
     staleTime: 1000 * 60 * 10,
   });
 
+  const { data: allBrands = [] } = useQuery({
+    queryKey: ["brands-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("brands").select("id, name");
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const vendorName = product.vendor_id
+    ? allBrands.find((b: any) => b.id === product.vendor_id)?.name
+    : null;
+
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
   const coreSet = [...new Set(product.category.split(",").map((c) => c.trim()).filter(Boolean))];
