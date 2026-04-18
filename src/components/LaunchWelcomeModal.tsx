@@ -66,8 +66,8 @@ export default function LaunchWelcomeModal() {
 
           {/* Body copy */}
           <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-            We’re adding new finds daily. See a way we can improve? Want to see a specific vibe? Let us know—we’re
-            building this for you.
+            Embrace the occasional "variation" in our collections as we add new finds daily. See a way we can improve?
+            Want to see a specific vibe? Let us know—we’re building this for you.
           </p>
 
           <Button className="w-full font-medium" style={{ background: "#534AB7", color: "#fff" }} onClick={handleClose}>
