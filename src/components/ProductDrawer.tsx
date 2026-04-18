@@ -257,7 +257,12 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                 </p>
               </div>
 
-              <ExternalCTA href={product.affiliate_url} label={ctaLabel} size="lg" fullWidth />
+              <div>
+                <ExternalCTA href={product.affiliate_url} label={ctaLabel} size="lg" fullWidth />
+                {vendorName && (
+                  <p className="mt-1.5 text-center text-[11px] text-muted-foreground">via {vendorName}</p>
+                )}
+              </div>
 
               <div className="flex justify-end">
                 <ReportBrokenLink productId={product.id} variant="full" />
