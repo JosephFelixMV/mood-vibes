@@ -6,6 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Cap keyword tags at `max` while preserving any "gift for ..." phrase.
+function capKeywordsPreservingGiftFor(values: string[], max = 6): string[] {
+  const deduped = Array.from(new Set(values.map((v) => v.toLowerCase().trim()).filter(Boolean)));
+  if (deduped.length <= max) return deduped;
+  const giftIdx = deduped.findIndex((k) => k.includes("gift for"));
+  if (giftIdx === -1 || giftIdx < max) return deduped.slice(0, max);
+  const kept = deduped.slice(0, max - 1);
+  kept.push(deduped[giftIdx]);
+  return kept;
+}
+
 async function callAnthropic(opts: {
   apiKey: string;
   system?: string;
@@ -318,7 +329,12 @@ ALWAYS return:
 - Intent-driven phrases: "anniversary gift for him", "quiet luxury desk accessory", "soft academia reading lamp"
 - Style/aesthetic phrases: "bauhaus minimalist watch", "oversized boyfriend fit knit", "cottagecore ceramic mug"
 
-Return 4–6 keywords. Each should be something a real person would search.
+GIFTING TAGS (IMPORTANT):
+- Whenever the product is plausibly giftable (most are), include AT LEAST ONE "gift for ..." phrase among the 6 tags.
+- Examples: "gift for home chef", "gift for new homeowner", "gift for coffee lover", "gift for him", "gift for her", "gift for new mom".
+- Pick the recipient that best matches the product's actual use case. Do not invent unrelated audiences.
+
+Return 4–6 keywords (one of which should be a "gift for ..." phrase when applicable). Each should be something a real person would search.
 
 ═══════════════════════════════════════
 CATEGORY-BASED MOOD DEFAULTS
@@ -635,7 +651,8 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     let validCore = dedupeStrings((suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c))).slice(0, 5);
     let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
-    const validKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim())).slice(0, 6);
+    const rawKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()));
+    const validKeywords = capKeywordsPreservingGiftFor(rawKeywords, 6);
     const confidence = typeof suggestions.confidence === "number"
       ? Math.min(1, Math.max(0, suggestions.confidence))
       : 0.6;

@@ -16,7 +16,7 @@ import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
 import { formatPrice } from "@/lib/supabase-queries";
-import { dedupeTaxonomyValues, parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
+import { capKeywordsPreservingGiftFor, dedupeTaxonomyValues, parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
 
 interface Props {
   editId: string | null;
@@ -231,7 +231,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         setAiSuggestions(suggestions);
         const updatedCategory = suggestions.core.length ? stringifyTaxonomyValues(suggestions.core) : stringifyTaxonomyValues(parseTaxonomyString(form.category));
         const updatedKeywords = suggestions.keywords.length
-          ? [...new Set([...form.keywords, ...suggestions.keywords])].slice(0, 6)
+          ? capKeywordsPreservingGiftFor([...form.keywords, ...suggestions.keywords], 6)
           : form.keywords;
         const isFashion = FASHION_SUBCATEGORIES.some((sub) => updatedCategory?.toLowerCase().includes(sub.toLowerCase()));
         const fashionUpdates: Record<string, any> = {};
@@ -842,7 +842,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                   if (error) throw error;
                   const suggested = (data?.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean);
                   if (suggested.length) {
-                    const updatedKws = [...new Set([...form.keywords, ...suggested])].slice(0, 6);
+                    const updatedKws = capKeywordsPreservingGiftFor([...form.keywords, ...suggested], 6);
                     const isFashion = FASHION_SUBCATEGORIES.some((sub) => form.category?.toLowerCase().includes(sub.toLowerCase()));
                     const fashionUpdates: Record<string, any> = {};
                     if (isFashion) {

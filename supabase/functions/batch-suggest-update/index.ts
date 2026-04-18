@@ -6,6 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Cap keyword tags at `max` while preserving any "gift for ..." phrase.
+function capKeywordsPreservingGiftFor(values: string[], max = 6): string[] {
+  const deduped = Array.from(new Set(values.map((v) => v.toLowerCase().trim()).filter(Boolean)));
+  if (deduped.length <= max) return deduped;
+  const giftIdx = deduped.findIndex((k) => k.includes("gift for"));
+  if (giftIdx === -1 || giftIdx < max) return deduped.slice(0, max);
+  const kept = deduped.slice(0, max - 1);
+  kept.push(deduped[giftIdx]);
+  return kept;
+}
+
 async function callAnthropic(opts: {
   apiKey: string;
   system?: string;
@@ -124,7 +135,7 @@ Respond ONLY with valid JSON in this exact format, no other text:
 {"core": ["Category1"], "vibes": ["Vibe1"], "moods": ["Mood1"], "keywords": ["keyword1", "keyword2"]}
 
 Use exact category/vibe/mood names from the lists above. Pick categories that genuinely fit.
-For keywords, suggest 4-6 lowercase search terms shoppers might use to find this product.`;
+For keywords, suggest 4-6 lowercase long-tail search terms (2–5 words each) shoppers might use to find this product. Whenever the product is plausibly giftable, include AT LEAST ONE "gift for ..." phrase (e.g. "gift for home chef", "gift for new homeowner", "gift for coffee lover").`;
 
   const content = await callAnthropic({
     apiKey,
@@ -142,7 +153,7 @@ For keywords, suggest 4-6 lowercase search terms shoppers might use to find this
   let core = (suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c)).slice(0, 5);
   let vibes = (suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v)).slice(0, 4);
   let moods = (suggestions.moods || []).filter((m: string) => moodNames.includes(m)).slice(0, 3);
-  const keywords = (suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean).slice(0, 6);
+  const keywords = capKeywordsPreservingGiftFor((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean), 6);
 
   // Auto-assign "The Atelier" vibe and "Luxe" mood for fashion items over $1000
   const FASHION_CATEGORIES = ["Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear", "Accessories", "Bags & Totes", "Jewelry", "Watches"];
