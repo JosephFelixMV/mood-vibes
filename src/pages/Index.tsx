@@ -9,6 +9,7 @@ import { getDailyPick, getRandomProduct, filterByRegion, type Product } from "@/
 import { supabase } from "@/lib/supabase";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
+import { setDiscoveryContext } from "@/lib/discovery-context";
 
 
 function useCountdownToMidnightUTC() {
@@ -34,6 +35,11 @@ function useCountdownToMidnightUTC() {
 
 export default function Index() {
   const { region } = useRegion();
+
+  useEffect(() => {
+    setDiscoveryContext({ type: "all", slug: "", name: "" });
+  }, []);
+
   useSEO({
     title: "Mood & Vibes | Find Your Mood. Shop the Vibe.",
     rawTitle: true,

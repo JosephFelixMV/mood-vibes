@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getCategories, getRandomProduct, filterByRegion, type Product } from "@/lib/supabase-queries";
@@ -8,6 +8,7 @@ import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSEO } from "@/hooks/useSEO";
+import { setDiscoveryContext } from "@/lib/discovery-context";
 
 import { useRegion } from "@/contexts/RegionContext";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,12 @@ export default function VibeLanding() {
 
   const vibe = vibes.find((v) => v.slug === slug);
   const vibeName = vibe?.name || "";
+
+  useEffect(() => {
+    if (slug && vibeName) {
+      setDiscoveryContext({ type: "vibe", slug, name: vibeName });
+    }
+  }, [slug, vibeName]);
 
   useSEO({
     title: vibeName ? `${vibeName} Aesthetic | Curated Finds | Mood & Vibes` : "Vibe | Mood & Vibes",

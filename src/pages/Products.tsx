@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { setDiscoveryContext } from "@/lib/discovery-context";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getProductsPaginated, getCategories, filterByRegion } from "@/lib/supabase-queries";
@@ -18,6 +19,11 @@ const PAGE_SIZE = 30;
 
 export default function Products() {
   const { region } = useRegion();
+
+  useEffect(() => {
+    setDiscoveryContext({ type: "all", slug: "", name: "" });
+  }, []);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const categorySlug = searchParams.get("category") || "";
   const vibeSlug = searchParams.get("vibe") || "";
