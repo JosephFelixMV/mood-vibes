@@ -256,7 +256,8 @@ Deno.serve(async (req) => {
     const { data: allProducts, error: prodErr } = await supabase
       .from("products")
       .select("id, name, description, category, vibe_category, mood, price, company_name")
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .limit(600);
 
     if (prodErr || !allProducts?.length) {
       await supabase.from("ai_requests").insert({
