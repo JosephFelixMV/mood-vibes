@@ -148,7 +148,7 @@ export default function ProductDetail() {
     });
 
     const pool = related.length > 0 ? related : allProducts;
-    const next = getRandomProduct(pool, product.id);
+    const next = getRandomProduct(pool as any, product.id);
     if (next) navigate(`/product/${(next as any).slug || next.id}`);
   };
 
