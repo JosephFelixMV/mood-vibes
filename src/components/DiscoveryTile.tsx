@@ -10,6 +10,7 @@ import ProductDrawer from "@/components/ProductDrawer";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
 import ShareButton from "@/components/ShareButton";
 import fallbackImage from "@/assets/fallback-product.png";
+import { formatBrandName } from "@/lib/brand-utils";
 
 const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
 
@@ -54,9 +55,10 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
     staleTime: 1000 * 60 * 10,
   });
 
-  const vendorName = pick?.vendor_id
+  const rawVendorName = pick?.vendor_id
     ? allBrands.find((b: any) => b.id === pick.vendor_id)?.name
     : null;
+  const vendorName = rawVendorName ? formatBrandName(rawVendorName) : null;
 
   // Sync pick if products load after mount
   if (products.length > 0 && !pick) {
