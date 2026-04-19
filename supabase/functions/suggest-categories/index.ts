@@ -315,6 +315,18 @@ NEVER return:
 - Standalone specs (e.g. "stainless steel", "43mm", "water resistant") — these belong in the Specifications field
 - The product's own brand name as a keyword
 - Single-word tags
+- DRUG-TERRITORY / MEDICAL-CLAIM LANGUAGE (legal compliance — strictly prohibited):
+  Never use verbs or phrases that imply medical efficacy, structural change to the body, or treatment of a condition. This applies to keywords, descriptions, and any output text.
+  Forbidden verbs/phrases include (non-exhaustive): treats, heals, cures, repairs (skin/damage/cells), reverses, stimulates collagen, boosts collagen, builds collagen, removes wrinkles, removes fine lines, eliminates wrinkles, reduces wrinkles, reduces inflammation, reduces redness, prevents aging, anti-aging, anti aging, fights aging, fights wrinkles, detoxifies, detox, alleviates, soothes pain, pain relief, joint pain, fat burning, cellulite removal, clinically proven, dermatologist proven, FDA approved, miracle, guaranteed results, boosts immunity.
+  Compliant alternatives — describe APPEARANCE, FEEL, or RITUAL only:
+    "anti-aging serum"        → "smoothing serum" or "youthful-looking skin serum"
+    "reduces fine lines"      → "helps minimize the appearance of fine lines"
+    "skin repair cream"       → "nourishing skin cream"
+    "removes wrinkles"        → "wrinkle-smoothing"
+    "stimulates collagen"     → "supports a plump, dewy look"
+    "treats acne"             → "for blemish-prone skin"
+    "heals dry skin"          → "hydrating dry skin balm"
+  RULE: If you cannot rephrase a benefit cosmetically, OMIT it. Never invent medical claims.
 
 ALWAYS return:
 - Long-tail phrases of 2–5 words that describe style, material combined with form, occasion combined with intent, or cultural vibe
