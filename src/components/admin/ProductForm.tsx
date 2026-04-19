@@ -16,7 +16,12 @@ import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
 import { formatPrice } from "@/lib/supabase-queries";
-import { capKeywordsPreservingGiftFor, dedupeTaxonomyValues, parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
+import {
+  capKeywordsPreservingGiftFor,
+  dedupeTaxonomyValues,
+  parseTaxonomyString,
+  stringifyTaxonomyValues,
+} from "@/lib/taxonomy-utils";
 
 interface Props {
   editId: string | null;
@@ -36,14 +41,51 @@ const AVAILABLE_REGIONS = [
 ] as const;
 
 const FASHION_SUBCATEGORIES = [
-  "womens-fashion", "mens-fashion", "womens-shoes", "mens-shoes", "activewear",
-  "Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear",
+  "womens-fashion",
+  "mens-fashion",
+  "womens-shoes",
+  "mens-shoes",
+  "activewear",
+  "Women's Fashion",
+  "Men's Fashion",
+  "Women's Shoes",
+  "Men's Shoes",
+  "Activewear",
 ];
 
 function inferFashionAttributes(keywords: string[]): { season: string; warmth: string } {
   const kws = keywords.map((k) => k.toLowerCase());
-  const fallWinterTerms = ["wool", "knit", "fleece", "flannel", "puffer", "thermal", "turtleneck", "fall", "winter", "sherpa", "down", "cashmere", "heavyweight", "insulated", "corduroy"];
-  const springSummerTerms = ["linen", "cotton", "sleeveless", "shorts", "floral", "lightweight", "breathable", "spring", "summer", "tank", "mesh", "seersucker"];
+  const fallWinterTerms = [
+    "wool",
+    "knit",
+    "fleece",
+    "flannel",
+    "puffer",
+    "thermal",
+    "turtleneck",
+    "fall",
+    "winter",
+    "sherpa",
+    "down",
+    "cashmere",
+    "heavyweight",
+    "insulated",
+    "corduroy",
+  ];
+  const springSummerTerms = [
+    "linen",
+    "cotton",
+    "sleeveless",
+    "shorts",
+    "floral",
+    "lightweight",
+    "breathable",
+    "spring",
+    "summer",
+    "tank",
+    "mesh",
+    "seersucker",
+  ];
   const lightTerms = ["linen", "mesh", "tank", "sleeveless", "breathable", "sheer"];
   const midLayerTerms = ["cotton", "denim", "jersey", "poplin", "twill", "chambray"];
   const warmTerms = ["wool", "knit", "fleece", "sherpa", "cashmere", "waffle knit"];
@@ -83,6 +125,40 @@ const empty = {
   vendor_id: "" as string,
 };
 
+// Canonical brand names — intentional casing preserved exactly
+const BRAND_CANONICAL: Record<string, string> = {
+  "rag & bone": "rag & bone",
+  "kate spade new york": "kate spade new york",
+  staud: "STAUD",
+  hoka: "HOKA",
+  "a.p.c.": "A.P.C.",
+  "farm rio": "FARM Rio",
+  etuhome: "etúHOME",
+  skims: "SKIMS",
+  nars: "NARS",
+  apc: "A.P.C.",
+  londontown: "LONDONTOWN",
+  reiss: "REISS",
+};
+
+function normalizeCompanyName(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed) return trimmed;
+
+  // Check canonical lookup first (case-insensitive key match)
+  const canonical = BRAND_CANONICAL[trimmed.toLowerCase()];
+  if (canonical) return canonical;
+
+  // Only apply title case if input is entirely uppercase (2+ letters)
+  const isAllCaps = trimmed === trimmed.toUpperCase() && /[A-Z]{2,}/.test(trimmed);
+  if (isAllCaps) {
+    return trimmed.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  // Leave all other casing untouched
+  return trimmed;
+}
+
 export default function ProductForm({ editId, onDone, savedState }: Props) {
   const qc = useQueryClient();
   const { data: coreCategories = [] } = useQuery({
@@ -105,7 +181,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   const { data: brandsList = [] } = useQuery({
     queryKey: ["brands"],
     queryFn: async () => {
-      const { data } = await supabase.from("brands").select("id, name, affiliate_url").eq("is_active", true).order("name");
+      const { data } = await supabase
+        .from("brands")
+        .select("id, name, affiliate_url")
+        .eq("is_active", true)
+        .order("name");
       return data || [];
     },
   });
@@ -142,7 +222,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     if (existing && editId) {
       Promise.all([
         supabase.from("product_images").select("image_url").eq("product_id", editId).order("display_order"),
-        supabase.from("product_specifications").select("item_detail, specification").eq("product_id", editId).order("display_order"),
+        supabase
+          .from("product_specifications")
+          .select("item_detail, specification")
+          .eq("product_id", editId)
+          .order("display_order"),
         supabase.from("product_keywords").select("keyword_id, keywords(term)").eq("product_id", editId),
       ]).then(([imgRes, specRes, kwRes]) => {
         setForm({
@@ -160,10 +244,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           is_active: existing.is_active,
           regions: existing.regions || ["US"],
           additional_images: imgRes.data?.map((d) => d.image_url) || [],
-          specifications: specRes.data?.map((s) => ({
-            item_detail: s.item_detail,
-            specification: s.specification,
-          })) || [],
+          specifications:
+            specRes.data?.map((s) => ({
+              item_detail: s.item_detail,
+              specification: s.specification,
+            })) || [],
           keywords: kwRes.data?.map((k: any) => k.keywords?.term).filter(Boolean) || [],
           fashion_season: (existing as any).fashion_season || "",
           fashion_warmth: (existing as any).fashion_warmth || "",
@@ -180,9 +265,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
   const filteredKeywords = allKeywords.filter(
-    (kw) =>
-      kw.term.toLowerCase().includes(keywordInput.toLowerCase()) &&
-      !form.keywords.includes(kw.term)
+    (kw) => kw.term.toLowerCase().includes(keywordInput.toLowerCase()) && !form.keywords.includes(kw.term),
   );
 
   const addKeyword = async (term: string) => {
@@ -203,18 +286,33 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   };
 
   const removeKeyword = (term: string) => {
-    set("keywords", form.keywords.filter((k: string) => k !== term));
+    set(
+      "keywords",
+      form.keywords.filter((k: string) => k !== term),
+    );
   };
 
   const [suggestingCategories, setSuggestingCategories] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<{ core: string[]; vibes: string[]; moods: string[]; keywords: string[] } | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<{
+    core: string[];
+    vibes: string[];
+    moods: string[];
+    keywords: string[];
+  } | null>(null);
 
   const suggestCategories = async (productName: string, description: string, price: string | number) => {
     setSuggestingCategories(true);
     setAiSuggestions(null);
     try {
       const { data, error } = await supabase.functions.invoke("suggest-categories", {
-        body: { name: productName, description, price, source_url: form.source_url, vendor_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name, company_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name },
+        body: {
+          name: productName,
+          description,
+          price,
+          source_url: form.source_url,
+          vendor_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name,
+          company_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name,
+        },
       });
       if (error) throw error;
       if (data?.core?.length || data?.vibes?.length || data?.moods?.length || data?.keywords?.length) {
@@ -229,11 +327,15 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           keywords: [...new Set(suggestionKeywords)] as string[],
         };
         setAiSuggestions(suggestions);
-        const updatedCategory = suggestions.core.length ? stringifyTaxonomyValues(suggestions.core) : stringifyTaxonomyValues(parseTaxonomyString(form.category));
+        const updatedCategory = suggestions.core.length
+          ? stringifyTaxonomyValues(suggestions.core)
+          : stringifyTaxonomyValues(parseTaxonomyString(form.category));
         const updatedKeywords = suggestions.keywords.length
           ? capKeywordsPreservingGiftFor([...form.keywords, ...suggestions.keywords], 6)
           : form.keywords;
-        const isFashion = FASHION_SUBCATEGORIES.some((sub) => updatedCategory?.toLowerCase().includes(sub.toLowerCase()));
+        const isFashion = FASHION_SUBCATEGORIES.some((sub) =>
+          updatedCategory?.toLowerCase().includes(sub.toLowerCase()),
+        );
         const fashionUpdates: Record<string, any> = {};
         if (isFashion && updatedKeywords.length) {
           const { season, warmth } = inferFashionAttributes(updatedKeywords);
@@ -242,13 +344,21 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         }
         setForm((prev: any) => ({
           ...prev,
-          category: suggestions.core.length ? stringifyTaxonomyValues(suggestions.core) : stringifyTaxonomyValues(parseTaxonomyString(prev.category)),
-          vibe_category: suggestions.vibes.length ? stringifyTaxonomyValues(suggestions.vibes) : stringifyTaxonomyValues(parseTaxonomyString(prev.vibe_category)),
-          mood: suggestions.moods.length ? stringifyTaxonomyValues(suggestions.moods) : stringifyTaxonomyValues(parseTaxonomyString(prev.mood)),
+          category: suggestions.core.length
+            ? stringifyTaxonomyValues(suggestions.core)
+            : stringifyTaxonomyValues(parseTaxonomyString(prev.category)),
+          vibe_category: suggestions.vibes.length
+            ? stringifyTaxonomyValues(suggestions.vibes)
+            : stringifyTaxonomyValues(parseTaxonomyString(prev.vibe_category)),
+          mood: suggestions.moods.length
+            ? stringifyTaxonomyValues(suggestions.moods)
+            : stringifyTaxonomyValues(parseTaxonomyString(prev.mood)),
           keywords: updatedKeywords,
           ...fashionUpdates,
         }));
-        toast.success(`Suggested ${suggestions.core.length} categories, ${suggestions.vibes.length} vibes, ${suggestions.moods.length} moods, and ${suggestions.keywords.length} keywords`);
+        toast.success(
+          `Suggested ${suggestions.core.length} categories, ${suggestions.vibes.length} vibes, ${suggestions.moods.length} moods, and ${suggestions.keywords.length} keywords`,
+        );
       } else {
         toast.info("No suggestions returned");
       }
@@ -267,7 +377,8 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target?.result as string);
-        const parsedPrice = typeof data.price === "string" ? parseFloat(data.price.replace(/[^0-9.]/g, "")) || "" : (data.price || "");
+        const parsedPrice =
+          typeof data.price === "string" ? parseFloat(data.price.replace(/[^0-9.]/g, "")) || "" : data.price || "";
         setForm((prev: any) => ({
           ...prev,
           name: data.name || prev.name,
@@ -275,18 +386,20 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           affiliate_url: data.affiliate_url || prev.affiliate_url,
           source_url: data.source_url || prev.source_url,
           image_url: data.image_url || prev.image_url,
-          additional_images: Array.isArray(data.additional_images) && data.additional_images.length > 0
-            ? data.additional_images.slice(0, 4)
-            : prev.additional_images,
+          additional_images:
+            Array.isArray(data.additional_images) && data.additional_images.length > 0
+              ? data.additional_images.slice(0, 4)
+              : prev.additional_images,
           video_url: data.video_url || prev.video_url,
           price: parsedPrice,
           description: stripHtml(data.description || "") || prev.description,
           category: stringifyTaxonomyValues(parseTaxonomyString(data.category ?? prev.category ?? "")),
           vibe_category: stringifyTaxonomyValues(parseTaxonomyString(data.vibe_category ?? prev.vibe_category ?? "")),
           mood: stringifyTaxonomyValues(parseTaxonomyString(data.mood ?? prev.mood ?? "")),
-          specifications: Array.isArray(data.specifications) && data.specifications.length > 0
-            ? data.specifications
-            : prev.specifications,
+          specifications:
+            Array.isArray(data.specifications) && data.specifications.length > 0
+              ? data.specifications
+              : prev.specifications,
           is_active: typeof data.is_active === "boolean" ? data.is_active : prev.is_active,
         }));
         toast.success("Template loaded — run AI suggestions manually when ready");
@@ -318,7 +431,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   };
 
   const removeImage = (index: number) => {
-    set("additional_images", form.additional_images.filter((_: any, i: number) => i !== index));
+    set(
+      "additional_images",
+      form.additional_images.filter((_: any, i: number) => i !== index),
+    );
   };
 
   const addSpecRow = () => {
@@ -332,7 +448,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   };
 
   const removeSpec = (index: number) => {
-    set("specifications", form.specifications.filter((_: any, i: number) => i !== index));
+    set(
+      "specifications",
+      form.specifications.filter((_: any, i: number) => i !== index),
+    );
   };
 
   const mutation = useMutation({
@@ -344,7 +463,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       const hasValidPrice = form.price !== "" && form.price !== null && !isNaN(numericPrice) && numericPrice >= 5;
       // Block publishing if price is missing or below $5 — force draft instead
       if (form.is_active && !hasValidPrice) {
-        throw new Error("Price must be at least $5.00 to publish. Save as draft (toggle off Active) to upload without a valid price.");
+        throw new Error(
+          "Price must be at least $5.00 to publish. Save as draft (toggle off Active) to upload without a valid price.",
+        );
       }
       if (!editId) {
         const { data: dupes } = await supabase
@@ -357,7 +478,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           throw new Error(
             isDraft
               ? `A draft product named "${form.name.trim()}" already exists. Review existing drafts before adding a new one.`
-              : `A product named "${form.name.trim()}" already exists.`
+              : `A product named "${form.name.trim()}" already exists.`,
           );
         }
       }
@@ -408,14 +529,12 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             product_id: productId!,
             image_url: url.trim(),
             display_order: i + 1,
-          }))
+          })),
         );
         if (error) throw error;
       }
 
-      const validSpecs = form.specifications.filter(
-        (s: SpecRow) => s.item_detail.trim() && s.specification.trim()
-      );
+      const validSpecs = form.specifications.filter((s: SpecRow) => s.item_detail.trim() && s.specification.trim());
       if (validSpecs.length > 0 && productId) {
         const { error } = await supabase.from("product_specifications").insert(
           validSpecs.map((s: SpecRow, i: number) => ({
@@ -423,7 +542,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             item_detail: s.item_detail.trim(),
             specification: s.specification.trim(),
             display_order: i + 1,
-          }))
+          })),
         );
         if (error) throw error;
       }
@@ -454,8 +573,8 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     onError: (err) => toast.error(err.message),
   });
 
-  const isFashionProduct = FASHION_SUBCATEGORIES.some(
-    (sub) => form.category?.toLowerCase().includes(sub.toLowerCase())
+  const isFashionProduct = FASHION_SUBCATEGORIES.some((sub) =>
+    form.category?.toLowerCase().includes(sub.toLowerCase()),
   );
 
   const preview: Product = {
@@ -511,7 +630,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <label>
             <input type="file" accept=".json" onChange={handleTemplateUpload} className="hidden" />
             <Button type="button" variant="outline" size="sm" className="gap-1.5 cursor-pointer" asChild>
-              <span><Upload className="h-3.5 w-3.5" /> Upload Template</span>
+              <span>
+                <Upload className="h-3.5 w-3.5" /> Upload Template
+              </span>
             </Button>
           </label>
         </div>
@@ -532,43 +653,63 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             <SelectContent>
               <SelectItem value="none">— No Vendor —</SelectItem>
               {brandsList.map((b: any) => (
-                <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                <SelectItem key={b.id} value={b.id}>
+                  {b.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <p className="mt-1 text-xs text-muted-foreground">Select the vendor/retailer from the brands list</p>
-          {form.source_url && !form.vendor_id && brandsList.length > 0 && (() => {
-            try {
-              const sourceHost = new URL(form.source_url).hostname.replace(/^www\./, "").toLowerCase();
-              const match = brandsList.find((b: any) => {
-                try {
-                  const brandHost = new URL(b.affiliate_url).hostname.replace(/^www\./, "").toLowerCase();
-                  if (sourceHost.includes(brandHost) || brandHost.includes(sourceHost)) return true;
-                } catch { /* skip */ }
-                const brandName = (b.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-                const domainBase = sourceHost.split(".")[0];
-                return brandName === domainBase || domainBase.includes(brandName);
-              });
-              if (match) return (
-                <button
-                  type="button"
-                  onClick={() => set("vendor_id", match.id)}
-                  className="mt-1 text-xs text-primary hover:underline"
-                >
-                  ✨ Auto-detected: {match.name} — click to apply
-                </button>
-              );
-            } catch { /* invalid URL */ }
-            return null;
-          })()}
+          {form.source_url &&
+            !form.vendor_id &&
+            brandsList.length > 0 &&
+            (() => {
+              try {
+                const sourceHost = new URL(form.source_url).hostname.replace(/^www\./, "").toLowerCase();
+                const match = brandsList.find((b: any) => {
+                  try {
+                    const brandHost = new URL(b.affiliate_url).hostname.replace(/^www\./, "").toLowerCase();
+                    if (sourceHost.includes(brandHost) || brandHost.includes(sourceHost)) return true;
+                  } catch {
+                    /* skip */
+                  }
+                  const brandName = (b.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+                  const domainBase = sourceHost.split(".")[0];
+                  return brandName === domainBase || domainBase.includes(brandName);
+                });
+                if (match)
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => set("vendor_id", match.id)}
+                      className="mt-1 text-xs text-primary hover:underline"
+                    >
+                      ✨ Auto-detected: {match.name} — click to apply
+                    </button>
+                  );
+              } catch {
+                /* invalid URL */
+              }
+              return null;
+            })()}
         </div>
         <div>
           <Label>Affiliate Link</Label>
-          <Input value={form.affiliate_url} onChange={(e) => set("affiliate_url", e.target.value)} required placeholder="https://..." />
+          <Input
+            value={form.affiliate_url}
+            onChange={(e) => set("affiliate_url", e.target.value)}
+            required
+            placeholder="https://..."
+          />
         </div>
         <div>
           <Label>Source Product Page URL (required, admin only)</Label>
-          <Input value={form.source_url} onChange={(e) => set("source_url", e.target.value)} required placeholder="https://retailer.com/product/..." />
+          <Input
+            value={form.source_url}
+            onChange={(e) => set("source_url", e.target.value)}
+            required
+            placeholder="https://retailer.com/product/..."
+          />
           <p className="mt-1 text-xs text-muted-foreground">Original product page URL for link validation</p>
         </div>
         <div>
@@ -585,30 +726,39 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                 <p className="text-xs font-medium text-muted-foreground mb-1">Keywords:</p>
                 <div className="flex flex-wrap gap-1.5">
                   {aiSuggestions.keywords.map((k) => (
-                    <span key={k} className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">{k}</span>
+                    <span
+                      key={k}
+                      className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium"
+                    >
+                      {k}
+                    </span>
                   ))}
                 </div>
               </div>
             )}
-            <p className="text-xs text-muted-foreground">Categories, vibes, moods, and keywords have been auto-selected. Adjust as needed.</p>
+            <p className="text-xs text-muted-foreground">
+              Categories, vibes, moods, and keywords have been auto-selected. Adjust as needed.
+            </p>
           </div>
         )}
         {/* Additional images */}
         <div>
           <div className="flex items-center justify-between">
             <Label>Additional Images ({form.additional_images.length}/4)</Label>
-            <Button type="button" variant="outline" size="sm" onClick={addImageField} disabled={form.additional_images.length >= 4}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addImageField}
+              disabled={form.additional_images.length >= 4}
+            >
               + Add Image
             </Button>
           </div>
           <div className="mt-2 space-y-2">
             {form.additional_images.map((url: string, i: number) => (
               <div key={i} className="flex gap-2">
-                <Input
-                  value={url}
-                  onChange={(e) => updateImage(i, e.target.value)}
-                  placeholder="https://..."
-                />
+                <Input value={url} onChange={(e) => updateImage(i, e.target.value)} placeholder="https://..." />
                 <Button type="button" variant="ghost" size="icon" onClick={() => removeImage(i)}>
                   <X className="h-4 w-4" />
                 </Button>
@@ -625,9 +775,19 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
         <div>
           <Label>Price</Label>
-          <Input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={form.price} onChange={(e) => set("price", e.target.value)} placeholder="29.99" min="5" />
+          <Input
+            type="text"
+            inputMode="decimal"
+            pattern="[0-9]*\.?[0-9]*"
+            value={form.price}
+            onChange={(e) => set("price", e.target.value)}
+            placeholder="29.99"
+            min="5"
+          />
           {form.price !== "" && (Number(form.price) < 5 || isNaN(Number(form.price))) && (
-            <p className="text-xs text-destructive mt-1">Price below $5.00 — product can be saved as a draft but cannot be published.</p>
+            <p className="text-xs text-destructive mt-1">
+              Price below $5.00 — product can be saved as a draft but cannot be published.
+            </p>
           )}
           {form.price === "" && (
             <p className="text-xs text-muted-foreground mt-1">Optional for drafts — required (≥ $5.00) to publish.</p>
@@ -639,7 +799,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               onChange={(e) => set("price_below_msrp", e.target.checked)}
               className="mt-0.5 h-4 w-4 rounded border-primary accent-primary"
             />
-            <span className="text-xs text-muted-foreground">Check to override text — <em>Seller often offers deals below MSRP</em></span>
+            <span className="text-xs text-muted-foreground">
+              Check to override text — <em>Seller often offers deals below MSRP</em>
+            </span>
           </label>
         </div>
         <div>
@@ -647,30 +809,40 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <RichTextEditor value={form.description} onChange={(html) => set("description", html)} />
         </div>
         <div>
-          <Label>Category (Core Lifestyle — up to 5) {suggestingCategories && <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>}</Label>
+          <Label>
+            Category (Core Lifestyle — up to 5){" "}
+            {suggestingCategories && (
+              <span className="text-xs text-muted-foreground animate-pulse ml-2">✨ AI suggesting...</span>
+            )}
+          </Label>
           <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
-            {coreCategories.filter((c) => !!c.parent_slug).map((c) => {
-              const selected = parseTaxonomyString(form.category);
-              const isChecked = selected.includes(c.name);
-              const atLimit = selected.length >= 5 && !isChecked;
-              return (
-                <label key={c.id} className={`flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 ${atLimit ? "opacity-50 cursor-not-allowed" : ""}`}>
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    disabled={atLimit}
-                    onChange={() => {
-                      const updated = isChecked
-                        ? selected.filter((v: string) => v !== c.name)
-                        : [...selected, c.name];
-                      set("category", stringifyTaxonomyValues(updated));
-                    }}
-                    className="rounded"
-                  />
-                  {c.icon} {c.name}
-                </label>
-              );
-            })}
+            {coreCategories
+              .filter((c) => !!c.parent_slug)
+              .map((c) => {
+                const selected = parseTaxonomyString(form.category);
+                const isChecked = selected.includes(c.name);
+                const atLimit = selected.length >= 5 && !isChecked;
+                return (
+                  <label
+                    key={c.id}
+                    className={`flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 ${atLimit ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      disabled={atLimit}
+                      onChange={() => {
+                        const updated = isChecked
+                          ? selected.filter((v: string) => v !== c.name)
+                          : [...selected, c.name];
+                        set("category", stringifyTaxonomyValues(updated));
+                      }}
+                      className="rounded"
+                    />
+                    {c.icon} {c.name}
+                  </label>
+                );
+              })}
           </div>
           <Button
             type="button"
@@ -685,7 +857,12 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           {aiSuggestions && aiSuggestions.core.length > 0 && (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {aiSuggestions.core.map((c) => (
-                <span key={c} className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{c}</span>
+                <span
+                  key={c}
+                  className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+                >
+                  {c}
+                </span>
               ))}
             </div>
           )}
@@ -695,7 +872,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             <Label>Vibes (Optional — select multiple)</Label>
             <Dialog>
               <DialogTrigger asChild>
-                <button type="button" className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted hover:bg-muted/80 text-muted-foreground transition-colors">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted hover:bg-muted/80 text-muted-foreground transition-colors"
+                >
                   <Info className="h-3 w-3" />
                 </button>
               </DialogTrigger>
@@ -722,14 +902,15 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               const selected = parseTaxonomyString(form.vibe_category);
               const isChecked = selected.includes(c.name);
               return (
-                <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                <label
+                  key={c.id}
+                  className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5"
+                >
                   <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => {
-                      const updated = isChecked
-                        ? selected.filter((v: string) => v !== c.name)
-                        : [...selected, c.name];
+                      const updated = isChecked ? selected.filter((v: string) => v !== c.name) : [...selected, c.name];
                       set("vibe_category", stringifyTaxonomyValues(updated));
                     }}
                     className="rounded"
@@ -752,7 +933,12 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           {aiSuggestions && aiSuggestions.vibes.length > 0 && (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {aiSuggestions.vibes.map((v) => (
-                <span key={v} className="inline-flex items-center rounded-full bg-accent/50 px-2.5 py-0.5 text-xs font-medium text-accent-foreground">{v}</span>
+                <span
+                  key={v}
+                  className="inline-flex items-center rounded-full bg-accent/50 px-2.5 py-0.5 text-xs font-medium text-accent-foreground"
+                >
+                  {v}
+                </span>
               ))}
             </div>
           )}
@@ -763,7 +949,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             <Label>Moods (Optional — select multiple)</Label>
             <Dialog>
               <DialogTrigger asChild>
-                <button type="button" className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted hover:bg-muted/80 text-muted-foreground transition-colors">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full h-5 w-5 bg-muted hover:bg-muted/80 text-muted-foreground transition-colors"
+                >
                   <Info className="h-3 w-3" />
                 </button>
               </DialogTrigger>
@@ -790,14 +979,15 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               const selected = parseTaxonomyString(form.mood);
               const isChecked = selected.includes(c.name);
               return (
-                <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5">
+                <label
+                  key={c.id}
+                  className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5"
+                >
                   <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => {
-                      const updated = isChecked
-                        ? selected.filter((v: string) => v !== c.name)
-                        : [...selected, c.name];
+                      const updated = isChecked ? selected.filter((v: string) => v !== c.name) : [...selected, c.name];
                       set("mood", stringifyTaxonomyValues(updated));
                     }}
                     className="rounded"
@@ -820,14 +1010,22 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           {aiSuggestions && aiSuggestions.moods.length > 0 && (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {aiSuggestions.moods.map((m) => (
-                <span key={m} className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">{m}</span>
+                <span
+                  key={m}
+                  className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground"
+                >
+                  {m}
+                </span>
               ))}
             </div>
           )}
         </div>
         <div ref={keywordRef}>
           <div className="flex items-center justify-between">
-            <Label>Keywords (for SEO & AI Discovery — up to 6) <span className="text-xs text-muted-foreground ml-1">{form.keywords.length}/6</span></Label>
+            <Label>
+              Keywords (for SEO & AI Discovery — up to 6){" "}
+              <span className="text-xs text-muted-foreground ml-1">{form.keywords.length}/6</span>
+            </Label>
             <Button
               type="button"
               variant="outline"
@@ -837,13 +1035,22 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                 setSuggestingCategories(true);
                 try {
                   const { data, error } = await supabase.functions.invoke("suggest-categories", {
-                    body: { name: form.name, description: form.description, price: form.price, source_url: form.source_url, vendor_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name, company_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name },
+                    body: {
+                      name: form.name,
+                      description: form.description,
+                      price: form.price,
+                      source_url: form.source_url,
+                      vendor_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name,
+                      company_name: brandsList?.find((b: any) => b.id === form.vendor_id)?.name,
+                    },
                   });
                   if (error) throw error;
                   const suggested = (data?.keywords || []).map((k: string) => k.toLowerCase().trim()).filter(Boolean);
                   if (suggested.length) {
                     const updatedKws = capKeywordsPreservingGiftFor([...form.keywords, ...suggested], 6);
-                    const isFashion = FASHION_SUBCATEGORIES.some((sub) => form.category?.toLowerCase().includes(sub.toLowerCase()));
+                    const isFashion = FASHION_SUBCATEGORIES.some((sub) =>
+                      form.category?.toLowerCase().includes(sub.toLowerCase()),
+                    );
                     const fashionUpdates: Record<string, any> = {};
                     if (isFashion) {
                       const { season, warmth } = inferFashionAttributes(updatedKws);
@@ -873,7 +1080,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5 min-h-[32px] rounded-lg border p-2">
             {form.keywords.map((kw: string) => (
-              <span key={kw} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">
+              <span
+                key={kw}
+                className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium"
+              >
                 {kw}
                 <button type="button" onClick={() => removeKeyword(kw)} className="ml-0.5 hover:text-destructive">
                   <X className="h-3 w-3" />
@@ -884,7 +1094,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <div className="relative mt-1">
             <Input
               value={keywordInput}
-              onChange={(e) => { setKeywordInput(e.target.value); setShowKeywordSuggestions(true); }}
+              onChange={(e) => {
+                setKeywordInput(e.target.value);
+                setShowKeywordSuggestions(true);
+              }}
               onFocus={() => setShowKeywordSuggestions(true)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && keywordInput.trim()) {
@@ -919,7 +1132,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               </div>
             )}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Press Enter to add custom keywords. Use ✨ Suggest to auto-generate from product name & description.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Press Enter to add custom keywords. Use ✨ Suggest to auto-generate from product name & description.
+          </p>
         </div>
 
         {/* Style Attributes — fashion only */}
@@ -996,7 +1211,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
                           "fashion_occasions",
                           selected
                             ? form.fashion_occasions.filter((o: string) => o !== val)
-                            : [...form.fashion_occasions, val]
+                            : [...form.fashion_occasions, val],
                         )
                       }
                       className={`px-3 py-1 rounded-full text-sm border transition-colors ${
@@ -1074,7 +1289,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               );
             })}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Select regions where this product ships to. Default: US only.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Select regions where this product ships to. Default: US only.
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -1093,11 +1310,21 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
             </Button>
           )}
           {!editId && (
-            <Button type="button" variant="outline" onClick={() => { setForm(empty); if (savedState) savedState.current = null; }} className="rounded-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setForm(empty);
+                if (savedState) savedState.current = null;
+              }}
+              className="rounded-full"
+            >
               Clear Fields
             </Button>
           )}
-          <Button type="button" variant="outline" onClick={onDone} className="rounded-full">Cancel</Button>
+          <Button type="button" variant="outline" onClick={onDone} className="rounded-full">
+            Cancel
+          </Button>
         </div>
       </form>
 
