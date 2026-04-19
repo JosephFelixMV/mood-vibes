@@ -17,6 +17,38 @@ function capKeywordsPreservingGiftFor(values: string[], max = 6): string[] {
   return kept;
 }
 
+// Legal compliance: strip drug-territory / medical-claim language from keywords.
+// Benign uses ("treat jar", "home repair tool", "remove makeup") are intentionally NOT matched.
+const DRUG_TERRITORY_PATTERNS: RegExp[] = [
+  /\banti[-\s]?aging\b/i,
+  /\b(reduces?|reduce)\s+(fine\s+lines?|wrinkles?|inflammation|redness|appearance\s+of\s+(?:\d+\s+)?wrinkles?|signs?\s+of\s+aging|expression\s+lines?|dark\s+circles?|visible\s+lines?|acne\s+scars?|oiliness)\b/i,
+  /\b(removes?|eliminates?)\s+(wrinkles?|fine\s+lines?|cellulite|dark\s+circles?|age\s+spots?)\b/i,
+  /\b(prevents?)\s+(aging|wrinkles?|fine\s+lines?|breakouts?|nail\s+splitting)\b/i,
+  /\b(repairs?)\s+(skin|damage|cells?|barrier)\b/i,
+  /\b(skin|nail|barrier|damage|cellular|wrinkle)\s+repair\b/i,
+  /\bnighttime?\s+(skin\s+)?repair\b/i,
+  /\bintensive\s+foot\s+repair\b/i,
+  /\bage\s+defense\b/i,
+  /\bserum\s+to\s+reduce\b/i,
+  /\b(treats?|heals?|cures?|reverses?)\s+(acne|skin|aging|wrinkles?|damage|dryness|condition|disease|inflammation|infection)/i,
+  /\b(stimulates?|boosts?|builds?)\s+collagen\b/i,
+  /\bcollagen\s+production\b/i,
+  /\bdetoxif(?:y|ies|ying)\b/i,
+  /\b(alleviates?|soothes?\s+pain|pain\s+relief|joint\s+pain|fat[-\s]?burning|cellulite\s+removal)\b/i,
+  /\b(clinically|dermatologist)[-\s]proven\b/i,
+  /\bFDA[-\s]approved\b/i,
+  /\b(miracle|guaranteed\s+results)\b/i,
+  /\bboosts?\s+immunity\b/i,
+];
+
+function isDrugTerritory(keyword: string): boolean {
+  return DRUG_TERRITORY_PATTERNS.some((re) => re.test(keyword));
+}
+
+export function stripDrugTerritory(keywords: string[]): string[] {
+  return keywords.filter((k) => !isDrugTerritory(k));
+}
+
 async function callAnthropic(opts: {
   apiKey: string;
   system?: string;
