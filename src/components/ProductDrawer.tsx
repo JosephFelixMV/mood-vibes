@@ -12,6 +12,7 @@ import { formatPrice, getCategories } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import { Link } from "react-router-dom";
 import fallbackImage from "@/assets/fallback-product.png";
+import { formatBrandName } from "@/lib/brand-utils";
 
 interface ProductDrawerProps {
   product: Product;
@@ -78,9 +79,10 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
     staleTime: 1000 * 60 * 10,
   });
 
-  const vendorName = product.vendor_id
+  const rawVendorName = product.vendor_id
     ? allBrands.find((b: any) => b.id === product.vendor_id)?.name
     : null;
+  const vendorName = rawVendorName ? formatBrandName(rawVendorName) : null;
 
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
@@ -214,7 +216,7 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                 </SheetTitle>
                 {product.company_name && (
                   <SheetDescription className="text-sm text-muted-foreground">
-                    {product.company_name}
+                    {formatBrandName(product.company_name)}
                   </SheetDescription>
                 )}
               </SheetHeader>

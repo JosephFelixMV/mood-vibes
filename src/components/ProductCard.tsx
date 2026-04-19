@@ -17,6 +17,7 @@ import type { Product } from "@/lib/supabase-queries";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProductDrawer from "@/components/ProductDrawer";
 import fallbackImage from "@/assets/fallback-product.png";
+import { formatBrandName } from "@/lib/brand-utils";
 
 interface ProductCardProps {
   product: Product;
@@ -46,9 +47,10 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
     staleTime: 1000 * 60 * 10,
   });
 
-  const vendorName = product.vendor_id
+  const rawVendorName = product.vendor_id
     ? allBrands.find((b: any) => b.id === product.vendor_id)?.name
     : null;
+  const vendorName = rawVendorName ? formatBrandName(rawVendorName) : null;
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
   // Pick one random tag per taxonomy type, stable across re-renders
@@ -249,7 +251,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
 
           {product.company_name && (
             <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground font-medium">
-              {product.company_name}
+              {formatBrandName(product.company_name)}
             </span>
           )}
 
