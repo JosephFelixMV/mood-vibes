@@ -51,19 +51,12 @@ async function callAnthropic(opts: {
 }
 
 async function loadCategories(sb: any) {
-  const { data } = await sb
-    .from("categories")
-    .select("name, type, description, parent_slug")
-    .order("name");
+  const { data } = await sb.from("categories").select("name, type, description, parent_slug").order("name");
   const rows = data || [];
 
-  const core = rows
-    .filter((r: any) => r.type === "core" && r.parent_slug)
-    .map((r: any) => r.name);
+  const core = rows.filter((r: any) => r.type === "core" && r.parent_slug).map((r: any) => r.name);
 
-  const vibes = rows
-    .filter((r: any) => r.type === "vibe")
-    .map((r: any) => r.name);
+  const vibes = rows.filter((r: any) => r.type === "vibe").map((r: any) => r.name);
 
   const moods: Record<string, string> = {};
   rows
@@ -129,10 +122,7 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const { core: CORE_CATEGORIES, vibes: VIBE_CATEGORIES, moods: MOOD_CATEGORIES } = await loadCategories(supabase);
 
@@ -662,19 +652,34 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     }
 
     const suggestions = JSON.parse(jsonMatch[0]);
-    
+
     const moodNames = Object.keys(MOOD_CATEGORIES);
-    let validCore = dedupeStrings((suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c))).slice(0, 5);
-    let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(0, 4);
+    let validCore = dedupeStrings((suggestions.core || []).filter((c: string) => CORE_CATEGORIES.includes(c))).slice(
+      0,
+      5,
+    );
+    let validVibes = dedupeStrings((suggestions.vibes || []).filter((v: string) => VIBE_CATEGORIES.includes(v))).slice(
+      0,
+      4,
+    );
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
     const rawKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()));
     const validKeywords = capKeywordsPreservingGiftFor(rawKeywords, 6);
-    const confidence = typeof suggestions.confidence === "number"
-      ? Math.min(1, Math.max(0, suggestions.confidence))
-      : 0.6;
+    const confidence =
+      typeof suggestions.confidence === "number" ? Math.min(1, Math.max(0, suggestions.confidence)) : 0.6;
 
     // Auto-assign "The Atelier" vibe and "Luxe" mood for fashion items over $1000
-    const FASHION_CATEGORIES = ["Women's Fashion", "Men's Fashion", "Women's Shoes", "Men's Shoes", "Activewear", "Accessories", "Bags & Totes", "Jewelry", "Watches"];
+    const FASHION_CATEGORIES = [
+      "Women's Fashion",
+      "Men's Fashion",
+      "Women's Shoes",
+      "Men's Shoes",
+      "Activewear",
+      "Accessories",
+      "Bags & Totes",
+      "Jewelry",
+      "Watches",
+    ];
     const parsedPrice = typeof price === "number" ? price : parseFloat(String(price));
     const isFashion = validCore.some((c: string) => FASHION_CATEGORIES.includes(c));
     if (isFashion && parsedPrice >= 1000) {
@@ -683,7 +688,14 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     }
 
     // Auto-assign "Pure Routine" vibe for skincare/wellness/beauty routine products
-    const PURE_ROUTINE_CATEGORIES = ["Skin Care", "Hair Care", "Body Care", "Beauty Tools & Devices", "Health & Wellness"];
+    const PURE_ROUTINE_CATEGORIES = [
+      "Skin Care",
+      "Hair Care",
+      "Body Care",
+      "Beauty Tools & Devices",
+      "Health & Wellness",
+      "Fragrance",
+    ];
     const isPureRoutine = validCore.some((c: string) => PURE_ROUTINE_CATEGORIES.includes(c));
     if (isPureRoutine && !validVibes.includes("Pure Routine")) {
       validVibes = [...validVibes, "Pure Routine"].slice(0, 4);
@@ -696,7 +708,7 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     }
 
     // Auto-assign "Fresh Start" mood for cleaning & organizing products
-    const FRESH_START_CATEGORIES = ["Cleaning", "Office & Stationery"];
+    const FRESH_START_CATEGORIES = ["Cleaning & Utility", "Office & Stationery"];
     const isFreshStart = validCore.some((c: string) => FRESH_START_CATEGORIES.includes(c));
     if (isFreshStart && !validMoods.includes("Fresh Start")) {
       validMoods = [...validMoods, "Fresh Start"].slice(0, 3);
@@ -705,11 +717,20 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     validVibes = dedupeStrings(validVibes).slice(0, 4);
     validMoods = dedupeStrings(validMoods).slice(0, 3);
 
-    console.log("Suggestions:", { core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords, confidence });
-
-    return new Response(JSON.stringify({ core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords, confidence }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    console.log("Suggestions:", {
+      core: validCore,
+      vibes: validVibes,
+      moods: validMoods,
+      keywords: validKeywords,
+      confidence,
     });
+
+    return new Response(
+      JSON.stringify({ core: validCore, vibes: validVibes, moods: validMoods, keywords: validKeywords, confidence }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     console.error("Error suggesting categories:", error);
     return new Response(JSON.stringify({ core: [], vibes: [], moods: [], error: String(error) }), {
