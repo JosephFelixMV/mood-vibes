@@ -386,6 +386,11 @@ The Sanctuary (home-living)
 → Use Cozy for textiles, candles, and soft furnishings
 → Override if: strong saturated color → Dopamine Hits vibe
 
+Homebody (homebody)
+→ Default mood: Calm
+→ Override if: fragrance-forward product → Romantic
+→ Override if: strong saturated color → Playful
+
 The Setup (tech-gadgets)
 → Default mood: Minimal or Focused
 → Use Minimal for clean desk setups, sleek devices, understated tech
