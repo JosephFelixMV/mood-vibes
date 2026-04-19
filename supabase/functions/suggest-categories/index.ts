@@ -522,6 +522,344 @@ Object terms: succulent, cactus, orchid, planter, ceramic vase, botanical print,
 → Note: Use Romantic for fragrance-forward products (perfumed candles, reed diffusers, room sprays). Use Calm for visual/decorative objects (planters, ceramics, vessels).
 
 ─────────────────────────────────────
+QUIET LUXURY signals
+─────────────────────────────────────
+Material terms: cashmere, merino, silk, linen, leather, suede, camel, ivory,
+cream, stone, sand, tailored, unstructured, relaxed fit, wide-leg, straight cut
+Style terms: no logo, logoless, understated, tonal dressing, monochrome,
+neutral palette, clean silhouette, heritage, classic, timeless
+Price signal: $200+ with neutral palette and quality material = strong Quiet Luxury
+Brand signal: known heritage or quiet designer brands
+→ Vibe: Quiet Luxury
+→ Mood: Calm or Minimal
+→ IMPORTANT: Quiet Luxury is logoless and understated. If the product has visible
+branding, logos, or flash → do NOT assign. Distinguish from The Atelier
+(which is artisan/investment) — Quiet Luxury is about restraint, not craft.
+
+─────────────────────────────────────
+MINIMAL AND CASUAL signals
+─────────────────────────────────────
+Material terms: cotton, jersey, linen, relaxed fit, easy wear, everyday,
+washed, soft, lightweight, breathable
+Style terms: effortless, simple, clean, unfussy, wardrobe staple, everyday
+essential, goes-with-everything, versatile, capsule wardrobe
+Price signal: $50–$250 range, accessible luxury feel
+→ Vibe: Minimal and Casual
+→ Mood: Minimal or Calm
+→ Note: This is the approachable version of Quiet Luxury. Similar materials
+but lower price point and less intentional dressing. French-girl energy —
+looks good without appearing to try.
+→ Distinguish from Quiet Luxury: if price is under $200 and brand has no
+luxury signal → Minimal and Casual over Quiet Luxury
+
+─────────────────────────────────────
+DRIP & SHINE signals
+─────────────────────────────────────
+Style terms: oversized, graphic tee, vintage wash, drop shoulder, distressed,
+raw hem, graffiti print, logo heavy, colorblock, patchwork denim, cargo,
+utility, baggy, streetwear, urban, fresh, clean, crisp
+Cultural terms: hype, limited drop, collab, sneaker, basketball, skate,
+music-affiliated, artist collab, exclusive
+Object terms: sneakers, hoodies, caps, bucket hats, chain jewelry,
+crossbody bags with streetwear aesthetic
+Price signal: irrelevant — street style spans all price points
+→ Vibe: Drip & Shine
+→ Mood: Bold or Playful
+→ IMPORTANT: Do not limit to low price points. A $600 limited drop and a
+$40 vintage find both qualify. The signal is cultural currency, not cost.
+
+─────────────────────────────────────
+DRESS TO IMPRESS signals
+─────────────────────────────────────
+Style terms: statement, bold silhouette, occasion wear, cocktail, formal,
+elevated, dressed up, going out, evening, party, gala, event, special
+occasion, standout, turn heads, dressed for the moment
+Material terms: satin, chiffon, velvet, embellished, sequin (less chaotic
+than Eclectic Maximalist), structured, tailored formal
+Color terms: jewel tones, rich colors, deep red, emerald, navy, black,
+metallic, gold, silver
+Object terms: blazers, tailored suits, statement heels, formal bags,
+structured clutch, cocktail dress, evening gown
+→ Vibe: Dress to Impress
+→ Mood: Bold or Romantic
+→ Distinguish from Eclectic Maximalist: Dress to Impress is polished and
+occasion-driven. Eclectic Maximalist is theatrical and deliberate.
+→ Distinguish from Going Out Era: Dress to Impress is formal/occasion.
+Going Out Era is nightlife/social.
+
+─────────────────────────────────────
+HOT MESS EXPRESS signals
+─────────────────────────────────────
+Style terms: clashing prints, mixed patterns, bold color clash, maximalist
+layering, unexpected combinations, mismatched, eclectic mix, fearless,
+unapologetic, rule-breaking, chaotic styling
+Color terms: multiple bold colors worn together, pattern mixing, print clash,
+neon with florals, stripes with animal print
+→ Vibe: Hot Mess Express
+→ Mood: Playful or Bold
+→ Distinguish from Eclectic Maximalist: Hot Mess Express is spontaneous
+and joyfully chaotic. Eclectic Maximalist is deliberate high-fashion chaos
+with clear intentionality. If the product description uses craft or
+design-forward language → Eclectic Maximalist. If it is just wild and fun →
+Hot Mess Express.
+
+─────────────────────────────────────
+BLOOM & GLOW signals
+─────────────────────────────────────
+Material terms: floral print, botanical print, petal, garden, rose,
+wildflower, soft pastel, blush, peach, lilac, sage, mint, feminine,
+delicate, soft texture, natural ingredients, botanical extract
+Style terms: feminine, romantic silhouette, soft drape, garden party,
+spring, fresh, nurturing, alive, blooming
+Object terms: floral skincare, botanical beauty, garden accessories,
+pressed flower objects, soft floral homeware, spring table setting
+→ Vibe: Bloom & Glow
+→ Mood: Romantic or Playful
+→ Note: Applies across fashion, beauty, and home. A floral face serum,
+a garden-print dress, and a botanical candle all qualify.
+→ Distinguish from Homebody: Bloom & Glow is floral and feminine-forward.
+Homebody is about the curated living space regardless of florals.
+
+─────────────────────────────────────
+BUILD & MAINTAIN signals
+─────────────────────────────────────
+Object terms: hand tools, power tools, drill, saw, screwdriver, wrench,
+hammer, level, tape measure, toolbox, workbench, storage system,
+garage organiser, workshop supply, safety equipment, paint, primer,
+caulk, hardware, fasteners, ladder, pressure washer
+Style terms: durable, heavy duty, professional grade, reliable,
+precision, ergonomic grip, long-lasting
+Brand signal: known tool brands (DeWalt, Milwaukee, STIHL, Craftsman,
+Garrett Wade)
+→ Vibe: Build & Maintain
+→ Mood: Focused
+→ Note: Garrett Wade qualifies despite being premium/artisan — the
+function is still building and maintaining. The aesthetic quality
+lifts the vibe signal but does not change it.
+
+─────────────────────────────────────
+COASTAL COOL signals
+─────────────────────────────────────
+Material terms: linen, cotton canvas, rope, rattan, jute, washed denim,
+natural fiber, sun-faded, weathered, bleached, chambray, terry cloth
+(in beach/outdoor context)
+Color terms: washed blue, sandy beige, off white, sun-bleached white,
+seafoam, driftwood, warm neutrals, ocean tones
+Style terms: relaxed, laid-back, effortless, beach town, surf-adjacent,
+nautical without being literal, sun-soaked, breezy
+Object terms: linen shirts, canvas totes, rattan accessories,
+beach towel, sun hat, woven bag, outdoor furniture in natural materials,
+coastal table setting
+→ Vibe: Coastal Cool
+→ Mood: Calm or Playful
+→ IMPORTANT: Coastal Cool is a lived-in aesthetic, not resort wear.
+Avoid assigning to formal beach or luxury resort products → those
+belong in Quiet Luxury or The Atelier.
+
+─────────────────────────────────────
+GOING OUT ERA signals
+─────────────────────────────────────
+Style terms: going out, night out, club, bar, dinner, date night,
+girls night, party, social, festive, glam, dressed up casual,
+after dark, elevated casual evening
+Material terms: satin, mesh, bodycon, mini, crop, strappy, backless,
+cutout, wrap, slip dress, cami, tube
+Object terms: going out top, mini skirt, bodycon dress, strappy heels,
+statement earrings, chain bag, glam makeup, party makeup,
+bold lip, shimmer
+Color terms: black, deep jewel tones, red, hot pink, metallic, gold
+→ Vibe: Going Out Era
+→ Mood: Bold or Playful
+→ Distinguish from Dress to Impress: Going Out Era is nightlife and
+social occasions — more casual, youthful energy. Dress to Impress is
+formal events and occasions where polish matters most.
+
+─────────────────────────────────────
+JET SET signals
+─────────────────────────────────────
+Style terms: travel, airport style, packing, carry-on, on the go,
+frequent flyer, globetrotter, destination, adventure-ready,
+travel-ready, wanderlust
+Object terms: luggage, carry-on, passport holder, travel wallet,
+packing cube, travel pillow, neck pillow, eye mask, noise cancelling
+headphones (in travel context), travel adapter, weekender bag,
+duffel, travel organiser, travel-size beauty
+Brand signal: known luggage and travel brands
+→ Vibe: Jet Set
+→ Mood: Motivated or Playful
+→ Note: Jet Set is about the lifestyle of movement, not just the
+destination. Airport-ready fashion also qualifies alongside
+travel accessories.
+
+─────────────────────────────────────
+KITCHEN FLEX signals
+─────────────────────────────────────
+Object terms: cookware, cast iron, Dutch oven, skillet, saucepan,
+knife, chef knife, cutting board, mixing bowl, stand mixer,
+food processor, baking sheet, roasting pan, mortar and pestle,
+kitchen scale, cookbook, apron, kitchen gadget, espresso machine,
+coffee maker, French press, premium ingredients, hosting setup,
+serving board, charcuterie board, wine glasses, cocktail tools
+Style terms: elevated cooking, premium kitchen, chef-inspired,
+entertaining, hosting, dinner party, food culture
+Brand signal: Our Place, Material, Lenox, Ooni, Weber, Solo Stove
+→ Vibe: Kitchen Flex
+→ Mood: Playful or Cozy
+→ Note: Kitchen Flex is cooking as self-expression and social currency.
+The product should feel aspirational — not just functional. A basic
+non-stick pan is not Kitchen Flex. An enameled cast iron Dutch oven is.
+
+─────────────────────────────────────
+ORGANIZED LIFE signals
+─────────────────────────────────────
+Object terms: storage box, drawer organiser, label maker, planner,
+notebook, calendar, desk organiser, cable management, shelf divider,
+bin, basket, acrylic organiser, closet system, pantry organiser,
+spice rack, file organiser, tray, container set, stackable storage
+Style terms: clean, systematic, everything in its place,
+satisfying organisation, aesthetic storage, matching set,
+colour-coordinated storage, clutter-free
+Brand signal: The Container Store, simplehuman-type brands
+→ Vibe: Organized Life
+→ Mood: Minimal or Calm
+→ Note: The aesthetic matters — plain cardboard boxes are not
+Organized Life. The storage solution should look good while
+functioning well.
+→ Distinguish from Work From Anywhere: if the product is specifically
+workspace-oriented → Work From Anywhere. If it is general home
+organisation → Organized Life.
+
+─────────────────────────────────────
+PURE ROUTINE signals
+─────────────────────────────────────
+Object terms: cleanser, moisturiser, serum, toner, SPF, sunscreen,
+eye cream, retinol, vitamin C, hyaluronic acid, face mask,
+sheet mask, facial oil, essence, mist, micellar water,
+exfoliant, AHA, BHA, body lotion, body oil, hand cream,
+lip treatment, nail care, shampoo, conditioner, hair mask,
+hair oil, scalp treatment, body wash, bath soak, bath oil
+Style terms: routine, ritual, daily, morning routine, evening routine,
+skincare routine, self-care, consistent, step, regimen
+Brand signal: dermatologist-recommended brands, clean beauty brands,
+Sephora and Ulta-carried skincare brands
+→ Vibe: Pure Routine
+→ Mood: Calm
+→ Note: Pure Routine is about the daily investment in self. Products
+should feel like part of a considered regimen — not one-off treatments
+or spa indulgences (those lean Bloom & Glow or The Wellness Era).
+
+─────────────────────────────────────
+THE WELLNESS ERA signals
+─────────────────────────────────────
+Object terms: supplement, vitamin, collagen, protein powder,
+greens powder, adaptogen, probiotic, omega, magnesium,
+sleep aid, melatonin, wellness shot, functional beverage,
+fitness tracker, yoga mat, foam roller, massage gun,
+resistance band, recovery tool, meditation journal,
+gratitude journal, wellness book, air purifier, water filter,
+blue light glasses
+Style terms: health-conscious, clean living, holistic,
+gut health, mental wellness, recovery, longevity,
+clean ingredients, functional, evidence-based
+→ Vibe: The Wellness Era
+→ Mood: Calm or Motivated
+→ Use Motivated for fitness recovery and performance tools
+→ Use Calm for sleep, mindfulness, and mental wellness products
+→ Distinguish from Pure Routine: Pure Routine is topical skincare
+and beauty. The Wellness Era is ingestible, fitness, and holistic health.
+
+─────────────────────────────────────
+TIS THE SEASON signals
+─────────────────────────────────────
+Object terms: Christmas ornament, advent calendar, wrapping paper,
+ribbon, gift tag, stocking, garland, wreath, tree decoration,
+menorah, dreidel, Halloween decoration, pumpkin, candle
+(holiday scented), holiday card, Easter basket, Valentine gift,
+seasonal tableware, holiday hosting, festive serving ware,
+fire pit, outdoor heater, chiminea, log basket,
+fireplace accessories, hot chocolate set, mulled wine set,
+weighted blanket (seasonal context), thermal flask, hand warmer,
+cosy outdoor living
+Style terms: seasonal, holiday, festive, gifting, celebrating,
+limited edition holiday, special occasion, christmas, halloween,
+valentines, easter, hanukkah, thanksgiving, autumnal,
+winter warmth, seasonal living, cosy season
+→ Vibe: Tis the Season
+→ Mood: Playful or Cozy
+→ Note: Applies to products that define a season or create seasonal
+atmosphere — not just holiday-branded items. A fire pit that anchors
+autumn outdoor living qualifies as strongly as a Christmas ornament.
+Use judgment — the product should feel distinctly tied to a time of year.
+
+─────────────────────────────────────
+TOUCH GRASS signals
+─────────────────────────────────────
+Object terms: hiking boots, trail running shoes, backpack,
+tent, sleeping bag, camping stove, headlamp, trekking poles,
+water bottle (outdoor context), carabiner, gardening gloves,
+trowel, seeds, planter (outdoor), outdoor furniture, hammock,
+kayak, paddleboard, bike, cycling gear, surfboard, wetsuit,
+outdoor blanket
+Style terms: outdoor, nature, trail, off-grid, sustainable,
+durable, weatherproof, all-terrain, adventure, wilderness
+Brand signal: performance outdoor brands, garden brands
+→ Vibe: Touch Grass
+→ Mood: Motivated or Playful
+→ Distinguish from Coastal Cool: Touch Grass is active outdoor
+pursuit — hiking, camping, gardening, adventure. Coastal Cool
+is the aesthetic of coastal living without necessarily being active.
+→ Distinguish from Get Sporty: Touch Grass is nature and outdoors
+specifically. Get Sporty is gym and athletic performance.
+
+─────────────────────────────────────
+WHIMSIGOTH signals
+─────────────────────────────────────
+Material terms: velvet (dark), black lace, dark florals,
+moon motif, star motif, celestial print, crystal,
+amethyst, obsidian, tarot, mushroom, butterfly (dark),
+dried botanicals, dark botanical print,
+black candle, wax seal, gothic calligraphy
+Color terms: black, deep purple, forest green, dark burgundy,
+midnight blue, aged gold, rust, dark terracotta
+Style terms: witchy, gothic-adjacent, celestial, mystical,
+cottagecore dark, halloween-adjacent year-round,
+moody, enchanted, folklore
+Object terms: crystal, tarot deck, spell candle,
+moon phase print, celestial jewelry, dark floral vase,
+gothic home accent, incense, altar object,
+star map, constellation print
+→ Vibe: Whimsigoth
+→ Mood: Playful or Bold
+→ IMPORTANT: Whimsigoth is playful dark — not aggressively
+gothic or horror-adjacent. The aesthetic is witchy cottage
+core, not heavy metal. Dark florals and celestial motifs
+qualify strongly. Skulls and gore do not.
+
+─────────────────────────────────────
+WORK FROM ANYWHERE signals
+─────────────────────────────────────
+Object terms: standing desk, monitor stand, laptop stand,
+desk lamp, ergonomic chair, keyboard, mouse, mousepad,
+webcam, ring light, microphone, headset, cable management,
+power strip, USB hub, laptop bag, desk plant,
+desk organiser (in workspace context), whiteboard,
+sticky notes, notebook (in workspace context)
+Style terms: home office, remote work, work from home,
+WFH, desk setup, workspace aesthetic, productivity,
+ergonomic, focus environment, aesthetic workspace
+→ Vibe: Work From Anywhere
+→ Mood: Focused or Minimal
+→ Use Focused for productivity and ergonomic tools
+→ Use Minimal for clean aesthetic desk setups
+→ Distinguish from In My Zone: Work From Anywhere is
+about the physical workspace setup. In My Zone is about
+the mental state of deep focus — flow state products.
+→ Distinguish from Organized Life: if the product is
+specifically workspace-oriented → Work From Anywhere.
+If it is general home organisation → Organized Life.
+
+
+─────────────────────────────────────
 AURA FARMING signals
 ─────────────────────────────────────
 Style terms: editorial, cool-girl, understated statement, monochrome with detail, considered, architectural, precise
