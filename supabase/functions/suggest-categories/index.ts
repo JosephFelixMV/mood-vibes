@@ -519,6 +519,14 @@ Object context: colorful cookware, bright stationery, vivid home accessory where
 → Mood: Playful or Bold
 
 ─────────────────────────────────────
+HOMEBODY signals
+─────────────────────────────────────
+Object terms: succulent, cactus, orchid, planter, ceramic vase, botanical print, beeswax candle, scented candle, home fragrance, diffuser, reed diffuser, room spray, pillow mist, ambient lamp, decorative object, terrarium, dried flowers
+→ Vibe: Homebody
+→ Mood: Calm or Romantic
+→ Note: Use Romantic for fragrance-forward products (perfumed candles, reed diffusers, room sprays). Use Calm for visual/decorative objects (planters, ceramics, vessels).
+
+─────────────────────────────────────
 AURA FARMING signals
 ─────────────────────────────────────
 Style terms: editorial, cool-girl, understated statement, monochrome with detail, considered, architectural, precise
