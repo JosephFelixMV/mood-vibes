@@ -125,25 +125,6 @@ const empty = {
   vendor_id: "" as string,
 };
 
-// Canonical brand names — intentional casing preserved exactly
-const BRAND_CANONICAL: Record<string, string> = {
-  "rag & bone": "rag & bone",
-  "kate spade new york": "kate spade new york",
-  staud: "STAUD",
-  hoka: "HOKA",
-  "a.p.c.": "A.P.C.",
-  "farm rio": "FARM Rio",
-  etuhome: "etúHOME",
-  skims: "SKIMS",
-  nars: "NARS",
-  apc: "A.P.C.",
-  londontown: "LONDONTOWN",
-  reiss: "REISS",
-};
-
-function normalizeCompanyName(input: string): string {
-  const trimmed = input.trim();
-  if (!trimmed) return trimmed;
 
   // Check canonical lookup first (case-insensitive key match)
   const canonical = BRAND_CANONICAL[trimmed.toLowerCase()];
