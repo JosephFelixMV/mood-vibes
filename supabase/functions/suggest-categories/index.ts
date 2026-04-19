@@ -279,6 +279,9 @@ Playful dark aesthetic. Celestial motifs, crystals, dark florals, Halloween-adja
 Work-From-Anywhere
 Home office and remote work setup. Ergonomic chairs, desk accessories, cable management, aesthetic workspaces. Products for people whose office is wherever they are.
 
+Homebody
+The aesthetic of an intentional living space. Botanicals and planters, ceramic objects, candles, home fragrance, diffusers, ambient lighting, decorative vessels. Products that make a home feel curated rather than furnished. Distinct from Cozy — this is about the visual and sensory environment of the space, not comfort or softness.
+
 IMPORTANT: Always use the exact vibe name as listed above when returning suggestions. The name must match exactly — including capitalisation, apostrophes, hyphens, and ampersands — because it is matched against the database. For example: "Drip & Shine" not "Drip and Shine", "Off-Duty Model" not "Off Duty Model", "Hot Mess Express" not "Hot Mess".
 
 ═══════════════════════════════════════
@@ -382,6 +385,11 @@ The Sanctuary (home-living)
 → Use Calm for décor, lighting, and artwork
 → Use Cozy for textiles, candles, and soft furnishings
 → Override if: strong saturated color → Dopamine Hits vibe
+
+Homebody (homebody)
+→ Default mood: Calm
+→ Override if: fragrance-forward product → Romantic
+→ Override if: strong saturated color → Playful
 
 The Setup (tech-gadgets)
 → Default mood: Minimal or Focused
@@ -514,6 +522,14 @@ Color terms (as primary selling point): cobalt, electric blue, cherry red, sunsh
 Object context: colorful cookware, bright stationery, vivid home accessory where color is clearly the product differentiator
 → Vibe: Dopamine Hits
 → Mood: Playful or Bold
+
+─────────────────────────────────────
+HOMEBODY signals
+─────────────────────────────────────
+Object terms: succulent, cactus, orchid, planter, ceramic vase, botanical print, beeswax candle, scented candle, home fragrance, diffuser, reed diffuser, room spray, pillow mist, ambient lamp, decorative object, terrarium, dried flowers
+→ Vibe: Homebody
+→ Mood: Calm or Romantic
+→ Note: Use Romantic for fragrance-forward products (perfumed candles, reed diffusers, room sprays). Use Calm for visual/decorative objects (planters, ceramics, vessels).
 
 ─────────────────────────────────────
 AURA FARMING signals
