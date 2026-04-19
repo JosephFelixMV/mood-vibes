@@ -90,22 +90,13 @@ Deno.serve(async (req) => {
       for (const p of products) {
         if (!p.slug) continue;
         const lastmod = (p.updated_at || "").slice(0, 10) || today;
-        productUrls.push(urlEntry(`${base}/products/${p.slug}`, lastmod, "weekly", "0.6"));
+        productUrls.push(urlEntry(`${base}/product/${p.slug}`, lastmod, "weekly", "0.6"));
       }
       if (products.length < PAGE) break;
       from += PAGE;
     }
 
-    // Brands
-    const { data: brands } = await supabase
-      .from("brands")
-      .select("id,updated_at")
-      .eq("is_active", true);
     const brandUrls: string[] = [];
-    for (const b of brands || []) {
-      const lastmod = (b.updated_at || "").slice(0, 10) || today;
-      brandUrls.push(urlEntry(`${base}/brands/${b.id}`, lastmod, "monthly", "0.5"));
-    }
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
