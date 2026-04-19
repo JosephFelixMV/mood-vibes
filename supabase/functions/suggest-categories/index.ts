@@ -17,6 +17,38 @@ function capKeywordsPreservingGiftFor(values: string[], max = 6): string[] {
   return kept;
 }
 
+// Legal compliance: strip drug-territory / medical-claim language from keywords.
+// Benign uses ("treat jar", "home repair tool", "remove makeup") are intentionally NOT matched.
+const DRUG_TERRITORY_PATTERNS: RegExp[] = [
+  /\banti[-\s]?aging\b/i,
+  /\b(reduces?|reduce)\s+(fine\s+lines?|wrinkles?|inflammation|redness|appearance\s+of\s+(?:\d+\s+)?wrinkles?|signs?\s+of\s+aging|expression\s+lines?|dark\s+circles?|visible\s+lines?|acne\s+scars?|oiliness)\b/i,
+  /\b(removes?|eliminates?)\s+(wrinkles?|fine\s+lines?|cellulite|dark\s+circles?|age\s+spots?)\b/i,
+  /\b(prevents?)\s+(aging|wrinkles?|fine\s+lines?|breakouts?|nail\s+splitting)\b/i,
+  /\b(repairs?)\s+(skin|damage|cells?|barrier)\b/i,
+  /\b(skin|nail|barrier|damage|cellular|wrinkle)\s+repair\b/i,
+  /\bnighttime?\s+(skin\s+)?repair\b/i,
+  /\bintensive\s+foot\s+repair\b/i,
+  /\bage\s+defense\b/i,
+  /\bserum\s+to\s+reduce\b/i,
+  /\b(treats?|heals?|cures?|reverses?)\s+(acne|skin|aging|wrinkles?|damage|dryness|condition|disease|inflammation|infection)/i,
+  /\b(stimulates?|boosts?|builds?)\s+collagen\b/i,
+  /\bcollagen\s+production\b/i,
+  /\bdetoxif(?:y|ies|ying)\b/i,
+  /\b(alleviates?|soothes?\s+pain|pain\s+relief|joint\s+pain|fat[-\s]?burning|cellulite\s+removal)\b/i,
+  /\b(clinically|dermatologist)[-\s]proven\b/i,
+  /\bFDA[-\s]approved\b/i,
+  /\b(miracle|guaranteed\s+results)\b/i,
+  /\bboosts?\s+immunity\b/i,
+];
+
+function isDrugTerritory(keyword: string): boolean {
+  return DRUG_TERRITORY_PATTERNS.some((re) => re.test(keyword));
+}
+
+export function stripDrugTerritory(keywords: string[]): string[] {
+  return keywords.filter((k) => !isDrugTerritory(k));
+}
+
 async function callAnthropic(opts: {
   apiKey: string;
   system?: string;
@@ -315,6 +347,18 @@ NEVER return:
 - Standalone specs (e.g. "stainless steel", "43mm", "water resistant") — these belong in the Specifications field
 - The product's own brand name as a keyword
 - Single-word tags
+- DRUG-TERRITORY / MEDICAL-CLAIM LANGUAGE (legal compliance — strictly prohibited):
+  Never use verbs or phrases that imply medical efficacy, structural change to the body, or treatment of a condition. This applies to keywords, descriptions, and any output text.
+  Forbidden verbs/phrases include (non-exhaustive): treats, heals, cures, repairs (skin/damage/cells), reverses, stimulates collagen, boosts collagen, builds collagen, removes wrinkles, removes fine lines, eliminates wrinkles, reduces wrinkles, reduces inflammation, reduces redness, prevents aging, anti-aging, anti aging, fights aging, fights wrinkles, detoxifies, detox, alleviates, soothes pain, pain relief, joint pain, fat burning, cellulite removal, clinically proven, dermatologist proven, FDA approved, miracle, guaranteed results, boosts immunity.
+  Compliant alternatives — describe APPEARANCE, FEEL, or RITUAL only:
+    "anti-aging serum"        → "smoothing serum" or "youthful-looking skin serum"
+    "reduces fine lines"      → "helps minimize the appearance of fine lines"
+    "skin repair cream"       → "nourishing skin cream"
+    "removes wrinkles"        → "wrinkle-smoothing"
+    "stimulates collagen"     → "supports a plump, dewy look"
+    "treats acne"             → "for blemish-prone skin"
+    "heals dry skin"          → "hydrating dry skin balm"
+  RULE: If you cannot rephrase a benefit cosmetically, OMIT it. Never invent medical claims.
 
 ALWAYS return:
 - Long-tail phrases of 2–5 words that describe style, material combined with form, occasion combined with intent, or cultural vibe
@@ -1002,7 +1046,8 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     );
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
     const rawKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()));
-    const validKeywords = capKeywordsPreservingGiftFor(rawKeywords, 6);
+    const compliantKeywords = stripDrugTerritory(rawKeywords);
+    const validKeywords = capKeywordsPreservingGiftFor(compliantKeywords, 6);
     const confidence =
       typeof suggestions.confidence === "number" ? Math.min(1, Math.max(0, suggestions.confidence)) : 0.6;
 
