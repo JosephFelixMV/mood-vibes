@@ -1046,7 +1046,8 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     );
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
     const rawKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()));
-    const validKeywords = capKeywordsPreservingGiftFor(rawKeywords, 6);
+    const compliantKeywords = stripDrugTerritory(rawKeywords);
+    const validKeywords = capKeywordsPreservingGiftFor(compliantKeywords, 6);
     const confidence =
       typeof suggestions.confidence === "number" ? Math.min(1, Math.max(0, suggestions.confidence)) : 0.6;
 
