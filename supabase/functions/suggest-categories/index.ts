@@ -679,6 +679,7 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
       "Bags & Totes",
       "Jewelry",
       "Watches",
+      "Eyewear",
     ];
     const parsedPrice = typeof price === "number" ? price : parseFloat(String(price));
     const isFashion = validCore.some((c: string) => FASHION_CATEGORIES.includes(c));
