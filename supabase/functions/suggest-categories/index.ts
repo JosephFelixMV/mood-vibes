@@ -279,6 +279,9 @@ Playful dark aesthetic. Celestial motifs, crystals, dark florals, Halloween-adja
 Work-From-Anywhere
 Home office and remote work setup. Ergonomic chairs, desk accessories, cable management, aesthetic workspaces. Products for people whose office is wherever they are.
 
+Homebody
+The aesthetic of an intentional living space. Botanicals and planters, ceramic objects, candles, home fragrance, diffusers, ambient lighting, decorative vessels. Products that make a home feel curated rather than furnished. Distinct from Cozy — this is about the visual and sensory environment of the space, not comfort or softness.
+
 IMPORTANT: Always use the exact vibe name as listed above when returning suggestions. The name must match exactly — including capitalisation, apostrophes, hyphens, and ampersands — because it is matched against the database. For example: "Drip & Shine" not "Drip and Shine", "Off-Duty Model" not "Off Duty Model", "Hot Mess Express" not "Hot Mess".
 
 ═══════════════════════════════════════
