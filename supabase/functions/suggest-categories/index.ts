@@ -516,7 +516,7 @@ Material terms: cashmere, nappa leather, silk, hand-stitched, hand-crafted, patc
 → Mood: Calm or Romantic
 
 ─────────────────────────────────────
-OLD MONEY / EFFORTLESS CHIC signals
+QUIET LUXURY / MINIMAL AND CASUAL signals
 ─────────────────────────────────────
 Material terms: linen, cotton twill, unstructured, relaxed fit, heritage, classic cut, natural fiber, stone-washed, raw edge, wide-leg, tailored, merino
 Style terms: minimal hardware, tonal, monochrome, neutral, understated, clean line
@@ -524,7 +524,7 @@ Style terms: minimal hardware, tonal, monochrome, neutral, understated, clean li
 → Mood: Calm or Minimal
 
 ─────────────────────────────────────
-STREET STYLE signals
+DRIP & SHINE signals
 ─────────────────────────────────────
 Style terms: oversized, vintage-wash, graphic, drop-shoulder, distressed, raw hem, graffiti, logo-heavy, colorblock, patchwork denim, cargo, utility
 Cultural terms: hype, limited drop, collab, streetwear, skate, bmx, sneaker, basketball
@@ -532,7 +532,7 @@ Cultural terms: hype, limited drop, collab, streetwear, skate, bmx, sneaker, bas
 → Mood: Bold or Playful
 
 ─────────────────────────────────────
-SPORTY GIRL / OFF DUTY signals
+GET SPORTY / OFF-DUTY MODEL signals
 ─────────────────────────────────────
 Material terms: compression, moisture-wicking, performance, ribbed, seamless, recycled nylon, spandex, lycra, mesh panel, four-way stretch, breathable, quick-dry
 Style terms: racerback, sports bra, legging, bike short, windbreaker, track, athletic
@@ -540,7 +540,7 @@ Style terms: racerback, sports bra, legging, bike short, windbreaker, track, ath
 → Mood: Motivated or Playful
 
 ─────────────────────────────────────
-COZY HOMEBODY signals
+STAY-IN CINEMA signals
 ─────────────────────────────────────
 Material terms: sherpa, fleece, waffle knit, terry cloth, lounge, fuzzy, plush, slipper, robe, weighted
 Style terms: oversized fit, relaxed, loungewear, sleepwear, pajama, hoodie, sweatshirt
@@ -548,7 +548,7 @@ Style terms: oversized fit, relaxed, loungewear, sleepwear, pajama, hoodie, swea
 → Mood: Cozy
 
 ─────────────────────────────────────
-ECCENTRIC MAXIMALIST signals
+ECLECTIC MAXIMALIST signals
 ─────────────────────────────────────
 Material terms: feather trim, sequin, beaded, rhinestone, embellished, metallic, holographic, velvet (in fashion context)
 Style terms: sculptural, avant-garde, exaggerated silhouette, theatrical, oversized volume, deconstructed, asymmetric
@@ -992,7 +992,7 @@ Color palette: warm browns, forest green, burgundy, cream, mustard, aged ivory
 → IMPORTANT: Apply this to home, stationery, and kitchen products, not only fashion. A leather-bound journal qualifies as strongly as a tweed blazer.
 
 ─────────────────────────────────────
-MAIN CHARACTER signals
+DRESS TO IMPRESS signals
 ─────────────────────────────────────
 Style terms: statement piece, showstopper, conversation piece, all eyes on, scene-stealing, one-of-a-kind, eye-catching, centerpiece (for home products)
 → Vibe: Dress to Impress
