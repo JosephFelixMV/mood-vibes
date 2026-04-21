@@ -123,6 +123,9 @@ export default function Brands() {
                     {formatBrandDescription(brand.description)}
                   </p>
                 )}
+                <p className="mt-2 text-[10px] italic text-muted-foreground">
+                  *We may earn a commission on purchases made through this link.
+                </p>
               </a>
             </motion.div>
           ))}
