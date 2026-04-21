@@ -267,6 +267,11 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
           {vendorName && (
             <span className="mt-0.5 block text-[10px] text-muted-foreground">via {vendorName}</span>
           )}
+          {product.affiliate_url && (
+            <span className="block text-[10px] italic text-muted-foreground">
+              *We may earn a commission on purchases made through this link.
+            </span>
+          )}
         </div>
       </motion.div>
 

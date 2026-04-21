@@ -217,6 +217,9 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                 {product.company_name && (
                   <SheetDescription className="text-sm text-muted-foreground">
                     {formatBrandName(product.company_name)}
+                    <span className="ml-2 text-xs italic">
+                      · More colors &amp; styles may be available on the seller's site
+                    </span>
                   </SheetDescription>
                 )}
               </SheetHeader>
@@ -264,6 +267,9 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                 {vendorName && (
                   <p className="mt-1.5 text-center text-[11px] text-muted-foreground">via {vendorName}</p>
                 )}
+                <p className="mt-1 text-center text-[11px] italic text-muted-foreground">
+                  *We may earn a commission on purchases made through this link.
+                </p>
               </div>
 
               <div className="flex justify-end">
