@@ -212,7 +212,7 @@ Minimal and Casual
 Elevated but wearable. Looks put-together without trying. Relaxed silhouettes in quality fabrics. Accessible luxury. The French-girl aesthetic applied to any category.
 
 Drip & Shine
-Trend-forward, urban, culturally fluent. Do NOT treat this as a low-price vibe — street style spans all price points. A $600 hype drop and a $40 vintage find both qualify. The signal is cultural currency, not cost. Hip-hop, pop, skate, and sneaker culture all live here.
+High-end shine. Bold jewelry, statement accessories, and pieces that add gleam and presence to any look. Gold chains, bold earrings, standout bags, and pieces that elevate an outfit through shine and quality. The flex is in what catches the eye.
 
 Get Sporty
 Performance meets lifestyle. Activewear worn beyond the gym. Elevated athletic aesthetic. Clean, functional, aspirational. The product looks as good in a coffee shop as in a workout.
@@ -236,7 +236,7 @@ Dopamine Hits
 Joy through color and form. The product exists to create an immediate emotional lift for its owner regardless of audience. A saturated cobalt vase, a cherry red Dutch oven, a sunshine yellow notebook. The color IS the value proposition. Applies equally to fashion, home, kitchen, and stationery. Inward-facing joy — not about how others see you.
 
 Aura Farming
-Attention through mystique rather than volume. Cool, modern, slightly untouchable presence. The person — or space — that everyone notices but cannot explain why. Pop star and music video energy off-stage. Often minimal or monochrome with one unexpected element. Outward-facing and social — about the signal projected, not the feeling created. Distinct from Dress to Impress which is dramatic; Aura Farming is magnetic.
+Streetwear cool factor. Effortless city style with hoodies, cargos, clean sneakers, and the cultural fluency that makes it all land without trying. The aesthetic of someone who just gets it without being loud about it. Understated cool over flashy.
 
 Soft Academia
 The romance of intellectual and creative life. Curiosity, craft, and the feeling of a well-loved study or studio. Tweed, plaid, leather accessories, warm lighting, books, stationery, wooden desk objects, loose-leaf tea. NOT limited to fashion — this is one of the most cross-category vibes on the platform. A leather notebook, a reading lamp, a set of art pencils, or a vintage globe all qualify.
@@ -298,13 +298,19 @@ Outdoors, nature, and getting away from screens. Hiking gear, camping, gardening
 Whimsigoth
 Playful dark aesthetic. Celestial motifs, crystals, dark florals, Halloween-adjacent decor that stays year-round. Not aggressively gothic — more witchy cottage core.
 
+Backyard Social
+High-energy outdoor entertaining. Grilling, smoking, and hosting in the backyard. The products of the person who takes their BBQ seriously. Cast iron, smokers, grill tools, outdoor kitchen setups, fire pits, and competitive lawn games. Loud, social, and savory.
+
+Al Fresco
+Effortless outdoor relaxation. The lighter, breezier side of being outside — lounging, picnicking, and garden living. Linen, string lights, hammocks, melamine dinnerware, outdoor cushions, and portable speakers in a garden context. Calm and unhurried.
+
 Work-From-Anywhere
 Home office and remote work setup. Ergonomic chairs, desk accessories, cable management, aesthetic workspaces. Products for people whose office is wherever they are.
 
 Homebody
 The aesthetic of an intentional living space. Botanicals and planters, ceramic objects, candles, home fragrance, diffusers, ambient lighting, decorative vessels. Products that make a home feel curated rather than furnished. Distinct from Cozy — this is about the visual and sensory environment of the space, not comfort or softness.
 
-IMPORTANT: Always use the exact vibe name as listed above when returning suggestions. The name must match exactly — including capitalisation, apostrophes, hyphens, and ampersands — because it is matched against the database. For example: "Drip & Shine" not "Drip and Shine", "Off-Duty Model" not "Off Duty Model", "Hot Mess Express" not "Hot Mess".
+IMPORTANT: Always use the exact vibe name as listed above when returning suggestions. The name must match exactly — including capitalisation, apostrophes, hyphens, and ampersands — because it is matched against the database. For example: "Drip & Shine" not "Drip and Shine", "Off-Duty Model" not "Off Duty Model", "Hot Mess Express" not "Hot Mess", "Backyard Social" not "Backyard Social BBQ", "Al Fresco" not "Alfresco".
 
 ═══════════════════════════════════════
 MOOD DEFINITIONS
@@ -599,18 +605,21 @@ luxury signal → Minimal and Casual over Quiet Luxury
 ─────────────────────────────────────
 DRIP & SHINE signals
 ─────────────────────────────────────
-Style terms: oversized, graphic tee, vintage wash, drop shoulder, distressed,
-raw hem, graffiti print, logo heavy, colorblock, patchwork denim, cargo,
-utility, baggy, streetwear, urban, fresh, clean, crisp
-Cultural terms: hype, limited drop, collab, sneaker, basketball, skate,
-music-affiliated, artist collab, exclusive
-Object terms: sneakers, hoodies, caps, bucket hats, chain jewelry,
-crossbody bags with streetwear aesthetic
-Price signal: irrelevant — street style spans all price points
+Object terms: gold chain, necklace, bracelet, earrings,
+rings, statement jewelry, bold accessories, designer bag,
+embellished bag, rhinestone, crystal accessories,
+pearl jewelry, layered jewelry, chunky jewelry,
+statement sunglasses, luxury watch, charm bracelet
+Style terms: high-end accessories, statement piece,
+jewelry stack, elevated accessories, shine, gleam,
+bold finish, luxe detail, eye-catching accessories
 → Vibe: Drip & Shine
-→ Mood: Bold or Playful
-→ IMPORTANT: Do not limit to low price points. A $600 limited drop and a
-$40 vintage find both qualify. The signal is cultural currency, not cost.
+→ Mood: Bold or Romantic
+→ Distinguish from Aura Farming: Drip & Shine is
+specifically accessories and jewelry that shine and pop.
+Aura Farming is the overall streetwear look and cool factor.
+→ Distinguish from The Atelier: Drip & Shine is bold
+and statement-making. The Atelier is quiet artisan luxury.
 
 ─────────────────────────────────────
 DRESS TO IMPRESS signals
@@ -904,13 +913,73 @@ If it is general home organisation → Organized Life.
 
 
 ─────────────────────────────────────
+BACKYARD SOCIAL signals
+─────────────────────────────────────
+Object terms: grill, smoker, BBQ, charcoal, cast iron,
+outdoor kitchen, fire pit, patio heater, lawn game,
+cornhole, brisket, ribs, apron, tongs, grill brush,
+smoker box, propane, BBQ rub, marinade, cooler,
+charcuterie board (outdoor), Weber, Traeger,
+Big Green Egg, Solo Stove
+Style terms: heavy duty, professional grade, outdoor
+entertaining, hosting, gathering, backyard, social,
+smoky, grilling, pitmaster, competition BBQ
+→ Vibe: Backyard Social
+→ Mood: Bold or Social
+→ Distinguish from Touch Grass: Touch Grass is outdoor
+adventure and nature. Backyard Social is outdoor hosting
+and entertaining in a fixed space.
+→ Distinguish from Tis the Season: Backyard Social is
+year-round outdoor entertaining, not seasonally defined.
+→ Distinguish from Kitchen Flex: Kitchen Flex is indoor
+cooking culture. Backyard Social is specifically outdoor
+and social.
+
+─────────────────────────────────────
+AL FRESCO signals
+─────────────────────────────────────
+Object terms: picnic basket, picnic blanket, hammock,
+outdoor rug, garden chair, patio umbrella, shade sail,
+string lights, lantern, citronella candle, mosquito
+repellent, outdoor cushion, melamine dinnerware,
+acrylic glassware, portable speaker (outdoor context),
+bocce ball, badminton, bubble machine, garden table,
+inflatable pool lounger
+Material terms: linen, cotton canvas, rattan, woven,
+natural fiber, lightweight, shatterproof, bamboo
+Style terms: picnic, garden, patio, shaded, lounging,
+breezy, airy, al fresco, outdoor living, summer
+afternoon, effortless outdoor, laid-back, relaxed
+→ Vibe: Al Fresco
+→ Mood: Calm or Playful
+→ Distinguish from Coastal Cool: Coastal Cool has a
+beach or water reference. Al Fresco is garden, patio,
+or countryside.
+→ Distinguish from Touch Grass: Touch Grass is active
+outdoor pursuit. Al Fresco is stationary and relaxed.
+→ Distinguish from Backyard Social: Backyard Social is
+high-energy grilling and hosting. Al Fresco is
+low-energy lounging and picnicking.
+
+─────────────────────────────────────
 AURA FARMING signals
 ─────────────────────────────────────
-Style terms: editorial, cool-girl, understated statement, monochrome with detail, considered, architectural, precise
-Cultural terms: model off-duty, fashion week, pop star, music video, avant-pop, clean girl (elevated version)
+Style terms: streetwear, cool factor, understated,
+effortless style, cultural currency, clean aesthetic,
+low-key flex, city cool, minimal streetwear
+Object terms: hoodies, cargo pants, caps, clean sneakers,
+oversized tees, joggers, bucket hats, crossbody bags
+Cultural terms: hype-adjacent, culturally fluent,
+cool without trying, effortless cool, street credibility
 → Vibe: Aura Farming
-→ Mood: Calm or Bold
-→ Note: Aura Farming is outward-facing. If the product creates joy for the owner privately → Dopamine Hits. If it creates presence socially → Aura Farming.
+→ Mood: Bold or Minimal
+→ Distinguish from Drip & Shine: Aura Farming is the
+overall cool streetwear aesthetic and cultural signal.
+Drip & Shine is specifically high-end jewelry and statement
+accessories that add shine and pop to any look.
+→ Distinguish from Dress to Impress: Aura Farming is
+casual and effortless. Dress to Impress is occasion-driven
+and polished.
 
 ─────────────────────────────────────
 SOFT ACADEMIA signals
