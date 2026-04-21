@@ -122,6 +122,9 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
               <ReportBrokenLink productId={pick.id} />
             </div>
           </div>
+          <p className="mt-1 text-[10px] italic text-muted-foreground">
+            *We may earn a commission on purchases made through this link.
+          </p>
         </div>
       </div>
 
