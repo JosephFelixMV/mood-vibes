@@ -236,7 +236,7 @@ Dopamine Hits
 Joy through color and form. The product exists to create an immediate emotional lift for its owner regardless of audience. A saturated cobalt vase, a cherry red Dutch oven, a sunshine yellow notebook. The color IS the value proposition. Applies equally to fashion, home, kitchen, and stationery. Inward-facing joy — not about how others see you.
 
 Aura Farming
-Attention through mystique rather than volume. Cool, modern, slightly untouchable presence. The person — or space — that everyone notices but cannot explain why. Pop star and music video energy off-stage. Often minimal or monochrome with one unexpected element. Outward-facing and social — about the signal projected, not the feeling created. Distinct from Dress to Impress which is dramatic; Aura Farming is magnetic.
+Streetwear cool factor. Effortless city style with hoodies, cargos, clean sneakers, and the cultural fluency that makes it all land without trying. The aesthetic of someone who just gets it without being loud about it. Understated cool over flashy.
 
 Soft Academia
 The romance of intellectual and creative life. Curiosity, craft, and the feeling of a well-loved study or studio. Tweed, plaid, leather accessories, warm lighting, books, stationery, wooden desk objects, loose-leaf tea. NOT limited to fashion — this is one of the most cross-category vibes on the platform. A leather notebook, a reading lamp, a set of art pencils, or a vintage globe all qualify.
