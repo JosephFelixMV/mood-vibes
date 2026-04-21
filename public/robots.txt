@@ -1,16 +1,18 @@
 User-agent: Googlebot
 Allow: /
-
+ 
 User-agent: Bingbot
 Allow: /
-
+ 
 User-agent: Twitterbot
 Allow: /
-
+ 
 User-agent: facebookexternalhit
 Allow: /
-
+ 
 User-agent: *
+Disallow: /admin
+Disallow: /admin/*
 Allow: /
-
-Sitemap: https://ztztujccujrigexfhdjj.supabase.co/functions/v1/sitemap
+ 
+Sitemap: https://www.mood-and-vibes.com/functions/v1/sitemap
