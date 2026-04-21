@@ -58,29 +58,19 @@ export default function ProductDetail() {
     enabled: !!product?.id,
   });
 
+  // Always fetch a global pool — context filtering happens in handleAnother at click time.
+  // This ensures the button is never disabled due to a stale or empty context-filtered pool.
   const { data: allProducts = [] } = useQuery({
     queryKey: ["related-products", product?.id],
     queryFn: async () => {
       if (!product) return [];
-      const ctx = getDiscoveryContext();
-      let query = supabase
+      const { data, error } = await supabase
         .from("products")
-        .select("id, slug, category, vibe_category")
+        .select("id, slug, category, vibe_category, mood")
         .eq("is_active", true)
         .neq("id", product.id)
+        .order("date_added", { ascending: false })
         .limit(100);
-
-      if (ctx?.type === "category" && ctx.name) {
-        query = query.ilike("category", `%${ctx.name}%`);
-      } else if (ctx?.type === "vibe" && ctx.name) {
-        query = query.ilike("vibe_category", `%${ctx.name}%`);
-      } else if (ctx?.type === "mood" && ctx.name) {
-        query = query.ilike("mood", `%${ctx.name}%`);
-      } else {
-        query = query.order("date_added", { ascending: false });
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
@@ -103,15 +93,21 @@ export default function ProductDetail() {
     staleTime: 1000 * 60 * 10,
   });
 
-  const rawVendorName = product?.vendor_id
-    ? allBrands.find((b: any) => b.id === product.vendor_id)?.name
-    : null;
+  const rawVendorName = product?.vendor_id ? allBrands.find((b: any) => b.id === product.vendor_id)?.name : null;
   const vendorName = rawVendorName ? formatBrandName(rawVendorName) : null;
 
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
   const primaryCategory = product?.category?.split(",")[0]?.trim() || "";
   const primaryVibe = product?.vibe_category?.split(",")[0]?.trim() || "";
+
+  // Descriptive alt text for SEO and accessibility
+  const imageAlt = product
+    ? product.company_name
+      ? `${product.name} by ${formatBrandName(product.company_name)}`
+      : product.name
+    : "";
+
   const seoTitle = product ? `${product.name} | ${primaryCategory || "Curated Pick"} | Mood & Vibes` : "Mood & Vibes";
   const seoDescription = product
     ? product.description
@@ -131,37 +127,52 @@ export default function ProductDetail() {
     image: product?.image_url || undefined,
     url: product ? `${window.location.origin}/product/${(product as any).slug || product.id}` : undefined,
     keywords: productKeywords.length > 0 ? productKeywords : undefined,
-    productName: product?.name, // 👈 add this
-    price: product?.price ?? null, // 👈 add this
+    productName: product?.name,
+    price: product?.price ?? null,
   });
 
-  // Images only (no video in gallery)
   const allImages = product
     ? [...(product.image_url ? [product.image_url] : []), ...images.map((img) => img.image_url)]
     : [];
 
   const handleAnother = () => {
     if (!product) return;
-    // Get all categories and vibes for this product
-    const cats = product.category
-      .split(",")
-      .map((c) => c.trim())
-      .filter(Boolean);
-    const vibes =
-      product.vibe_category
-        ?.split(",")
-        .map((v) => v.trim())
-        .filter(Boolean) || [];
 
-    // Filter to products sharing at least one category or vibe
-    const related = allProducts.filter((p) => {
-      if (p.id === product.id) return false;
-      const pCats = p.category.split(",").map((c) => c.trim());
-      const pVibes = p.vibe_category?.split(",").map((v) => v.trim()) || [];
-      return cats.some((c) => pCats.includes(c)) || vibes.some((v) => pVibes.includes(v));
-    });
+    const ctx = getDiscoveryContext();
 
-    const pool = related.length > 0 ? related : allProducts;
+    // Helper: split a comma-separated field into trimmed array
+    const split = (s?: string | null) =>
+      (s || "")
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
+
+    let pool = allProducts;
+
+    if (ctx?.type === "category" && ctx.name) {
+      // Prefer products from the category the user entered from
+      const contextFiltered = allProducts.filter((p) => split(p.category).includes(ctx.name));
+      if (contextFiltered.length > 1) pool = contextFiltered;
+    } else if (ctx?.type === "vibe" && ctx.name) {
+      const contextFiltered = allProducts.filter((p) => split(p.vibe_category).includes(ctx.name));
+      if (contextFiltered.length > 1) pool = contextFiltered;
+    } else if (ctx?.type === "mood" && ctx.name) {
+      const contextFiltered = allProducts.filter((p) => split((p as any).mood).includes(ctx.name));
+      if (contextFiltered.length > 1) pool = contextFiltered;
+    } else {
+      // No context (direct URL, homepage) — prefer products sharing
+      // at least one category or vibe with the current product
+      const cats = split(product.category);
+      const vibes = split(product.vibe_category);
+      const related = allProducts.filter((p) => {
+        const pCats = split(p.category);
+        const pVibes = split(p.vibe_category);
+        return cats.some((c) => pCats.includes(c)) || vibes.some((v) => pVibes.includes(v));
+      });
+      if (related.length > 1) pool = related;
+      // else falls back to full global pool of 100
+    }
+
     const next = getRandomProduct(pool as any, product.id);
     if (next) navigate(`/product/${(next as any).slug || next.id}`);
   };
@@ -169,12 +180,7 @@ export default function ProductDetail() {
   const handleBuyClick = () => {
     if (product) {
       trackProductClick(product.id);
-      // Fire async click-time validation (non-blocking)
-      supabase.functions
-        .invoke("validate-click", {
-          body: { product_id: product.id },
-        })
-        .catch(() => {});
+      supabase.functions.invoke("validate-click", { body: { product_id: product.id } }).catch(() => {});
     }
   };
 
@@ -199,19 +205,18 @@ export default function ProductDetail() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-5xl overflow-hidden rounded-2xl border bg-card"
+        className="overflow-hidden rounded-lg border bg-card"
       >
-        {/* Top section: images + key info */}
-        <div className="md:flex">
+        <div className="flex flex-col md:flex-row">
           {/* Image gallery */}
-          <div className="relative md:w-1/2">
-            <div className="relative aspect-square w-full overflow-hidden bg-muted">
+          <div className="md:w-1/2">
+            <div className="relative aspect-square overflow-hidden bg-[#f7f7f5]">
               {allImages.length > 0 ? (
                 <>
                   <img
                     src={allImages[currentImage]}
                     sizes="(min-width: 768px) 50vw, 100vw"
-                    alt={product.name}
+                    alt={imageAlt}
                     className="sharp-image h-full w-full object-contain"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = fallbackImage;
@@ -240,6 +245,7 @@ export default function ProductDetail() {
                 <div className="flex h-full items-center justify-center text-6xl text-muted-foreground">🛍️</div>
               )}
             </div>
+
             {/* Thumbnail strip */}
             {allImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto p-3">
@@ -255,7 +261,7 @@ export default function ProductDetail() {
                   >
                     <img
                       src={url}
-                      alt={`${product.name} ${i + 1}`}
+                      alt={`${product.name} image ${i + 1}`}
                       className="h-full w-full object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = fallbackImage;
@@ -269,6 +275,7 @@ export default function ProductDetail() {
 
           {/* Product info */}
           <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
+            {/* Category / vibe / mood badges */}
             <div className="flex flex-wrap gap-2">
               {[
                 ...new Set(
@@ -325,7 +332,9 @@ export default function ProductDetail() {
                   );
                 })}
             </div>
+
             <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
+
             {product.company_name && (
               <p className="text-sm text-muted-foreground">
                 by {formatBrandName(product.company_name)}
@@ -334,6 +343,7 @@ export default function ProductDetail() {
                 </span>
               </p>
             )}
+
             <div>
               <span className="font-heading text-3xl font-bold text-primary">{formatPrice(product.price)}</span>
               <p className="text-xs text-muted-foreground">
@@ -348,18 +358,18 @@ export default function ProductDetail() {
                 variant="outline"
                 size="lg"
                 onClick={handleAnother}
-                disabled={allProducts.length <= 1}
+                disabled={allProducts.length === 0}
                 className="gap-2 rounded-full"
               >
                 Show me another <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
-            {vendorName && (
-              <p className="text-xs text-muted-foreground pt-1">via {vendorName}</p>
-            )}
+
+            {vendorName && <p className="text-xs text-muted-foreground pt-1">via {vendorName}</p>}
             <p className="text-[11px] italic text-muted-foreground">
               *We may earn a commission on purchases made through this link.
             </p>
+
             <ReportBrokenLink productId={product.id} variant="full" />
           </div>
         </div>
