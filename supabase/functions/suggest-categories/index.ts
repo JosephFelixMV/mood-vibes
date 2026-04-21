@@ -467,27 +467,27 @@ $1,000 and above
 
 $500–$999
 → With luxury brand OR premium material signal (cashmere, silk, leather, hand-crafted, limited edition):
-  → Assign: The Atelier or Old Money
+  → Assign: The Atelier or Quiet Luxury
 → Without luxury signal:
   → Treat as neutral, let other signals decide
 
 $200–$499 (fashion category only)
-→ Lean toward: Effortless Chic
-→ Override if: strong material or aesthetic signal points elsewhere (e.g. athletic → Sporty Girl, bold color → Dopamine Hits)
+→ Lean toward: Minimal and Casual
+→ Override if: strong material or aesthetic signal points elsewhere (e.g. athletic → Get Sporty, bold color → Dopamine Hits)
 
 $80–$199
 → No price-based vibe default
 → Let category, material, and visual signals decide entirely
 
 Under $80 (fashion category only)
-→ Do NOT auto-assign Street Style based on price alone
-→ Street Style is a cultural signal, not a price bracket — a $40 item can be Street Style if it has the right aesthetic signals, and a $60 item can be Effortless Chic
+→ Do NOT auto-assign Drip & Shine based on price alone
+→ Drip & Shine is a cultural signal, not a price bracket — a $40 item can be Drip & Shine if it has the right aesthetic signals, and a $60 item can be Minimal and Casual
 → Treat as neutral and let other signals decide
 
 Any price — activewear or fitness category
-→ Assign: Sporty Girl or Off Duty
-→ Use Sporty Girl for performance-first products
-→ Use Off Duty for lifestyle-athletic crossover products
+→ Assign: Get Sporty or Off-Duty Model
+→ Use Get Sporty for performance-first products
+→ Use Off-Duty Model for lifestyle-athletic crossover products
 
 Any price — strong single saturated color as primary selling point
 → Consider: Dopamine Hits vibe regardless of price tier
@@ -495,11 +495,11 @@ Any price — strong single saturated color as primary selling point
 
 PRICE TIER SUMMARY TABLE:
 $1000+    → The Atelier (fashion/luxury/accessories)
-$500-999  → The Atelier or Old Money (with luxury signal)
-$200-499  → Effortless Chic (fashion default)
+$500-999  → The Atelier or Quiet Luxury (with luxury signal)
+$200-499  → Minimal and Casual (fashion default)
 $80-199   → No default, signals decide
 Under $80 → No default, signals decide
-Any price + activewear → Sporty Girl or Off Duty
+Any price + activewear → Get Sporty or Off-Duty Model
 Any price + bold color → Dopamine Hits consideration
 
 ═══════════════════════════════════════
@@ -520,7 +520,7 @@ OLD MONEY / EFFORTLESS CHIC signals
 ─────────────────────────────────────
 Material terms: linen, cotton twill, unstructured, relaxed fit, heritage, classic cut, natural fiber, stone-washed, raw edge, wide-leg, tailored, merino
 Style terms: minimal hardware, tonal, monochrome, neutral, understated, clean line
-→ Vibe: Old Money (if price $300+) or Effortless Chic (if price under $300)
+→ Vibe: Quiet Luxury (if price $300+) or Minimal and Casual (if price under $300)
 → Mood: Calm or Minimal
 
 ─────────────────────────────────────
@@ -528,7 +528,7 @@ STREET STYLE signals
 ─────────────────────────────────────
 Style terms: oversized, vintage-wash, graphic, drop-shoulder, distressed, raw hem, graffiti, logo-heavy, colorblock, patchwork denim, cargo, utility
 Cultural terms: hype, limited drop, collab, streetwear, skate, bmx, sneaker, basketball
-→ Vibe: Street Style (regardless of price)
+→ Vibe: Drip & Shine (regardless of price)
 → Mood: Bold or Playful
 
 ─────────────────────────────────────
@@ -536,7 +536,7 @@ SPORTY GIRL / OFF DUTY signals
 ─────────────────────────────────────
 Material terms: compression, moisture-wicking, performance, ribbed, seamless, recycled nylon, spandex, lycra, mesh panel, four-way stretch, breathable, quick-dry
 Style terms: racerback, sports bra, legging, bike short, windbreaker, track, athletic
-→ Vibe: Sporty Girl (performance focus) or Off Duty (lifestyle crossover)
+→ Vibe: Get Sporty (performance focus) or Off-Duty Model (lifestyle crossover)
 → Mood: Motivated or Playful
 
 ─────────────────────────────────────
@@ -544,7 +544,7 @@ COZY HOMEBODY signals
 ─────────────────────────────────────
 Material terms: sherpa, fleece, waffle knit, terry cloth, lounge, fuzzy, plush, slipper, robe, weighted
 Style terms: oversized fit, relaxed, loungewear, sleepwear, pajama, hoodie, sweatshirt
-→ Vibe: Cozy Homebody
+→ Vibe: Stay-In Cinema
 → Mood: Cozy
 
 ─────────────────────────────────────
@@ -995,7 +995,7 @@ Color palette: warm browns, forest green, burgundy, cream, mustard, aged ivory
 MAIN CHARACTER signals
 ─────────────────────────────────────
 Style terms: statement piece, showstopper, conversation piece, all eyes on, scene-stealing, one-of-a-kind, eye-catching, centerpiece (for home products)
-→ Vibe: Main Character
+→ Vibe: Dress to Impress
 → Mood: Bold
 → Use when the product is clearly designed to be the focal point of an outfit or room — not just colorful or unusual, but specifically dominant
 
@@ -1021,7 +1021,7 @@ The company_name field provides brand context. Use it as a categorical signal, n
 LUXURY & INDEPENDENT DESIGNER brands
 ─────────────────────────────────────
 Signals: brand is a known luxury house, independent fashion designer, or artisan maker. Often single-name or founder-named brands. Products typically $200+.
-→ Vibe lean: The Atelier or Old Money
+→ Vibe lean: The Atelier or Quiet Luxury
 → Confirm with price signal — if price is under $100 despite luxury brand name, treat brand signal as weak
 → Examples of brand type (not exhaustive): single-name European fashion houses, independent New York or LA designers, Japanese craft brands
 
@@ -1029,7 +1029,7 @@ Signals: brand is a known luxury house, independent fashion designer, or artisan
 PERFORMANCE & ATHLETIC brands
 ─────────────────────────────────────
 Signals: brand is known primarily for sportswear, athletic gear, outdoor performance, or fitness equipment. Applies regardless of price point.
-→ Vibe lean: Sporty Girl or Off Duty
+→ Vibe lean: Get Sporty or Off-Duty Model
 → Mood lean: Motivated
 → Override only if the specific product is clearly a lifestyle/fashion crossover with no performance function
 → Brand types: running brands, yoga/studio brands, outdoor performance brands, gym equipment brands, athletic footwear
@@ -1037,8 +1037,8 @@ Signals: brand is known primarily for sportswear, athletic gear, outdoor perform
 ─────────────────────────────────────
 STREETWEAR & HYPE brands
 ─────────────────────────────────────
-Signals: brand operates in hype, drop, or streetwear culture. Associated with limited releases, collaborations, sneaker culture, or music/artist affiliations. Price is irrelevant — do NOT limit Street Style to low price points.
-→ Vibe lean: Street Style
+Signals: brand operates in hype, drop, or streetwear culture. Associated with limited releases, collaborations, sneaker culture, or music/artist affiliations. Price is irrelevant — do NOT limit Drip & Shine to low price points.
+→ Vibe lean: Drip & Shine
 → Mood lean: Bold or Playful
 → Brand types: skate brands, sneaker brands, music-affiliated fashion labels, hype-adjacent streetwear
 
@@ -1063,7 +1063,7 @@ HOME & LIFESTYLE brands
 ─────────────────────────────────────
 Signals: brand specializes in home décor, kitchen, or lifestyle objects.
 → If brand is known for colorful, design-forward products (e.g. Le Creuset-type brands) → Dopamine Hits vibe
-→ If brand is known for minimalist Scandinavian or Japanese design → Minimal mood, Old Money or Effortless Chic vibe
+→ If brand is known for minimalist Scandinavian or Japanese design → Minimal mood, Quiet Luxury or Minimal and Casual vibe
 → If brand is known for artisan or craft objects → Soft Academia or The Atelier vibe
 
 ─────────────────────────────────────
