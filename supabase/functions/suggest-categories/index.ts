@@ -605,18 +605,21 @@ luxury signal → Minimal and Casual over Quiet Luxury
 ─────────────────────────────────────
 DRIP & SHINE signals
 ─────────────────────────────────────
-Style terms: oversized, graphic tee, vintage wash, drop shoulder, distressed,
-raw hem, graffiti print, logo heavy, colorblock, patchwork denim, cargo,
-utility, baggy, streetwear, urban, fresh, clean, crisp
-Cultural terms: hype, limited drop, collab, sneaker, basketball, skate,
-music-affiliated, artist collab, exclusive
-Object terms: sneakers, hoodies, caps, bucket hats, chain jewelry,
-crossbody bags with streetwear aesthetic
-Price signal: irrelevant — street style spans all price points
+Object terms: gold chain, necklace, bracelet, earrings,
+rings, statement jewelry, bold accessories, designer bag,
+embellished bag, rhinestone, crystal accessories,
+pearl jewelry, layered jewelry, chunky jewelry,
+statement sunglasses, luxury watch, charm bracelet
+Style terms: high-end accessories, statement piece,
+jewelry stack, elevated accessories, shine, gleam,
+bold finish, luxe detail, eye-catching accessories
 → Vibe: Drip & Shine
-→ Mood: Bold or Playful
-→ IMPORTANT: Do not limit to low price points. A $600 limited drop and a
-$40 vintage find both qualify. The signal is cultural currency, not cost.
+→ Mood: Bold or Romantic
+→ Distinguish from Aura Farming: Drip & Shine is
+specifically accessories and jewelry that shine and pop.
+Aura Farming is the overall streetwear look and cool factor.
+→ Distinguish from The Atelier: Drip & Shine is bold
+and statement-making. The Atelier is quiet artisan luxury.
 
 ─────────────────────────────────────
 DRESS TO IMPRESS signals
