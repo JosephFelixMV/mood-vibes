@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getCategories, getProductCountByCategory } from "@/lib/supabase-queries";
+import { getPublicCategories, getProductCountByCategory } from "@/lib/supabase-queries";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/useSEO";
 import type { Category } from "@/lib/supabase-queries";
@@ -16,8 +16,8 @@ export default function Categories() {
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["categories", "core"],
-    queryFn: () => getCategories("core"),
+    queryKey: ["public-categories", "core"],
+    queryFn: () => getPublicCategories("core"),
   });
   const { data: counts = {} } = useQuery({
     queryKey: ["product-counts"],

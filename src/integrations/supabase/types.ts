@@ -540,6 +540,20 @@ export type Database = {
     Functions: {
       disable_cron_job: { Args: never; Returns: undefined }
       enable_cron_job: { Args: never; Returns: undefined }
+      get_categories_with_counts: {
+        Args: { category_type?: string }
+        Returns: {
+          description: string
+          icon: string
+          icon_url: string
+          id: string
+          name: string
+          parent_slug: string
+          product_count: number
+          slug: string
+          type: string
+        }[]
+      }
       get_cron_job_status: { Args: never; Returns: boolean }
       get_or_create_daily_pick: { Args: never; Returns: string }
     }
