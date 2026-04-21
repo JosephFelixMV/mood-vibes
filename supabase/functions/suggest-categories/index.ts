@@ -212,7 +212,7 @@ Minimal and Casual
 Elevated but wearable. Looks put-together without trying. Relaxed silhouettes in quality fabrics. Accessible luxury. The French-girl aesthetic applied to any category.
 
 Drip & Shine
-Trend-forward, urban, culturally fluent. Do NOT treat this as a low-price vibe — street style spans all price points. A $600 hype drop and a $40 vintage find both qualify. The signal is cultural currency, not cost. Hip-hop, pop, skate, and sneaker culture all live here.
+High-end shine. Bold jewelry, statement accessories, and pieces that add gleam and presence to any look. Gold chains, bold earrings, standout bags, and pieces that elevate an outfit through shine and quality. The flex is in what catches the eye.
 
 Get Sporty
 Performance meets lifestyle. Activewear worn beyond the gym. Elevated athletic aesthetic. Clean, functional, aspirational. The product looks as good in a coffee shop as in a workout.
