@@ -61,13 +61,15 @@ Deno.serve(async (req) => {
     ];
 
     // Categories (split by type for proper URL prefixes)
+    // Fetch updated_at and created_at for accurate lastmod
     const { data: categories } = await supabase
       .from("categories")
-      .select("slug,type,created_at");
+      .select("slug,type,updated_at,created_at");
 
     const categoryUrls: string[] = [];
     for (const c of categories || []) {
-      const lastmod = (c.created_at || "").slice(0, 10) || today;
+      // Prefer updated_at over created_at for accurate change signalling
+      const lastmod = (c.updated_at || c.created_at || "").slice(0, 10) || today;
       let path = "";
       if (c.type === "vibe") path = `/vibes/${c.slug}`;
       else if (c.type === "mood") path = `/moods/${c.slug}`;
@@ -96,11 +98,9 @@ Deno.serve(async (req) => {
       from += PAGE;
     }
 
-    const brandUrls: string[] = [];
-
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticUrls, ...categoryUrls, ...brandUrls, ...productUrls].join("\n")}
+${[...staticUrls, ...categoryUrls, ...productUrls].join("\n")}
 </urlset>`;
 
     return new Response(xml, {
