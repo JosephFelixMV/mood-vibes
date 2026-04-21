@@ -11,16 +11,38 @@ interface SEOProps {
   productName?: string;
   ogType?: "website" | "product";
   collectionName?: string;
+  /** Inject WebSite JSON-LD with SearchAction — use on homepage only */
+  siteSchema?: boolean;
+  /** Breadcrumb trail: array of {name, url} items from root to current page */
+  breadcrumbs?: { name: string; url: string }[];
 }
 
 const SITE_DEFAULT_OG = "https://www.mood-and-vibes.com/og-default.jpg";
+const SITE_URL = "https://www.mood-and-vibes.com";
 
-export function useSEO({ title, description, image, url, keywords, rawTitle, price, productName, ogType = "website", collectionName }: SEOProps) {
+export function useSEO({
+  title,
+  description,
+  image,
+  url,
+  keywords,
+  rawTitle,
+  price,
+  productName,
+  ogType = "website",
+  collectionName,
+  siteSchema,
+  breadcrumbs,
+}: SEOProps) {
   useEffect(() => {
     if (!title && !description) return;
 
     const suffix = "Mood & Vibes";
-    const fullTitle = title ? (rawTitle || title.includes(suffix) ? title : `${title} | ${suffix}`) : suffix;
+    const fullTitle = title
+      ? rawTitle || title.includes(suffix)
+        ? title
+        : `${title} | ${suffix}`
+      : suffix;
     document.title = fullTitle;
 
     const setMeta = (attr: string, key: string, content: string) => {
@@ -43,8 +65,9 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
       el.setAttribute("href", href);
     };
 
-    const canonicalUrl = url || (window.location.origin + window.location.pathname);
+    const canonicalUrl = url || window.location.origin + window.location.pathname;
     const ogImage = image || SITE_DEFAULT_OG;
+
     setLink("canonical", canonicalUrl);
 
     if (description) {
@@ -56,6 +79,7 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
       setMeta("property", "og:title", fullTitle);
       setMeta("name", "twitter:title", fullTitle);
     }
+
     setMeta("property", "og:image", ogImage);
     setMeta("name", "twitter:image", ogImage);
     setMeta("name", "twitter:card", "summary_large_image");
@@ -66,9 +90,13 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
       setMeta("name", "keywords", keywords.join(", "));
     }
 
+    // Clean up all JSON-LD on every render
     document.getElementById("seo-product-jsonld")?.remove();
     document.getElementById("seo-collection-jsonld")?.remove();
+    document.getElementById("seo-website-jsonld")?.remove();
+    document.getElementById("seo-breadcrumb-jsonld")?.remove();
 
+    // Product schema
     if (productName) {
       const schema: Record<string, unknown> = {
         "@context": "https://schema.org",
@@ -94,6 +122,7 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
       document.head.appendChild(script);
     }
 
+    // CollectionPage schema
     if (collectionName) {
       const schema: Record<string, unknown> = {
         "@context": "https://schema.org",
@@ -110,9 +139,54 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
       document.head.appendChild(script);
     }
 
+    // WebSite schema with SearchAction — homepage only
+    if (siteSchema) {
+      const schema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "Mood & Vibes",
+        url: SITE_URL,
+        description: "Daily curated product picks organized by mood, vibe, and lifestyle.",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: `${SITE_URL}/products?q={search_term_string}`,
+          },
+          "query-input": "required name=search_term_string",
+        },
+      };
+      const script = document.createElement("script");
+      script.id = "seo-website-jsonld";
+      script.type = "application/ld+json";
+      script.text = JSON.stringify(schema);
+      document.head.appendChild(script);
+    }
+
+    // BreadcrumbList schema
+    if (breadcrumbs && breadcrumbs.length > 0) {
+      const schema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumbs.map((crumb, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: crumb.name,
+          item: crumb.url,
+        })),
+      };
+      const script = document.createElement("script");
+      script.id = "seo-breadcrumb-jsonld";
+      script.type = "application/ld+json";
+      script.text = JSON.stringify(schema);
+      document.head.appendChild(script);
+    }
+
     return () => {
       document.getElementById("seo-product-jsonld")?.remove();
       document.getElementById("seo-collection-jsonld")?.remove();
+      document.getElementById("seo-website-jsonld")?.remove();
+      document.getElementById("seo-breadcrumb-jsonld")?.remove();
     };
-  }, [title, description, image, url, keywords, rawTitle, price, productName, ogType, collectionName]);
+  }, [title, description, image, url, keywords, rawTitle, price, productName, ogType, collectionName, siteSchema, breadcrumbs]);
 }

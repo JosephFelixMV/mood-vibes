@@ -45,7 +45,20 @@ export default function Index() {
     rawTitle: true,
     description:
       "Daily curated product picks organized by mood, vibe, and lifestyle. Find your mood. Shop the vibe. Discover unique finds that match your aesthetic on Mood & Vibes.",
+    url: "https://www.mood-and-vibes.com/",
+    keywords: [
+      "mood shopping",
+      "curated products",
+      "aesthetic finds",
+      "vibe shopping",
+      "daily product picks",
+      "mood and vibes",
+      "curated discovery",
+    ],
+    ogType: "website",
+    siteSchema: true,
   });
+
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
@@ -122,9 +135,6 @@ export default function Index() {
             />
           </motion.div>
         </div>
-
-        {/* Decorative elements */}
-        {/* removed decorative blobs */}
       </section>
 
       {/* Surprise result */}

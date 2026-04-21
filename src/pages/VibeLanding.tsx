@@ -47,6 +47,11 @@ export default function VibeLanding() {
     url: `${window.location.origin}/vibe/${slug}`,
     ogType: "website",
     collectionName: vibe ? `${vibeName} Aesthetic Products | Mood & Vibes` : undefined,
+    breadcrumbs: vibe ? [
+      { name: "Home", url: "https://www.mood-and-vibes.com/" },
+      { name: "Vibes", url: "https://www.mood-and-vibes.com/vibes" },
+      { name: `${vibeName} Aesthetic`, url: `https://www.mood-and-vibes.com/vibe/${slug}` },
+    ] : undefined,
   });
 
   const { data: products = [], isLoading } = useQuery({
