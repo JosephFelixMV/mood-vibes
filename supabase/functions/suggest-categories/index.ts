@@ -913,13 +913,73 @@ If it is general home organisation → Organized Life.
 
 
 ─────────────────────────────────────
+BACKYARD SOCIAL signals
+─────────────────────────────────────
+Object terms: grill, smoker, BBQ, charcoal, cast iron,
+outdoor kitchen, fire pit, patio heater, lawn game,
+cornhole, brisket, ribs, apron, tongs, grill brush,
+smoker box, propane, BBQ rub, marinade, cooler,
+charcuterie board (outdoor), Weber, Traeger,
+Big Green Egg, Solo Stove
+Style terms: heavy duty, professional grade, outdoor
+entertaining, hosting, gathering, backyard, social,
+smoky, grilling, pitmaster, competition BBQ
+→ Vibe: Backyard Social
+→ Mood: Bold or Social
+→ Distinguish from Touch Grass: Touch Grass is outdoor
+adventure and nature. Backyard Social is outdoor hosting
+and entertaining in a fixed space.
+→ Distinguish from Tis the Season: Backyard Social is
+year-round outdoor entertaining, not seasonally defined.
+→ Distinguish from Kitchen Flex: Kitchen Flex is indoor
+cooking culture. Backyard Social is specifically outdoor
+and social.
+
+─────────────────────────────────────
+AL FRESCO signals
+─────────────────────────────────────
+Object terms: picnic basket, picnic blanket, hammock,
+outdoor rug, garden chair, patio umbrella, shade sail,
+string lights, lantern, citronella candle, mosquito
+repellent, outdoor cushion, melamine dinnerware,
+acrylic glassware, portable speaker (outdoor context),
+bocce ball, badminton, bubble machine, garden table,
+inflatable pool lounger
+Material terms: linen, cotton canvas, rattan, woven,
+natural fiber, lightweight, shatterproof, bamboo
+Style terms: picnic, garden, patio, shaded, lounging,
+breezy, airy, al fresco, outdoor living, summer
+afternoon, effortless outdoor, laid-back, relaxed
+→ Vibe: Al Fresco
+→ Mood: Calm or Playful
+→ Distinguish from Coastal Cool: Coastal Cool has a
+beach or water reference. Al Fresco is garden, patio,
+or countryside.
+→ Distinguish from Touch Grass: Touch Grass is active
+outdoor pursuit. Al Fresco is stationary and relaxed.
+→ Distinguish from Backyard Social: Backyard Social is
+high-energy grilling and hosting. Al Fresco is
+low-energy lounging and picnicking.
+
+─────────────────────────────────────
 AURA FARMING signals
 ─────────────────────────────────────
-Style terms: editorial, cool-girl, understated statement, monochrome with detail, considered, architectural, precise
-Cultural terms: model off-duty, fashion week, pop star, music video, avant-pop, clean girl (elevated version)
+Style terms: streetwear, cool factor, understated,
+effortless style, cultural currency, clean aesthetic,
+low-key flex, city cool, minimal streetwear
+Object terms: hoodies, cargo pants, caps, clean sneakers,
+oversized tees, joggers, bucket hats, crossbody bags
+Cultural terms: hype-adjacent, culturally fluent,
+cool without trying, effortless cool, street credibility
 → Vibe: Aura Farming
-→ Mood: Calm or Bold
-→ Note: Aura Farming is outward-facing. If the product creates joy for the owner privately → Dopamine Hits. If it creates presence socially → Aura Farming.
+→ Mood: Bold or Minimal
+→ Distinguish from Drip & Shine: Aura Farming is the
+overall cool streetwear aesthetic and cultural signal.
+Drip & Shine is specifically high-end jewelry and statement
+accessories that add shine and pop to any look.
+→ Distinguish from Dress to Impress: Aura Farming is
+casual and effortless. Dress to Impress is occasion-driven
+and polished.
 
 ─────────────────────────────────────
 SOFT ACADEMIA signals
