@@ -326,7 +326,14 @@ export default function ProductDetail() {
                 })}
             </div>
             <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>
-            {product.company_name && <p className="text-sm text-muted-foreground">by {product.company_name}</p>}
+            {product.company_name && (
+              <p className="text-sm text-muted-foreground">
+                by {formatBrandName(product.company_name)}
+                <span className="ml-2 text-xs italic">
+                  · More colors &amp; styles may be available on the seller's site
+                </span>
+              </p>
+            )}
             <div>
               <span className="font-heading text-3xl font-bold text-primary">{formatPrice(product.price)}</span>
               <p className="text-xs text-muted-foreground">
@@ -347,8 +354,11 @@ export default function ProductDetail() {
                 Show me another <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs italic text-muted-foreground pt-1">
-              More colors &amp; styles may be available on the seller's site
+            {vendorName && (
+              <p className="text-xs text-muted-foreground pt-1">via {vendorName}</p>
+            )}
+            <p className="text-[11px] italic text-muted-foreground">
+              *We may earn a commission on purchases made through this link.
             </p>
             <ReportBrokenLink productId={product.id} variant="full" />
           </div>
