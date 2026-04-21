@@ -10,9 +10,12 @@ interface SEOProps {
   price?: number | null;
   productName?: string;
   ogType?: "website" | "product";
+  collectionName?: string;
 }
 
-export function useSEO({ title, description, image, url, keywords, rawTitle, price, productName, ogType = "website" }: SEOProps) {
+const SITE_DEFAULT_OG = "https://www.mood-and-vibes.com/og-default.jpg";
+
+export function useSEO({ title, description, image, url, keywords, rawTitle, price, productName, ogType = "website", collectionName }: SEOProps) {
   useEffect(() => {
     if (!title && !description) return;
 
@@ -41,6 +44,7 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
     };
 
     const canonicalUrl = url || (window.location.origin + window.location.pathname);
+    const ogImage = image || SITE_DEFAULT_OG;
     setLink("canonical", canonicalUrl);
 
     if (description) {
@@ -52,11 +56,9 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
       setMeta("property", "og:title", fullTitle);
       setMeta("name", "twitter:title", fullTitle);
     }
-    if (image) {
-      setMeta("property", "og:image", image);
-      setMeta("name", "twitter:image", image);
-    }
-
+    setMeta("property", "og:image", ogImage);
+    setMeta("name", "twitter:image", ogImage);
+    setMeta("name", "twitter:card", "summary_large_image");
     setMeta("property", "og:url", canonicalUrl);
     setMeta("property", "og:type", ogType);
 
@@ -73,7 +75,7 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
         "@type": "Product",
         name: productName,
         ...(description && { description }),
-        ...(image && { image }),
+        image: ogImage,
         ...(keywords && keywords.length > 0 && { keywords: keywords.join(", ") }),
         ...(canonicalUrl && {
           offers: {
@@ -92,9 +94,25 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
       document.head.appendChild(script);
     }
 
+    if (collectionName) {
+      const schema: Record<string, unknown> = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: collectionName,
+        ...(description && { description }),
+        url: canonicalUrl,
+        image: ogImage,
+      };
+      const script = document.createElement("script");
+      script.id = "seo-collection-jsonld";
+      script.type = "application/ld+json";
+      script.text = JSON.stringify(schema);
+      document.head.appendChild(script);
+    }
+
     return () => {
       document.getElementById("seo-product-jsonld")?.remove();
       document.getElementById("seo-collection-jsonld")?.remove();
     };
-  }, [title, description, image, url, keywords, rawTitle, price, productName, ogType]);
+  }, [title, description, image, url, keywords, rawTitle, price, productName, ogType, collectionName]);
 }

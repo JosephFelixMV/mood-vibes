@@ -74,6 +74,7 @@ export default function CategoryLanding() {
       : undefined,
     url: `${window.location.origin}/category/${slug}`,
     ogType: "website",
+    collectionName: category ? `${categoryName} Products | Mood & Vibes` : undefined,
   });
 
   const { data: products = [], isLoading } = useQuery({

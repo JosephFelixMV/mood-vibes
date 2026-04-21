@@ -104,6 +104,7 @@ export default function MoodLanding() {
       : undefined,
     url: `${window.location.origin}/mood/${slug}`,
     ogType: "website",
+    collectionName: mood ? `${mood.name} Mood Products | Mood & Vibes` : undefined,
   });
 
   if (!mood) {
