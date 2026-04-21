@@ -75,7 +75,7 @@ export default function CategoryLanding() {
     queryKey: ["category-products", slug, filterNames.join(",")],
     queryFn: async () => {
       const orClause = filterNames
-        .map((n) => `category.ilike.%${encodeURIComponent(n).replace(/%20/g, " ")}%`)
+        .map((n) => `category.ilike.*${n.replace(/[,()"]/g, "")}*`)
         .join(",");
       const { data, error } = await supabase
         .from("products")
