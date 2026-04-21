@@ -36,11 +36,16 @@ export default function VibeLanding() {
   }, [slug, vibeName]);
 
   useSEO({
-    title: vibeName ? `${vibeName} Aesthetic | Curated Finds | Mood & Vibes` : "Vibe | Mood & Vibes",
+    title: vibe ? `${vibeName} Aesthetic | Curated Finds | Mood & Vibes` : undefined,
     rawTitle: true,
-    description: vibe?.description
-      ? vibe.description
-      : `Browse ${vibeName} products curated by aesthetic. Find your mood. Shop the vibe on Mood & Vibes.`,
+    description: vibe
+      ? (vibe.description || `Browse ${vibeName} aesthetic products curated by mood and style. Find your vibe on Mood & Vibes.`)
+      : undefined,
+    keywords: vibe
+      ? [vibeName, `${vibeName} aesthetic`, `${vibeName} products`, `${vibeName} style`, "mood and vibes", "aesthetic finds"]
+      : undefined,
+    url: `${window.location.origin}/vibe/${slug}`,
+    ogType: "website",
   });
 
   const { data: products = [], isLoading } = useQuery({
@@ -119,7 +124,7 @@ export default function VibeLanding() {
           <p className="mb-2 text-muted-foreground">{vibe.description}</p>
         )}
         <p className="text-sm text-muted-foreground">
-          {products.length} product{products.length !== 1 ? "s" : ""} in this vibe
+          {healthyProducts.length} product{healthyProducts.length !== 1 ? "s" : ""} in this vibe
         </p>
       </div>
 

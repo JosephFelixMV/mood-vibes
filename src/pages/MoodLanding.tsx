@@ -92,13 +92,18 @@ export default function MoodLanding() {
   });
 
 
-  const moodProductCount = filteredProducts.length;
+  const stableProductCount = products.length;
   useSEO({
-    title: mood ? `Shop ${mood.name} | Products for Every Mood | Mood & Vibes` : "Mood | Mood & Vibes",
+    title: mood ? `${mood.name} Mood | Curated Products | Mood & Vibes` : undefined,
     rawTitle: true,
-    description: mood?.description
-      ? mood.description
-      : `${moodProductCount} products curated for a ${mood?.name ?? ""} mood. Find your mood. Shop the vibe on Mood & Vibes.`,
+    description: mood
+      ? (mood.description || `${stableProductCount} products curated for a ${mood.name} mood. Find your mood. Shop the vibe on Mood & Vibes.`)
+      : undefined,
+    keywords: mood
+      ? [mood.name, `${mood.name} mood`, `${mood.name} products`, `${mood.name} gifts`, "mood shopping", "mood and vibes"]
+      : undefined,
+    url: `${window.location.origin}/mood/${slug}`,
+    ogType: "website",
   });
 
   if (!mood) {

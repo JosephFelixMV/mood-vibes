@@ -239,7 +239,7 @@ Deno.serve(async (req) => {
       }).eq("id", product.id);
     } catch (e) {
       vendorLastRequest[vendor] = Date.now();
-      const detail = `fetch_error: ${e.message}`;
+      const detail = `fetch_error: ${e instanceof Error ? e.message : String(e)}`;
       const newCount = (product.check_failure_count || 0) + 1;
       const shouldFlag = newCount >= AUTO_DEACTIVATE_THRESHOLD;
 
