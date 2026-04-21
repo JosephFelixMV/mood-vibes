@@ -64,11 +64,16 @@ export default function CategoryLanding() {
   }, [slug, categoryName]);
 
   useSEO({
-    title: categoryName ? `${categoryName} | Curated Picks | Mood & Vibes` : "Category | Mood & Vibes",
+    title: category ? `${categoryName} | Curated Picks | Mood & Vibes` : undefined,
     rawTitle: true,
-    description: category?.description
-      ? category.description
-      : `Discover curated ${categoryName} products. Find your mood. Shop the vibe on Mood & Vibes.`,
+    description: category
+      ? (category.description || `Discover curated ${categoryName} products handpicked by mood and aesthetic. Shop the vibe on Mood & Vibes.`)
+      : undefined,
+    keywords: category
+      ? [categoryName, `${categoryName} products`, `shop ${categoryName}`, `curated ${categoryName}`, "mood and vibes", "curated finds"]
+      : undefined,
+    url: `${window.location.origin}/category/${slug}`,
+    ogType: "website",
   });
 
   const { data: products = [], isLoading } = useQuery({

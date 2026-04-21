@@ -6,16 +6,16 @@ interface SEOProps {
   image?: string;
   url?: string;
   keywords?: string[];
-  /** When true, use title exactly as passed without appending the brand suffix. */
   rawTitle?: boolean;
-  /** Pass product price to enable JSON-LD Product schema (no brand, affiliate-safe) */
   price?: number | null;
-  /** Pass product name separately for JSON-LD schema name field */
   productName?: string;
+  ogType?: "website" | "product";
 }
 
-export function useSEO({ title, description, image, url, keywords, rawTitle, price, productName }: SEOProps) {
+export function useSEO({ title, description, image, url, keywords, rawTitle, price, productName, ogType = "website" }: SEOProps) {
   useEffect(() => {
+    if (!title && !description) return;
+
     const suffix = "Mood & Vibes";
     const fullTitle = title ? (rawTitle || title.includes(suffix) ? title : `${title} | ${suffix}`) : suffix;
     document.title = fullTitle;
@@ -30,6 +30,19 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
       el.setAttribute("content", content);
     };
 
+    const setLink = (rel: string, href: string) => {
+      let el = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
+      if (!el) {
+        el = document.createElement("link");
+        el.setAttribute("rel", rel);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("href", href);
+    };
+
+    const canonicalUrl = url || (window.location.origin + window.location.pathname);
+    setLink("canonical", canonicalUrl);
+
     if (description) {
       setMeta("name", "description", description);
       setMeta("property", "og:description", description);
@@ -43,16 +56,16 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
       setMeta("property", "og:image", image);
       setMeta("name", "twitter:image", image);
     }
-    if (url) {
-      setMeta("property", "og:url", url);
-    }
+
+    setMeta("property", "og:url", canonicalUrl);
+    setMeta("property", "og:type", ogType);
+
     if (keywords && keywords.length > 0) {
       setMeta("name", "keywords", keywords.join(", "));
     }
 
-    // JSON-LD Product schema — no brand field, affiliate-safe
-    const existingSchema = document.getElementById("seo-product-jsonld");
-    if (existingSchema) existingSchema.remove();
+    document.getElementById("seo-product-jsonld")?.remove();
+    document.getElementById("seo-collection-jsonld")?.remove();
 
     if (productName) {
       const schema: Record<string, unknown> = {
@@ -62,17 +75,16 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
         ...(description && { description }),
         ...(image && { image }),
         ...(keywords && keywords.length > 0 && { keywords: keywords.join(", ") }),
-        ...(url && {
+        ...(canonicalUrl && {
           offers: {
             "@type": "Offer",
             priceCurrency: "USD",
             ...(price != null && { price: price.toFixed(2) }),
             availability: "https://schema.org/InStock",
-            url,
+            url: canonicalUrl,
           },
         }),
       };
-
       const script = document.createElement("script");
       script.id = "seo-product-jsonld";
       script.type = "application/ld+json";
@@ -82,6 +94,7 @@ export function useSEO({ title, description, image, url, keywords, rawTitle, pri
 
     return () => {
       document.getElementById("seo-product-jsonld")?.remove();
+      document.getElementById("seo-collection-jsonld")?.remove();
     };
-  }, [title, description, image, url, keywords, rawTitle, price, productName]);
+  }, [title, description, image, url, keywords, rawTitle, price, productName, ogType]);
 }
