@@ -12,10 +12,10 @@ import { useSEO } from "@/hooks/useSEO";
 import { useRegion } from "@/contexts/RegionContext";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
-const toTitleCase = (s: string) =>
-  s.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+const toTitleCase = (s: string) => s.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 
 const PAGE_SIZE = 30;
+const SITE_URL = "https://www.mood-and-vibes.com";
 
 export default function Products() {
   const { region } = useRegion();
@@ -108,24 +108,67 @@ export default function Products() {
   const regionProducts = filterByRegion(products, region);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
+  // Build canonical URL — strip pagination params, preserve active filters
+  const canonicalUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (categorySlug) params.set("category", categorySlug);
+    if (vibeSlug) params.set("vibe", vibeSlug);
+    if (moodSlug) params.set("mood", moodSlug);
+    const qs = params.toString();
+    return `${SITE_URL}/products${qs ? `?${qs}` : ""}`;
+  }, [categorySlug, vibeSlug, moodSlug]);
+
   // SEO — filter-aware, brand-free metadata
-  let seoTitle = `Shop All Products | ${totalCount.toLocaleString()} Curated Finds | Mood & Vibes`;
-  let seoDescription = `Browse ${totalCount.toLocaleString()} curated products organized by mood, vibe, and lifestyle category. Find your mood. Shop the vibe.`;
+  let seoTitle = `Shop All Products | Mood & Vibes`;
+  let seoDescription = `Browse ${totalCount > 0 ? totalCount.toLocaleString() + " " : ""}curated products organized by mood, vibe, and lifestyle category. Find your mood. Shop the vibe.`;
+  let seoKeywords = ["curated products", "mood shopping", "aesthetic finds", "vibe shopping", "mood and vibes"];
+  let collectionName = "All Products | Mood & Vibes";
+  let breadcrumbs = [
+    { name: "Home", url: `${SITE_URL}/` },
+    { name: "All Products", url: `${SITE_URL}/products` },
+  ];
+
   if (categoryName) {
     seoTitle = `${categoryName} Products | Mood & Vibes`;
     seoDescription = `Browse curated ${categoryName} products. Find your mood. Shop the vibe on Mood & Vibes.`;
+    seoKeywords = [categoryName, `${categoryName} products`, `curated ${categoryName}`, "mood and vibes"];
+    collectionName = `${categoryName} Products | Mood & Vibes`;
+    breadcrumbs = [
+      { name: "Home", url: `${SITE_URL}/` },
+      { name: "Products", url: `${SITE_URL}/products` },
+      { name: categoryName, url: canonicalUrl },
+    ];
   } else if (vibeName) {
     seoTitle = `${vibeName} Finds | Mood & Vibes`;
     seoDescription = `Browse ${vibeName} aesthetic finds curated by vibe. Find your mood. Shop the vibe on Mood & Vibes.`;
+    seoKeywords = [vibeName, `${vibeName} aesthetic`, `${vibeName} products`, "mood and vibes"];
+    collectionName = `${vibeName} Finds | Mood & Vibes`;
+    breadcrumbs = [
+      { name: "Home", url: `${SITE_URL}/` },
+      { name: "Products", url: `${SITE_URL}/products` },
+      { name: vibeName, url: canonicalUrl },
+    ];
   } else if (moodName) {
     seoTitle = `${moodName} Mood Picks | Mood & Vibes`;
     seoDescription = `Products curated for a ${moodName} mood. Find your mood. Shop the vibe on Mood & Vibes.`;
+    seoKeywords = [moodName, `${moodName} mood`, `${moodName} products`, "mood shopping", "mood and vibes"];
+    collectionName = `${moodName} Mood Picks | Mood & Vibes`;
+    breadcrumbs = [
+      { name: "Home", url: `${SITE_URL}/` },
+      { name: "Products", url: `${SITE_URL}/products` },
+      { name: `${moodName} Mood`, url: canonicalUrl },
+    ];
   }
 
   useSEO({
     title: seoTitle,
     rawTitle: true,
     description: seoDescription,
+    url: canonicalUrl,
+    keywords: seoKeywords,
+    ogType: "website",
+    collectionName,
+    breadcrumbs,
   });
 
   const availableVendors = useMemo(() => {
@@ -135,7 +178,6 @@ export default function Products() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [brandsList, vendorCounts]);
 
-  // Reset page when filters change
   const resetPage = useCallback(() => setPage(1), []);
 
   const setCategory = (slug: string) => {
@@ -294,10 +336,7 @@ export default function Products() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <nav
-              className="mt-10 flex items-center justify-center gap-2"
-              aria-label="Product pagination"
-            >
+            <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Product pagination">
               <Button
                 variant="outline"
                 size="icon"
@@ -320,9 +359,7 @@ export default function Products() {
               <span className="px-3 text-sm text-muted-foreground">
                 Page <strong className="text-foreground">{page}</strong> of{" "}
                 <strong className="text-foreground">{totalPages}</strong>
-                <span className="ml-2 hidden sm:inline">
-                  ({totalCount.toLocaleString()} products)
-                </span>
+                <span className="ml-2 hidden sm:inline">({totalCount.toLocaleString()} products)</span>
               </span>
 
               <Button
