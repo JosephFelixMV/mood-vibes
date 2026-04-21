@@ -75,6 +75,11 @@ export default function CategoryLanding() {
     url: `${window.location.origin}/category/${slug}`,
     ogType: "website",
     collectionName: category ? `${categoryName} Products | Mood & Vibes` : undefined,
+    breadcrumbs: category ? [
+      { name: "Home", url: "https://www.mood-and-vibes.com/" },
+      { name: "Categories", url: "https://www.mood-and-vibes.com/categories" },
+      { name: categoryName, url: `https://www.mood-and-vibes.com/category/${slug}` },
+    ] : undefined,
   });
 
   const { data: products = [], isLoading } = useQuery({
@@ -140,7 +145,6 @@ export default function CategoryLanding() {
     const dateB = new Date(b.date_added).getTime();
     return sort === "newest" ? dateB - dateA : dateA - dateB;
   });
-
 
   if (!category && !isLoading) {
     return (

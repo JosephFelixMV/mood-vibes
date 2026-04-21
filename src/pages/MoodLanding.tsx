@@ -45,7 +45,7 @@ export default function MoodLanding() {
         .select("*")
         .eq("is_active", true)
         .ilike("mood", `%${mood.name}%`);
-      
+
       query = sort === "newest"
         ? query.order("date_added", { ascending: false })
         : query.order("date_added", { ascending: true });
@@ -91,13 +91,16 @@ export default function MoodLanding() {
     return true;
   });
 
+  // Use null guard to avoid "0 products" flash before query resolves
+  const stableProductCount = products.length > 0 ? products.length : null;
 
-  const stableProductCount = products.length;
   useSEO({
     title: mood ? `${mood.name} Mood | Curated Products | Mood & Vibes` : undefined,
     rawTitle: true,
     description: mood
-      ? (mood.description || `${stableProductCount} products curated for a ${mood.name} mood. Find your mood. Shop the vibe on Mood & Vibes.`)
+      ? (mood.description || (stableProductCount
+          ? `${stableProductCount} products curated for a ${mood.name} mood. Find your mood. Shop the vibe on Mood & Vibes.`
+          : `Curated products for a ${mood.name} mood. Find your mood. Shop the vibe on Mood & Vibes.`))
       : undefined,
     keywords: mood
       ? [mood.name, `${mood.name} mood`, `${mood.name} products`, `${mood.name} gifts`, "mood shopping", "mood and vibes"]
@@ -105,6 +108,11 @@ export default function MoodLanding() {
     url: `${window.location.origin}/mood/${slug}`,
     ogType: "website",
     collectionName: mood ? `${mood.name} Mood Products | Mood & Vibes` : undefined,
+    breadcrumbs: mood ? [
+      { name: "Home", url: "https://www.mood-and-vibes.com/" },
+      { name: "Moods", url: "https://www.mood-and-vibes.com/moods" },
+      { name: `${mood.name} Mood`, url: `https://www.mood-and-vibes.com/mood/${slug}` },
+    ] : undefined,
   });
 
   if (!mood) {
