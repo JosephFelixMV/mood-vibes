@@ -4,7 +4,7 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import { setDiscoveryContext } from "@/lib/discovery-context";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getProductsPaginated, getCategories, filterByRegion } from "@/lib/supabase-queries";
+import { getProductsPaginated, getCategories, getPublicCategories, filterByRegion } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -28,15 +28,30 @@ export default function Products() {
   const categorySlug = searchParams.get("category") || "";
   const vibeSlug = searchParams.get("vibe") || "";
 
+  // Public dropdowns: only show categories with >= MIN_PRODUCTS_PER_CATEGORY items
   const { data: coreCategories = [] } = useQuery({
+    queryKey: ["public-categories", "core"],
+    queryFn: () => getPublicCategories("core"),
+  });
+  const { data: vibeCategories = [] } = useQuery({
+    queryKey: ["public-categories", "vibe"],
+    queryFn: () => getPublicCategories("vibe"),
+  });
+  const { data: moodCategories = [] } = useQuery({
+    queryKey: ["public-categories", "mood"],
+    queryFn: () => getPublicCategories("mood"),
+  });
+  // Unfiltered lookup: used to resolve slugs from URL params even if a
+  // category falls below the public threshold (preserves direct/shared links).
+  const { data: allCoreCategories = [] } = useQuery({
     queryKey: ["categories", "core"],
     queryFn: () => getCategories("core"),
   });
-  const { data: vibeCategories = [] } = useQuery({
+  const { data: allVibeCategories = [] } = useQuery({
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
   });
-  const { data: moodCategories = [] } = useQuery({
+  const { data: allMoodCategories = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
   });
@@ -80,13 +95,15 @@ export default function Products() {
     },
   });
 
-  const categoryName = coreCategories.find((c) => c.slug === categorySlug)?.name || "";
-  const vibeName = vibeCategories.find((c) => c.slug === vibeSlug)?.name || "";
+  // Resolve names from the unfiltered list so direct URLs to thin
+  // categories still load products correctly.
+  const categoryName = allCoreCategories.find((c) => c.slug === categorySlug)?.name || "";
+  const vibeName = allVibeCategories.find((c) => c.slug === vibeSlug)?.name || "";
 
   const [sort, setSort] = useState<"newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc">("newest");
 
   const moodSlug = searchParams.get("mood") || "";
-  const moodName = moodCategories.find((c) => c.slug === moodSlug)?.name || filterMood;
+  const moodName = allMoodCategories.find((c) => c.slug === moodSlug)?.name || filterMood;
 
   const { data: result, isLoading } = useQuery({
     queryKey: ["products-paginated", categoryName, vibeName, moodName, sort, page, filterVendor],

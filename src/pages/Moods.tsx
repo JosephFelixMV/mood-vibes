@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getCategories } from "@/lib/supabase-queries";
+import { getPublicCategories } from "@/lib/supabase-queries";
 import { supabase } from "@/lib/supabase";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +16,8 @@ export default function Moods() {
   });
 
   const { data: moods = [] } = useQuery({
-    queryKey: ["categories", "mood"],
-    queryFn: () => getCategories("mood"),
+    queryKey: ["public-categories", "mood"],
+    queryFn: () => getPublicCategories("mood"),
   });
 
   const { data: counts = {} } = useQuery({

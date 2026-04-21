@@ -2,8 +2,19 @@ import { supabase } from "@/lib/supabase";
 import type { Database } from "@/integrations/supabase/types";
 import type { VisitorRegion } from "@/hooks/useVisitorRegion";
 
+/**
+ * Minimum number of active products a category/vibe/mood must have
+ * to be shown to public visitors. Admin pages bypass this filter.
+ * Adjust as the catalog grows.
+ */
+export const MIN_PRODUCTS_PER_CATEGORY = 15;
+
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
+
+export interface PublicCategory extends Category {
+  product_count: number;
+}
 
 /** Helper: filter products client-side by region availability */
 export function filterByRegion(products: Product[], region?: VisitorRegion): Product[] {
@@ -161,6 +172,26 @@ export async function getCategories(type?: "core" | "vibe" | "mood") {
   const { data, error } = await query;
   if (error) throw error;
   return data;
+}
+
+/**
+ * Public-facing category fetch — returns only categories with at least
+ * MIN_PRODUCTS_PER_CATEGORY active products. Backed by the
+ * `get_categories_with_counts` Postgres function which performs the
+ * count + filter in a single round-trip.
+ *
+ * Use this in visitor-facing list/dropdown UIs.
+ * Use `getCategories()` for admin UIs and slug lookups where every
+ * category must remain accessible.
+ */
+export async function getPublicCategories(
+  type?: "core" | "vibe" | "mood",
+): Promise<PublicCategory[]> {
+  const { data, error } = await supabase.rpc("get_categories_with_counts", {
+    category_type: type ?? null,
+  });
+  if (error) throw error;
+  return (data ?? []) as PublicCategory[];
 }
 
 export async function getProductCountByCategory() {

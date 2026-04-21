@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getCategories, getProductCountByVibe } from "@/lib/supabase-queries";
+import { getPublicCategories, getProductCountByVibe } from "@/lib/supabase-queries";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/useSEO";
@@ -15,8 +15,8 @@ export default function Vibes() {
   });
 
   const { data: vibes = [] } = useQuery({
-    queryKey: ["categories", "vibe"],
-    queryFn: () => getCategories("vibe"),
+    queryKey: ["public-categories", "vibe"],
+    queryFn: () => getPublicCategories("vibe"),
   });
   const { data: counts = {} } = useQuery({
     queryKey: ["vibe-counts"],
