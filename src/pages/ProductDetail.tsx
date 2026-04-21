@@ -354,15 +354,6 @@ export default function ProductDetail() {
             <div className="flex flex-wrap gap-3 pt-2">
               <ExternalCTA href={product.affiliate_url} label="Discover Brand" onClick={handleBuyClick} size="lg" />
               <ShareButton product={product} variant="full" />
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handleAnother}
-                disabled={allProducts.length === 0}
-                className="gap-2 rounded-full"
-              >
-                Show me another <ArrowRight className="h-4 w-4" />
-              </Button>
             </div>
 
             {vendorName && <p className="text-xs text-muted-foreground pt-1">via {vendorName}</p>}
