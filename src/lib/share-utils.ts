@@ -47,7 +47,7 @@ export function getProductShareUrl(product: Product, platform: string): string {
   return `${baseUrl}?${params.toString()}`;
 }
 
-export type SharePlatform = "pinterest" | "whatsapp" | "facebook" | "email" | "copy";
+export type SharePlatform = "pinterest" | "whatsapp" | "instagram" | "facebook" | "email" | "copy";
 
 export function fireShareEvent(product: Product, method: SharePlatform) {
   const vibeSlug = product.vibe_category
@@ -81,6 +81,8 @@ export function buildShareLink(
       return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(fullText)}`;
     case "email":
       return `mailto:?subject=${encodeURIComponent(`Check out: ${product.name}`)}&body=${encodeURIComponent(`${fullText}\n\n${url}`)}`;
+    case "instagram":
+      return `https://www.instagram.com/`;
     case "copy":
       return null; // handled separately
   }

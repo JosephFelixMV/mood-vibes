@@ -10,6 +10,7 @@ import type { Product } from "@/lib/supabase-queries";
 const platforms: { key: SharePlatform; label: string; icon: string }[] = [
   { key: "pinterest", label: "Pinterest", icon: "📌" },
   { key: "whatsapp", label: "WhatsApp", icon: "💬" },
+  { key: "instagram", label: "Instagram", icon: "📷" },
   { key: "facebook", label: "Facebook", icon: "📘" },
   { key: "email", label: "Email", icon: "✉️" },
   { key: "copy", label: "Copy Link", icon: "🔗" },
@@ -38,6 +39,34 @@ export default function ShareButton({ product, variant = "icon" }: ShareButtonPr
       } catch {
         toast.error("Failed to copy link");
       }
+      return;
+    }
+
+    if (platform === "instagram") {
+      const url = getProductShareUrl(product, "instagram");
+      const caption = `${getShareCopy(product)}\n${product.name}\n${url}`;
+
+      // Mobile: try the native share sheet first (Instagram appears as an option)
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile && typeof navigator.share === "function") {
+        try {
+          await navigator.share({ title: product.name, text: `${getShareCopy(product)}\n${product.name}`, url });
+          setOpen(false);
+          return;
+        } catch {
+          // user cancelled or share failed — fall through to copy+open flow
+        }
+      }
+
+      // Desktop (or Web Share unavailable): copy caption and open Instagram
+      try {
+        await navigator.clipboard.writeText(caption);
+        toast.success("Caption copied! Paste it in your Story, bio, or DM.");
+      } catch {
+        toast.error("Couldn't copy caption — please copy the link manually.");
+      }
+      window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+      setOpen(false);
       return;
     }
 
