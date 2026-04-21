@@ -298,13 +298,19 @@ Outdoors, nature, and getting away from screens. Hiking gear, camping, gardening
 Whimsigoth
 Playful dark aesthetic. Celestial motifs, crystals, dark florals, Halloween-adjacent decor that stays year-round. Not aggressively gothic — more witchy cottage core.
 
+Backyard Social
+High-energy outdoor entertaining. Grilling, smoking, and hosting in the backyard. The products of the person who takes their BBQ seriously. Cast iron, smokers, grill tools, outdoor kitchen setups, fire pits, and competitive lawn games. Loud, social, and savory.
+
+Al Fresco
+Effortless outdoor relaxation. The lighter, breezier side of being outside — lounging, picnicking, and garden living. Linen, string lights, hammocks, melamine dinnerware, outdoor cushions, and portable speakers in a garden context. Calm and unhurried.
+
 Work-From-Anywhere
 Home office and remote work setup. Ergonomic chairs, desk accessories, cable management, aesthetic workspaces. Products for people whose office is wherever they are.
 
 Homebody
 The aesthetic of an intentional living space. Botanicals and planters, ceramic objects, candles, home fragrance, diffusers, ambient lighting, decorative vessels. Products that make a home feel curated rather than furnished. Distinct from Cozy — this is about the visual and sensory environment of the space, not comfort or softness.
 
-IMPORTANT: Always use the exact vibe name as listed above when returning suggestions. The name must match exactly — including capitalisation, apostrophes, hyphens, and ampersands — because it is matched against the database. For example: "Drip & Shine" not "Drip and Shine", "Off-Duty Model" not "Off Duty Model", "Hot Mess Express" not "Hot Mess".
+IMPORTANT: Always use the exact vibe name as listed above when returning suggestions. The name must match exactly — including capitalisation, apostrophes, hyphens, and ampersands — because it is matched against the database. For example: "Drip & Shine" not "Drip and Shine", "Off-Duty Model" not "Off Duty Model", "Hot Mess Express" not "Hot Mess", "Backyard Social" not "Backyard Social BBQ", "Al Fresco" not "Alfresco".
 
 ═══════════════════════════════════════
 MOOD DEFINITIONS
