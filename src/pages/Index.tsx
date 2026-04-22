@@ -93,20 +93,62 @@ export default function Index() {
     queryFn: () => getCategories("vibe"),
   });
 
-  const pickRandom = (arr: Category[], n: number) => {
-    const valid = arr.filter((c) => c?.name && c?.slug);
-    return [...valid].sort(() => Math.random() - 0.5).slice(0, n);
-  };
+  const { data: qualifiedMoods = [], isLoading: moodsLoading } = useQuery({
+    queryKey: ["qualified-moods", moods.map((m) => m.slug).join(",")],
+    queryFn: async () => {
+      if (!moods.length) return [];
+      const results = await Promise.all(
+        moods.map(async (m) => {
+          const { count } = await supabase
+            .from("products")
+            .select("*", { count: "exact", head: true })
+            .eq("is_active", true)
+            .ilike("mood", `%${m.name}%`);
+          return { ...m, productCount: count ?? 0 };
+        }),
+      );
+      return results.filter((m) => m.productCount > 0);
+    },
+    enabled: moods.length > 0,
+    staleTime: 1000 * 60 * 15,
+  });
+
+  const { data: qualifiedVibes = [], isLoading: vibesLoading } = useQuery({
+    queryKey: ["qualified-vibes", vibes.map((v) => v.slug).join(",")],
+    queryFn: async () => {
+      if (!vibes.length) return [];
+      const results = await Promise.all(
+        vibes.map(async (v) => {
+          const { count } = await supabase
+            .from("products")
+            .select("*", { count: "exact", head: true })
+            .eq("is_active", true)
+            .ilike("vibe_category", `%${v.name}%`);
+          return { ...v, productCount: count ?? 0 };
+        }),
+      );
+      return results.filter((v) => v.productCount > 0);
+    },
+    enabled: vibes.length > 0,
+    staleTime: 1000 * 60 * 15,
+  });
 
   const [randomMoods, setRandomMoods] = useState<Category[]>([]);
   const [randomVibes, setRandomVibes] = useState<Category[]>([]);
 
   useEffect(() => {
-    if (moods.length) setRandomMoods(pickRandom(moods, 4));
-  }, [moods]);
+    if (qualifiedMoods.length) {
+      const shuffled = [...qualifiedMoods].sort(() => Math.random() - 0.5);
+      setRandomMoods(shuffled.slice(0, 4));
+    }
+  }, [qualifiedMoods]);
+
   useEffect(() => {
-    if (vibes.length) setRandomVibes(pickRandom(vibes, 4));
-  }, [vibes]);
+    if (qualifiedVibes.length) {
+      const shuffled = [...qualifiedVibes].sort(() => Math.random() - 0.5);
+      setRandomVibes(shuffled.slice(0, 4));
+    }
+  }, [qualifiedVibes]);
 
   const [surprise, setSurprise] = useState<typeof dailyPick>(null);
   const [key, setKey] = useState(0);
