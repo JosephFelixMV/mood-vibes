@@ -264,29 +264,71 @@ export default function Index() {
               )}
               {randomVibes.length > 0 && (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex w-full max-w-xl items-center justify-between px-1">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Shop Your Vibe
-                    </span>
-                    <Link
-                      to="/vibes"
-                      className="text-xs font-medium text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
-                    >
-                      Shop all vibes →
-                    </Link>
-                  </div>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Shop Your Vibe
+                  </span>
                   <div className="flex flex-wrap justify-center gap-2">
-                    {randomVibes.map((v) => (
-                      <Link
-                        key={v.id}
-                        to={`/vibes/${v.slug}`}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-4 py-1.5 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80"
-                      >
-                        {v.icon && <span aria-hidden>{v.icon}</span>}
-                        <span>{v.name}</span>
-                      </Link>
-                    ))}
+                    {randomVibes.map((v, idx) => {
+                      const driftAmount = 1.5 + idx * 0.5;
+                      const driftDuration = 2.8 + idx * 0.6;
+                      return (
+                        <Link key={v.id} to={`/vibes/${v.slug}`}>
+                          <motion.div
+                            animate={{ y: [0, -driftAmount, 0, driftAmount * 0.5, 0] }}
+                            whileHover={{ y: -3, scale: 1.05 }}
+                            transition={{
+                              y: { duration: driftDuration, repeat: Infinity, ease: "easeInOut" },
+                              scale: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+                            }}
+                            className="will-change-transform"
+                          >
+                            <motion.div
+                              className="relative overflow-hidden rounded-full inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium uppercase tracking-[0.12em] cursor-pointer"
+                              style={{
+                                background: "linear-gradient(135deg, #F5D061 0%, #D9732B 100%)",
+                                color: "#1C1209",
+                              }}
+                              initial={{ boxShadow: "0 0 0 rgba(0,0,0,0)", border: "1.5px solid transparent" }}
+                              whileHover={{
+                                boxShadow: "0 0 20px rgba(217,115,43,0.15)",
+                                background: "#F8F7F4",
+                                border: "1.5px solid #D9732B",
+                                color: "#D9732B",
+                              }}
+                              whileTap={{ scale: 0.97 }}
+                              transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                            >
+                              <span className="relative z-10 flex items-center gap-1.5">
+                                {v.icon && <span aria-hidden>{v.icon}</span>}
+                                <span>{v.name}</span>
+                              </span>
+                              <motion.div
+                                className="pointer-events-none absolute inset-0 rounded-full"
+                                style={{
+                                  background:
+                                    "linear-gradient(120deg, transparent 0%, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%, transparent 100%)",
+                                  x: "-100%",
+                                }}
+                                whileHover={{ x: "100%" }}
+                                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                              />
+                            </motion.div>
+                          </motion.div>
+                        </Link>
+                      );
+                    })}
                   </div>
+                  <Link
+                    to="/vibes"
+                    className="mood-tag-pulse relative overflow-hidden inline-flex items-center justify-center gap-1.5 rounded-full uppercase font-medium tracking-[0.12em] whitespace-nowrap h-7 px-4 py-1 text-[11px] cursor-pointer"
+                    style={{
+                      background: "linear-gradient(135deg, #121212 0%, #3F3F46 100%)",
+                      color: "#FFFFFF",
+                      border: "1.5px solid rgba(217, 115, 43, 0.5)",
+                    }}
+                  >
+                    <span className="relative z-10">Shop all vibes</span>
+                  </Link>
                 </div>
               )}
             </motion.div>
