@@ -279,26 +279,36 @@ export default function Index() {
         )}
       </section>
 
-      {/* Surprise result */}
-      <AnimatePresence mode="wait">
-        {surprise && (
-          <section className="container -mt-6 mb-6" key={key}>
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            >
-              <div className="mx-auto max-w-3xl">
-                <p className="mb-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+      {/* Discover More Brands */}
+      <section className="container pb-10">
+        <div className="flex flex-col items-center gap-6">
+          <ExternalCTA
+            as="button"
+            label={cooldown ? "Wait…" : "Discover More Brands"}
+            onClick={handleSurprise}
+            disabled={isLoading || healthyProducts.length === 0 || cooldown}
+            size="lg"
+            showIcon={false}
+          />
+          <AnimatePresence mode="wait">
+            {surprise && (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                className="w-full max-w-3xl"
+              >
+                <p className="mb-4 text-xs font-medium uppercase tracking-widest text-muted-foreground text-center">
                   Your surprise pick
                 </p>
                 <ProductCard product={surprise} featured ctaLabel="Discover Brand" />
-              </div>
-            </motion.div>
-          </section>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
     </div>
   );
 }
