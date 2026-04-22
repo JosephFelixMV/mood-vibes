@@ -57,10 +57,11 @@ export default function LaunchWelcomeModal() {
               className="inline-block text-[11px] font-medium tracking-[0.08em] uppercase px-2.5 py-1 rounded-full mb-3"
               style={{ color: "#534AB7", background: "#EEEDFE" }}
             >
-              This is a Proof of Concept.
+              Proof of Concept.
             </span>
             <h2 className="text-xl font-medium leading-snug" style={{ color: "var(--foreground)" }}>
-              Welcome to Mood and Vibes
+              Welcome to Mood and Vibes a POC I created to help people find products when they are not sure what exactly
+              they are looking for.
             </h2>
           </div>
 
