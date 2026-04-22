@@ -187,7 +187,7 @@ export default function Index() {
           </motion.div>
 
           {/* Mood & Vibe Selector */}
-          {(randomMoods.length > 0 || randomVibes.length > 0) && (
+          {!moodsLoading && !vibesLoading && (randomMoods.length > 0 || randomVibes.length > 0) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -195,10 +195,18 @@ export default function Index() {
               className="mt-10 w-full max-w-3xl space-y-5"
             >
               {randomMoods.length > 0 && (
-                <div className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-                  <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                    Find Your Mood
-                  </span>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex w-full max-w-xl items-center justify-between px-1">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Find Your Mood
+                    </span>
+                    <Link
+                      to="/moods"
+                      className="text-xs font-medium text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
+                    >
+                      See all moods →
+                    </Link>
+                  </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {randomMoods.map((m) => (
                       <Link
@@ -210,20 +218,22 @@ export default function Index() {
                         <span>{m.name}</span>
                       </Link>
                     ))}
-                    <Link
-                      to="/moods"
-                      className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-foreground underline-offset-4 hover:underline"
-                    >
-                      See all →
-                    </Link>
                   </div>
                 </div>
               )}
               {randomVibes.length > 0 && (
-                <div className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-                  <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                    Shop Your Vibe
-                  </span>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex w-full max-w-xl items-center justify-between px-1">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Shop Your Vibe
+                    </span>
+                    <Link
+                      to="/vibes"
+                      className="text-xs font-medium text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
+                    >
+                      Shop all vibes →
+                    </Link>
+                  </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {randomVibes.map((v) => (
                       <Link
@@ -235,33 +245,12 @@ export default function Index() {
                         <span>{v.name}</span>
                       </Link>
                     ))}
-                    <Link
-                      to="/vibes"
-                      className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-foreground underline-offset-4 hover:underline"
-                    >
-                      See all →
-                    </Link>
                   </div>
                 </div>
               )}
             </motion.div>
           )}
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-            className="mt-10"
-          >
-            <ExternalCTA
-              as="button"
-              label={cooldown ? "Wait…" : "Discover More Brands"}
-              onClick={handleSurprise}
-              disabled={isLoading || healthyProducts.length === 0 || cooldown}
-              size="lg"
-              showIcon={false}
-            />
-          </motion.div>
         </div>
       </section>
 
