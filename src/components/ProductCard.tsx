@@ -59,10 +59,10 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
     const vibeSet = [...new Set((product.vibe_category || "").split(",").map(v => v.trim()).filter(Boolean))];
     const moodSet = [...new Set((product.mood || "").split(",").map(m => m.trim()).filter(Boolean))];
     const picks: { name: string; type: string }[] = [];
-    const vibe = pickRandom(vibeSet);
-    if (vibe) picks.push({ name: vibe, type: "vibe" });
     const mood = pickRandom(moodSet);
     if (mood) picks.push({ name: mood, type: "mood" });
+    const vibe = pickRandom(vibeSet);
+    if (vibe) picks.push({ name: vibe, type: "vibe" });
     return picks;
   }, [product.id]);
   useEffect(() => {
