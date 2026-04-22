@@ -93,20 +93,62 @@ export default function Index() {
     queryFn: () => getCategories("vibe"),
   });
 
-  const pickRandom = (arr: Category[], n: number) => {
-    const valid = arr.filter((c) => c?.name && c?.slug);
-    return [...valid].sort(() => Math.random() - 0.5).slice(0, n);
-  };
+  const { data: qualifiedMoods = [], isLoading: moodsLoading } = useQuery({
+    queryKey: ["qualified-moods", moods.map((m) => m.slug).join(",")],
+    queryFn: async () => {
+      if (!moods.length) return [];
+      const results = await Promise.all(
+        moods.map(async (m) => {
+          const { count } = await supabase
+            .from("products")
+            .select("*", { count: "exact", head: true })
+            .eq("is_active", true)
+            .ilike("mood", `%${m.name}%`);
+          return { ...m, productCount: count ?? 0 };
+        }),
+      );
+      return results.filter((m) => m.productCount > 0);
+    },
+    enabled: moods.length > 0,
+    staleTime: 1000 * 60 * 15,
+  });
+
+  const { data: qualifiedVibes = [], isLoading: vibesLoading } = useQuery({
+    queryKey: ["qualified-vibes", vibes.map((v) => v.slug).join(",")],
+    queryFn: async () => {
+      if (!vibes.length) return [];
+      const results = await Promise.all(
+        vibes.map(async (v) => {
+          const { count } = await supabase
+            .from("products")
+            .select("*", { count: "exact", head: true })
+            .eq("is_active", true)
+            .ilike("vibe_category", `%${v.name}%`);
+          return { ...v, productCount: count ?? 0 };
+        }),
+      );
+      return results.filter((v) => v.productCount > 0);
+    },
+    enabled: vibes.length > 0,
+    staleTime: 1000 * 60 * 15,
+  });
 
   const [randomMoods, setRandomMoods] = useState<Category[]>([]);
   const [randomVibes, setRandomVibes] = useState<Category[]>([]);
 
   useEffect(() => {
-    if (moods.length) setRandomMoods(pickRandom(moods, 4));
-  }, [moods]);
+    if (qualifiedMoods.length) {
+      const shuffled = [...qualifiedMoods].sort(() => Math.random() - 0.5);
+      setRandomMoods(shuffled.slice(0, 4));
+    }
+  }, [qualifiedMoods]);
+
   useEffect(() => {
-    if (vibes.length) setRandomVibes(pickRandom(vibes, 4));
-  }, [vibes]);
+    if (qualifiedVibes.length) {
+      const shuffled = [...qualifiedVibes].sort(() => Math.random() - 0.5);
+      setRandomVibes(shuffled.slice(0, 4));
+    }
+  }, [qualifiedVibes]);
 
   const [surprise, setSurprise] = useState<typeof dailyPick>(null);
   const [key, setKey] = useState(0);
@@ -145,7 +187,7 @@ export default function Index() {
           </motion.div>
 
           {/* Mood & Vibe Selector */}
-          {(randomMoods.length > 0 || randomVibes.length > 0) && (
+          {!moodsLoading && !vibesLoading && (randomMoods.length > 0 || randomVibes.length > 0) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -153,10 +195,18 @@ export default function Index() {
               className="mt-10 w-full max-w-3xl space-y-5"
             >
               {randomMoods.length > 0 && (
-                <div className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-                  <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                    Find Your Mood
-                  </span>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex w-full max-w-xl items-center justify-between px-1">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Find Your Mood
+                    </span>
+                    <Link
+                      to="/moods"
+                      className="text-xs font-medium text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
+                    >
+                      See all moods →
+                    </Link>
+                  </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {randomMoods.map((m) => (
                       <Link
@@ -168,20 +218,22 @@ export default function Index() {
                         <span>{m.name}</span>
                       </Link>
                     ))}
-                    <Link
-                      to="/moods"
-                      className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-foreground underline-offset-4 hover:underline"
-                    >
-                      See all →
-                    </Link>
                   </div>
                 </div>
               )}
               {randomVibes.length > 0 && (
-                <div className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-                  <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                    Shop Your Vibe
-                  </span>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex w-full max-w-xl items-center justify-between px-1">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Shop Your Vibe
+                    </span>
+                    <Link
+                      to="/vibes"
+                      className="text-xs font-medium text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
+                    >
+                      Shop all vibes →
+                    </Link>
+                  </div>
                   <div className="flex flex-wrap justify-center gap-2">
                     {randomVibes.map((v) => (
                       <Link
@@ -193,33 +245,12 @@ export default function Index() {
                         <span>{v.name}</span>
                       </Link>
                     ))}
-                    <Link
-                      to="/vibes"
-                      className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-foreground underline-offset-4 hover:underline"
-                    >
-                      See all →
-                    </Link>
                   </div>
                 </div>
               )}
             </motion.div>
           )}
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-            className="mt-10"
-          >
-            <ExternalCTA
-              as="button"
-              label={cooldown ? "Wait…" : "Discover More Brands"}
-              onClick={handleSurprise}
-              disabled={isLoading || healthyProducts.length === 0 || cooldown}
-              size="lg"
-              showIcon={false}
-            />
-          </motion.div>
         </div>
       </section>
 
@@ -248,26 +279,36 @@ export default function Index() {
         )}
       </section>
 
-      {/* Surprise result */}
-      <AnimatePresence mode="wait">
-        {surprise && (
-          <section className="container -mt-6 mb-6" key={key}>
-            <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            >
-              <div className="mx-auto max-w-3xl">
-                <p className="mb-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+      {/* Discover More Brands */}
+      <section className="container pb-10">
+        <div className="flex flex-col items-center gap-6">
+          <ExternalCTA
+            as="button"
+            label={cooldown ? "Wait…" : "Discover More Brands"}
+            onClick={handleSurprise}
+            disabled={isLoading || healthyProducts.length === 0 || cooldown}
+            size="lg"
+            showIcon={false}
+          />
+          <AnimatePresence mode="wait">
+            {surprise && (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                className="w-full max-w-3xl"
+              >
+                <p className="mb-4 text-xs font-medium uppercase tracking-widest text-muted-foreground text-center">
                   Your surprise pick
                 </p>
                 <ProductCard product={surprise} featured ctaLabel="Discover Brand" />
-              </div>
-            </motion.div>
-          </section>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
     </div>
   );
 }
