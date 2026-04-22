@@ -25,8 +25,12 @@ export default function Categories() {
   });
 
   const ORDER = ["home-living", "beauty-wellness", "everyday-goods", "jewel-box", "fashion-style"];
+  const parentSlugsWithChildren = new Set(
+    categories.filter((c) => c.parent_slug).map((c) => c.parent_slug as string),
+  );
   const parents = categories
     .filter((c) => !c.parent_slug)
+    .filter((c) => parentSlugsWithChildren.has(c.slug))
     .slice()
     .sort((a, b) => {
       const ai = ORDER.indexOf(a.slug);
