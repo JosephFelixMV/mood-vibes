@@ -196,29 +196,60 @@ export default function Index() {
             >
               {randomMoods.length > 0 && (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex w-full max-w-xl items-center justify-between px-1">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Find Your Mood
-                    </span>
-                    <Link
-                      to="/moods"
-                      className="text-xs font-medium text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
-                    >
-                      See all moods →
-                    </Link>
-                  </div>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Find Your Mood
+                  </span>
                   <div className="flex flex-wrap justify-center gap-2">
-                    {randomMoods.map((m) => (
-                      <Link
-                        key={m.id}
-                        to={`/moods/${m.slug}`}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                      >
-                        {m.icon && <span aria-hidden>{m.icon}</span>}
-                        <span>{m.name}</span>
-                      </Link>
-                    ))}
+                    {randomMoods.map((m, idx) => {
+                      const driftAmount = 1.5 + idx * 0.5;
+                      const driftDuration = 2.8 + idx * 0.6;
+                      return (
+                        <Link key={m.id} to={`/moods/${m.slug}`}>
+                          <motion.div
+                            animate={{ y: [0, -driftAmount, 0, driftAmount * 0.5, 0] }}
+                            whileHover={{ y: -3, scale: 1.05 }}
+                            transition={{
+                              y: { duration: driftDuration, repeat: Infinity, ease: "easeInOut" },
+                              scale: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+                            }}
+                            className="will-change-transform"
+                          >
+                            <motion.div
+                              className="mood-tag-pulse relative overflow-hidden rounded-full inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium uppercase tracking-[0.12em] cursor-pointer"
+                              style={{
+                                background: "linear-gradient(135deg, #121212 0%, #3F3F46 100%)",
+                                color: "#FFFFFF",
+                                border: "1.5px solid #D9732B",
+                              }}
+                              initial={{ boxShadow: "0 0 0 rgba(0,0,0,0)" }}
+                              whileHover={{
+                                boxShadow: "0 0 24px 4px rgba(217, 115, 43, 0.3)",
+                                textShadow: "0 2px 8px rgba(255,255,255,0.3)",
+                              }}
+                              whileTap={{ scale: 0.97 }}
+                              transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                            >
+                              <span className="relative z-10 flex items-center gap-1.5">
+                                {m.icon && <span aria-hidden>{m.icon}</span>}
+                                <span>{m.name}</span>
+                              </span>
+                              <motion.div
+                                className="pointer-events-none absolute inset-0 rounded-full"
+                                style={{
+                                  background:
+                                    "linear-gradient(120deg, transparent 0%, transparent 25%, rgba(217,115,43,0.35) 45%, rgba(242,161,84,0.3) 55%, transparent 75%, transparent 100%)",
+                                  x: "-100%",
+                                }}
+                                whileHover={{ x: "100%" }}
+                                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                              />
+                            </motion.div>
+                          </motion.div>
+                        </Link>
+                      );
+                    })}
                   </div>
+                  <ExternalCTA as="link" href="/moods" label="See all moods" size="sm" showIcon={false} />
                 </div>
               )}
               {randomVibes.length > 0 && (
