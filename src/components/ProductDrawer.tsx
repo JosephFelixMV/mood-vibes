@@ -234,19 +234,19 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                     </Link>
                   );
                 })}
-                {vibeSet.map((name) => {
-                  const cat = categorySlugMap[name];
-                  return (
-                    <Link key={name} to={cat ? `/vibes/${cat.slug}` : "#"} onClick={() => onOpenChange(false)}>
-                      <Badge className="bg-[hsl(var(--badge-vibe))] text-[hsl(var(--badge-vibe-foreground))] cursor-pointer">{name}</Badge>
-                    </Link>
-                  );
-                })}
                 {moodSet.map((name) => {
                   const cat = categorySlugMap[name];
                   return (
                     <Link key={name} to={cat ? `/moods/${cat.slug}` : "#"} onClick={() => onOpenChange(false)}>
                       <Badge className="bg-[hsl(var(--badge-mood))] text-[hsl(var(--badge-mood-foreground))] cursor-pointer">{name}</Badge>
+                    </Link>
+                  );
+                })}
+                {vibeSet.map((name) => {
+                  const cat = categorySlugMap[name];
+                  return (
+                    <Link key={name} to={cat ? `/vibes/${cat.slug}` : "#"} onClick={() => onOpenChange(false)}>
+                      <Badge className="bg-[hsl(var(--badge-vibe))] text-[hsl(var(--badge-vibe-foreground))] cursor-pointer">{name}</Badge>
                     </Link>
                   );
                 })}
