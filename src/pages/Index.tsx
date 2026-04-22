@@ -249,7 +249,17 @@ export default function Index() {
                       );
                     })}
                   </div>
-                  <ExternalCTA as="link" href="/moods" label="See all moods" size="sm" showIcon={false} />
+                  <Link
+                    to="/moods"
+                    className="mood-tag-pulse relative overflow-hidden inline-flex items-center justify-center gap-1.5 rounded-full uppercase font-medium tracking-[0.12em] whitespace-nowrap h-7 px-4 py-1 text-[11px] cursor-pointer"
+                    style={{
+                      background: "linear-gradient(135deg, #121212 0%, #3F3F46 100%)",
+                      color: "#FFFFFF",
+                      border: "1.5px solid rgba(217, 115, 43, 0.5)",
+                    }}
+                  >
+                    <span className="relative z-10">See all moods</span>
+                  </Link>
                 </div>
               )}
               {randomVibes.length > 0 && (
