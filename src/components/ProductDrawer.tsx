@@ -145,6 +145,7 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                 muted
                 loop
                 playsInline
+                controls
                 className="w-full aspect-video object-contain bg-[#f5f5f5]"
               />
             )}
