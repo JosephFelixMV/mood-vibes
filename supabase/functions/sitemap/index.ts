@@ -83,15 +83,15 @@ Deno.serve(async (req) => {
     while (true) {
       const { data: products, error } = await supabase
         .from("products")
-        .select("name,updated_at")
+        .select("slug,updated_at")
         .eq("is_active", true)
         .range(from, from + PAGE - 1);
       if (error) throw error;
       if (!products || products.length === 0) break;
       for (const p of products) {
-        if (!p.name) continue;
+        if (!p.slug) continue;
         const lastmod = (p.updated_at || "").slice(0, 10) || today;
-        productUrls.push(urlEntry(`${base}/product/${encodeURIComponent(p.name)}`, lastmod, "weekly", "0.6"));
+        productUrls.push(urlEntry(`${base}/product/${p.slug}`, lastmod, "weekly", "0.6"));
       }
       if (products.length < PAGE) break;
       from += PAGE;
