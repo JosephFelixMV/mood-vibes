@@ -38,10 +38,14 @@ function AppShell() {
 
   useEffect(() => {
     if (loading) return;
-    if (detected !== "US" && !wasRegionNoticeDismissed()) {
-      setShowNotice(true);
+    if (detected !== "US") {
+      // Always pin non-US visitors to the US catalog (no non-US products yet)
+      setRegion("US");
+      if (!wasRegionNoticeDismissed()) {
+        setShowNotice(true);
+      }
     }
-  }, [detected, loading]);
+  }, [detected, loading, setRegion]);
 
   const handleContinueUS = () => {
     setRegion("US");
@@ -50,7 +54,8 @@ function AppShell() {
   };
 
   const handleDismiss = () => {
-    // Keep detected region (CA or Intl)
+    // Force US region so products remain visible (no non-US catalog yet)
+    setRegion("US");
     markRegionNoticeDismissed();
     setShowNotice(false);
   };
