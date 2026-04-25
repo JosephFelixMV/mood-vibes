@@ -36,6 +36,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Reject immediately if the Turnstile token is missing or empty.
+    const tsToken = (body["cf-turnstile-response"] ?? turnstile_token ?? "").toString().trim();
+    if (!tsToken) {
+      return new Response(JSON.stringify({ error: "Verification required." }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Honeypot check — if filled, silently accept but flag
     const honeypotTriggered = !!honeypot;
 
