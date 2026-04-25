@@ -1,9 +1,6 @@
 import { Link } from "react-router-dom";
-import { useCookieConsentTrigger } from "@/components/CookieConsent";
 
 export default function Footer() {
-  const openCookiePrefs = useCookieConsentTrigger();
-
   return (
     <footer className="border-t bg-background" aria-label="Site footer">
       <div className="container flex flex-col items-center gap-4 py-8 text-center text-sm text-muted-foreground md:flex-row md:justify-between md:text-left">
@@ -36,7 +33,10 @@ export default function Footer() {
             <Link to="/terms" className="hover:text-foreground">
               Terms of Use
             </Link>
-            <button onClick={openCookiePrefs} className="hover:text-foreground underline-offset-2 hover:underline">
+            <button
+              onClick={() => (window as any).__enzuzo?.openPreferenceCenter()}
+              className="hover:text-foreground underline-offset-2 hover:underline"
+            >
               Manage Cookies
             </button>
           </div>
