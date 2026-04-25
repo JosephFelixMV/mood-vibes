@@ -34,7 +34,10 @@ export default function Footer() {
               Terms of Use
             </Link>
             <button
-              onClick={() => (window as any).__enzuzo?.openPreferenceCenter()}
+              onClick={(e) => {
+                e.preventDefault();
+                (window as any).__enzuzo?.openPreferenceCenter();
+              }}
               className="hover:text-foreground underline-offset-2 hover:underline"
             >
               Manage Cookies
