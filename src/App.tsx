@@ -50,7 +50,8 @@ function AppShell() {
   };
 
   const handleDismiss = () => {
-    // Keep detected region (CA or Intl)
+    // Force US region so products remain visible (no non-US catalog yet)
+    setRegion("US");
     markRegionNoticeDismissed();
     setShowNotice(false);
   };
