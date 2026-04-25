@@ -4,10 +4,11 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Save, Loader2, ExternalLink, BarChart3, MousePointer, Search, Globe, FileText, Shield } from "lucide-react";
+import { Save, Loader2, ExternalLink, BarChart3, MousePointer, Search, Globe, FileText, Shield, Flag } from "lucide-react";
 import { toast } from "sonner";
 import CategoryVibeManager from "./CategoryVibeManager";
 import AutomatedLinkCheckConfig from "./AutomatedLinkCheckConfig";
@@ -104,6 +105,24 @@ const RECOMMENDATIONS = [
   },
 ];
 
+const FEATURE_FLAGS: { key: string; label: string; description: string }[] = [
+  {
+    key: "feature_ai_discover",
+    label: "AI Discover page",
+    description: "Show the /discover page and Navbar link to all visitors. Admins always see it.",
+  },
+  {
+    key: "feature_broken_link_reporter",
+    label: "Broken link reporter",
+    description: "Render the flag/report button on product cards and pages.",
+  },
+  {
+    key: "feature_welcome_modal",
+    label: "Welcome modal",
+    description: "Show the first-visit welcome modal to new visitors.",
+  },
+];
+
 export default function SiteConfiguration() {
   const qc = useQueryClient();
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
@@ -137,6 +156,24 @@ export default function SiteConfiguration() {
     },
     onError: (err: any) => {
       toast.error("Failed to save: " + err.message);
+    },
+  });
+
+  const flagMut = useMutation({
+    mutationFn: async ({ key, value }: { key: string; value: string }) => {
+      // Upsert by key so the row is created if missing.
+      const { error } = await supabase
+        .from("site_config")
+        .upsert({ key, value, label: key }, { onConflict: "key" });
+      if (error) throw error;
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ["site-config"] });
+      qc.invalidateQueries({ queryKey: ["feature-flag", vars.key] });
+      toast.success("Feature flag updated");
+    },
+    onError: (err: any) => {
+      toast.error("Failed to update flag: " + err.message);
     },
   });
 
@@ -177,6 +214,39 @@ export default function SiteConfiguration() {
 
       {/* Category & Vibe Manager */}
       <CategoryVibeManager />
+
+      {/* Feature flags */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Flag className="h-5 w-5 text-primary" />
+            Feature Flags
+          </CardTitle>
+          <CardDescription>
+            Turn entire features on or off site-wide. Admins always see gated features regardless of these toggles.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {FEATURE_FLAGS.map((f) => {
+            const value = configs.find((c) => c.key === f.key)?.value === "true";
+            return (
+              <div key={f.key} className="flex items-start justify-between gap-4 rounded-lg border p-3">
+                <div className="space-y-0.5">
+                  <div className="text-sm font-medium">{f.label}</div>
+                  <p className="text-xs text-muted-foreground">{f.description}</p>
+                </div>
+                <Switch
+                  checked={value}
+                  disabled={flagMut.isPending}
+                  onCheckedChange={(checked) =>
+                    flagMut.mutate({ key: f.key, value: checked ? "true" : "false" })
+                  }
+                />
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
       {/* AI Discover Config */}
       <AIDiscoverConfig />
