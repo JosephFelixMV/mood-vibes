@@ -502,3 +502,29 @@ function DiscoverInner() {
     </div>
   );
 }
+
+export default function Discover() {
+  const { enabled, loading } = useFeatureFlag("feature_ai_discover");
+
+  if (loading) {
+    return (
+      <div className="container flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!enabled) {
+    return (
+      <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-3 py-16 text-center">
+        <Sparkles className="h-10 w-10 text-muted-foreground" />
+        <h1 className="font-heading text-3xl">Coming Soon</h1>
+        <p className="max-w-md text-sm text-muted-foreground">
+          Our AI product finder is being polished. Check back shortly.
+        </p>
+      </div>
+    );
+  }
+
+  return <DiscoverInner />;
+}
