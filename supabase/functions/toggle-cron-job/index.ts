@@ -24,6 +24,7 @@ async function requireAdmin(req: Request, supabaseUrl: string, serviceRoleKey: s
 }
 
 Deno.serve(async (req) => {
+  // CORS preflight must be answered before any auth check (browsers send no Authorization on OPTIONS).
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
