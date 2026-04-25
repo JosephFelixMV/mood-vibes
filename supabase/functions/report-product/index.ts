@@ -21,26 +21,37 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // ---- Parse body first (malformed JSON => 403, never crashes to 500) ----
+  let body: any = null;
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Missing token" }), {
+      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // ---- Turnstile token guard runs as the very first check ----
+  const tsToken = (body?.["cf-turnstile-response"] ?? body?.turnstile_token ?? "")
+    .toString()
+    .trim();
+  if (!tsToken) {
+    return new Response(JSON.stringify({ error: "Missing token" }), {
+      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const turnstileSecret = Deno.env.get("TURNSTILE_SECRET_KEY");
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   try {
-    const body = await req.json();
-    const { product_id, turnstile_token, honeypot } = body;
+    const { product_id, honeypot } = body;
 
     if (!product_id || typeof product_id !== "string") {
       return new Response(JSON.stringify({ error: "product_id is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Reject immediately if the Turnstile token is missing or empty.
-    const tsToken = (body["cf-turnstile-response"] ?? turnstile_token ?? "").toString().trim();
-    if (!tsToken) {
-      return new Response(JSON.stringify({ error: "Verification required." }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
