@@ -15,4 +15,4 @@ Disallow: /admin
 Disallow: /admin/*
 Allow: /
  
-Sitemap: https://www.mood-and-vibes.com/functions/v1/sitemap
+Sitemap: https://fqccttthuzvltbyzmvid.supabase.co/functions/v1/sitemap
