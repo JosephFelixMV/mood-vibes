@@ -33,15 +33,13 @@ export default function Footer() {
             <Link to="/terms" className="hover:text-foreground">
               Terms of Use
             </Link>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                (window as any).__enzuzo?.openPreferenceCenter();
-              }}
+            <a
+              href="#manage_cookies"
+              id="manage_cookies"
               className="hover:text-foreground underline-offset-2 hover:underline"
             >
               Manage Cookies
-            </button>
+            </a>
           </div>
           <p>© {new Date().getFullYear()} Mood & Vibes. All rights reserved.</p>
         </div>
