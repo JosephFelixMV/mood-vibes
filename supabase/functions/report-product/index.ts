@@ -36,26 +36,34 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Reject immediately if the Turnstile token is missing or empty.
+    const tsToken = (body["cf-turnstile-response"] ?? turnstile_token ?? "").toString().trim();
+    if (!tsToken) {
+      return new Response(JSON.stringify({ error: "Verification required." }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Honeypot check — if filled, silently accept but flag
     const honeypotTriggered = !!honeypot;
 
     // Turnstile verification
     let turnstilePassed = false;
-    if (turnstileSecret && turnstile_token) {
+    if (turnstileSecret) {
       const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
           secret: turnstileSecret,
-          response: turnstile_token,
+          response: tsToken,
         }),
       });
       const verifyData = await verifyRes.json();
       turnstilePassed = verifyData.success === true;
     }
 
-    // If Turnstile is configured AND a token was provided but failed, reject
-    if (turnstileSecret && turnstile_token && !turnstilePassed && !honeypotTriggered) {
+    // If Turnstile is configured and verification failed, reject
+    if (turnstileSecret && !turnstilePassed && !honeypotTriggered) {
       return new Response(JSON.stringify({ error: "Verification failed. Please try again." }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
