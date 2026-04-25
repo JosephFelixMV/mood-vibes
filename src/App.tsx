@@ -16,6 +16,8 @@ import MoodLanding from "./pages/MoodLanding";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Admin from "./pages/Admin";
+import Login from "./pages/Login";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Disclosure from "./pages/Disclosure";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -72,7 +74,15 @@ function AppShell() {
                 <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/discover" element={<Discover />} />
                 <Route path="/brands" element={<Brands />} />
-                <Route path="/admin" element={<Admin />} />
+                <Route path="/login" element={<Login />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <Admin />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/disclosure" element={<Disclosure />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
