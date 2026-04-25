@@ -54,7 +54,8 @@ export function fireShareEvent(product: Product, method: SharePlatform) {
     ? product.vibe_category.split(",")[0].trim().toLowerCase().replace(/\s+/g, "-")
     : "general";
 
-  if (typeof window !== "undefined" && (window as any).gtag && localStorage.getItem("cookie_consent")?.includes('"analytics":true')) {
+  // Enzuzo auto-blocks gtag.js until consent is granted, so a simple existence check is enough.
+  if (typeof window !== "undefined" && (window as any).gtag) {
     (window as any).gtag("event", "share", {
       method,
       content_type: "product",
