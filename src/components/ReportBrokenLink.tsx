@@ -142,6 +142,8 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
     );
   }
 
+  if (!reporterEnabled) return null;
+
   return (
     <div className="relative inline-flex flex-col items-end gap-1.5">
       {/* Hidden honeypot field */}
