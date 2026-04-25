@@ -50,6 +50,12 @@ export default function Login() {
     setGoogleSubmitting(true);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
+      extraParams: {
+        // Restrict sign-in to the mood-and-vibes.com Google Workspace.
+        // Personal Gmail and other Workspace domains will be rejected by Google.
+        hd: "mood-and-vibes.com",
+        prompt: "select_account",
+      },
     });
     if (result.error) {
       setGoogleSubmitting(false);
