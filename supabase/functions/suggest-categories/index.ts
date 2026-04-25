@@ -148,13 +148,41 @@ function formatBrandHint(row: any): string {
   return parts.length ? `\nBRAND CONTEXT:\n${parts.join("\n")}\n` : "";
 }
 
+async function requireAdmin(req: Request, supabaseUrl: string, serviceRoleKey: string) {
+  const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) return { ok: false as const, status: 401, error: "Missing bearer token" };
+  const token = authHeader.slice("Bearer ".length);
+  const admin = createClient(supabaseUrl, serviceRoleKey);
+  const { data: userData, error: userErr } = await admin.auth.getUser(token);
+  if (userErr || !userData?.user) return { ok: false as const, status: 401, error: "Invalid session" };
+  const { data: roleRow } = await admin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userData.user.id)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (!roleRow) return { ok: false as const, status: 401, error: "Admin role required" };
+  return { ok: true as const, userId: userData.user.id };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const auth = await requireAdmin(req, supabaseUrl, serviceRoleKey);
+    if (!auth.ok) {
+      return new Response(JSON.stringify({ error: auth.error }), {
+        status: auth.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const { core: CORE_CATEGORIES, vibes: VIBE_CATEGORIES, moods: MOOD_CATEGORIES } = await loadCategories(supabase);
 
