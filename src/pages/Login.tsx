@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,30 +47,27 @@ export default function Login() {
 
   const handleGoogle = async () => {
     setGoogleSubmitting(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-      extraParams: {
-        // Restrict sign-in to the mood-and-vibes.com Google Workspace.
-        // Personal Gmail and other Workspace domains will be rejected by Google.
-        hd: "mood-and-vibes.com",
-        prompt: "select_account",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + from,
+        queryParams: {
+          // Restrict sign-in to the mood-and-vibes.com Google Workspace.
+          hd: "mood-and-vibes.com",
+          prompt: "select_account",
+        },
       },
     });
-    if (result.error) {
+    if (error) {
       setGoogleSubmitting(false);
       toast({
         title: "Google sign-in failed",
-        description: result.error.message,
+        description: error.message,
         variant: "destructive",
       });
       return;
     }
-    if (result.redirected) {
-      // Browser is navigating to Google — leave the spinner up.
-      return;
-    }
-    // Tokens received and session is set; go to intended destination.
-    navigate(from, { replace: true });
+    // Browser will redirect to Google — leave the spinner up.
   };
 
   return (
