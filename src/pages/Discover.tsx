@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { useSEO } from "@/hooks/useSEO";
 import type { Product } from "@/lib/supabase-queries";
 import { useQuery } from "@tanstack/react-query";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 const MAX_PROMPT_LENGTH = 150;
 const SESSION_KEY = "discover_queue";
@@ -55,7 +56,7 @@ function lightShuffle<T>(arr: T[]): T[] {
   return copy;
 }
 
-export default function Discover() {
+function DiscoverInner() {
   useSEO({
     title: "AI Product Finder — Discover",
     description: "Describe what you're looking for and our AI will find the best matching products for you.",
