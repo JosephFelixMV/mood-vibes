@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 interface ReportBrokenLinkProps {
   productId: string;
@@ -15,6 +16,7 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
   const [step, setStep] = useState<"idle" | "confirm" | "verifying" | "done">("idle");
   const honeypotRef = useRef<HTMLInputElement>(null);
   const { trigger, cooldown } = useRateLimitedAction(5000);
+  const { enabled: reporterEnabled } = useFeatureFlag("feature_broken_link_reporter");
 
   const { data: turnstileSiteKey } = useQuery({
     queryKey: ["turnstile-site-key"],
