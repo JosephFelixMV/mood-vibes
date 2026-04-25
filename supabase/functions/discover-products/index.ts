@@ -147,9 +147,9 @@ Deno.serve(async (req) => {
     // Parse input
     const body = await req.json();
     const rawPrompt = typeof body.prompt === "string" ? body.prompt : "";
-    const turnstileToken = typeof body["cf-turnstile-response"] === "string"
-      ? body["cf-turnstile-response"]
-      : (typeof body.turnstile_token === "string" ? body.turnstile_token : "");
+    const turnstileToken = typeof body.turnstile_token === "string"
+      ? body.turnstile_token
+      : "";
 
     if (!rawPrompt || rawPrompt.length > 200) {
       return new Response(JSON.stringify({ error: "Prompt must be 1-200 characters" }), {
