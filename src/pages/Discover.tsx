@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Sparkles, ArrowRight, RotateCcw, Loader2, AlertTriangle, ChevronRight, Info, X } from "lucide-react";
+import { Search, Sparkles, ArrowRight, RotateCcw, Loader2, AlertTriangle, ChevronRight, Info, X, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { supabase } from "@/lib/supabase";
 import { useSEO } from "@/hooks/useSEO";
 import type { Product } from "@/lib/supabase-queries";
+import { useQuery } from "@tanstack/react-query";
 
 const MAX_PROMPT_LENGTH = 150;
 const SESSION_KEY = "discover_queue";
@@ -71,6 +72,24 @@ export default function Discover() {
   const [hasResults, setHasResults] = useState(false);
   const [showProtoBanner, setShowProtoBanner] = useState(true);
   const [weeklyLimit, setWeeklyLimit] = useState(5);
+  const [showVerify, setShowVerify] = useState(false);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
+  const pendingPromptRef = useRef<string>("");
+
+  // Site key from site_config
+  const { data: turnstileSiteKey } = useQuery({
+    queryKey: ["turnstile-site-key"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("site_config")
+        .select("value")
+        .eq("key", "turnstile_site_key")
+        .single();
+      return data?.value || "";
+    },
+    staleTime: 1000 * 60 * 30,
+  });
 
   // Fetch configurable weekly limit
   useEffect(() => {
@@ -112,10 +131,7 @@ export default function Discover() {
     return ids.map((id) => map.get(id)).filter(Boolean) as Product[];
   }
 
-  const handleSubmit = useCallback(async () => {
-    const trimmed = prompt.trim();
-    if (!trimmed) return;
-
+  const runDiscover = useCallback(async (trimmed: string, turnstileToken: string) => {
     setIsLoading(true);
     setError(null);
     setWarning(null);
@@ -125,7 +141,7 @@ export default function Discover() {
     try {
       const { data, error: invokeError } = await supabase.functions.invoke(
         "discover-products",
-        { body: { prompt: trimmed } }
+        { body: { prompt: trimmed, "cf-turnstile-response": turnstileToken } }
       );
 
       if (invokeError) {
@@ -173,7 +189,81 @@ export default function Discover() {
     } finally {
       setIsLoading(false);
     }
-  }, [prompt]);
+  }, []);
+
+  const handleSubmit = useCallback(() => {
+    const trimmed = prompt.trim();
+    if (!trimmed) return;
+    pendingPromptRef.current = trimmed;
+    if (turnstileSiteKey) {
+      // Show widget; the Turnstile callback triggers runDiscover with the token
+      setShowVerify(true);
+    } else {
+      // No site key configured — call without token (server will reject if required)
+      runDiscover(trimmed, "");
+    }
+  }, [prompt, turnstileSiteKey, runDiscover]);
+
+  // Render Turnstile widget when verification step is active
+  useEffect(() => {
+    if (!showVerify || !turnstileSiteKey || !turnstileContainerRef.current) return;
+
+    const renderWidget = () => {
+      const turnstile = (window as any).turnstile;
+      if (!turnstile || !turnstileContainerRef.current) return;
+
+      if (turnstileWidgetIdRef.current) {
+        try { turnstile.remove(turnstileWidgetIdRef.current); } catch { /* noop */ }
+      }
+
+      turnstileWidgetIdRef.current = turnstile.render(turnstileContainerRef.current, {
+        sitekey: turnstileSiteKey,
+        callback: (token: string) => {
+          setShowVerify(false);
+          runDiscover(pendingPromptRef.current, token);
+        },
+        "error-callback": (errorCode?: string) => {
+          console.warn("Turnstile transient error:", errorCode);
+        },
+        "expired-callback": () => {
+          // auto-refresh handles this
+        },
+        "timeout-callback": () => {
+          setShowVerify(false);
+          setError("Verification timed out. Please try again.");
+        },
+        retry: "auto",
+        "retry-interval": 2000,
+        "refresh-expired": "auto",
+        size: "normal",
+        theme: "auto",
+      });
+    };
+
+    if (!document.querySelector('script[src*="turnstile"]')) {
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.onload = renderWidget;
+      document.head.appendChild(script);
+    } else {
+      const waitForTurnstile = () => {
+        if ((window as any).turnstile) {
+          renderWidget();
+        } else {
+          setTimeout(waitForTurnstile, 100);
+        }
+      };
+      waitForTurnstile();
+    }
+
+    return () => {
+      if (turnstileWidgetIdRef.current) {
+        try { (window as any).turnstile?.remove(turnstileWidgetIdRef.current); } catch { /* noop */ }
+        turnstileWidgetIdRef.current = null;
+      }
+    };
+  }, [showVerify, turnstileSiteKey, runDiscover]);
 
   const handleNext = () => {
     const nextIndex = currentIndex + 1;
@@ -316,6 +406,25 @@ export default function Discover() {
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
               <p className="text-lg font-medium">Finding products for you...</p>
               <p className="text-sm text-muted-foreground">This usually takes a few seconds</p>
+            </div>
+          )}
+
+          {/* Turnstile verification */}
+          {showVerify && !isLoading && (
+            <div className="mt-8 flex w-full max-w-md flex-col items-center gap-3 rounded-2xl border bg-card p-6">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>Quick verification</span>
+              </div>
+              <div ref={turnstileContainerRef} />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowVerify(false)}
+                className="text-xs text-muted-foreground"
+              >
+                Cancel
+              </Button>
             </div>
           )}
 
