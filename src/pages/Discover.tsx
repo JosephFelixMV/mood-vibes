@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { useSEO } from "@/hooks/useSEO";
 import type { Product } from "@/lib/supabase-queries";
 import { useQuery } from "@tanstack/react-query";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 const MAX_PROMPT_LENGTH = 150;
 const SESSION_KEY = "discover_queue";
@@ -55,7 +56,7 @@ function lightShuffle<T>(arr: T[]): T[] {
   return copy;
 }
 
-export default function Discover() {
+function DiscoverInner() {
   useSEO({
     title: "AI Product Finder — Discover",
     description: "Describe what you're looking for and our AI will find the best matching products for you.",
@@ -500,4 +501,30 @@ export default function Discover() {
       </section>
     </div>
   );
+}
+
+export default function Discover() {
+  const { enabled, loading } = useFeatureFlag("feature_ai_discover");
+
+  if (loading) {
+    return (
+      <div className="container flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!enabled) {
+    return (
+      <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-3 py-16 text-center">
+        <Sparkles className="h-10 w-10 text-muted-foreground" />
+        <h1 className="font-heading text-3xl">Coming Soon</h1>
+        <p className="max-w-md text-sm text-muted-foreground">
+          Our AI product finder is being polished. Check back shortly.
+        </p>
+      </div>
+    );
+  }
+
+  return <DiscoverInner />;
 }

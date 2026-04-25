@@ -2,15 +2,18 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useRegion } from "@/contexts/RegionContext";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 const STORAGE_KEY = "mv_welcome_shown";
 
 export default function LaunchWelcomeModal() {
   const { detected, loading } = useRegion();
+  const { enabled: flagEnabled, loading: flagLoading } = useFeatureFlag("feature_welcome_modal");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (loading) return;
+    if (flagLoading || !flagEnabled) return;
     const params = new URLSearchParams(window.location.search);
     const forceShow = params.has("welcome_preview");
     const reset = params.has("welcome_reset");
@@ -25,12 +28,14 @@ export default function LaunchWelcomeModal() {
       const t = setTimeout(() => setOpen(true), 1200);
       return () => clearTimeout(t);
     }
-  }, [loading, detected]);
+  }, [loading, detected, flagEnabled, flagLoading]);
 
   function handleClose() {
     localStorage.setItem(STORAGE_KEY, "true");
     setOpen(false);
   }
+
+  if (!flagEnabled) return null;
 
   return (
     <Dialog
