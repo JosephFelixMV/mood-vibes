@@ -89,13 +89,12 @@ export default function Privacy() {
           <p>
             The detailed list of cookies and tracking technologies used on this site is
             maintained below. You can update your preferences at any time via the{" "}
-            <button
-              type="button"
-              onClick={() => (window as unknown as { __enzuzo?: { openPreferenceCenter?: () => void } }).__enzuzo?.openPreferenceCenter?.()}
+            <a
+              href="#manage_cookies"
               className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
             >
               Manage Cookies
-            </button>{" "}
+            </a>{" "}
             link in the footer.
           </p>
           <div id="__enzuzo-root" className="text-foreground" />
