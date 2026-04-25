@@ -16,7 +16,7 @@ export function useFeatureFlag(key: string): { enabled: boolean; loading: boolea
   const flagQuery = useQuery({
     queryKey: ["feature-flag", key],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("site_config")
         .select("value")
         .eq("key", key)
@@ -33,7 +33,7 @@ export function useFeatureFlag(key: string): { enabled: boolean; loading: boolea
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
       if (!userId) return false;
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
