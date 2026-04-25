@@ -2,6 +2,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import DOMPurify from "dompurify";
 import ExternalCTA from "@/components/ExternalCTA";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
 import ShareButton from "@/components/ShareButton";
@@ -385,7 +386,7 @@ export default function ProductDetail() {
             <h2 className="mb-3 font-heading text-lg font-semibold">About this product</h2>
             <div
               className="prose prose-sm max-w-none text-muted-foreground leading-relaxed [&_p]:my-3 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:my-1"
-              dangerouslySetInnerHTML={{ __html: product.description }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
             />
           </div>
         )}
