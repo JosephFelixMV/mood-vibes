@@ -49,21 +49,21 @@ Deno.serve(async (req) => {
 
     // Turnstile verification
     let turnstilePassed = false;
-    if (turnstileSecret && turnstile_token) {
+    if (turnstileSecret) {
       const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
           secret: turnstileSecret,
-          response: turnstile_token,
+          response: tsToken,
         }),
       });
       const verifyData = await verifyRes.json();
       turnstilePassed = verifyData.success === true;
     }
 
-    // If Turnstile is configured AND a token was provided but failed, reject
-    if (turnstileSecret && turnstile_token && !turnstilePassed && !honeypotTriggered) {
+    // If Turnstile is configured and verification failed, reject
+    if (turnstileSecret && !turnstilePassed && !honeypotTriggered) {
       return new Response(JSON.stringify({ error: "Verification failed. Please try again." }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
