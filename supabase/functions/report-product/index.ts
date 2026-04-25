@@ -102,25 +102,37 @@ Deno.serve(async (req) => {
     }
 
     // Upsert report (unique constraint on product_id + fingerprint)
-    const { error: insertErr } = await supabase
-      .from("product_reports")
-      .upsert({
-        product_id,
-        reporter_fingerprint: fingerprint,
-        honeypot_triggered: honeypotTriggered,
-        turnstile_passed: turnstilePassed,
-        reported_at: new Date().toISOString(),
-      }, { onConflict: "product_id,reporter_fingerprint" });
+    try {
+      const { error: insertErr } = await supabase
+        .from("product_reports")
+        .upsert({
+          product_id,
+          reporter_fingerprint: fingerprint,
+          honeypot_triggered: honeypotTriggered,
+          turnstile_passed: turnstilePassed,
+          reported_at: new Date().toISOString(),
+        }, { onConflict: "product_id,reporter_fingerprint" });
 
-    if (insertErr) {
-      console.error("Insert error:", insertErr);
-      // Foreign key violation — product_id doesn't exist in products table
-      if ((insertErr as any).code === "23503") {
+      if (insertErr) {
+        console.error("Insert error:", insertErr);
+        // Foreign key violation — product_id doesn't exist in products table
+        if ((insertErr as any).code === "23503") {
+          return new Response(JSON.stringify({ error: "Invalid product" }), {
+            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({ error: "Server error" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } catch (dbErr) {
+      console.error("Insert threw:", dbErr);
+      if ((dbErr as any)?.code === "23503") {
         return new Response(JSON.stringify({ error: "Invalid product" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      return new Response(JSON.stringify({ error: "Failed to submit report" }), {
+      return new Response(JSON.stringify({ error: "Server error" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
