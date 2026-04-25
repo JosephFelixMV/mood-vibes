@@ -3,8 +3,9 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import RegionIndicator from "@/components/RegionIndicator";
 import { useRegion } from "@/contexts/RegionContext";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
-const navLinks = [
+const allNavLinks = [
   { to: "/", label: "Home" },
   { to: "/discover", label: "Discover" },
   { to: "/categories", label: "Categories" },
@@ -18,6 +19,8 @@ export default function Navbar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const { region, detected, isOverridden, setRegion, clearOverride } = useRegion();
+  const { enabled: discoverEnabled } = useFeatureFlag("feature_ai_discover");
+  const navLinks = allNavLinks.filter((l) => l.to !== "/discover" || discoverEnabled);
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur-md" aria-label="Main navigation">
