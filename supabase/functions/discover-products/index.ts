@@ -135,6 +135,7 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
+    const turnstileSecret = Deno.env.get("TURNSTILE_SECRET_KEY");
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     if (!anthropicApiKey) {
@@ -146,12 +147,59 @@ Deno.serve(async (req) => {
     // Parse input
     const body = await req.json();
     const rawPrompt = typeof body.prompt === "string" ? body.prompt : "";
+    const turnstileToken = typeof body["cf-turnstile-response"] === "string"
+      ? body["cf-turnstile-response"]
+      : (typeof body.turnstile_token === "string" ? body.turnstile_token : "");
 
     if (!rawPrompt || rawPrompt.length > 200) {
       return new Response(JSON.stringify({ error: "Prompt must be 1-200 characters" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // ----- Cloudflare Turnstile verification (must pass before rate limit / AI) -----
+    if (!turnstileSecret) {
+      console.error("TURNSTILE_SECRET_KEY is not configured");
+      return new Response(JSON.stringify({ error: "Verification service not configured" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!turnstileToken) {
+      return new Response(JSON.stringify({ error: "Verification required. Please refresh and try again." }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const tsClientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || req.headers.get("cf-connecting-ip")
+      || "";
+
+    try {
+      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: turnstileSecret,
+          response: turnstileToken,
+          ...(tsClientIp ? { remoteip: tsClientIp } : {}),
+        }),
+      });
+      const verifyData = await verifyRes.json();
+      if (verifyData?.success !== true) {
+        return new Response(JSON.stringify({
+          error: "Verification failed. Please refresh and try again.",
+        }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } catch (verifyErr) {
+      console.error("Turnstile verification error:", verifyErr);
+      return new Response(JSON.stringify({ error: "Verification failed. Please try again." }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // ----- End Turnstile verification -----
 
     const prompt = sanitizeInput(rawPrompt);
     if (!prompt) {
