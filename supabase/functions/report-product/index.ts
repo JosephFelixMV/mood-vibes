@@ -114,6 +114,12 @@ Deno.serve(async (req) => {
 
     if (insertErr) {
       console.error("Insert error:", insertErr);
+      // Foreign key violation — product_id doesn't exist in products table
+      if ((insertErr as any).code === "23503") {
+        return new Response(JSON.stringify({ error: "Invalid product" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return new Response(JSON.stringify({ error: "Failed to submit report" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
