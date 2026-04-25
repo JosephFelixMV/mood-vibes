@@ -81,6 +81,25 @@ export default function Privacy() {
             </a>
           </p>
         </section>
+
+        <section id="cookies" className="space-y-3 scroll-mt-24">
+          <h2 className="font-heading text-xl font-semibold text-foreground">
+            Cookie Policy
+          </h2>
+          <p>
+            The detailed list of cookies and tracking technologies used on this site is
+            maintained below. You can update your preferences at any time via the{" "}
+            <button
+              type="button"
+              onClick={() => (window as unknown as { __enzuzo?: { openPreferenceCenter?: () => void } }).__enzuzo?.openPreferenceCenter?.()}
+              className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
+            >
+              Manage Cookies
+            </button>{" "}
+            link in the footer.
+          </p>
+          <div id="__enzuzo-root" className="text-foreground" />
+        </section>
       </div>
     </div>
   );
