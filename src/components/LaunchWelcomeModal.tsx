@@ -65,8 +65,7 @@ export default function LaunchWelcomeModal() {
               Proof of Concept.
             </span>
             <h2 className="text-xl font-medium leading-snug" style={{ color: "var(--foreground)" }}>
-              Welcome to Mood and Vibes a POC I created to help people find products when they are not sure what exactly
-              they are looking for.
+              Welcome to Mood and Vibes a prototype to find and discover new brands and products.
             </h2>
           </div>
 
