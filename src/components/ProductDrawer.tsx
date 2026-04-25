@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import DOMPurify from "dompurify";
 import ExternalCTA from "@/components/ExternalCTA";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
 import { Badge } from "@/components/ui/badge";
@@ -281,7 +282,7 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
               {product.description && (
                 <div
                   className="prose prose-sm max-w-none text-muted-foreground"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
                 />
               )}
 
