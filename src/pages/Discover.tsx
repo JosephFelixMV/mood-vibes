@@ -141,7 +141,7 @@ export default function Discover() {
     try {
       const { data, error: invokeError } = await supabase.functions.invoke(
         "discover-products",
-        { body: { prompt: trimmed, "cf-turnstile-response": turnstileToken } }
+        { body: { prompt: trimmed, turnstile_token: turnstileToken } }
       );
 
       if (invokeError) {

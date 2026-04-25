@@ -32,9 +32,7 @@ Deno.serve(async (req) => {
   }
 
   // ---- Turnstile token guard runs as the very first check ----
-  const tsToken = (body?.["cf-turnstile-response"] ?? body?.turnstile_token ?? "")
-    .toString()
-    .trim();
+  const tsToken = (body?.turnstile_token ?? "").toString().trim();
   if (!tsToken) {
     return new Response(JSON.stringify({ error: "Missing token" }), {
       status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
