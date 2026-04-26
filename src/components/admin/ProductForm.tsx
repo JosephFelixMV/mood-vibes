@@ -492,7 +492,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         affiliate_url: form.affiliate_url,
         source_url: form.source_url,
         category: stringifyTaxonomyValues(parseTaxonomyString(form.category)),
-        company_name: form.company_name,
+        company_name: normalizeCompanyName(form.company_name || "") || null,
         is_active: form.is_active,
         vibe_category: stringifyTaxonomyValues(parseTaxonomyString(form.vibe_category)) || null,
         mood: stringifyTaxonomyValues(parseTaxonomyString(form.mood)) || null,
