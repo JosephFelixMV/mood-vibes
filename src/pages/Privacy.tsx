@@ -69,7 +69,7 @@ export default function Privacy() {
         <section className="space-y-3">
           <h2 className="font-heading text-xl font-semibold text-foreground">CASL (Canadian Anti-Spam Legislation)</h2>
           <p>
-            <span className="font-medium text-foreground">Canada:</span> "We do not currently send marketing emails. If
+            <span className="font-medium text-foreground">Canada:</span> We do not currently send marketing emails. If
             we introduce email communications in the future, we will comply with the Canadian Anti-Spam Legislation
             (CASL) and obtain explicit consent before sending.
           </p>
@@ -94,15 +94,14 @@ export default function Privacy() {
             The detailed list of cookies and tracking technologies used on this site is maintained and kept current by
             our cookie consent provider. You can view and update your preferences at any time via the Manage Cookies
             link in the footer.{" "}
-            <a
-              href="#manage_cookies"
-              className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
-            >
+           <button
+                onClick={() => window.__enzuzo?.openPreferenceCenter()}
+                className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
+                            >
               Manage Cookies
             </a>{" "}
             link in the footer.
           </p>
-          <div id="__enzuzo-root" className="text-foreground" />
         </section>
       </div>
     </div>
