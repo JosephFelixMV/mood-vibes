@@ -61,9 +61,12 @@ Deno.serve(async (req) => {
 
     // Categories (split by type for proper URL prefixes)
     // Fetch updated_at and created_at for accurate lastmod
-    const { data: categories } = await supabase
+    const { data: categories, error: catError } = await supabase
       .from("categories")
       .select("slug,type,updated_at,created_at");
+
+    if (catError) console.error("Categories error:", catError);
+    console.log("Categories fetched:", categories?.length ?? 0);
 
     const categoryUrls: string[] = [];
     for (const c of categories || []) {
