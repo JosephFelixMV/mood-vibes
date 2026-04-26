@@ -60,18 +60,17 @@ Deno.serve(async (req) => {
     ];
 
     // Categories (split by type for proper URL prefixes)
-    // Fetch updated_at and created_at for accurate lastmod
+    // Fetch created_at for lastmod (categories table has no updated_at column)
     const { data: categories, error: catError } = await supabase
       .from("categories")
-      .select("slug,type,updated_at,created_at");
+      .select("slug,type,created_at");
 
     if (catError) console.error("Categories error:", catError);
     console.log("Categories fetched:", categories?.length ?? 0);
 
     const categoryUrls: string[] = [];
     for (const c of categories || []) {
-      // Prefer updated_at over created_at for accurate change signalling
-      const lastmod = (c.updated_at || c.created_at || "").slice(0, 10) || today;
+      const lastmod = (c.created_at || "").slice(0, 10) || today;
       let path = "";
       if (c.type === "vibe") path = `/vibes/${c.slug}`;
       else if (c.type === "mood") path = `/moods/${c.slug}`;
