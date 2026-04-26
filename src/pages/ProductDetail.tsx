@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import DOMPurify from "dompurify";
 import ExternalCTA from "@/components/ExternalCTA";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
@@ -59,7 +59,7 @@ export default function ProductDetail() {
     enabled: !!product?.id,
   });
 
-  // Always fetch a global pool — context filtering happens in handleAnother at click time.
+  // Always fetch a global pool used for related-product fallbacks.
   // This ensures the button is never disabled due to a stale or empty context-filtered pool.
   const { data: allProducts = [] } = useQuery({
     queryKey: ["related-products", product?.id],
@@ -135,48 +135,6 @@ export default function ProductDetail() {
   const allImages = product
     ? [...(product.image_url ? [product.image_url] : []), ...images.map((img) => img.image_url)]
     : [];
-
-  const handleAnother = () => {
-    if (!product) return;
-
-    const ctx = getDiscoveryContext();
-
-    // Helper: split a comma-separated field into trimmed array
-    const split = (s?: string | null) =>
-      (s || "")
-        .split(",")
-        .map((x) => x.trim())
-        .filter(Boolean);
-
-    let pool = allProducts;
-
-    if (ctx?.type === "category" && ctx.name) {
-      // Prefer products from the category the user entered from
-      const contextFiltered = allProducts.filter((p) => split(p.category).includes(ctx.name));
-      if (contextFiltered.length > 1) pool = contextFiltered;
-    } else if (ctx?.type === "vibe" && ctx.name) {
-      const contextFiltered = allProducts.filter((p) => split(p.vibe_category).includes(ctx.name));
-      if (contextFiltered.length > 1) pool = contextFiltered;
-    } else if (ctx?.type === "mood" && ctx.name) {
-      const contextFiltered = allProducts.filter((p) => split((p as any).mood).includes(ctx.name));
-      if (contextFiltered.length > 1) pool = contextFiltered;
-    } else {
-      // No context (direct URL, homepage) — prefer products sharing
-      // at least one category or vibe with the current product
-      const cats = split(product.category);
-      const vibes = split(product.vibe_category);
-      const related = allProducts.filter((p) => {
-        const pCats = split(p.category);
-        const pVibes = split(p.vibe_category);
-        return cats.some((c) => pCats.includes(c)) || vibes.some((v) => pVibes.includes(v));
-      });
-      if (related.length > 1) pool = related;
-      // else falls back to full global pool of 100
-    }
-
-    const next = getRandomProduct(pool as any, product.id);
-    if (next) navigate(`/product/${(next as any).slug || next.id}`);
-  };
 
   const handleBuyClick = () => {
     if (product) {
