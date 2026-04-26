@@ -94,14 +94,16 @@ export default function Privacy() {
             The detailed list of cookies and tracking technologies used on this site is maintained and kept current by
             our cookie consent provider. You can view and update your preferences at any time via the Manage Cookies
             link in the footer.{" "}
-             <button
+            <button
               onClick={() => (window as any).__enzuzo?.openPreferenceCenter()}
-              className="font-medium text-foreground underline underline-offset-2 hover:text-primary">
+              className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
+            >
               Manage Cookies
-             </button>
-            {" "}link in the footer.
+            </button>{" "}
+            link in the footer.
           </p>
-        </div>
+        </section>
+      </div>
     </div>
   );
 }
