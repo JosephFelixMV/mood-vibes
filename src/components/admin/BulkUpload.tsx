@@ -1,12 +1,12 @@
 import { useState, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Upload, FileUp, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { generateSlug } from "@/lib/slug-utils";
 import { stripHtml } from "@/lib/brand-utils";
-import { stringifyTaxonomyValues, dedupeTaxonomyValues } from "@/lib/taxonomy-utils";
+import { stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
 
 interface UploadResult {
   fileName: string;
