@@ -59,11 +59,9 @@ Deno.serve(async (req) => {
       urlEntry(`${base}/terms`, today, "yearly", "0.3"),
     ];
 
-    // Categories (split by type for proper URL prefixes)
-    // Fetch created_at for lastmod (categories table has no updated_at column)
+    // Categories — use RPC that applies visibility thresholds (core ≥1, vibe/mood ≥15)
     const { data: categories, error: catError } = await supabase
-      .from("categories")
-      .select("slug,type,created_at");
+      .rpc("get_categories_with_counts");
 
     if (catError) console.error("Categories error:", catError);
     console.log("Categories fetched:", categories?.length ?? 0);
