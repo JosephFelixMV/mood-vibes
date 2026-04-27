@@ -28,6 +28,7 @@ import Brands from "./pages/Brands";
 import NotFound from "./pages/NotFound";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import LaunchWelcomeModal from "@/components/LaunchWelcomeModal";
+import AnalyticsLoader from "@/components/AnalyticsLoader";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ function AppShell() {
   return (
     <>
       <RegionNoticeDialog open={showNotice} onContinueUS={handleContinueUS} onDismiss={handleDismiss} />
+      <AnalyticsLoader />
       <div className="flex min-h-screen flex-col">
         <AffiliateDisclosureBanner />
         <Navbar />
