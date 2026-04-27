@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useRegion } from "@/contexts/RegionContext";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -64,9 +64,9 @@ export default function LaunchWelcomeModal() {
             >
               Proof of Concept.
             </span>
-            <h2 className="text-xl font-medium leading-snug" style={{ color: "var(--foreground)" }}>
+            <DialogTitle className="text-xl font-medium leading-snug" style={{ color: "var(--foreground)" }}>
               Welcome to Mood and Vibes a prototype to find and discover new brands and products.
-            </h2>
+            </DialogTitle>
           </div>
 
           {/* Body copy */}
