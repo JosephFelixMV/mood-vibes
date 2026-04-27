@@ -33,6 +33,9 @@ export default function Footer() {
             <Link to="/terms" className="hover:text-foreground">
               Terms of Use
             </Link>
+            <Link to="/about" className="hover:text-foreground">
+              About
+            </Link>
             <a
               href="#manage_cookies"
               id="manage_cookies"
