@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock } from "lucide-react";
@@ -136,30 +136,45 @@ export default function Index() {
   const moodsLoading = taxonomyLoading;
   const vibesLoading = taxonomyLoading;
 
-  const qualifiedMoods = moods
-    .map((m) => ({ ...m, productCount: taxonomyCounts?.moodCounts[m.name.toLowerCase()] ?? 0 }))
-    .filter((m) => m.productCount > 0);
+  const qualifiedMoods = useMemo(
+    () =>
+      moods
+        .map((m) => ({ ...m, productCount: taxonomyCounts?.moodCounts[m.name.toLowerCase()] ?? 0 }))
+        .filter((m) => m.productCount > 0),
+    [moods, taxonomyCounts],
+  );
 
-  const qualifiedVibes = vibes
-    .map((v) => ({ ...v, productCount: taxonomyCounts?.vibeCounts[v.name.toLowerCase()] ?? 0 }))
-    .filter((v) => v.productCount > 0);
+  const qualifiedVibes = useMemo(
+    () =>
+      vibes
+        .map((v) => ({ ...v, productCount: taxonomyCounts?.vibeCounts[v.name.toLowerCase()] ?? 0 }))
+        .filter((v) => v.productCount > 0),
+    [vibes, taxonomyCounts],
+  );
 
   const [randomMoods, setRandomMoods] = useState<Category[]>([]);
   const [randomVibes, setRandomVibes] = useState<Category[]>([]);
+
+  // Depend on stable primitive (joined ids) so the shuffle only runs when the
+  // qualifying set actually changes — not on every render.
+  const moodIdsKey = qualifiedMoods.map((m) => m.id).join(",");
+  const vibeIdsKey = qualifiedVibes.map((v) => v.id).join(",");
 
   useEffect(() => {
     if (qualifiedMoods.length) {
       const shuffled = [...qualifiedMoods].sort(() => Math.random() - 0.5);
       setRandomMoods(shuffled.slice(0, 4));
     }
-  }, [qualifiedMoods]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moodIdsKey]);
 
   useEffect(() => {
     if (qualifiedVibes.length) {
       const shuffled = [...qualifiedVibes].sort(() => Math.random() - 0.5);
       setRandomVibes(shuffled.slice(0, 4));
     }
-  }, [qualifiedVibes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vibeIdsKey]);
 
   const [surprise, setSurprise] = useState<typeof dailyPick>(null);
   const [key, setKey] = useState(0);
