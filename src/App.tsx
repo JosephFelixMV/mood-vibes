@@ -29,6 +29,7 @@ import Discover from "./pages/Discover";
 import VibeLanding from "./pages/VibeLanding";
 import Brands from "./pages/Brands";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import LaunchWelcomeModal from "@/components/LaunchWelcomeModal";
 import AnalyticsLoader from "@/components/AnalyticsLoader";
