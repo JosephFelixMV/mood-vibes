@@ -3,9 +3,9 @@ import { Flag, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { useQuery } from "@tanstack/react-query";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useSiteConfigValue } from "@/hooks/useSiteConfig";
 
 interface ReportBrokenLinkProps {
   productId: string;
@@ -18,18 +18,8 @@ export default function ReportBrokenLink({ productId, variant = "icon" }: Report
   const { trigger, cooldown } = useRateLimitedAction(5000);
   const { enabled: reporterEnabled } = useFeatureFlag("feature_broken_link_reporter");
 
-  const { data: turnstileSiteKey } = useQuery({
-    queryKey: ["turnstile-site-key"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("site_config")
-        .select("value")
-        .eq("key", "turnstile_site_key")
-        .single();
-      return data?.value || "";
-    },
-    staleTime: 1000 * 60 * 30,
-  });
+  // Reads from shared site_config cache (single request shared site-wide).
+  const { value: turnstileSiteKey } = useSiteConfigValue("turnstile_site_key");
 
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetIdRef = useRef<string | null>(null);
