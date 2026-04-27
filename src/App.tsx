@@ -6,7 +6,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RegionProvider, useRegion } from "@/contexts/RegionContext";
 import Navbar from "@/components/Navbar";
-import RegionNoticeDialog, { wasRegionNoticeDismissed, markRegionNoticeDismissed } from "@/components/RegionNoticeDialog";
+import RegionNoticeDialog, {
+  wasRegionNoticeDismissed,
+  markRegionNoticeDismissed,
+} from "@/components/RegionNoticeDialog";
 import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 import Categories from "./pages/Categories";
@@ -114,39 +117,40 @@ function AppShell() {
       <div className="flex min-h-screen flex-col">
         <AffiliateDisclosureBanner />
         <Navbar />
-            <main id="main-content" className="flex-1">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/categories" element={<Categories />} />
-                <Route path="/vibes" element={<Vibes />} />
-                <Route path="/vibes/:slug" element={<VibeLanding />} />
-                <Route path="/moods" element={<Moods />} />
-                <Route path="/moods/:slug" element={<MoodLanding />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/category/:slug" element={<CategoryLanding />} />
-                <Route path="/product/:slug" element={<ProductDetail />} />
-                <Route path="/discover" element={<Discover />} />
-                <Route path="/brands" element={<Brands />} />
-                <Route path="/login" element={<Login />} />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute>
-                      <Admin />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/disclosure" element={<Disclosure />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          <Footer />
-          <LaunchWelcomeModal />
-        </div>
-      </>
-    );
+        <main id="main-content" className="flex-1">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/vibes" element={<Vibes />} />
+            <Route path="/vibes/:slug" element={<VibeLanding />} />
+            <Route path="/moods" element={<Moods />} />
+            <Route path="/moods/:slug" element={<MoodLanding />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/category/:slug" element={<CategoryLanding />} />
+            <Route path="/product/:slug" element={<ProductDetail />} />
+            <Route path="/discover" element={<Discover />} />
+            <Route path="/brands" element={<Brands />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/about" element={<About />} />
+            <Route path="/disclosure" element={<Disclosure />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        <Footer />
+        <LaunchWelcomeModal />
+      </div>
+    </>
+  );
 }
 
 const App = () => (
