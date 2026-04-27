@@ -10,6 +10,7 @@ import { useSEO } from "@/hooks/useSEO";
 import type { Product } from "@/lib/supabase-queries";
 import { useQuery } from "@tanstack/react-query";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useSiteConfig, useSiteConfigValue } from "@/hooks/useSiteConfig";
 
 const MAX_PROMPT_LENGTH = 150;
 const SESSION_KEY = "discover_queue";
@@ -80,30 +81,14 @@ function DiscoverInner() {
   const pendingPromptRef = useRef<string>("");
 
   // Site key from site_config
-  const { data: turnstileSiteKey } = useQuery({
-    queryKey: ["turnstile-site-key"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("site_config")
-        .select("value")
-        .eq("key", "turnstile_site_key")
-        .single();
-      return data?.value || "";
-    },
-    staleTime: 1000 * 60 * 30,
-  });
+  // Both values come from the shared site_config cache (single round trip).
+  const { value: turnstileSiteKey } = useSiteConfigValue("turnstile_site_key");
+  const { data: siteConfig } = useSiteConfig();
 
-  // Fetch configurable weekly limit
   useEffect(() => {
-    supabase
-      .from("site_config")
-      .select("value")
-      .eq("key", "ai_weekly_prompt_limit")
-      .single()
-      .then(({ data }) => {
-        if (data?.value) setWeeklyLimit(parseInt(data.value, 10) || 5);
-      });
-  }, []);
+    const raw = siteConfig?.ai_weekly_prompt_limit;
+    if (raw) setWeeklyLimit(parseInt(raw, 10) || 5);
+  }, [siteConfig]);
 
   // Restore queue from session on mount
   useEffect(() => {
