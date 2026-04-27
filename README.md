@@ -86,13 +86,6 @@ PIPEDA — Privacy policy covers data collection (analytics events), third-party
 
 Note for contributors: All product imports must include a valid affiliate disclosure at the point of entry. The product-import-template.json includes an affiliate_disclosure reminder field for this purpose.
 
-Development Notes
-
-Lovable + Supabase Auth — After any domain migration, update the Supabase Auth Site URL in Dashboard → Authentication → URL Configuration to match the live production domain.
-Selector Profiles (Scraper) — Site-specific CSS/JSON selectors for the scraper extension are stored as named profiles. New retail sites require selector tuning before bulk scraping.
-React Hashed Classnames — The scraper avoids class-based selectors in favour of JSON-LD, **NEXT_DATA**, heading text search, and paired-children DOM patterns due to React build hashing.
-Clean Base Files — When iterative patching causes regressions, revert to the last clean base and re-apply targeted changes rather than patching broken state.
-
 Contributing
 This is a private project. Access to the Supabase project, Lovable workspace, and Chirpyest account is required to contribute. Contact the project owner for onboarding.
 
