@@ -376,8 +376,28 @@ export default function Index() {
           </div>
         </div>
         {isLoading ? (
-          <div className="flex justify-center" role="status" aria-label="Loading">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <div
+            className="mx-auto max-w-3xl overflow-hidden rounded-sm border border-border bg-background md:flex md:items-stretch"
+            role="status"
+            aria-label="Loading today's pick"
+          >
+            {/* Image placeholder — matches featured card image dimensions */}
+            <div className="md:w-1/2">
+              <div className="relative aspect-[4/5] w-full bg-muted/40 md:aspect-auto md:h-full md:min-h-[360px]" />
+            </div>
+            {/* Content placeholder — matches featured card content layout */}
+            <div className="flex flex-col gap-2 p-4 md:w-1/2 md:justify-center md:p-8">
+              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+              <div className="mt-1 h-5 w-1/4 animate-pulse rounded bg-muted" />
+              <div className="mt-2 flex items-center gap-2">
+                <div className="h-9 w-28 animate-pulse rounded bg-muted" />
+                <div className="h-9 w-9 animate-pulse rounded bg-muted" />
+                <div className="h-9 w-9 animate-pulse rounded bg-muted" />
+              </div>
+              <div className="mt-1 h-3 w-1/4 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
+            </div>
           </div>
         ) : displayedProduct ? (
           <div className="mx-auto max-w-3xl">
