@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 /**
  * Loads analytics scripts using IDs stored in the `site_config` table
@@ -15,29 +15,13 @@ import { supabase } from "@/lib/supabase";
  * these requests until the visitor grants analytics consent.
  */
 export default function AnalyticsLoader() {
+  const { data: config } = useSiteConfig();
+
   useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      const { data, error } = await supabase
-        .from("site_config")
-        .select("key,value")
-        .in("key", ["google_analytics_id", "hotjar_id"]);
-
-      if (cancelled || error || !data) return;
-
-      const byKey = Object.fromEntries(
-        data.map((row) => [row.key, (row.value ?? "").trim()]),
-      ) as Record<string, string>;
-
-      injectGA4(byKey.google_analytics_id);
-      injectHotjar(byKey.hotjar_id);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (!config) return;
+    injectGA4((config.google_analytics_id ?? "").trim());
+    injectHotjar((config.hotjar_id ?? "").trim());
+  }, [config]);
 
   return null;
 }
