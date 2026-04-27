@@ -55,7 +55,7 @@ function hasStoredEnzuzoConsent(): boolean {
     });
     if (hasConsentCookie) return true;
 
-    for (const key of ENZUO_CONSENT_STORAGE_KEYS_FIXME) {
+    for (const key of ENZUZO_CONSENT_STORAGE_KEYS) {
       const value = localStorage.getItem(key);
       if (value && value !== "{}" && value !== "[]") {
         return true;
