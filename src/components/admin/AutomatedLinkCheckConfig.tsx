@@ -109,6 +109,7 @@ export default function AutomatedLinkCheckConfig() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["site-config-link-check"] });
       qc.invalidateQueries({ queryKey: ["site-config"] });
+      qc.invalidateQueries({ queryKey: ["site-config-all"] });
       setEdited({});
       toast.success("Link checker configuration saved");
     },

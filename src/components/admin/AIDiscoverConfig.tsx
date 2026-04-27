@@ -63,6 +63,7 @@ export default function AIDiscoverConfig() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["site-config-ai"] });
       qc.invalidateQueries({ queryKey: ["site-config"] });
+      qc.invalidateQueries({ queryKey: ["site-config-all"] });
       setEdited({});
       toast.success("AI Discover configuration saved");
     },
