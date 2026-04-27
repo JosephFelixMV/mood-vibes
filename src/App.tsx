@@ -44,6 +44,11 @@ const ENZUZO_CONSENT_STORAGE_KEYS = [
   "enzuzo-categories",
 ];
 
+function isResolvedConsentValue(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  return /accepted|declined|allow|reject|dismiss|consent|analytics|marketing|preferences|functional/.test(normalized);
+}
+
 function hasStoredEnzuzoConsent(): boolean {
   if (typeof window === "undefined") return false;
   try {
@@ -57,7 +62,7 @@ function hasStoredEnzuzoConsent(): boolean {
 
     for (const key of ENZUZO_CONSENT_STORAGE_KEYS) {
       const value = localStorage.getItem(key);
-      if (value && value !== "{}" && value !== "[]") {
+      if (value && value !== "{}" && value !== "[]" && isResolvedConsentValue(value)) {
         return true;
       }
     }
@@ -105,7 +110,7 @@ function hasEnzuzoConsent(): boolean {
 function AppShell() {
   const { detected, setRegion, loading } = useRegion();
   const [showNotice, setShowNotice] = useState(false);
-  const [cookieResolved, setCookieResolved] = useState(() => hasEnzuzoConsent());
+  const [cookieResolved, setCookieResolved] = useState(false);
 
   // Wait until Enzuzo cookie consent has been resolved (accepted or declined)
   // before allowing the RegionNoticeDialog to open. Otherwise the AlertDialog
