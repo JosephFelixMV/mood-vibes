@@ -1,5 +1,3 @@
-Content-Signal: search=yes,ai-train=no
-
 User-agent: Googlebot
 Disallow: /
 
