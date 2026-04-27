@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 /**
  * Feature flag hook backed by `site_config` rows of the form
@@ -13,19 +14,9 @@ import { supabase } from "@/lib/supabase";
  * gated UI for unauthenticated visitors.
  */
 export function useFeatureFlag(key: string): { enabled: boolean; loading: boolean; isAdmin: boolean } {
-  const flagQuery = useQuery({
-    queryKey: ["feature-flag", key],
-    queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("site_config")
-        .select("value")
-        .eq("key", key)
-        .maybeSingle();
-      if (error) throw error;
-      return data?.value === "true";
-    },
-    staleTime: 1000 * 30,
-  });
+  // Read from the shared site_config cache so we make a single request for
+  // ALL feature flags + other site_config values combined.
+  const flagQuery = useSiteConfig();
 
   const adminQuery = useQuery({
     queryKey: ["is-admin"],
@@ -47,7 +38,7 @@ export function useFeatureFlag(key: string): { enabled: boolean; loading: boolea
 
   const loading = flagQuery.isLoading || adminQuery.isLoading;
   const isAdmin = adminQuery.data === true;
-  const flagOn = flagQuery.data === true;
+  const flagOn = flagQuery.data?.[key] === "true";
 
   return {
     enabled: !loading && (flagOn || isAdmin),

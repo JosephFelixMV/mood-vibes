@@ -151,6 +151,7 @@ export default function SiteConfiguration() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["site-config"] });
+      qc.invalidateQueries({ queryKey: ["site-config-all"] });
       setEditedValues({});
       toast.success("Configuration saved");
     },
@@ -170,6 +171,7 @@ export default function SiteConfiguration() {
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["site-config"] });
       qc.invalidateQueries({ queryKey: ["feature-flag", vars.key] });
+      qc.invalidateQueries({ queryKey: ["site-config-all"] });
       toast.success("Feature flag updated");
     },
     onError: (err: any) => {
