@@ -5,5 +5,6 @@ export default function AffiliateDisclosureBanner() {
      <a href="/disclosure" className="underline hover:text-foreground">
         Learn more about our affiliate disclosure
      </a>
+    </div>
   );
 }
