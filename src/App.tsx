@@ -35,17 +35,35 @@ const queryClient = new QueryClient();
 function AppShell() {
   const { detected, setRegion, loading } = useRegion();
   const [showNotice, setShowNotice] = useState(false);
+  const [cookieResolved, setCookieResolved] = useState(() => hasEnzuzoConsent());
+
+  // Wait until Enzuzo cookie consent has been resolved (accepted or declined)
+  // before allowing the RegionNoticeDialog to open. Otherwise the AlertDialog
+  // overlay blocks taps on the cookie banner on mobile.
+  useEffect(() => {
+    if (cookieResolved) return;
+    const interval = window.setInterval(() => {
+      if (hasEnzuzoConsent()) {
+        setCookieResolved(true);
+        window.clearInterval(interval);
+      }
+    }, 300);
+    return () => window.clearInterval(interval);
+  }, [cookieResolved]);
 
   useEffect(() => {
     if (loading) return;
+    if (!cookieResolved) return;
     if (detected !== "US") {
       // Always pin non-US visitors to the US catalog (no non-US products yet)
       setRegion("US");
       if (!wasRegionNoticeDismissed()) {
-        setShowNotice(true);
+        // Short delay so the cookie banner dismissal animation finishes first
+        const t = window.setTimeout(() => setShowNotice(true), 400);
+        return () => window.clearTimeout(t);
       }
     }
-  }, [detected, loading, setRegion]);
+  }, [detected, loading, setRegion, cookieResolved]);
 
   const handleContinueUS = () => {
     setRegion("US");
