@@ -40,7 +40,7 @@ const CONFIG_SECTIONS = [
     keys: ["google_analytics_id", "hotjar_id"],
     helpTexts: {
       google_analytics_id: "Enter your Google Analytics 4 Measurement ID (e.g., G-XXXXXXXXXX). Find it in Google Analytics → Admin → Data Streams.",
-      hotjar_id: "Enter your Hotjar Site ID (numeric). Find it in Hotjar → Settings → Sites & Organizations.",
+      hotjar_id: "Enter your Hotjar Site ID (numeric, e.g. 1234567) OR paste the full Hotjar/Contentsquare UXA script URL (e.g. https://t.contentsquare.net/uxa/<id>.js). Find it in Hotjar → Settings → Sites & Organizations, or in your Contentsquare install snippet.",
     },
   },
   {
