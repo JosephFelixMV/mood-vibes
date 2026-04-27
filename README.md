@@ -45,6 +45,7 @@ Specifications Table — Structured label/value rows (e.g. "Material → 100% Co
 Active / Draft Toggle — Products can be published or held in draft state before going live.
 AI-Powered Category & Keyword Suggestions — When adding a product, admins can trigger an AI suggestion via a Supabase Edge Function (Deno) that calls the Anthropic API (Claude Haiku). The function receives the product name, brand, description, and price, then returns recommended core categories, vibes, moods, and SEO keywords with a confidence score (0–1). Brand-specific hints are pulled from a brand_lookup table in Supabase to improve accuracy for known retailers. Post-processing rules enforce correctness at the edge — luxury fashion items over $1,000 are automatically assigned the The Atelier vibe, beauty and skincare products receive Pure Routine, and cleaning/organising products receive the Fresh Start mood. All suggested keywords are filtered against a drug-territory and medical-claims blocklist before being returned, keeping product copy compliant with Canadian Competition Act advertising standards. The endpoint is admin-gated via JWT + user_roles table check.
 Bulk Import via JSON — A structured JSON import template (product-import-template.json) allows batch product entry with schema validation hints, field descriptions, and an example record. Includes built-in affiliate disclosure reminder.
+
 📋 Legal & Compliance
 
 Affiliate Disclosure Banner — A persistent sitewide disclosure banner notifies visitors that the site earns commissions on affiliate purchases, satisfying requirements under the Canadian Competition Act and Ad Standards guidelines.
@@ -65,20 +66,6 @@ product_events — Analytics event log: event type (view, click), product ID, ti
 categories — Category and vibe definitions used to populate dropdowns and filter UIs. Includes icon, slug, and parent slug to distinguish Core Lifestyle vs. Vibe types.
 
 Row Level Security (RLS) is enforced via Supabase policies. Admin operations require authenticated sessions.
-Affiliate Link Pipeline
-Chirpyest has no public API. Affiliate links are generated through one of two workflows:
-
-Frontend Architecture
-Built on React (via Lovable) with:
-
-TanStack Query — Server state management for product and category fetching, cache invalidation on mutations.
-Supabase JS client — Direct database queries from the frontend under RLS policies.
-IntersectionObserver — Fires impression events when product tiles enter the visible viewport.
-Sonner — Toast notification system for admin feedback.
-shadcn/ui + Tailwind CSS — Component library and utility-first styling.
-
-Affiliate Link Disclosure (Legal)
-This site operates under Canadian jurisdiction (Ontario). The following compliance items are implemented:
 
 Competition Act — Price representation follows accuracy standards. Prices shown are sourced from retailer listings and may change; disclaimers are present and persistent (not tooltip/hover-only, which is insufficient on mobile and legally risky).
 Ad Standards / CASL — A persistent, unavoidable affiliate disclosure banner is shown sitewide. Hover-only tooltips are not used as the sole disclosure mechanism.
