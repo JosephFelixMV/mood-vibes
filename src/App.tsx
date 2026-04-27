@@ -32,6 +32,35 @@ import AnalyticsLoader from "@/components/AnalyticsLoader";
 
 const queryClient = new QueryClient();
 
+/**
+ * Check whether the Enzuzo cookie banner has been resolved (accepted or declined).
+ * Enzuzo persists consent in localStorage under keys prefixed with "enzuzo-".
+ * We treat the presence of any such key (other than purely internal session keys)
+ * as a signal that the user has interacted with the banner.
+ */
+function hasEnzuzoConsent(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      const lower = key.toLowerCase();
+      if (
+        lower.startsWith("enzuzo-consent") ||
+        lower.startsWith("enzuzo-cookie") ||
+        lower === "enzuzo-preferences" ||
+        lower === "enzuzo-categories"
+      ) {
+        return true;
+      }
+    }
+  } catch {
+    // localStorage unavailable — don't block the region dialog forever
+    return true;
+  }
+  return false;
+}
+
 function AppShell() {
   const { detected, setRegion, loading } = useRegion();
   const [showNotice, setShowNotice] = useState(false);
