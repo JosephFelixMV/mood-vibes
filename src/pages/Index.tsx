@@ -93,45 +93,56 @@ export default function Index() {
     queryFn: () => getCategories("vibe"),
   });
 
-  const { data: qualifiedMoods = [], isLoading: moodsLoading } = useQuery({
-    queryKey: ["qualified-moods", moods.map((m) => m.slug).join(",")],
+  // Single consolidated query that fetches mood + vibe_category for all active
+  // products, then derives per-mood / per-vibe counts client-side. Replaces the
+  // previous N+N pattern (one count query per mood and per vibe).
+  const { data: taxonomyCounts, isLoading: taxonomyLoading } = useQuery({
+    queryKey: ["homepage-taxonomy-counts"],
     queryFn: async () => {
-      if (!moods.length) return [];
-      const results = await Promise.all(
-        moods.map(async (m) => {
-          const { count } = await supabase
-            .from("products")
-            .select("*", { count: "exact", head: true })
-            .eq("is_active", true)
-            .ilike("mood", `%${m.name}%`);
-          return { ...m, productCount: count ?? 0 };
-        }),
-      );
-      return results.filter((m) => m.productCount > 0);
+      const PAGE_SIZE = 1000;
+      let from = 0;
+      let hasMore = true;
+      const moodCounts: Record<string, number> = {};
+      const vibeCounts: Record<string, number> = {};
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from("products")
+          .select("mood, vibe_category")
+          .eq("is_active", true)
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        (data ?? []).forEach((row: { mood: string | null; vibe_category: string | null }) => {
+          if (row.mood) {
+            row.mood.split(",").forEach((m) => {
+              const k = m.trim().toLowerCase();
+              if (k) moodCounts[k] = (moodCounts[k] || 0) + 1;
+            });
+          }
+          if (row.vibe_category) {
+            row.vibe_category.split(",").forEach((v) => {
+              const k = v.trim().toLowerCase();
+              if (k) vibeCounts[k] = (vibeCounts[k] || 0) + 1;
+            });
+          }
+        });
+        hasMore = (data?.length || 0) === PAGE_SIZE;
+        from += PAGE_SIZE;
+      }
+      return { moodCounts, vibeCounts };
     },
-    enabled: moods.length > 0,
     staleTime: 1000 * 60 * 15,
   });
 
-  const { data: qualifiedVibes = [], isLoading: vibesLoading } = useQuery({
-    queryKey: ["qualified-vibes", vibes.map((v) => v.slug).join(",")],
-    queryFn: async () => {
-      if (!vibes.length) return [];
-      const results = await Promise.all(
-        vibes.map(async (v) => {
-          const { count } = await supabase
-            .from("products")
-            .select("*", { count: "exact", head: true })
-            .eq("is_active", true)
-            .ilike("vibe_category", `%${v.name}%`);
-          return { ...v, productCount: count ?? 0 };
-        }),
-      );
-      return results.filter((v) => v.productCount > 0);
-    },
-    enabled: vibes.length > 0,
-    staleTime: 1000 * 60 * 15,
-  });
+  const moodsLoading = taxonomyLoading;
+  const vibesLoading = taxonomyLoading;
+
+  const qualifiedMoods = moods
+    .map((m) => ({ ...m, productCount: taxonomyCounts?.moodCounts[m.name.toLowerCase()] ?? 0 }))
+    .filter((m) => m.productCount > 0);
+
+  const qualifiedVibes = vibes
+    .map((v) => ({ ...v, productCount: taxonomyCounts?.vibeCounts[v.name.toLowerCase()] ?? 0 }))
+    .filter((v) => v.productCount > 0);
 
   const [randomMoods, setRandomMoods] = useState<Category[]>([]);
   const [randomVibes, setRandomVibes] = useState<Category[]>([]);
