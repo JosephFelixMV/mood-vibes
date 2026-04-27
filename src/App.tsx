@@ -36,25 +36,28 @@ import AnalyticsLoader from "@/components/AnalyticsLoader";
 
 const queryClient = new QueryClient();
 
-/**
- * Check whether the Enzuzo cookie banner has been resolved (accepted or declined).
- * Enzuzo persists consent in localStorage under keys prefixed with "enzuzo-".
- * We treat the presence of any such key (other than purely internal session keys)
- * as a signal that the user has interacted with the banner.
- */
-function hasEnzuzoConsent(): boolean {
+const ENZUZO_CONSENT_COOKIES = ["cookies-analytics", "cookies-marketing", "cookies-preferences"];
+const ENZUZO_CONSENT_STORAGE_KEYS = [
+  "enzuzo-consent",
+  "enzuzo-cookie",
+  "enzuzo-preferences",
+  "enzuzo-categories",
+];
+
+function hasStoredEnzuzoConsent(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key) continue;
-      const lower = key.toLowerCase();
-      if (
-        lower.startsWith("enzuzo-consent") ||
-        lower.startsWith("enzuzo-cookie") ||
-        lower === "enzuzo-preferences" ||
-        lower === "enzuzo-categories"
-      ) {
+    const hasConsentCookie = document.cookie.split(";").some((entry) => {
+      const [rawName, rawValue = ""] = entry.split("=");
+      const name = decodeURIComponent(rawName.trim()).toLowerCase();
+      const value = decodeURIComponent(rawValue.trim()).toLowerCase();
+      return ENZUZO_CONSENT_COOKIES.includes(name) && (value === "true" || value === "false");
+    });
+    if (hasConsentCookie) return true;
+
+    for (const key of ENZUO_CONSENT_STORAGE_KEYS_FIXME) {
+      const value = localStorage.getItem(key);
+      if (value && value !== "{}" && value !== "[]") {
         return true;
       }
     }
@@ -63,6 +66,40 @@ function hasEnzuzoConsent(): boolean {
     return true;
   }
   return false;
+}
+
+function isVisibleElement(element: Element): boolean {
+  const style = window.getComputedStyle(element);
+  const rect = element.getBoundingClientRect();
+  return style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0" && rect.width > 0 && rect.height > 0;
+}
+
+function isEnzuzoBannerVisible(): boolean {
+  if (typeof window === "undefined") return false;
+  const selectors = [
+    "#ez-cookie-notification",
+    "#enzuzo-cookie-notification",
+    "#enzuzo-cookiebar",
+    "#enzuzo-cc-banner",
+    "#enzuzo-root [class*='banner']",
+    ".ez-consent [class*='cookie-notification']",
+    "[class*='enzuzo'][class*='banner']",
+  ];
+  return selectors.some((selector) => {
+    try {
+      return Array.from(document.querySelectorAll(selector)).some(isVisibleElement);
+    } catch {
+      return false;
+    }
+  });
+}
+
+/**
+ * Check whether the Enzuzo cookie banner has been resolved (accepted or declined)
+ * and is no longer visibly blocking the page.
+ */
+function hasEnzuzoConsent(): boolean {
+  return hasStoredEnzuzoConsent() && !isEnzuzoBannerVisible();
 }
 
 function AppShell() {
