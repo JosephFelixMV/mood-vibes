@@ -23,7 +23,7 @@ Structured Metadata — Each product and category page has its own <title>, <met
 Default OG Image — A fallback ogdefault.jpg is used for social share previews when no product image is available.
 Category Landing Pages — Each Core Lifestyle category has a dedicated, indexable landing page that shows only products from that category, supporting both SEO and focused browsing.
 
-🗂️ Category & Vibe System
+Category & Vibe System
 
 Core Lifestyle Categories — Products are organized into structured lifestyle verticals (e.g. Beauty, Fashion, Home, Kitchen, Fitness, Tech, Outdoors, Pets, Toys, Gaming, Electronics, Books). These anchor browsability and SEO structure.
 Vibe Tags — An optional secondary tag layer adds personality and cross-category discoverability (e.g. "Eco", "Cozy", "Minimalist"). Vibes cut across categories, letting users explore by aesthetic or feeling rather than product type.
@@ -43,8 +43,8 @@ Image Management — Supports one primary image URL plus up to 4 additional gall
 Video Support — Optional MP4 video URL field per product.
 Specifications Table — Structured label/value rows (e.g. "Material → 100% Cotton") can be added to any product.
 Active / Draft Toggle — Products can be published or held in draft state before going live.
+AI-Powered Category & Keyword Suggestions — When adding a product, admins can trigger an AI suggestion via a Supabase Edge Function (Deno) that calls the Anthropic API (Claude Haiku). The function receives the product name, brand, description, and price, then returns recommended core categories, vibes, moods, and SEO keywords with a confidence score (0–1). Brand-specific hints are pulled from a brand_lookup table in Supabase to improve accuracy for known retailers. Post-processing rules enforce correctness at the edge — luxury fashion items over $1,000 are automatically assigned the The Atelier vibe, beauty and skincare products receive Pure Routine, and cleaning/organising products receive the Fresh Start mood. All suggested keywords are filtered against a drug-territory and medical-claims blocklist before being returned, keeping product copy compliant with Canadian Competition Act advertising standards. The endpoint is admin-gated via JWT + user_roles table check.
 Bulk Import via JSON — A structured JSON import template (product-import-template.json) allows batch product entry with schema validation hints, field descriptions, and an example record. Includes built-in affiliate disclosure reminder.
-
 📋 Legal & Compliance
 
 Affiliate Disclosure Banner — A persistent sitewide disclosure banner notifies visitors that the site earns commissions on affiliate purchases, satisfying requirements under the Canadian Competition Act and Ad Standards guidelines.
@@ -85,19 +85,6 @@ Ad Standards / CASL — A persistent, unavoidable affiliate disclosure banner is
 PIPEDA — Privacy policy covers data collection (analytics events), third-party links (retailer sites), and user rights.
 
 Note for contributors: All product imports must include a valid affiliate disclosure at the point of entry. The product-import-template.json includes an affiliate_disclosure reminder field for this purpose.
-
-Post-Launch Roadmap
-Security Hardening (Post-Traction)
-
-CSP Nonce via Cloudflare Workers — Replace unsafe-inline in script-src with a per-request nonce. Not a launch blocker but recommended as traffic grows.
-Subresource Integrity (SRI) — Add SRI hashes to external scripts in index.html. Meaningful effort; schedule for post-launch sprint.
-
-Experience Enhancements
-
-Mood Quiz / Onboarding — A short "what's your vibe today?" quiz that routes visitors into a filtered discovery experience.
-Saved / Wishlist Feature — Allow users to save products they liked without requiring a purchase.
-Return Visitor Personalization — Surface products from categories a visitor has previously engaged with.
-Email / SMS Digest — Opt-in daily or weekly product drops sent to subscribers, driving return visits.
 
 Development Notes
 
