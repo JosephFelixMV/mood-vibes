@@ -323,7 +323,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       if (error) throw error;
       if (data?.core?.length || data?.vibes?.length || data?.moods?.length || data?.keywords?.length) {
         const suggestionKeywords = Array.isArray(data?.keywords)
-          ? data.keywords.map((k: string) => k.toLowerCase().trim()).filter(Boolean)
+          ? stripBannedKeywords(
+              data.keywords.map((k: string) => k.toLowerCase().trim()).filter(Boolean),
+            )
           : [];
 
         const suggestions = {
@@ -337,8 +339,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           ? stringifyTaxonomyValues(suggestions.core)
           : stringifyTaxonomyValues(parseTaxonomyString(form.category));
         const updatedKeywords = suggestions.keywords.length
-          ? capKeywordsPreservingGiftFor([...form.keywords, ...suggestions.keywords], 6)
-          : form.keywords;
+          ? capKeywordsPreservingGiftFor(
+              stripBannedKeywords([...form.keywords, ...suggestions.keywords]),
+              6,
+            )
+          : stripBannedKeywords(form.keywords);
         const isFashion = FASHION_SUBCATEGORIES.some((sub) =>
           updatedCategory?.toLowerCase().includes(sub.toLowerCase()),
         );
