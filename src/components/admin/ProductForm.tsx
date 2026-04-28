@@ -21,6 +21,8 @@ import {
   dedupeTaxonomyValues,
   parseTaxonomyString,
   stringifyTaxonomyValues,
+  isBannedKeyword,
+  stripBannedKeywords,
 } from "@/lib/taxonomy-utils";
 
 interface Props {
@@ -271,6 +273,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   const addKeyword = async (term: string) => {
     const normalized = term.toLowerCase().trim();
     if (!normalized || form.keywords.includes(normalized)) return;
+    if (isBannedKeyword(normalized)) {
+      toast.error("Keyword blocked: cannot contain 'anti', 'aging', or 'serum'");
+      return;
+    }
     if (form.keywords.length >= 6) {
       toast.error("Maximum of 6 keywords allowed");
       return;
