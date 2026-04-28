@@ -49,6 +49,17 @@ export function stripDrugTerritory(keywords: string[]): string[] {
   return keywords.filter((k) => !isDrugTerritory(k));
 }
 
+// Hard ban: any keyword containing these substrings (case-insensitive) is rejected.
+// This is a stricter, simpler filter on top of the regex-based drug-territory check.
+const BANNED_KEYWORD_SUBSTRINGS = ["anti", "aging", "serum"];
+function containsBannedSubstring(keyword: string): boolean {
+  const lower = keyword.toLowerCase();
+  return BANNED_KEYWORD_SUBSTRINGS.some((term) => lower.includes(term));
+}
+export function stripBannedKeywords(keywords: string[]): string[] {
+  return keywords.filter((k) => !containsBannedSubstring(k));
+}
+
 async function callAnthropic(opts: {
   apiKey: string;
   system?: string;
