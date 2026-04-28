@@ -49,6 +49,17 @@ export function stripDrugTerritory(keywords: string[]): string[] {
   return keywords.filter((k) => !isDrugTerritory(k));
 }
 
+// Hard ban: any keyword containing these substrings (case-insensitive) is rejected.
+// This is a stricter, simpler filter on top of the regex-based drug-territory check.
+const BANNED_KEYWORD_SUBSTRINGS = ["anti", "aging", "serum"];
+function containsBannedSubstring(keyword: string): boolean {
+  const lower = keyword.toLowerCase();
+  return BANNED_KEYWORD_SUBSTRINGS.some((term) => lower.includes(term));
+}
+export function stripBannedKeywords(keywords: string[]): string[] {
+  return keywords.filter((k) => !containsBannedSubstring(k));
+}
+
 async function callAnthropic(opts: {
   apiKey: string;
   system?: string;
@@ -1143,7 +1154,7 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     );
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
     const rawKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()));
-    const compliantKeywords = stripDrugTerritory(rawKeywords);
+    const compliantKeywords = stripBannedKeywords(stripDrugTerritory(rawKeywords));
     const validKeywords = capKeywordsPreservingGiftFor(compliantKeywords, 6);
     const confidence =
       typeof suggestions.confidence === "number" ? Math.min(1, Math.max(0, suggestions.confidence)) : 0.6;

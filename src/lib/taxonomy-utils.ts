@@ -39,3 +39,19 @@ export function capKeywordsPreservingGiftFor(values: string[], max = 6): string[
   kept.push(deduped[giftIdx]);
   return kept;
 }
+
+/**
+ * FTC/FDA cosmetic-claim compliance: keywords containing any of these substrings
+ * are banned. Matched case-insensitively as substrings (so "antioxidant",
+ * "anti-aging", "vitamin c serum", etc. are all rejected).
+ */
+export const BANNED_KEYWORD_SUBSTRINGS = ["anti", "aging", "serum"] as const;
+
+export function isBannedKeyword(keyword: string): boolean {
+  const lower = keyword.toLowerCase();
+  return BANNED_KEYWORD_SUBSTRINGS.some((term) => lower.includes(term));
+}
+
+export function stripBannedKeywords(keywords: string[]): string[] {
+  return keywords.filter((k) => !isBannedKeyword(k));
+}

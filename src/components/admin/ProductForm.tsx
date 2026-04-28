@@ -21,6 +21,8 @@ import {
   dedupeTaxonomyValues,
   parseTaxonomyString,
   stringifyTaxonomyValues,
+  isBannedKeyword,
+  stripBannedKeywords,
 } from "@/lib/taxonomy-utils";
 
 interface Props {
@@ -271,6 +273,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   const addKeyword = async (term: string) => {
     const normalized = term.toLowerCase().trim();
     if (!normalized || form.keywords.includes(normalized)) return;
+    if (isBannedKeyword(normalized)) {
+      toast.error("Keyword blocked: cannot contain 'anti', 'aging', or 'serum'");
+      return;
+    }
     if (form.keywords.length >= 6) {
       toast.error("Maximum of 6 keywords allowed");
       return;
@@ -317,7 +323,9 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       if (error) throw error;
       if (data?.core?.length || data?.vibes?.length || data?.moods?.length || data?.keywords?.length) {
         const suggestionKeywords = Array.isArray(data?.keywords)
-          ? data.keywords.map((k: string) => k.toLowerCase().trim()).filter(Boolean)
+          ? stripBannedKeywords(
+              data.keywords.map((k: string) => k.toLowerCase().trim()).filter(Boolean),
+            )
           : [];
 
         const suggestions = {
@@ -331,8 +339,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           ? stringifyTaxonomyValues(suggestions.core)
           : stringifyTaxonomyValues(parseTaxonomyString(form.category));
         const updatedKeywords = suggestions.keywords.length
-          ? capKeywordsPreservingGiftFor([...form.keywords, ...suggestions.keywords], 6)
-          : form.keywords;
+          ? capKeywordsPreservingGiftFor(
+              stripBannedKeywords([...form.keywords, ...suggestions.keywords]),
+              6,
+            )
+          : stripBannedKeywords(form.keywords);
         const isFashion = FASHION_SUBCATEGORIES.some((sub) =>
           updatedCategory?.toLowerCase().includes(sub.toLowerCase()),
         );
