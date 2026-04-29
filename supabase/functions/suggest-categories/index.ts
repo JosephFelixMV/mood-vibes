@@ -49,17 +49,6 @@ export function stripDrugTerritory(keywords: string[]): string[] {
   return keywords.filter((k) => !isDrugTerritory(k));
 }
 
-// Hard ban: any keyword containing these substrings (case-insensitive) is rejected.
-// This is a stricter, simpler filter on top of the regex-based drug-territory check.
-const BANNED_KEYWORD_SUBSTRINGS = ["anti", "aging", "serum"];
-function containsBannedSubstring(keyword: string): boolean {
-  const lower = keyword.toLowerCase();
-  return BANNED_KEYWORD_SUBSTRINGS.some((term) => lower.includes(term));
-}
-export function stripBannedKeywords(keywords: string[]): string[] {
-  return keywords.filter((k) => !containsBannedSubstring(k));
-}
-
 async function callAnthropic(opts: {
   apiKey: string;
   system?: string;
@@ -279,9 +268,6 @@ Streetwear cool factor. Effortless city style with hoodies, cargos, clean sneake
 
 Soft Academia
 The romance of intellectual and creative life. Curiosity, craft, and the feeling of a well-loved study or studio. Tweed, plaid, leather accessories, warm lighting, books, stationery, wooden desk objects, loose-leaf tea. NOT limited to fashion — this is one of the most cross-category vibes on the platform. A leather notebook, a reading lamp, a set of art pencils, or a vintage globe all qualify.
-
-Ballin' on a Budget
-Great style and finds at accessible price points. Savvy shopping, high-low mixing, deals that look expensive. The flex is getting it for less.
 
 Bloom & Glow
 Fresh, feminine, nature-inspired. Florals, soft pastels, skincare rituals, garden aesthetics. Spring energy all year round. Products that feel alive and nurturing.
@@ -1154,7 +1140,7 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     );
     let validMoods = dedupeStrings((suggestions.moods || []).filter((m: string) => moodNames.includes(m))).slice(0, 3);
     const rawKeywords = dedupeStrings((suggestions.keywords || []).map((k: string) => k.toLowerCase().trim()));
-    const compliantKeywords = stripBannedKeywords(stripDrugTerritory(rawKeywords));
+    const compliantKeywords = stripDrugTerritory(rawKeywords);
     const validKeywords = capKeywordsPreservingGiftFor(compliantKeywords, 6);
     const confidence =
       typeof suggestions.confidence === "number" ? Math.min(1, Math.max(0, suggestions.confidence)) : 0.6;
