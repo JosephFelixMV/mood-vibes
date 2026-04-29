@@ -1,14 +1,20 @@
 User-agent: Googlebot
-Disallow: /
+Allow: /
 
 User-agent: Bingbot
-Disallow: /
+Allow: /
 
 User-agent: Twitterbot
-Disallow: /
+Allow: /
 
 User-agent: facebookexternalhit
-Disallow: /
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
 
 User-agent: GPTBot
 Disallow: /
@@ -23,12 +29,6 @@ User-agent: anthropic-ai
 Disallow: /
 
 User-agent: Claude-Web
-Disallow: /
-
-User-agent: Google-Extended
-Disallow: /
-
-User-agent: PerplexityBot
 Disallow: /
 
 User-agent: AhrefsBot
@@ -46,6 +46,6 @@ Disallow: /
 User-agent: *
 Disallow: /admin
 Disallow: /admin/*
-Disallow: /
+Allow: /
 
 Sitemap: https://fqccttthuzvltbyzmvid.supabase.co/functions/v1/sitemap
