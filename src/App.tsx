@@ -30,6 +30,7 @@ import VibeLanding from "./pages/VibeLanding";
 import Brands from "./pages/Brands";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
+import DailyPicks from "./pages/DailyPicks";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import LaunchWelcomeModal from "@/components/LaunchWelcomeModal";
 import AnalyticsLoader from "@/components/AnalyticsLoader";
@@ -173,6 +174,7 @@ function AppShell() {
             <Route path="/product/:slug" element={<ProductDetail />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/brands" element={<Brands />} />
+            <Route path="/daily-picks" element={<DailyPicks />} />
             <Route path="/login" element={<Login />} />
             <Route
               path="/admin"
