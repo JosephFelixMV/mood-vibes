@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Instagram } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -42,6 +43,16 @@ export default function Footer() {
               className="hover:text-foreground underline-offset-2 hover:underline"
             >
               Manage Cookies
+            </a>
+            <a
+              href="https://www.instagram.com/mnvbrands/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Follow Mood & Vibes on Instagram"
+              className="inline-flex items-center gap-1 hover:text-foreground"
+            >
+              <Instagram className="h-4 w-4" aria-hidden />
+              <span>Instagram</span>
             </a>
           </div>
           <p>© {new Date().getFullYear()} Mood & Vibes. All rights reserved.</p>
