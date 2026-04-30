@@ -1,12 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
 import ExternalCTA from "@/components/ExternalCTA";
+import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
 import fallbackImage from "@/assets/fallback-product.png";
+
+const PAGE_SIZE = 30;
 
 interface DailyPickRow {
   pick_date: string;
@@ -24,18 +29,42 @@ function formatPickDate(iso: string): string {
   });
 }
 
-async function fetchDailyPicks(): Promise<DailyPickRow[]> {
-  // Ensure today's pick exists
+async function fetchTodayPick(): Promise<DailyPickRow | null> {
   await supabase.rpc("get_or_create_daily_pick");
-
-  // No FK between daily_picks and products in this DB, so fetch in two steps.
-  const { data: pickRows, error: pickErr } = await supabase
+  const todayIso = new Date().toISOString().split("T")[0];
+  const { data: row, error } = await supabase
     .from("daily_picks")
     .select("pick_date, product_id")
+    .eq("pick_date", todayIso)
+    .maybeSingle();
+  if (error) throw error;
+  if (!row) return null;
+  const { data: product, error: pErr } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", row.product_id)
+    .eq("is_active", true)
+    .eq("page_error", false)
+    .maybeSingle();
+  if (pErr) throw pErr;
+  return product ? { pick_date: row.pick_date, product: product as Product } : null;
+}
+
+async function fetchPastPicks(
+  page: number,
+): Promise<{ rows: DailyPickRow[]; total: number }> {
+  const todayIso = new Date().toISOString().split("T")[0];
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
+  const { data: pickRows, error, count } = await supabase
+    .from("daily_picks")
+    .select("pick_date, product_id", { count: "exact" })
+    .lt("pick_date", todayIso)
     .order("pick_date", { ascending: false })
-    .limit(500);
-  if (pickErr) throw pickErr;
-  if (!pickRows || pickRows.length === 0) return [];
+    .range(from, to);
+  if (error) throw error;
+  if (!pickRows || pickRows.length === 0) return { rows: [], total: count || 0 };
 
   const productIds = Array.from(new Set(pickRows.map((r) => r.product_id)));
   const { data: products, error: prodErr } = await supabase
@@ -49,12 +78,14 @@ async function fetchDailyPicks(): Promise<DailyPickRow[]> {
   const productMap = new Map<string, Product>();
   (products || []).forEach((p) => productMap.set((p as Product).id, p as Product));
 
-  return pickRows
+  const rows = pickRows
     .map((r) => {
       const product = productMap.get(r.product_id);
       return product ? { pick_date: r.pick_date, product } : null;
     })
     .filter((r): r is DailyPickRow => r !== null);
+
+  return { rows, total: count || 0 };
 }
 
 export default function DailyPicks() {
@@ -65,15 +96,25 @@ export default function DailyPicks() {
     url: "https://www.mood-and-vibes.com/daily-picks",
   });
 
-  const { data: picks = [], isLoading } = useQuery({
-    queryKey: ["daily-picks-archive"],
-    queryFn: fetchDailyPicks,
+  const [page, setPage] = useState(1);
+
+  const { data: todayPick, isLoading: todayLoading } = useQuery({
+    queryKey: ["daily-picks-today"],
+    queryFn: fetchTodayPick,
     staleTime: 1000 * 60 * 5,
   });
 
-  const todayIso = new Date().toISOString().split("T")[0];
-  const todayPick = picks.find((p) => p.pick_date === todayIso) || picks[0];
-  const pastPicks = picks.filter((p) => p !== todayPick);
+  const { data: pastData, isLoading: pastLoading } = useQuery({
+    queryKey: ["daily-picks-past", page],
+    queryFn: () => fetchPastPicks(page),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const pastPicks = pastData?.rows ?? [];
+  const totalPast = pastData?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalPast / PAGE_SIZE));
+  const isLoading = todayLoading;
 
   return (
     <div className="container py-12 md:py-16">
@@ -110,16 +151,73 @@ export default function DailyPicks() {
           </section>
 
           {/* Past picks grid */}
-          {pastPicks.length > 0 && (
+          {(pastPicks.length > 0 || pastLoading) && (
             <section>
               <h2 className="mb-6 font-heading text-2xl font-semibold tracking-tight">
                 Past Picks
               </h2>
-              <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:gap-8 lg:grid-cols-4">
-                {pastPicks.map((p) => (
-                  <PastPickCard key={p.pick_date} pick={p} />
-                ))}
-              </div>
+              {pastLoading && pastPicks.length === 0 ? (
+                <div className="py-12 text-center text-sm text-muted-foreground">
+                  Loading…
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:gap-8 lg:grid-cols-4">
+                  {pastPicks.map((p) => (
+                    <PastPickCard key={p.pick_date} pick={p} />
+                  ))}
+                </div>
+              )}
+
+              {totalPages > 1 && (
+                <nav
+                  className="mt-10 flex items-center justify-center gap-2"
+                  aria-label="Daily picks pagination"
+                >
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPage(1)}
+                    disabled={page === 1}
+                    aria-label="First page"
+                  >
+                    <ChevronsLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="px-3 text-sm text-muted-foreground">
+                    Page <strong className="text-foreground">{page}</strong> of{" "}
+                    <strong className="text-foreground">{totalPages}</strong>
+                    <span className="ml-2 hidden sm:inline">
+                      ({totalPast.toLocaleString()} past picks)
+                    </span>
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPage(totalPages)}
+                    disabled={page === totalPages}
+                    aria-label="Last page"
+                  >
+                    <ChevronsRight className="h-4 w-4" />
+                  </Button>
+                </nav>
+              )}
             </section>
           )}
         </>
