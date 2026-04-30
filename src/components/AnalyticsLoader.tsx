@@ -19,11 +19,72 @@ export default function AnalyticsLoader() {
 
   useEffect(() => {
     if (!config) return;
-    injectGA4((config.google_analytics_id ?? "").trim());
-    injectHotjar((config.hotjar_id ?? "").trim());
+
+    const ga4Id = (config.google_analytics_id ?? "").trim();
+    const hotjarId = (config.hotjar_id ?? "").trim();
+
+    const injectAll = () => {
+      injectGA4(ga4Id);
+      injectHotjar(hotjarId);
+    };
+
+    // Check existing consent on mount (returning visitors who already consented)
+    if (hasAnalyticsConsent()) {
+      injectAll();
+      return;
+    }
+
+    // Listen for consent being granted during this session
+    const handleConsent = (e: any) => {
+      const detail = e?.detail;
+      const granted =
+        detail?.analytics === true ||
+        detail?.categories?.analytics === true ||
+        hasAnalyticsConsent();
+      if (granted) {
+        injectAll();
+        cleanup();
+      }
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("enzuzo:consent", handleConsent);
+      window.removeEventListener("enzuzo-consent", handleConsent);
+    };
+
+    window.addEventListener("enzuzo:consent", handleConsent);
+    window.addEventListener("enzuzo-consent", handleConsent);
+
+    return cleanup;
   }, [config]);
 
   return null;
+}
+
+/**
+ * Returns true when the visitor has already granted analytics consent via
+ * Enzuzo. Checks the Enzuzo runtime API first, then falls back to the
+ * `cookies-analytics` cookie that Enzuzo sets after a choice is made.
+ */
+function hasAnalyticsConsent(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const consent = (window as any).__enzuzo?.getConsent?.();
+    if (consent?.analytics === true) return true;
+    if (consent?.categories?.analytics === true) return true;
+  } catch {
+    // ignore — fall back to cookie sniff
+  }
+  try {
+    return document.cookie.split(";").some((entry) => {
+      const [rawName, rawValue = ""] = entry.split("=");
+      const name = decodeURIComponent(rawName.trim()).toLowerCase();
+      const value = decodeURIComponent(rawValue.trim()).toLowerCase();
+      return name === "cookies-analytics" && value === "true";
+    });
+  } catch {
+    return false;
+  }
 }
 
 function injectGA4(measurementId: string | undefined) {
