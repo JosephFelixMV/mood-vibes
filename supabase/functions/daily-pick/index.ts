@@ -1,8 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Origin": "https://www.mood-and-vibes.com",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-api-secret",
 };
 
 const SITE_URL = "https://www.mood-and-vibes.com";
@@ -22,9 +22,18 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const providedSecret = req.headers.get("x-api-secret");
+    const expectedSecret = Deno.env.get("SOCIAL_API_SECRET");
+    if (!expectedSecret || providedSecret !== expectedSecret) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
     );
 
     // Get or create today's pick
@@ -88,7 +97,6 @@ Deno.serve(async (req) => {
       },
       urls: {
         product_page: `${SITE_URL}/product/${product.slug}`,
-        affiliate_url: product.affiliate_url,
         share_facebook: buildShareUrl(product.slug, "facebook"),
         share_instagram: buildShareUrl(product.slug, "instagram"),
       },
