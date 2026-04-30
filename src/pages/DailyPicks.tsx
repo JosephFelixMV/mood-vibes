@@ -28,17 +28,33 @@ async function fetchDailyPicks(): Promise<DailyPickRow[]> {
   // Ensure today's pick exists
   await supabase.rpc("get_or_create_daily_pick");
 
-  // Fetch all picks newest first, joined to active products
-  const { data, error } = await supabase
+  // No FK between daily_picks and products in this DB, so fetch in two steps.
+  const { data: pickRows, error: pickErr } = await supabase
     .from("daily_picks")
-    .select("pick_date, product:products!inner(*)")
-    .eq("product.is_active", true)
-    .eq("product.page_error", false)
+    .select("pick_date, product_id")
     .order("pick_date", { ascending: false })
     .limit(500);
+  if (pickErr) throw pickErr;
+  if (!pickRows || pickRows.length === 0) return [];
 
-  if (error) throw error;
-  return (data || []) as unknown as DailyPickRow[];
+  const productIds = Array.from(new Set(pickRows.map((r) => r.product_id)));
+  const { data: products, error: prodErr } = await supabase
+    .from("products")
+    .select("*")
+    .in("id", productIds)
+    .eq("is_active", true)
+    .eq("page_error", false);
+  if (prodErr) throw prodErr;
+
+  const productMap = new Map<string, Product>();
+  (products || []).forEach((p) => productMap.set((p as Product).id, p as Product));
+
+  return pickRows
+    .map((r) => {
+      const product = productMap.get(r.product_id);
+      return product ? { pick_date: r.pick_date, product } : null;
+    })
+    .filter((r): r is DailyPickRow => r !== null);
 }
 
 export default function DailyPicks() {
