@@ -17,7 +17,10 @@ function buildShareUrl(slug: string, platform: string) {
 }
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 Deno.serve(async (req) => {
@@ -29,43 +32,38 @@ Deno.serve(async (req) => {
     const providedSecret = req.headers.get("x-api-secret");
     const expectedSecret = Deno.env.get("SOCIAL_API_SECRET");
     if (!expectedSecret || providedSecret !== expectedSecret) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-    );
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
 
     // Get or create today's pick
-    const { data: productId, error: rpcError } = await supabase.rpc(
-      "get_or_create_daily_pick",
-    );
+    const { data: productId, error: rpcError } = await supabase.rpc("get_or_create_daily_pick");
 
     if (rpcError || !productId) {
-      return new Response(
-        JSON.stringify({ error: "No daily pick available" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ error: "No daily pick available" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Fetch the product
     const { data: product, error: pErr } = await supabase
       .from("products")
       .select(
-        "id, name, slug, description, price, image_url, video_url, affiliate_url, category, vibe_category, mood, company_name, regions",
+        "id, name, slug, description, price, image_url, video_url, category, vibe_category, mood, company_name, regions",
       )
       .eq("id", productId)
       .single();
 
     if (pErr || !product) {
-      return new Response(
-        JSON.stringify({ error: "Product not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ error: "Product not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Fetch gallery images
@@ -81,9 +79,8 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().split("T")[0];
 
     const description_plain = product.description ? stripHtml(product.description) : "";
-    const description_truncated = description_plain.length > 200
-      ? `${description_plain.substring(0, 200)}...`
-      : description_plain;
+    const description_truncated =
+      description_plain.length > 200 ? `${description_plain.substring(0, 200)}...` : description_plain;
     const brandSuffix = product.company_name ? ` by ${product.company_name}` : "";
     const price_formatted = `$${Number(product.price).toFixed(2)}`;
     const hashtags = [
@@ -144,9 +141,9 @@ Deno.serve(async (req) => {
       },
     });
   } catch (err) {
-    return new Response(
-      JSON.stringify({ error: (err as Error).message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: (err as Error).message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
