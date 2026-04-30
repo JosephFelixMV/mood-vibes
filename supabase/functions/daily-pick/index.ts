@@ -16,6 +16,10 @@ function buildShareUrl(slug: string, platform: string) {
   return `${SITE_URL}/product/${slug}?${params.toString()}`;
 }
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -76,6 +80,28 @@ Deno.serve(async (req) => {
     // Get today's date in ISO format (YYYY-MM-DD)
     const today = new Date().toISOString().split("T")[0];
 
+    const description_plain = product.description ? stripHtml(product.description) : "";
+    const description_truncated = description_plain.length > 200
+      ? `${description_plain.substring(0, 200)}...`
+      : description_plain;
+    const brandSuffix = product.company_name ? ` by ${product.company_name}` : "";
+    const price_formatted = `$${Number(product.price).toFixed(2)}`;
+    const hashtags = [
+      "#MoodAndVibes",
+      "#DailyPick",
+      "#ProductOfTheDay",
+      ...(product.vibe_category
+        ? product.vibe_category
+            .split(",")
+            .map((v: string) => `#${v.trim().replace(/[^a-zA-Z0-9]/g, "")}`)
+            .filter((h: string) => h.length > 1)
+        : []),
+    ];
+    const hashtagsStr = hashtags.join(" ");
+    const share_facebook = buildShareUrl(product.slug, "facebook");
+    const caption_instagram = `✨ Today's Pick: ${product.name}${brandSuffix}\n\n${description_truncated}\n\n${price_formatted} — Link in bio to shop today's pick 👆\n\n#ad #affiliate ${hashtagsStr}`;
+    const caption_facebook = `✨ Today's Pick: ${product.name}${brandSuffix}\n\n${description_truncated}\n\n${price_formatted} — Shop here: ${share_facebook}\n\n#ad #affiliate ${hashtagsStr}`;
+
     // Build clean payload for social automation
     const payload = {
       pick_date: today,
@@ -85,7 +111,7 @@ Deno.serve(async (req) => {
         slug: product.slug,
         description: product.description,
         price: product.price,
-        price_formatted: `$${Number(product.price).toFixed(2)}`,
+        price_formatted,
         brand: product.company_name,
         category: product.category,
         vibe: product.vibe_category,
@@ -97,25 +123,16 @@ Deno.serve(async (req) => {
       },
       urls: {
         product_page: `${SITE_URL}/product/${product.slug}`,
-        share_facebook: buildShareUrl(product.slug, "facebook"),
+        share_facebook,
         share_instagram: buildShareUrl(product.slug, "instagram"),
       },
       social_copy: {
         headline: `Today's Pick: ${product.name}`,
-        caption: product.description
-          ? `${product.description.substring(0, 200)}${product.description.length > 200 ? "..." : ""}`
-          : `Discover ${product.name} — today's curated pick from Mood & Vibes.`,
-        hashtags: [
-          "#MoodAndVibes",
-          "#DailyPick",
-          "#ProductOfTheDay",
-          ...(product.vibe_category
-            ? product.vibe_category
-                .split(",")
-                .map((v: string) => `#${v.trim().replace(/[^a-zA-Z0-9]/g, "")}`)
-                .filter((h: string) => h.length > 1)
-            : []),
-        ],
+        description_plain,
+        caption_instagram,
+        caption_facebook,
+        disclosure: "#ad #affiliate",
+        hashtags,
       },
     };
 
