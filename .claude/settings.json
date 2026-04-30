@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/post-edit-lint.js",
+            "async": true,
+            "timeout": 5
+          }
+        ],
+        "description": "Remind to run lint after editing TypeScript files",
+        "id": "post:edit:lint-reminder"
+      }
+    ]
+  }
+}
