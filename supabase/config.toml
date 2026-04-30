@@ -2,3 +2,6 @@ project_id = "ztztujccujrigexfhdjj"
 
 [functions.sitemap]
 verify_jwt = false
+
+[functions.daily-pick]
+verify_jwt = false
