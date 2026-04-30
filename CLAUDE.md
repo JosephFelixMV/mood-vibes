@@ -10,7 +10,7 @@ Platform identity is **curated discovery** — generic apparel (plain shirts, pa
 
 ## Development Workflow
 
-- **Active branch:** `lovable-dev` — all changes stay on this branch, never commit directly to `main`
+- **Active branch:** `Lovable-Dev` — all changes stay on this branch, never commit directly to `main`
 - **Primary build tool:** Lovable (syncs with lovable-dev via GitHub)
 - **Run Lovable prompts one at a time** — never combine security + feature changes in a single prompt
 - Production URL: `https://www.mood-and-vibes.com`
