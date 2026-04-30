@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock } from "lucide-react";
+import { Clock, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductCard from "@/components/ProductCard";
@@ -374,6 +374,16 @@ export default function Index() {
               {countdown.h}:{countdown.m}:{countdown.s}
             </span>
           </div>
+          <a
+            href="https://www.instagram.com/mnvbrands/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow @mnvbrands on Instagram"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Instagram className="h-4 w-4" aria-hidden />
+            <span>Follow @mnvbrands for daily picks</span>
+          </a>
         </div>
         {isLoading ? (
           <div
