@@ -18,7 +18,20 @@ function buildShareUrl(slug: string, platform: string) {
 
 function stripHtml(html: string): string {
   return html
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/?(p|li|ul|ol|div|h[1-6])[^>]*>/gi, " ")
     .replace(/<[^>]*>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&mdash;/g, "—")
+    .replace(/&ndash;/g, "-")
+    .replace(/&bull;/g, "•")
+    .replace(/&hellip;/g, "...")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
     .replace(/\s+/g, " ")
     .trim();
 }
