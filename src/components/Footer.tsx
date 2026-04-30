@@ -1,5 +1,25 @@
 import { Link } from "react-router-dom";
-import { Instagram } from "lucide-react";
+
+function InstagramGradientIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <defs>
+        <radialGradient id="ig-grad" cx="30%" cy="107%" r="150%">
+          <stop offset="0%" stopColor="#FFD776" />
+          <stop offset="10%" stopColor="#F9CE54" />
+          <stop offset="25%" stopColor="#F58529" />
+          <stop offset="45%" stopColor="#DD2A7B" />
+          <stop offset="70%" stopColor="#8134AF" />
+          <stop offset="100%" stopColor="#515BD4" />
+        </radialGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="5" fill="url(#ig-grad)" />
+      <rect x="4.5" y="4.5" width="15" height="15" rx="4" fill="none" stroke="#fff" strokeWidth="1.6" />
+      <circle cx="12" cy="12" r="3.6" fill="none" stroke="#fff" strokeWidth="1.6" />
+      <circle cx="17" cy="7" r="1.1" fill="#fff" />
+    </svg>
+  );
+}
 
 export default function Footer() {
   return (
@@ -51,7 +71,7 @@ export default function Footer() {
               aria-label="Follow Mood & Vibes on Instagram"
               className="inline-flex items-center gap-1 hover:text-foreground"
             >
-              <Instagram className="h-4 w-4" aria-hidden />
+              <InstagramGradientIcon className="h-4 w-4" />
               <span>Instagram</span>
             </a>
           </div>
