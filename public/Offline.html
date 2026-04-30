@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Mood &amp; Vibes — Temporarily Unavailable</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F9F7F2;
+      --fg: #121212;
+      --muted: #666666;
+      --border: #E0DED7;
+      --accent: #D9732B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-weight: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      line-height: 1.6;
+      position: relative;
+      overflow: hidden;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+    }
+    main {
+      max-width: 32rem;
+      width: 100%;
+      text-align: center;
+      border: 1px solid var(--border);
+      background: #FBFAF6;
+      padding: 3.5rem 2.5rem;
+      border-radius: 6px;
+      position: relative;
+      z-index: 1;
+    }
+    .brand {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 1.125rem;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: var(--accent);
+      margin: 0 auto 2rem;
+    }
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 600;
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.25rem;
+      color: var(--fg);
+    }
+    p {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 24rem;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <main role="main">
+    <div class="brand">Mood &amp; Vibes</div>
+    <div class="divider" aria-hidden="true"></div>
+    <h1>Mood and Vibes is temporarily unavailable. We'll be back shortly.</h1>
+    <p>Thanks for your patience while we make a few improvements.</p>
+  </main>
+</body>
+</html>
