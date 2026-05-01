@@ -329,11 +329,7 @@ export default function ProductDetail() {
           <div className="border-t px-8 py-6">
             <h2 className="mb-3 font-heading text-lg font-semibold">Product Video</h2>
             <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted">
-              <video controls className="h-full w-full object-contain">
-                <source src={product.video_url} type="video/mp4" />
-                <source src={`${product.video_url}.mp4`} />
-                Your browser does not support the video tag.
-              </video>
+              <ProductVideo url={product.video_url} className="h-full w-full object-contain" controls />
             </div>
           </div>
         )}
