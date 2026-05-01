@@ -1197,12 +1197,13 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
 
     // Auto-assign "Indulge" mood for high-value artisan/collectible/home products $100+
     const INDULGE_CATEGORIES = [
-      "Home Décor",
-      "Art & Collectibles",
-      "Books & Stationery",
-      "Candles & Fragrance",
-      "Glassware & Barware",
+      "Home Decor",
+      "Books",
+      "Home Frange",
       "Kitchen & Dining",
+      "Bags & Totes"
+      "Watches"
+      "Jewelry"
     ];
     const isIndulgeCategory = validCore.some((c: string) => INDULGE_CATEGORIES.includes(c));
     if (isIndulgeCategory && parsedPrice >= 100 && !validMoods.includes("Indulge")) {
