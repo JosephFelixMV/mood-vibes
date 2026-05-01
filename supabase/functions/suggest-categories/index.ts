@@ -1201,8 +1201,8 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
       "Books",
       "Home Frange",
       "Kitchen & Dining",
-      "Bags & Totes"
-      "Watches"
+      "Bags & Totes",
+      "Watches",
       "Jewelry"
     ];
     const isIndulgeCategory = validCore.some((c: string) => INDULGE_CATEGORIES.includes(c));
