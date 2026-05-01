@@ -110,6 +110,8 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
 
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+  const galleryTouchStartX = useRef<number | null>(null);
+  const galleryTouchStartY = useRef<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -154,10 +156,30 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
             {/* Image gallery */}
             {allImages.length > 0 && (
               <div className="relative">
-                <GalleryImage
-                  src={allImages[safeIndex].src}
-                  alt={allImages[safeIndex].alt}
-                />
+                <div
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    galleryTouchStartX.current = e.touches[0].clientX;
+                    galleryTouchStartY.current = e.touches[0].clientY;
+                  }}
+                  onTouchEnd={(e) => {
+                    e.stopPropagation();
+                    if (galleryTouchStartX.current === null || galleryTouchStartY.current === null) return;
+                    const dx = e.changedTouches[0].clientX - galleryTouchStartX.current;
+                    const dy = e.changedTouches[0].clientY - galleryTouchStartY.current;
+                    if (allImages.length > 1 && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                      if (dx < 0) goNext();
+                      else goPrev();
+                    }
+                    galleryTouchStartX.current = null;
+                    galleryTouchStartY.current = null;
+                  }}
+                >
+                  <GalleryImage
+                    src={allImages[safeIndex].src}
+                    alt={allImages[safeIndex].alt}
+                  />
+                </div>
 
                 {/* Navigation arrows */}
                 {allImages.length > 1 && (
