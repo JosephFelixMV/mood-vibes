@@ -367,6 +367,9 @@ Purposeful and task-oriented. Products that help you build, make, fix, or create
 MOTIVATED
 High energy, achievement-oriented, driven. Products associated with self-improvement, performance, and getting things done. Fitness gear, goal-setting tools, workspace upgrades. The product that makes you want to start.
 
+INDULGE
+Self-treat discovery. Items the user would never casually buy but would love to own. Artisan goods, sculptural home objects, art books, collectibles, fine glassware, limited edition or small-run pieces. Minimum price $100. Coherence comes from quality and specialness, not category. Feels discovered, not advertised.
+
 ═══════════════════════════════════════
 KEYWORD RULES
 ═══════════════════════════════════════
@@ -1190,6 +1193,20 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     const isFreshStart = validCore.some((c: string) => FRESH_START_CATEGORIES.includes(c));
     if (isFreshStart && !validMoods.includes("Fresh Start")) {
       validMoods = [...validMoods, "Fresh Start"].slice(0, 3);
+    }
+
+    // Auto-assign "Indulge" mood for high-value artisan/collectible/home products $100+
+    const INDULGE_CATEGORIES = [
+      "Home Décor",
+      "Art & Collectibles",
+      "Books & Stationery",
+      "Candles & Fragrance",
+      "Glassware & Barware",
+      "Kitchen & Dining",
+    ];
+    const isIndulgeCategory = validCore.some((c: string) => INDULGE_CATEGORIES.includes(c));
+    if (isIndulgeCategory && parsedPrice >= 100 && !validMoods.includes("Indulge")) {
+      validMoods = [...validMoods, "Indulge"].slice(0, 3);
     }
 
     validVibes = dedupeStrings(validVibes).slice(0, 4);
