@@ -6,6 +6,7 @@ import ReportBrokenLink from "@/components/ReportBrokenLink";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ProductVideo from "@/components/ProductVideo";
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -142,8 +143,8 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
           <div className="flex flex-col">
             {/* Video */}
             {product.video_url && (
-              <video
-                src={product.video_url}
+              <ProductVideo
+                url={product.video_url}
                 autoPlay
                 muted
                 loop
