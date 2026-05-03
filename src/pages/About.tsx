@@ -77,6 +77,7 @@ export default function About() {
             you.
           </p>
         </div>
+        <div className="rounded-2xl p-6 mt-4" style={{ background: "#EEEDFE", border: "0.5px solid #C8C4F5" }}>
           <p className="text-sm leading-relaxed" style={{ color: "#2E2A6E" }}>
             Collaborate with Us
             Interested in sharing your product reviews? please reach out to us at contact@mood-and-vibes.com.          
