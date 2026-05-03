@@ -367,7 +367,7 @@ Purposeful and task-oriented. Products that help you build, make, fix, or create
 MOTIVATED
 High energy, achievement-oriented, driven. Products associated with self-improvement, performance, and getting things done. Fitness gear, goal-setting tools, workspace upgrades. The product that makes you want to start.
 
-INDULGE
+TREAT YOURSELF
 Self-treat discovery. Items the user would never casually buy but would love to own. Artisan goods, sculptural home objects, art books, collectibles, fine glassware, limited edition or small-run pieces. Minimum price $100. Coherence comes from quality and specialness, not category. Feels discovered, not advertised.
 
 ═══════════════════════════════════════
@@ -827,7 +827,7 @@ Sephora and Ulta-carried skincare brands
 → Mood: Calm
 → Note: Pure Routine is about the daily investment in self. Products
 should feel like part of a considered regimen — not one-off treatments
-or spa indulgences (those lean Bloom & Glow or The Wellness Era).
+or spa treats (those lean Bloom & Glow or The Wellness Era).
 
 ─────────────────────────────────────
 THE WELLNESS ERA signals
@@ -1195,8 +1195,8 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
       validMoods = [...validMoods, "Fresh Start"].slice(0, 3);
     }
 
-    // Auto-assign "Indulge" mood for high-value artisan/collectible/home products $100+
-    const INDULGE_CATEGORIES = [
+    // Auto-assign "Treat Yourself" mood for high-value artisan/collectible/home products $100+
+    const TREAT_YOURSELF_CATEGORIES = [
       "Home Decor",
       "Books",
       "Home Frange",
@@ -1205,9 +1205,9 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
       "Watches",
       "Jewelry"
     ];
-    const isIndulgeCategory = validCore.some((c: string) => INDULGE_CATEGORIES.includes(c));
-    if (isIndulgeCategory && parsedPrice >= 100 && !validMoods.includes("Indulge")) {
-      validMoods = [...validMoods, "Indulge"].slice(0, 3);
+    const isTreatYourselfCategory = validCore.some((c: string) => TREAT_YOURSELF_CATEGORIES.includes(c));
+    if (isTreatYourselfCategory && parsedPrice >= 100 && !validMoods.includes("Treat Yourself")) {
+      validMoods = [...validMoods, "Treat Yourself"].slice(0, 3);
     }
 
     validVibes = dedupeStrings(validVibes).slice(0, 4);
