@@ -11,7 +11,7 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Plus, Upload, Download, Info, ExternalLink } from "lucide-react";
+import { X, Plus, Upload, Download, Info, ExternalLink, Sparkles, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
@@ -302,6 +302,33 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   };
 
   const [suggestingCategories, setSuggestingCategories] = useState(false);
+  const [rewriting, setRewriting] = useState(false);
+
+  const handleRewriteDescription = async () => {
+    const raw = form.description?.replace(/<[^>]*>/g, "").trim();
+    if (!raw || raw.length < 20) {
+      toast.error("Add a description first before rewriting.");
+      return;
+    }
+    setRewriting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "rewrite-description",
+        { body: { description: form.description } }
+      );
+      if (error) throw error;
+      if (data?.rewritten) {
+        set("description", data.rewritten);
+        toast.success("Description rewritten.");
+      } else {
+        toast.error("No output returned. Try again.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Rewrite failed.");
+    } finally {
+      setRewriting(false);
+    }
+  };
   const [aiSuggestions, setAiSuggestions] = useState<{
     core: string[];
     vibes: string[];
@@ -833,6 +860,23 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         <div>
           <Label>Description</Label>
           <RichTextEditor value={form.description} onChange={(html) => set("description", html)} />
+          <div className="mt-2 flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleRewriteDescription}
+              disabled={rewriting}
+              className="gap-1.5 rounded-full text-xs"
+            >
+              {rewriting ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="h-3 w-3" />
+              )}
+              {rewriting ? "Rewriting…" : "Rewrite with AI"}
+            </Button>
+          </div>
         </div>
         <div>
           <Label>
