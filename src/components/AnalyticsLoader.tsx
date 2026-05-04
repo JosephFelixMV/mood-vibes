@@ -112,6 +112,34 @@ function injectGA4(measurementId: string | undefined) {
 }
 
 function injectHotjar(rawValue: string | undefined) {
+  // placeholder
+  void 0;
+  return _injectHotjar(rawValue);
+}
+
+function injectGoogleAds(conversionId: string) {
+  if (!conversionId) return;
+  if (document.getElementById("google-ads-loader")) return;
+
+  const loader = document.createElement("script");
+  loader.id = "google-ads-loader";
+  loader.async = true;
+  loader.src = `https://www.googletagmanager.com/gtag/js?id=${conversionId}`;
+  document.head.appendChild(loader);
+
+  const inline = document.createElement("script");
+  inline.id = "google-ads-init";
+  inline.text = `
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = window.gtag || gtag;
+    gtag('js', new Date());
+    gtag('config', '${conversionId}');
+  `;
+  document.head.appendChild(inline);
+}
+
+function _injectHotjar(rawValue: string | undefined) {
   if (!rawValue) return;
   if (document.getElementById("hotjar-loader")) return;
 
