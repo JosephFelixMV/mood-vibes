@@ -367,6 +367,9 @@ Purposeful and task-oriented. Products that help you build, make, fix, or create
 MOTIVATED
 High energy, achievement-oriented, driven. Products associated with self-improvement, performance, and getting things done. Fitness gear, goal-setting tools, workspace upgrades. The product that makes you want to start.
 
+TREAT YOURSELF
+Self-treat discovery. Items the user would never casually buy but would love to own. Artisan goods, sculptural home objects, art books, collectibles, fine glassware, limited edition or small-run pieces. Minimum price $100. Coherence comes from quality and specialness, not category. Feels discovered, not advertised.
+
 ═══════════════════════════════════════
 KEYWORD RULES
 ═══════════════════════════════════════
@@ -824,7 +827,7 @@ Sephora and Ulta-carried skincare brands
 → Mood: Calm
 → Note: Pure Routine is about the daily investment in self. Products
 should feel like part of a considered regimen — not one-off treatments
-or spa indulgences (those lean Bloom & Glow or The Wellness Era).
+or spa treats (those lean Bloom & Glow or The Wellness Era).
 
 ─────────────────────────────────────
 THE WELLNESS ERA signals
@@ -1190,6 +1193,21 @@ CONFIDENCE SCORE: Include a "confidence" field (0.0–1.0). Score higher when br
     const isFreshStart = validCore.some((c: string) => FRESH_START_CATEGORIES.includes(c));
     if (isFreshStart && !validMoods.includes("Fresh Start")) {
       validMoods = [...validMoods, "Fresh Start"].slice(0, 3);
+    }
+
+    // Auto-assign "Treat Yourself" mood for high-value artisan/collectible/home products $100+
+    const TREAT_YOURSELF_CATEGORIES = [
+      "Home Decor",
+      "Books",
+      "Home Frange",
+      "Kitchen & Dining",
+      "Bags & Totes",
+      "Watches",
+      "Jewelry"
+    ];
+    const isTreatYourselfCategory = validCore.some((c: string) => TREAT_YOURSELF_CATEGORIES.includes(c));
+    if (isTreatYourselfCategory && parsedPrice >= 100 && !validMoods.includes("Treat Yourself")) {
+      validMoods = [...validMoods, "Treat Yourself"].slice(0, 3);
     }
 
     validVibes = dedupeStrings(validVibes).slice(0, 4);

@@ -26,6 +26,7 @@ export default function AnalyticsLoader() {
     const injectAll = () => {
       injectGA4(ga4Id);
       injectHotjar(hotjarId);
+      injectGoogleAds("AW-18102407115");
     };
 
     // Check existing consent on mount (returning visitors who already consented)
@@ -106,6 +107,33 @@ function injectGA4(measurementId: string | undefined) {
     window.gtag = gtag;
     gtag('js', new Date());
     gtag('config', '${measurementId}', { anonymize_ip: true });
+  `;
+  document.head.appendChild(inline);
+}
+
+function injectGoogleAds(conversionId: string) {
+  if (!conversionId) return;
+  if (document.getElementById("google-ads-loader")) return;
+
+  const loader = document.createElement("script");
+  loader.id = "google-ads-loader";
+  loader.async = true;
+  loader.src = `https://www.googletagmanager.com/gtag/js?id=${conversionId}`;
+  document.head.appendChild(loader);
+
+  const inline = document.createElement("script");
+  inline.id = "google-ads-init";
+  inline.text = `
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = window.gtag || gtag;
+    gtag('js', new Date());
+    gtag('config', '${conversionId}');
+    gtag('event', 'conversion', {
+      'send_to': '${conversionId}/ZBT7CO7zoaccEMuf87dD',
+      'value': 1.0,
+      'currency': 'CAD'
+    });
   `;
   document.head.appendChild(inline);
 }
