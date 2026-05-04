@@ -26,6 +26,7 @@ export default function AnalyticsLoader() {
     const injectAll = () => {
       injectGA4(ga4Id);
       injectHotjar(hotjarId);
+      injectGoogleAds("AW-18102407115");
     };
 
     // Check existing consent on mount (returning visitors who already consented)
