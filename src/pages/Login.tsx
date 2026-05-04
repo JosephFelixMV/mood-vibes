@@ -12,6 +12,8 @@ export default function Login() {
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from ?? "/admin";
 
+  const authError = (location.state as { authError?: string } | null)?.authError ?? null;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -79,6 +81,11 @@ export default function Login() {
         <div className="flex items-center gap-2 font-heading text-lg font-semibold">
           <Lock className="h-5 w-5 text-primary" /> Admin Sign In
         </div>
+        {authError && (
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {authError}
+          </div>
+        )}
 
         <Button
           type="button"
