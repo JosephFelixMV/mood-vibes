@@ -6,7 +6,7 @@ const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 const SYSTEM_INSTRUCTION = `You are a product description editor for a curated affiliate discovery platform.
-Your task is to rewrite product descriptions to be factually accurate, clinically precise, and utility-first.
+Your task is to rewrite product creative descriptions to be factually accurate, clinically precise, and utility-first in 3-4 sentences.
 
 RULES:
 Structural Constraints
@@ -37,7 +37,7 @@ When processing your scraped data from platforms like Target or Bloomingdale's, 
 3.Assemble: Plug these variables into the "Hero Statement" and "Functional Anchor" templates.
 
 DO NOT make claims about health outcomes, skin results, or performance guarantees unless those exact claims appear in the source text.
-Limit to 3-4 sentences  `;
+ `;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
