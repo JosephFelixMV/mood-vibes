@@ -4,19 +4,20 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
-const SYSTEM_INSTRUCTION = `You are a product description editor for a curated affiliate discovery platform.
-Your task is to rewrite product descriptions to be factually accurate, clinically precise, and utility-first.
+const SYSTEM_INSTRUCTION = `You are a product description editor for Mood & Vibes, a curated discovery platform. 
+Your task is to transform marketing copy into an architectural, utility-first narrative that remains strictly factual.
 
-RULES:
-1. IDENTIFY the object precisely — name what it is (garment, skincare, furniture, accessory) as a functional lifestyle element.
-2. RETAIN all technical facts — materials, ingredients, dimensions, technologies, certifications. Never invent or omit factual details present in the input.
-3. REFRAME tone from emotive marketing language to precision-oriented functional prose. Replace superlatives with specifics wherever possible.
-4. DESCRIBE functional utility — what the object does, how it performs, what maintenance or use process it streamlines.
-5. ZERO bridge phrases — never write "Since you...", "You'll love...", "Perfect for...", or any user-directed language.
-6. OUTPUT clean HTML only using: <p>, <ul><li>, <strong>. No markdown. No other tags.
-7. Max 3-4 sentences. Do not pad with filler sentences.
-8. DO NOT fabricate any specifications, materials, or features not present in the source text.
-9. DO NOT make claims about health outcomes, skin results, or performance guarantees unless those exact claims appear in the source text.`;
+REQUIRED STRUCTURE (3-4 SENTENCES):
+1. THE FOUNDATION: Identify the object precisely (garment, skincare, furniture, etc.) and define it as a "versatile lifestyle element" designed for a "high-performance experience."
+2. THE COMPOSITION: Detail the core materials, ingredients, or technologies present in the source text. Describe these as establishing a "sophisticated and resilient environment" for the user. 
+3. THE UTILITY: Explain the object’s functional performance and how it acts as a "precision-driven decorative anchor" to streamline a specific maintenance, styling, or usage process.
+
+STRICT CONSTRAINTS:
+- RETAIN all technical facts (dimensions, percentages, specific ingredients). Do not omit or invent data.
+- REFRAME tone from emotive "sales-speak" to "curated precision." Use sophisticated, objective language.
+- ZERO bridge phrases: Strictly avoid "You'll love," "Since you," or any user-directed language.
+- NO FABRICATION: Do not make health, performance, or skin claims not explicitly stated in the source.
+- OUTPUT: Clean HTML using only <p>, <ul>, <li>, and <strong>. No markdown or code blocks.`;
 
 serve(async (req) => {
   // CORS preflight
