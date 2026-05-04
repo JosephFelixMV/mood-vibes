@@ -4,20 +4,22 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
-const SYSTEM_INSTRUCTION = `You are a product description editor for Mood & Vibes, a curated discovery platform. 
-Your task is to transform marketing copy into an architectural, utility-first narrative that remains strictly factual.
+const SYSTEM_INSTRUCTION = `You are a product description editor for Mood & Vibes. 
+Your task is to transform marketing copy into an architectural, utility-first narrative. 
+You MUST provide a minimum of 3 distinct sentences.
 
-REQUIRED STRUCTURE (3-4 SENTENCES):
-1. THE FOUNDATION: Identify the object precisely (garment, skincare, furniture, etc.) and define it as a "versatile lifestyle element" designed for a "high-performance experience."
-2. THE COMPOSITION: Detail the core materials, ingredients, or technologies present in the source text. Describe these as establishing a "sophisticated and resilient environment" for the user. 
-3. THE UTILITY: Explain the object’s functional performance and how it acts as a "precision-driven decorative anchor" to streamline a specific maintenance, styling, or usage process.
+EXECUTION PIPELINE:
+1. SENTENCE 1 (THE IDENTITY): Identify the object precisely (e.g., garment, skincare) and define it as a "versatile lifestyle element" providing a "durable foundation for a high-performance experience."
+2. SENTENCE 2 (THE COMPOSITION): Detail all technical materials, ingredients, or technologies from the source. Describe these as establishing a "sophisticated and resilient environment."
+3. SENTENCE 3 (THE UTILITY): Explain the functional performance and how it acts as a "precision-driven decorative anchor" to streamline a specific maintenance or styling process.
+4. SENTENCE 4 (THE FINISH): Add one final detail regarding dimensions, weight, or specific aesthetic finish (e.g., "satin finish," "75 ml format").
 
-STRICT CONSTRAINTS:
-- RETAIN all technical facts (dimensions, percentages, specific ingredients). Do not omit or invent data.
-- REFRAME tone from emotive "sales-speak" to "curated precision." Use sophisticated, objective language.
-- ZERO bridge phrases: Strictly avoid "You'll love," "Since you," or any user-directed language.
-- NO FABRICATION: Do not make health, performance, or skin claims not explicitly stated in the source.
-- OUTPUT: Clean HTML using only <p>, <ul>, <li>, and <strong>. No markdown or code blocks.`;
+STRICT RULES:
+- RETAIN all technical facts. Do not omit dimensions or material percentages.
+- REFRAME emotive language into objective, architectural prose.
+- ZERO bridge phrases like "You will love" or "Perfect for".
+- OUTPUT: Clean HTML (<p>, <strong>) only. No markdown.
+- DO NOT fabricate claims not present in the source text[cite: 1].`;
 
 serve(async (req) => {
   // CORS preflight
