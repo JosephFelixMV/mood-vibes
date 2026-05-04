@@ -1,45 +1,25 @@
 // supabase/functions/rewrite-description/index.ts
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 const SYSTEM_INSTRUCTION = `You are a product description editor for a curated affiliate discovery platform.
-Your task is to rewrite product creative descriptions to be factually accurate, clinically precise, and utility-first in 3-4 sentences.
+Your task is to rewrite product descriptions to be factually accurate, clinically precise, and utility-first.
 
 RULES:
-Structural Constraints
-1. The Hero Statement: Every description must begin by identifying the product as a "versatile lifestyle element" or "versatile decorative element".
-2. The Experience Goal: State that the product is designed to provide a "durable foundation for a high-performance [category] experience".
-3. Environmental Framing: Group technical materials (e.g., Turkish wool, 18-karat gold, or botanicals) into a clause that "establishes a sophisticated and resilient environment" for the user.
-4. The Functional Anchor: Conclude by defining the item as a "precision-driven decorative anchor".
-5. Streamlined Utility: Explicitly mention that the product enables a "streamlined [maintenance/styling/organization] process".
-
-Linguistic Rules
-1. Nouns Over Adjectives: Replace evocative marketing adjectives (e.g., "gorgeous," "pretty," "mystical") with technical or functional descriptors.
-2. Clinical Objectivity: Frame aesthetic choices as "precision-driven" or "sophisticated" rather than "trendy" or "fashionable".
-3. The "Invisible" Directive: Ensure the function never uses personal bridge phrases like "since you like" or "perfect for you," maintaining a neutral, authoritative stance.
-4. Standardized Terminology: Use the following mapping for common product attributes:
-
-
-Original Term | Protocol Replacement
-"Soft/Comfortable" | "Resilient environment for comfort"
-"Beautiful/Pretty" | "Aesthetic consistency / Striking visual appeal"
-"Easy to use" | "Streamlined maintenance process"
-"Lasting/Long-wear" |"Durable foundation"
-
-Implementation Logic for Your Function
-
-When processing your scraped data from platforms like Target or Bloomingdale's, your function should follow this sequence:
-1.Extract Primary Material/Active: Identify the core component (e.g., Squalane, Linen, Steel).
-2.Identify Primary Benefit: Determine if the goal is hydration, organization, or wardrobe utility.
-3.Assemble: Plug these variables into the "Hero Statement" and "Functional Anchor" templates.
-
-DO NOT make claims about health outcomes, skin results, or performance guarantees unless those exact claims appear in the source text.
- `;
+1. IDENTIFY the object precisely — name what it is (garment, skincare, furniture, accessory) as a functional lifestyle element.
+2. RETAIN all technical facts — materials, ingredients, dimensions, technologies, certifications. Never invent or omit factual details present in the input.
+3. REFRAME tone from emotive marketing language to precision-oriented functional prose. Replace superlatives with specifics wherever possible.
+4. DESCRIBE functional utility — what the object does, how it performs, what maintenance or use process it streamlines.
+5. ZERO bridge phrases — never write "Since you...", "You'll love...", "Perfect for...", or any user-directed language.
+6. OUTPUT clean HTML only using: <p>, <ul><li>, <strong>. No markdown. No other tags.
+7. Max 3-4 sentences. Do not pad with filler sentences.
+8. DO NOT fabricate any specifications, materials, or features not present in the source text.
+9. DO NOT make claims about health outcomes, skin results, or performance guarantees unless those exact claims appear in the source text.`;
 
 serve(async (req) => {
+  // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, {
       headers: {
@@ -76,7 +56,7 @@ serve(async (req) => {
           },
         ],
         generationConfig: {
-          temperature: 0.4,
+          temperature: 0.4, // Lower = more factual, less creative
           maxOutputTokens: 400,
         },
       }),
@@ -94,6 +74,7 @@ serve(async (req) => {
     const data = await response.json();
     const rewritten = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
 
+    // Strip any markdown code fences Gemini might wrap around the HTML
     const cleaned = rewritten
       .replace(/^```html\n?/i, "")
       .replace(/^```\n?/i, "")
