@@ -129,6 +129,11 @@ function injectGoogleAds(conversionId: string) {
     window.gtag = window.gtag || gtag;
     gtag('js', new Date());
     gtag('config', '${conversionId}');
+    gtag('event', 'conversion', {
+      'send_to': '${conversionId}/ZBT7CO7zoaccEMuf87dD',
+      'value': 1.0,
+      'currency': 'CAD'
+    });
   `;
   document.head.appendChild(inline);
 }
