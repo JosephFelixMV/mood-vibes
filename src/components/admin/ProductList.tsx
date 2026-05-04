@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useUserRole } from "@/contexts/UserRoleContext";
 import { getProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,8 @@ interface Props {
 }
 
 export default function ProductList({ onEdit }: Props) {
+  const role = useUserRole();
+  const isAdmin = role === "admin";
   const qc = useQueryClient();
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterVibe, setFilterVibe] = useState("all");
@@ -73,6 +76,7 @@ export default function ProductList({ onEdit }: Props) {
   const [filterMood, setFilterMood] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterError, setFilterError] = useState("all");
+  const [filterCreator, setFilterCreator] = useState("all");
   const [pageSize, setPageSize] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState<"views" | "clicks" | "updated" | null>("updated");
@@ -298,6 +302,7 @@ export default function ProductList({ onEdit }: Props) {
     if (filterStatus === "inactive" && p.is_active) return false;
     if (filterError === "error" && !p.page_error) return false;
     if (filterError === "ok" && p.page_error) return false;
+    if (filterCreator !== "all" && (p as any).created_by !== filterCreator) return false;
     if (dateFrom) {
       const added = new Date(p.date_added);
       if (added < dateFrom) return false;
@@ -475,6 +480,24 @@ export default function ProductList({ onEdit }: Props) {
           </SelectContent>
         </Select>
 
+        {(() => {
+          const creators = [...new Set(products.map((p: any) => p.created_by).filter(Boolean))];
+          if (creators.length === 0) return null;
+          return (
+            <Select value={filterCreator} onValueChange={handleFilterChange(setFilterCreator)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Creator" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Creators</SelectItem>
+                {creators.map((email: string) => (
+                  <SelectItem key={email} value={email}>{email}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        })()}
+
         {/* Date range filter */}
         <Popover>
           <PopoverTrigger asChild>
@@ -503,7 +526,7 @@ export default function ProductList({ onEdit }: Props) {
             Clear dates
           </Button>
         )}
-        {(filterCategory !== "all" || filterVibe !== "all" || filterMood !== "all" || filterVendor !== "all" || filterStatus !== "all" || filterError !== "all" || dateFrom || dateTo) && (
+        {(filterCategory !== "all" || filterVibe !== "all" || filterMood !== "all" || filterVendor !== "all" || filterStatus !== "all" || filterError !== "all" || filterCreator !== "all" || dateFrom || dateTo) && (
           <Button
             variant="outline"
             size="sm"
@@ -516,6 +539,7 @@ export default function ProductList({ onEdit }: Props) {
               setFilterVendor("all");
               setFilterStatus("all");
               setFilterError("all");
+              setFilterCreator("all");
               setDateFrom(undefined);
               setDateTo(undefined);
               setCurrentPage(1);
@@ -528,7 +552,7 @@ export default function ProductList({ onEdit }: Props) {
       </div>
 
 
-      {selectedIds.size > 0 && (
+      {isAdmin && selectedIds.size > 0 && (
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium">{selectedIds.size} selected</span>
           <AlertDialog>
@@ -566,12 +590,14 @@ export default function ProductList({ onEdit }: Props) {
         <table className="w-full text-sm">
           <thead className="border-b bg-muted/50 text-left">
             <tr>
-              <th className="px-3 py-3 w-10">
-                <Checkbox
-                  checked={paginated.length > 0 && selectedIds.size === paginated.length}
-                  onCheckedChange={toggleSelectAll}
-                />
-              </th>
+              {isAdmin && (
+                <th className="px-3 py-3 w-10">
+                  <Checkbox
+                    checked={paginated.length > 0 && selectedIds.size === paginated.length}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </th>
+              )}
               <th className="px-4 py-3 font-medium">
                 <button onClick={() => toggleSort("updated")} className="inline-flex items-center gap-1 hover:text-primary">
                   Product {sortColumn === "updated" && (sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
@@ -593,18 +619,21 @@ export default function ProductList({ onEdit }: Props) {
               </th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Error</th>
+              <th className="px-4 py-3 font-medium">Created By</th>
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
             {paginated.map((p) => (
               <tr key={p.id} className={cn("border-b last:border-0", selectedIds.has(p.id) && "bg-primary/5")}>
-                <td className="px-3 py-3">
-                  <Checkbox
-                    checked={selectedIds.has(p.id)}
-                    onCheckedChange={() => toggleSelect(p.id)}
-                  />
-                </td>
+                {isAdmin && (
+                  <td className="px-3 py-3">
+                    <Checkbox
+                      checked={selectedIds.has(p.id)}
+                      onCheckedChange={() => toggleSelect(p.id)}
+                    />
+                  </td>
+                )}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     {p.image_url ? (
@@ -634,6 +663,9 @@ export default function ProductList({ onEdit }: Props) {
                       </div>
                       <div className="text-[11px] text-muted-foreground">
                         Updated {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
+                        {(p as any).updated_by && (
+                          <span className="ml-1">by {(p as any).updated_by}</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -690,28 +722,33 @@ export default function ProductList({ onEdit }: Props) {
                     </TooltipProvider>
                   )}
                 </td>
+                <td className="px-4 py-3 text-xs text-muted-foreground">
+                  {(p as any).created_by ?? "—"}
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(p.id)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive"
-                      onClick={() => {
-                        if (confirm("Delete this product?")) deleteMut.mutate(p.id);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive"
+                        onClick={() => {
+                          if (confirm("Delete this product?")) deleteMut.mutate(p.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={11} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={12} className="px-4 py-10 text-center text-muted-foreground">
                   No products match filters
                 </td>
               </tr>

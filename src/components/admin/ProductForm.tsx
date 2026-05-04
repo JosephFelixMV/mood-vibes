@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, MutableRefObject } from "react";
+import { useUserRole } from "@/contexts/UserRoleContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { getProduct, getCategories } from "@/lib/supabase-queries";
@@ -162,6 +163,8 @@ function normalizeCompanyName(input: string): string {
 }
 
 export default function ProductForm({ editId, onDone, savedState }: Props) {
+  const role = useUserRole();
+  const isAdmin = role === "admin";
   const qc = useQueryClient();
   const { data: coreCategories = [] } = useQuery({
     queryKey: ["categories", "core"],
@@ -467,9 +470,12 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!form.affiliate_url?.trim()) {
+      if (isAdmin && !form.affiliate_url?.trim()) {
         throw new Error("Affiliate URL is required. Please add a valid link before saving.");
       }
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userEmail = sessionData.session?.user?.email ?? null;
       const numericPrice = Number(form.price);
       const hasValidPrice = form.price !== "" && form.price !== null && !isNaN(numericPrice) && numericPrice >= 5;
       // Block publishing if price is missing or below $5 — force draft instead
@@ -520,7 +526,10 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       let productId = editId;
 
       if (editId) {
-        const { error } = await supabase.from("products").update(payload).eq("id", editId);
+        const { error } = await supabase
+          .from("products")
+          .update({ ...payload, ...(userEmail ? { updated_by: userEmail } : {}) })
+          .eq("id", editId);
         if (error) throw error;
         await Promise.all([
           supabase.from("product_images").delete().eq("product_id", editId),
@@ -528,7 +537,11 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           supabase.from("product_keywords").delete().eq("product_id", editId),
         ]);
       } else {
-        const { data, error } = await supabase.from("products").insert([payload]).select("id").single();
+        const insertPayload = {
+          ...payload,
+          ...(userEmail ? { created_by: userEmail, updated_by: userEmail } : {}),
+        };
+        const { data, error } = await supabase.from("products").insert([insertPayload]).select("id").single();
         if (error) throw error;
         productId = data.id;
       }
@@ -704,15 +717,17 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
               return null;
             })()}
         </div>
-        <div>
-          <Label>Affiliate Link</Label>
-          <Input
-            value={form.affiliate_url}
-            onChange={(e) => set("affiliate_url", e.target.value)}
-            required
-            placeholder="https://..."
-          />
-        </div>
+        {isAdmin && (
+          <div>
+            <Label>Affiliate Link</Label>
+            <Input
+              value={form.affiliate_url}
+              onChange={(e) => set("affiliate_url", e.target.value)}
+              required
+              placeholder="https://..."
+            />
+          </div>
+        )}
         <div>
           <Label>Source Product Page URL (required, admin only)</Label>
           <Input

@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useUserRole } from "@/contexts/UserRoleContext";
 import ProductForm from "./ProductForm";
 import ProductList from "./ProductList";
 import AnalyticsDashboard from "./AnalyticsDashboard";
@@ -15,11 +16,21 @@ import BrandManager from "./BrandManager";
 import FlaggedProductsDashboard from "./FlaggedProductsDashboard";
 
 export default function AdminDashboard() {
+  const role = useUserRole();
+  const isAdmin = role === "admin";
   const [tab, setTab] = useState("list");
   const [editId, setEditId] = useState<string | null>(null);
   const formStateRef = useRef<Record<string, any> | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const navigate = useNavigate();
+
+  // Reset to a visible tab if the current tab is not accessible for this role
+  useEffect(() => {
+    const adminOnlyTabs = ["brands", "bulk", "analytics", "ai", "flagged", "config"];
+    if (!isAdmin && adminOnlyTabs.includes(tab)) {
+      setTab("list");
+    }
+  }, [isAdmin, tab]);
 
   const handleEdit = (id: string) => {
     formStateRef.current = null;
@@ -67,12 +78,12 @@ export default function AdminDashboard() {
         <TabsList className="flex-wrap">
           <TabsTrigger value="list">Products</TabsTrigger>
           <TabsTrigger value="form">{editId ? "Edit Product" : "Add Product"}</TabsTrigger>
-          <TabsTrigger value="brands">Brands</TabsTrigger>
-          <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="ai">AI Discover</TabsTrigger>
-          <TabsTrigger value="flagged">Flagged Links</TabsTrigger>
-          <TabsTrigger value="config">Configuration</TabsTrigger>
+          {isAdmin && <TabsTrigger value="brands">Brands</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="analytics">Analytics</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="ai">AI Discover</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="flagged">Flagged Links</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="config">Configuration</TabsTrigger>}
         </TabsList>
         <TabsContent value="list" forceMount className={tab !== "list" ? "hidden" : ""}>
           <ProductList onEdit={handleEdit} />

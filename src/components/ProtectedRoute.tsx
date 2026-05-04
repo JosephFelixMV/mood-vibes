@@ -3,35 +3,53 @@ import { Navigate, useLocation } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
+import { UserRoleProvider, type UserRole } from "@/contexts/UserRoleContext";
 
-/**
- * Gates child routes behind an authenticated Supabase session.
- *
- * Important: nothing inside `children` is rendered (or even imported, when
- * combined with React.lazy on the child) until `getSession()` resolves AND
- * returns a valid session. If the check fails, we redirect to /login and
- * preserve the intended destination in router state.
- */
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [session, setSession] = useState<Session | null>(null);
+  const [role, setRole] = useState<UserRole | null>(null);
   const [checked, setChecked] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
+    async function resolveAccess(s: Session | null) {
+      if (!s) {
+        if (mounted) { setSession(null); setChecked(true); }
+        return;
+      }
+
+      const email = s.user.email ?? "";
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", s.user.id)
+        .maybeSingle();
+
+      if (!mounted) return;
+
+      if (data?.role === "admin" || data?.role === "content") {
+        setSession(s);
+        setRole(data.role as UserRole);
+      } else if (email.endsWith("@mood-and-vibes.com")) {
+        // GW user with no explicit row — default to content
+        setSession(s);
+        setRole("content");
+      } else {
+        setAuthError("Account not authorized for admin access.");
+      }
+      setChecked(true);
+    }
+
     // Subscribe BEFORE getSession (per Supabase guidance) so we don't miss events.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (!mounted) return;
-      setSession(newSession);
-      setChecked(true);
+      resolveAccess(newSession);
     });
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      setSession(data.session);
-      setChecked(true);
-    });
+    supabase.auth.getSession().then(({ data }) => resolveAccess(data.session));
 
     return () => {
       mounted = false;
@@ -39,8 +57,6 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     };
   }, []);
 
-  // Until the auth check completes, render NOTHING from the protected tree.
-  // This guarantees no admin UI / data flashes for unauthenticated visitors.
   if (!checked) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -49,9 +65,13 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     );
   }
 
-  if (!session) {
+  if (authError) {
+    return <Navigate to="/login" replace state={{ from: location.pathname, authError }} />;
+  }
+
+  if (!session || !role) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  return <>{children}</>;
+  return <UserRoleProvider role={role}>{children}</UserRoleProvider>;
 }
