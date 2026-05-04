@@ -111,12 +111,6 @@ function injectGA4(measurementId: string | undefined) {
   document.head.appendChild(inline);
 }
 
-function injectHotjar(rawValue: string | undefined) {
-  // placeholder
-  void 0;
-  return _injectHotjar(rawValue);
-}
-
 function injectGoogleAds(conversionId: string) {
   if (!conversionId) return;
   if (document.getElementById("google-ads-loader")) return;
@@ -139,7 +133,7 @@ function injectGoogleAds(conversionId: string) {
   document.head.appendChild(inline);
 }
 
-function _injectHotjar(rawValue: string | undefined) {
+function injectHotjar(rawValue: string | undefined) {
   if (!rawValue) return;
   if (document.getElementById("hotjar-loader")) return;
 
