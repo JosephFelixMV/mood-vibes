@@ -64,6 +64,26 @@ Supabase enforces a 1000-row limit; queries use pagination where needed. Region 
 
 All Supabase queries must use **server-side filters with `.limit()` caps** — `CategoryLanding`, `VibeLanding`, `MoodLanding`, and `Index.tsx` must never do full-table fetches filtered in JavaScript.
 
+### Taxonomy Architecture
+
+Products are tagged with core categories, vibes, and moods. The canonical data lives in three **junction tables** — never filter products using the legacy CSV columns (`products.category`, `products.vibe_category`, `products.mood`):
+
+| Junction table | FK column | Links to |
+|---|---|---|
+| `product_categories` | `category_slug` | `categories.slug` where `type = 'core'` |
+| `product_vibes` | `vibe_slug` | `categories.slug` where `type = 'vibe'` |
+| `product_moods` | `mood_slug` | `categories.slug` where `type = 'mood'` |
+
+**Filtering pattern** — all landing pages and `applyProductFilters` use a two-step query:
+1. Query the junction table for matching product IDs
+2. Fetch products with `.in("id", productIds)`
+
+**Write path** — `ProductForm.tsx` writes both the legacy CSV columns (backward compat) and the junction tables explicitly. A `BEFORE INSERT OR UPDATE` trigger (`trg_sync_taxonomy_junction_tables`) also syncs junction tables automatically from the CSV columns as a safety net.
+
+**Category visibility threshold** — `MIN_PRODUCTS_PER_CATEGORY = 8` (defined in `supabase-queries.ts`). The `get_categories_with_counts()` RPC enforces `HAVING COUNT >= 8`, which gates all public-facing category lists, the sitemap, and homepage chips.
+
+**Phase 5 pending** (after regression testing): drop the trigger, drop `products.category / vibe_category / mood` columns, remove `parseTaxonomyString` / `stringifyTaxonomyValues` / `dedupeTaxonomyValues` from `taxonomy-utils.ts`, and update `ProductForm` to load taxonomy from junction tables instead of CSV.
+
 ### Analytics
 
 Two tracking utilities:
@@ -130,7 +150,10 @@ Deno/TypeScript functions:
 | `product_images` | Up to 4 gallery images per product |
 | `product_specifications` | Key/value spec pairs |
 | `product_events` | Analytics (view/click events) |
-| `categories` | Taxonomy (type: core/vibe/mood) |
+| `categories` | Taxonomy definitions (type: core/vibe/mood) — slug, name, icon, parent_slug |
+| `product_categories` | Junction: product ↔ core category slug. Source of truth for category filtering |
+| `product_vibes` | Junction: product ↔ vibe slug. Source of truth for vibe filtering |
+| `product_moods` | Junction: product ↔ mood slug. Source of truth for mood filtering |
 | `brand_lookup` | Brand hints for AI categorization |
 | `daily_picks` | Product of the Day (RPC-generated) |
 | `category_vibe_manager` | Source of truth for categories/vibes — Edge Functions must read from here |

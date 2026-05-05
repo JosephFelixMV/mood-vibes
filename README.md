@@ -27,7 +27,8 @@ Category & Vibe System
 
 Core Lifestyle Categories — Products are organized into structured lifestyle verticals (e.g. Beauty, Fashion, Home, Kitchen, Fitness, Tech, Outdoors, Pets, Toys, Gaming, Electronics, Books). These anchor browsability and SEO structure.
 Vibe Tags — An optional secondary tag layer adds personality and cross-category discoverability (e.g. "Eco", "Cozy", "Minimalist"). Vibes cut across categories, letting users explore by aesthetic or feeling rather than product type.
-Filtered Browsing — Visitors can filter by Core Lifestyle category or by Vibe to narrow or shift their discovery experience.
+Mood Tags — A tertiary layer describes the feeling a product evokes (e.g. "Cozy", "Calm", "Energized"). Mood landing pages and mood-based filtering are driven by the same junction table system.
+Filtered Browsing — Category, vibe, and mood filtering uses normalized junction tables (product_categories, product_vibes, product_moods) for exact slug-based matching — no partial-string searches. Only categories with at least 8 active products are surfaced publicly.
 
 📊 Analytics & Tracking
 
@@ -59,11 +60,14 @@ LayerTechnologyFrontend / App BuilderLovable (React + Vite)Backend / DatabaseSup
 Database (Supabase / PostgreSQL)
 Key tables:
 
-products — Core product records: name, company, price, image URL, affiliate URL, category, vibe category, video URL, active flag, timestamps.
+products — Core product records: name, company, price, image URL, affiliate URL, video URL, active flag, timestamps.
 product_images — Up to 4 additional gallery images per product, ordered by display_order.
 product_specifications — Key/value specification rows per product, ordered by display_order.
 product_events — Analytics event log: event type (view, click), product ID, timestamp. Powers the admin dashboard.
-categories — Category and vibe definitions used to populate dropdowns and filter UIs. Includes icon, slug, and parent slug to distinguish Core Lifestyle vs. Vibe types.
+categories — Category, vibe, and mood definitions. Includes icon, slug, parent_slug, and type (core/vibe/mood).
+product_categories — Junction table: maps products to core category slugs. Primary filter source for category landing pages and sitemap.
+product_vibes — Junction table: maps products to vibe slugs.
+product_moods — Junction table: maps products to mood slugs.
 
 Row Level Security (RLS) is enforced via Supabase policies. Admin operations require authenticated sessions.
 
