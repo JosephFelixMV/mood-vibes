@@ -15,6 +15,8 @@ interface SEOProps {
   siteSchema?: boolean;
   /** Breadcrumb trail: array of {name, url} items from root to current page */
   breadcrumbs?: { name: string; url: string }[];
+  noindex?: boolean;
+  canonicalOverride?: string;
 }
 
 const SITE_DEFAULT_OG = "https://www.mood-and-vibes.com/og-default.jpg";
@@ -33,6 +35,8 @@ export function useSEO({
   collectionName,
   siteSchema,
   breadcrumbs,
+  noindex,
+  canonicalOverride,
 }: SEOProps) {
   useEffect(() => {
     if (!title && !description) return;
@@ -65,10 +69,26 @@ export function useSEO({
       el.setAttribute("href", href);
     };
 
-    const canonicalUrl = url || window.location.origin + window.location.pathname;
+    const canonicalUrl =
+      canonicalOverride || url || window.location.origin + window.location.pathname;
     const ogImage = image || SITE_DEFAULT_OG;
 
     setLink("canonical", canonicalUrl);
+
+    // Robots noindex handling
+    const existingRobots = document.querySelector('meta[name="robots"]');
+    if (noindex) {
+      if (existingRobots) {
+        existingRobots.setAttribute("content", "noindex, follow");
+      } else {
+        const m = document.createElement("meta");
+        m.setAttribute("name", "robots");
+        m.setAttribute("content", "noindex, follow");
+        document.head.appendChild(m);
+      }
+    } else if (existingRobots) {
+      existingRobots.remove();
+    }
 
     if (description) {
       setMeta("name", "description", description);
@@ -188,5 +208,5 @@ export function useSEO({
       document.getElementById("seo-website-jsonld")?.remove();
       document.getElementById("seo-breadcrumb-jsonld")?.remove();
     };
-  }, [title, description, image, url, keywords, rawTitle, price, productName, ogType, collectionName, siteSchema, breadcrumbs]);
+  }, [title, description, image, url, keywords, rawTitle, price, productName, ogType, collectionName, siteSchema, breadcrumbs, noindex, canonicalOverride]);
 }
