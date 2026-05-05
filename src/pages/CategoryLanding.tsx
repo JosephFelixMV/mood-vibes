@@ -256,7 +256,6 @@ export default function CategoryLanding() {
               </SelectContent>
             </Select>
             <Select
-              value=""
               onValueChange={(moodSlug) => {
                 if (moodSlug && slug) navigate(`/category/${slug}/mood/${moodSlug}`);
               }}
