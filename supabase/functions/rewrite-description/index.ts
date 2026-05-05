@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
         contents: [{ role: "user", parts: [{ text: description }] }],
-        generationConfig: { temperature: 0.6, maxOutputTokens: 1000 },
+        generationConfig: { temperature: 0.6, maxOutputTokens: 2048 },
       }),
     });
 
@@ -94,7 +94,12 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.toString() ?? "";
+    const candidate = data?.candidates?.[0];
+    const finishReason = candidate?.finishReason ?? "unknown";
+    if (finishReason !== "STOP") {
+      console.warn("Gemini finishReason:", finishReason, JSON.stringify(candidate?.safetyRatings ?? []));
+    }
+    const raw = candidate?.content?.parts?.[0]?.text?.toString() ?? "";
 
     const cleaned = raw
       .replace(/^```(?:html)?\s*/i, "")
