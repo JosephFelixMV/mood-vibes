@@ -3,10 +3,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
-onst SYSTEM_INSTRUCTION = `You are a product description rewriter for an affiliate discovery site.
+const SYSTEM_INSTRUCTION = `You are a product description rewriter for an affiliate discovery site.
 
 Rewrite the given product description into precise, descriptive prose that balances functional clarity with considered editorial voice.
 
@@ -25,8 +24,7 @@ RULES:
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -39,13 +37,10 @@ serve(async (req) => {
     const { description } = await req.json();
 
     if (!description || typeof description !== "string") {
-      return new Response(
-        JSON.stringify({ error: "Missing or invalid 'description' field." }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Missing or invalid 'description' field." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
@@ -61,18 +56,14 @@ serve(async (req) => {
     if (!response.ok) {
       const errText = await response.text();
       console.error("Gemini API error:", response.status, errText);
-      return new Response(
-        JSON.stringify({ error: "Gemini API request failed." }),
-        {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Gemini API request failed." }), {
+        status: 502,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();
-    const raw =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text?.toString() ?? "";
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text?.toString() ?? "";
 
     const cleaned = raw
       .replace(/^```(?:html)?\s*/i, "")
@@ -84,12 +75,9 @@ serve(async (req) => {
     });
   } catch (err) {
     console.error("rewrite-description error:", err);
-    return new Response(
-      JSON.stringify({ error: "Internal server error." }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error." }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
