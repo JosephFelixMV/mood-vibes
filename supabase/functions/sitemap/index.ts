@@ -97,50 +97,21 @@ Deno.serve(async (req) => {
       from += PAGE;
     }
 
-    // Combo URLs: (core × mood) and (vibe × mood). Skip pairs with < 3 active products.
+    // Combo URLs: (core × mood) and (vibe × mood).
+    // Uses a single aggregation RPC instead of N×M individual COUNT queries
+    // to stay well within the Edge Function 150s wall-clock timeout.
     const comboUrls: string[] = [];
-    const MIN_COMBO_COUNT = 3;
-    const BATCH_SIZE = 8;
 
-    const { data: allCats } = await supabase
-      .from("categories")
-      .select("slug,name,type");
+    const { data: combos, error: comboError } = await supabase
+      .rpc("get_sitemap_combo_counts");
 
-    const cores = (allCats || []).filter((c: any) => c.type === "core");
-    const vibes = (allCats || []).filter((c: any) => c.type === "vibe");
-    const moods = (allCats || []).filter((c: any) => c.type === "mood");
+    if (comboError) console.error("Combo counts error:", comboError);
 
-    async function comboCount(field: "category" | "vibe_category", primaryName: string, moodName: string) {
-      const { count } = await supabase
-        .from("products")
-        .select("id", { count: "exact", head: true })
-        .eq("is_active", true)
-        .ilike(field, `%${primaryName}%`)
-        .ilike("mood", `%${moodName}%`);
-      return count ?? 0;
-    }
-
-    type Pair = { path: string; field: "category" | "vibe_category"; primary: string; mood: string };
-    const pairs: Pair[] = [];
-    for (const c of cores) {
-      for (const m of moods) {
-        pairs.push({ path: `/category/${c.slug}/mood/${m.slug}`, field: "category", primary: c.name, mood: m.name });
-      }
-    }
-    for (const v of vibes) {
-      for (const m of moods) {
-        pairs.push({ path: `/vibe/${v.slug}/mood/${m.slug}`, field: "vibe_category", primary: v.name, mood: m.name });
-      }
-    }
-
-    for (let i = 0; i < pairs.length; i += BATCH_SIZE) {
-      const batch = pairs.slice(i, i + BATCH_SIZE);
-      const counts = await Promise.all(batch.map((p) => comboCount(p.field, p.primary, p.mood)));
-      batch.forEach((p, idx) => {
-        if (counts[idx] >= MIN_COMBO_COUNT) {
-          comboUrls.push(urlEntry(`${base}${p.path}`, today, "weekly", "0.6"));
-        }
-      });
+    for (const row of combos || []) {
+      const path = row.primary_type === "core"
+        ? `/category/${row.primary_slug}/mood/${row.mood_slug}`
+        : `/vibe/${row.primary_slug}/mood/${row.mood_slug}`;
+      comboUrls.push(urlEntry(`${base}${path}`, today, "weekly", "0.6"));
     }
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
