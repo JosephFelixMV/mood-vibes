@@ -49,7 +49,7 @@ serve(async (req) => {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
         contents: [{ role: "user", parts: [{ text: description }] }],
-        generationConfig: { temperature: 0.6, maxOutputTokens: 1200 },
+        generationConfig: { temperature: 0.6, maxOutputTokens: 1000 },
       }),
     });
 
