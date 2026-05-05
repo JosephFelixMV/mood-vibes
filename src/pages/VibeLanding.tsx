@@ -160,7 +160,6 @@ export default function VibeLanding() {
               </SelectContent>
             </Select>
             <Select
-              value=""
               onValueChange={(moodSlug) => {
                 if (moodSlug && slug) navigate(`/vibe/${slug}/mood/${moodSlug}`);
               }}
