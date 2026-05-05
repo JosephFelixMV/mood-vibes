@@ -7,7 +7,7 @@ const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemi
 
 const SYSTEM_INSTRUCTION = `You are a product description rewriter for an affiliate discovery site.
 
-Rewrite the given product description into a descriptive prose that balances functional clarity with considered editorial voice.
+Rewrite the given product description into a descriptive prose that balances functional clarity with a creative editorial voice.
 
 RULES:
 - Target 4-5 sentences or a short paragraph plus a feature list. Minimum 100 words, maximum 180 words.
@@ -49,7 +49,7 @@ serve(async (req) => {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
         contents: [{ role: "user", parts: [{ text: description }] }],
-        generationConfig: { temperature: 0.5, maxOutputTokens: 1024 },
+        generationConfig: { temperature: 0.6, maxOutputTokens: 1200 },
       }),
     });
 
