@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -20,6 +20,12 @@ const toTitleCase = (s: string) =>
 export default function VibeLanding() {
   const { region } = useRegion();
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+
+  const { data: moodCats = [] } = useQuery({
+    queryKey: ["categories", "mood"],
+    queryFn: () => getCategories("mood"),
+  });
 
   const { data: vibes = [] } = useQuery({
     queryKey: ["categories", "vibe"],
@@ -150,6 +156,20 @@ export default function VibeLanding() {
                 <SelectItem value="all">All Vendors</SelectItem>
                 {availableVendors.map((v) => (
                   <SelectItem key={v.id} value={v.id}>{v.name} ({vendorCounts[v.id] || 0})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              onValueChange={(moodSlug) => {
+                if (moodSlug && slug) navigate(`/vibe/${slug}/mood/${moodSlug}`);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Filter by Mood" />
+              </SelectTrigger>
+              <SelectContent>
+                {moodCats.map((m) => (
+                  <SelectItem key={m.id} value={m.slug}>{m.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
