@@ -97,9 +97,55 @@ Deno.serve(async (req) => {
       from += PAGE;
     }
 
+    // Combo URLs: (core × mood) and (vibe × mood). Skip pairs with < 3 active products.
+    const comboUrls: string[] = [];
+    const MIN_COMBO_COUNT = 3;
+    const BATCH_SIZE = 8;
+
+    const { data: allCats } = await supabase
+      .from("categories")
+      .select("slug,name,type");
+
+    const cores = (allCats || []).filter((c: any) => c.type === "core");
+    const vibes = (allCats || []).filter((c: any) => c.type === "vibe");
+    const moods = (allCats || []).filter((c: any) => c.type === "mood");
+
+    async function comboCount(field: "category" | "vibe_category", primaryName: string, moodName: string) {
+      const { count } = await supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .eq("is_active", true)
+        .ilike(field, `%${primaryName}%`)
+        .ilike("mood", `%${moodName}%`);
+      return count ?? 0;
+    }
+
+    type Pair = { path: string; field: "category" | "vibe_category"; primary: string; mood: string };
+    const pairs: Pair[] = [];
+    for (const c of cores) {
+      for (const m of moods) {
+        pairs.push({ path: `/category/${c.slug}/mood/${m.slug}`, field: "category", primary: c.name, mood: m.name });
+      }
+    }
+    for (const v of vibes) {
+      for (const m of moods) {
+        pairs.push({ path: `/vibe/${v.slug}/mood/${m.slug}`, field: "vibe_category", primary: v.name, mood: m.name });
+      }
+    }
+
+    for (let i = 0; i < pairs.length; i += BATCH_SIZE) {
+      const batch = pairs.slice(i, i + BATCH_SIZE);
+      const counts = await Promise.all(batch.map((p) => comboCount(p.field, p.primary, p.mood)));
+      batch.forEach((p, idx) => {
+        if (counts[idx] >= MIN_COMBO_COUNT) {
+          comboUrls.push(urlEntry(`${base}${p.path}`, today, "weekly", "0.6"));
+        }
+      });
+    }
+
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticUrls, ...categoryUrls, ...productUrls].join("\n")}
+${[...staticUrls, ...categoryUrls, ...comboUrls, ...productUrls].join("\n")}
 </urlset>`;
 
     return new Response(xml, {
