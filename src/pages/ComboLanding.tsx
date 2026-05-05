@@ -97,7 +97,11 @@ export default function ComboLanding() {
     ] : undefined,
   });
 
-  if ((primaryCats.length > 0 && !primary) || (moodCats.length > 0 && !mood)) {
+  if (
+    (primaryCats.length > 0 && !primary) ||
+    (moodCats.length > 0 && !mood) ||
+    (isCoreCombo && primary && !primary.parent_slug)
+  ) {
     return <Navigate to={parentPath} replace />;
   }
 

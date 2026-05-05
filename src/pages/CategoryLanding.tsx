@@ -255,20 +255,22 @@ export default function CategoryLanding() {
                 ))}
               </SelectContent>
             </Select>
-            <Select
-              onValueChange={(moodSlug) => {
-                if (moodSlug && slug) navigate(`/category/${slug}/mood/${moodSlug}`);
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filter by Mood" />
-              </SelectTrigger>
-              <SelectContent>
-                {moodCats.map((m) => (
-                  <SelectItem key={m.id} value={m.slug}>{m.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {!isParent && (
+              <Select
+                onValueChange={(moodSlug) => {
+                  if (moodSlug && slug) navigate(`/category/${slug}/mood/${moodSlug}`);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Filter by Mood" />
+                </SelectTrigger>
+                <SelectContent>
+                  {moodCats.map((m) => (
+                    <SelectItem key={m.id} value={m.slug}>{m.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />
