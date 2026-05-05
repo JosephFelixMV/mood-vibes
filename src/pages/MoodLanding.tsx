@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -22,10 +22,24 @@ export default function MoodLanding() {
   const { slug } = useParams<{ slug: string }>();
   const { region } = useRegion();
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
+  const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState<
+    { type: "core" | "vibe"; slug: string } | null
+  >(null);
 
   const { data: moods = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
+  });
+
+  const { data: coreCats = [] } = useQuery({
+    queryKey: ["categories", "core"],
+    queryFn: () => getCategories("core"),
+  });
+
+  const { data: vibeCats = [] } = useQuery({
+    queryKey: ["categories", "vibe"],
+    queryFn: () => getCategories("vibe"),
   });
 
   const mood = moods.find((m) => m.slug === slug);
@@ -146,6 +160,40 @@ export default function MoodLanding() {
               <SelectItem value="all">All Vendors</SelectItem>
               {availableVendors.map((v) => (
                 <SelectItem key={v.id} value={v.id}>{v.name} ({vendorCounts[v.id] || 0})</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={activeFilter?.type === "core" ? activeFilter.slug : undefined}
+            onValueChange={(coreSlug) => {
+              if (!coreSlug || !slug) return;
+              setActiveFilter({ type: "core", slug: coreSlug });
+              navigate(`/category/${coreSlug}/mood/${slug}`);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Shop by Category" />
+            </SelectTrigger>
+            <SelectContent>
+              {coreCats.map((c) => (
+                <SelectItem key={c.id} value={c.slug}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={activeFilter?.type === "vibe" ? activeFilter.slug : undefined}
+            onValueChange={(vibeSlug) => {
+              if (!vibeSlug || !slug) return;
+              setActiveFilter({ type: "vibe", slug: vibeSlug });
+              navigate(`/vibe/${vibeSlug}/mood/${slug}`);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Shop by Vibe" />
+            </SelectTrigger>
+            <SelectContent>
+              {vibeCats.map((v) => (
+                <SelectItem key={v.id} value={v.slug}>{v.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
