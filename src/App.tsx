@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useParams } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -34,6 +34,13 @@ import DailyPicks from "./pages/DailyPicks";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import LaunchWelcomeModal from "@/components/LaunchWelcomeModal";
 import AnalyticsLoader from "@/components/AnalyticsLoader";
+
+const ComboLanding = lazy(() => import("./pages/ComboLanding"));
+
+function RedirectToCoreCategory() {
+  const { coreSlug } = useParams<{ coreSlug: string }>();
+  return <Navigate to={`/category/${coreSlug}`} replace />;
+}
 
 const queryClient = new QueryClient();
 
@@ -171,6 +178,26 @@ function AppShell() {
             <Route path="/moods/:slug" element={<MoodLanding />} />
             <Route path="/products" element={<Products />} />
             <Route path="/category/:slug" element={<CategoryLanding />} />
+            <Route
+              path="/category/:coreSlug/mood/:moodSlug"
+              element={
+                <Suspense fallback={null}>
+                  <ComboLanding />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/vibe/:vibeSlug/mood/:moodSlug"
+              element={
+                <Suspense fallback={null}>
+                  <ComboLanding />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/category/:coreSlug/vibe/:vibeSlug"
+              element={<RedirectToCoreCategory />}
+            />
             <Route path="/product/:slug" element={<ProductDetail />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/brands" element={<Brands />} />
