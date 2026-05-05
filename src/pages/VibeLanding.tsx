@@ -62,13 +62,24 @@ export default function VibeLanding() {
   });
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["vibe-products", slug, vibeName],
+    queryKey: ["vibe-products", slug],
     queryFn: async () => {
+      if (!slug) return [];
+
+      const { data: junctionRows, error: jErr } = await supabase
+        .from("product_vibes")
+        .select("product_id")
+        .eq("vibe_slug", slug);
+      if (jErr) throw jErr;
+
+      const productIds = [...new Set((junctionRows || []).map((r: any) => r.product_id))];
+      if (!productIds.length) return [];
+
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("is_active", true)
-        .ilike("vibe_category", `%${vibeName}%`)
+        .in("id", productIds)
         .order("date_added", { ascending: false })
         .limit(300);
       if (error) throw error;

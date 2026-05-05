@@ -52,14 +52,24 @@ export default function MoodLanding() {
   }, [slug, mood?.name]);
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["mood-products", mood?.name, sort],
+    queryKey: ["mood-products", mood?.slug, sort],
     queryFn: async () => {
       if (!mood) return [];
+
+      const { data: junctionRows, error: jErr } = await supabase
+        .from("product_moods")
+        .select("product_id")
+        .eq("mood_slug", mood.slug);
+      if (jErr) throw jErr;
+
+      const productIds = [...new Set((junctionRows || []).map((r: any) => r.product_id))];
+      if (!productIds.length) return [];
+
       let query = supabase
         .from("products")
         .select("*")
         .eq("is_active", true)
-        .ilike("mood", `%${mood.name}%`);
+        .in("id", productIds);
 
       query = sort === "newest"
         ? query.order("date_added", { ascending: false })

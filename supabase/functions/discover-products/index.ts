@@ -99,20 +99,20 @@ interface Product {
   id: string;
   name: string;
   description: string | null;
-  category: string;
-  vibe_category: string | null;
-  mood: string | null;
   price: number;
   company_name: string | null;
+  category_slugs: string[];
+  vibe_slugs: string[];
+  mood_slugs: string[];
 }
 
 function keywordScore(product: Product, keywords: string[], productKeywords: string[] = []): number {
   const text = [
     product.name,
     product.description || "",
-    product.category,
-    product.vibe_category || "",
-    product.mood || "",
+    product.category_slugs.join(" "),
+    product.vibe_slugs.join(" "),
+    product.mood_slugs.join(" "),
     product.company_name || "",
     ...productKeywords,
   ].join(" ").toLowerCase();
@@ -300,14 +300,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch all active products with their keywords
-    const { data: allProducts, error: prodErr } = await supabase
+    // Fetch all active products (taxonomy loaded separately from junction tables)
+    const { data: rawProducts, error: prodErr } = await supabase
       .from("products")
-      .select("id, name, description, category, vibe_category, mood, price, company_name")
+      .select("id, name, description, price, company_name")
       .eq("is_active", true)
       .limit(600);
 
-    if (prodErr || !allProducts?.length) {
+    if (prodErr || !rawProducts?.length) {
       await supabase.from("ai_requests").insert({
         ip_hash: ipHash, prompt_hash: promptHash, prompt_text: prompt,
         result_count: 0, product_ids: [],
@@ -316,6 +316,32 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Fetch taxonomy from junction tables for these products
+    const productIds = rawProducts.map((p: any) => p.id);
+    const [
+      { data: catRows },
+      { data: vibeRows },
+      { data: moodRows },
+    ] = await Promise.all([
+      supabase.from("product_categories").select("product_id, category_slug").in("product_id", productIds),
+      supabase.from("product_vibes").select("product_id, vibe_slug").in("product_id", productIds),
+      supabase.from("product_moods").select("product_id, mood_slug").in("product_id", productIds),
+    ]);
+
+    const categoryMap: Record<string, string[]> = {};
+    const vibeMap: Record<string, string[]> = {};
+    const moodMap: Record<string, string[]> = {};
+    (catRows || []).forEach((r: any) => { (categoryMap[r.product_id] ??= []).push(r.category_slug); });
+    (vibeRows || []).forEach((r: any) => { (vibeMap[r.product_id] ??= []).push(r.vibe_slug); });
+    (moodRows || []).forEach((r: any) => { (moodMap[r.product_id] ??= []).push(r.mood_slug); });
+
+    const allProducts: Product[] = rawProducts.map((p: any) => ({
+      ...p,
+      category_slugs: categoryMap[p.id] ?? [],
+      vibe_slugs: vibeMap[p.id] ?? [],
+      mood_slugs: moodMap[p.id] ?? [],
+    }));
 
     // Fetch product keywords for enrichment
     const { data: productKeywords } = await supabase
@@ -348,7 +374,7 @@ Deno.serve(async (req) => {
     const catalogText = candidates.map((p) => {
       const desc = (p.description || "").replace(/<[^>]*>/g, "").slice(0, 150);
       const kws = (keywordsByProduct[p.id] || []).join(", ");
-      return `ID:${p.id} | ${p.name} | $${p.price} | Cat:${p.category} | Vibe:${p.vibe_category || "none"} | Mood:${p.mood || "none"} | Keys:${kws || "none"} | ${desc}`;
+      return `ID:${p.id} | ${p.name} | $${p.price} | Cat:${p.category_slugs.join(",") || "none"} | Vibe:${p.vibe_slugs.join(",") || "none"} | Mood:${p.mood_slugs.join(",") || "none"} | Keys:${kws || "none"} | ${desc}`;
     }).join("\n");
 
     const systemPrompt = `You are a product matching assistant for a gift and lifestyle shopping site. Your ONLY job is to return a JSON array of product IDs from the catalog below that best match the user's request, ranked by relevance (best match first).

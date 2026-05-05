@@ -7,7 +7,7 @@ import type { VisitorRegion } from "@/hooks/useVisitorRegion";
  * to be shown to public visitors. Admin pages bypass this filter.
  * Adjust as the catalog grows.
  */
-export const MIN_PRODUCTS_PER_CATEGORY = 15;
+export const MIN_PRODUCTS_PER_CATEGORY = 8;
 
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
@@ -43,6 +43,38 @@ export interface ProductQueryOptions {
   vendorId?: string;
 }
 
+async function getProductIdsForTaxonomy(options?: ProductQueryOptions): Promise<string[] | null> {
+  const queries: Promise<string[]>[] = [];
+
+  if (options?.category) {
+    queries.push(
+      supabase.from("product_categories").select("product_id").eq("category_slug", options.category)
+        .then(({ data }) => (data || []).map((r: any) => r.product_id))
+    );
+  }
+  if (options?.vibeCategory) {
+    queries.push(
+      supabase.from("product_vibes").select("product_id").eq("vibe_slug", options.vibeCategory)
+        .then(({ data }) => (data || []).map((r: any) => r.product_id))
+    );
+  }
+  if (options?.mood) {
+    queries.push(
+      supabase.from("product_moods").select("product_id").eq("mood_slug", options.mood)
+        .then(({ data }) => (data || []).map((r: any) => r.product_id))
+    );
+  }
+
+  if (!queries.length) return null;
+
+  const idArrays = await Promise.all(queries);
+  if (idArrays.length === 1) return idArrays[0];
+
+  // Multiple taxonomy filters → intersect
+  const sets = idArrays.map((ids) => new Set(ids));
+  return [...sets[0]].filter((id) => sets.every((s) => s.has(id)));
+}
+
 function applyProductFilters(
   options?: ProductQueryOptions,
   withCount = false,
@@ -54,15 +86,7 @@ function applyProductFilters(
   if (options?.activeOnly !== false) {
     query = query.eq("is_active", true);
   }
-  if (options?.category) {
-    query = query.ilike("category", `%${options.category}%`);
-  }
-  if (options?.vibeCategory) {
-    query = query.ilike("vibe_category", `%${options.vibeCategory}%`);
-  }
-  if (options?.mood) {
-    query = query.ilike("mood", `%${options.mood}%`);
-  }
+  // category / vibeCategory / mood are applied via junction table pre-query (see getProductIdsForTaxonomy)
   if (options?.vendorId) {
     query = query.eq("vendor_id", options.vendorId);
   }
@@ -96,8 +120,14 @@ export async function getProductsPaginated(
 ): Promise<PaginatedResult<Product>> {
   const pageSize = options?.pageSize ?? 30;
   const page = options?.page ?? 1;
-  const query = applyProductFilters(options, true);
   const from = (page - 1) * pageSize;
+
+  const taxonomyIds = await getProductIdsForTaxonomy(options);
+  if (taxonomyIds !== null && taxonomyIds.length === 0) return { data: [], count: 0 };
+
+  let query = applyProductFilters(options, true);
+  if (taxonomyIds !== null) query = query.in("id", taxonomyIds);
+
   const { data, error, count } = await query.range(from, from + pageSize - 1);
   if (error) throw error;
   return { data: data || [], count: count ?? 0 };
@@ -106,11 +136,16 @@ export async function getProductsPaginated(
 /** Fetch ALL products (paginating internally past the 1000-row cap). Returns Product[]. */
 export async function getProducts(options?: ProductQueryOptions): Promise<Product[]> {
   const PAGE_SIZE = 1000;
+
+  const taxonomyIds = await getProductIdsForTaxonomy(options);
+  if (taxonomyIds !== null && taxonomyIds.length === 0) return [];
+
   let allData: Product[] = [];
   let from = 0;
   let hasMore = true;
   while (hasMore) {
-    const query = applyProductFilters(options);
+    let query = applyProductFilters(options);
+    if (taxonomyIds !== null) query = query.in("id", taxonomyIds);
     const { data: page, error } = await query.range(from, from + PAGE_SIZE - 1);
     if (error) throw error;
     allData = allData.concat((page || []) as Product[]);
@@ -194,60 +229,23 @@ export async function getPublicCategories(
   return (data ?? []) as PublicCategory[];
 }
 
-export async function getProductCountByCategory() {
-  const PAGE_SIZE = 1000;
-  let allData: any[] = [];
-  let from = 0;
-  let hasMore = true;
-  while (hasMore) {
-    const { data, error } = await supabase
-      .from("products")
-      .select("category")
-      .eq("is_active", true)
-      .range(from, from + PAGE_SIZE - 1);
-    if (error) throw error;
-    allData = allData.concat(data || []);
-    hasMore = (data?.length || 0) === PAGE_SIZE;
-    from += PAGE_SIZE;
-  }
-
-  const counts: Record<string, number> = {};
-  allData.forEach((p) => {
-    p.category.split(",").forEach((c: string) => {
-      const trimmed = c.trim();
-      if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
-    });
+export async function getProductCountByCategory(): Promise<Record<string, number>> {
+  const { data, error } = await supabase.rpc("get_categories_with_counts", {
+    category_type: "core",
   });
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  (data || []).forEach((c: any) => { counts[c.slug] = c.product_count; });
   return counts;
 }
 
-export async function getProductCountByVibe() {
-  const PAGE_SIZE = 1000;
-  let allData: any[] = [];
-  let from = 0;
-  let hasMore = true;
-  while (hasMore) {
-    const { data, error } = await supabase
-      .from("products")
-      .select("vibe_category")
-      .eq("is_active", true)
-      .not("vibe_category", "is", null)
-      .range(from, from + PAGE_SIZE - 1);
-    if (error) throw error;
-    allData = allData.concat(data || []);
-    hasMore = (data?.length || 0) === PAGE_SIZE;
-    from += PAGE_SIZE;
-  }
-
-  const counts: Record<string, number> = {};
-  allData.forEach((p) => {
-    if (p.vibe_category) {
-      p.vibe_category.split(",").forEach((v: string) => {
-        const trimmed = v.trim();
-        if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
-      });
-    }
+export async function getProductCountByVibe(): Promise<Record<string, number>> {
+  const { data, error } = await supabase.rpc("get_categories_with_counts", {
+    category_type: "vibe",
   });
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  (data || []).forEach((c: any) => { counts[c.slug] = c.product_count; });
   return counts;
 }
 

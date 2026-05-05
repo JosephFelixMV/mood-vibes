@@ -74,12 +74,17 @@ export default function AnalyticsDashboard() {
     queryFn: () => getCategories("vibe"),
   });
 
-  const { data: products = [] } = useQuery({
-    queryKey: ["analytics-products"],
+  const { data: junctionData } = useQuery({
+    queryKey: ["analytics-junction"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("id, category, vibe_category");
-      if (error) throw error;
-      return data;
+      const [catRes, vibeRes] = await Promise.all([
+        supabase.from("product_categories").select("product_id, category_slug").limit(10000),
+        supabase.from("product_vibes").select("product_id, vibe_slug").limit(10000),
+      ]);
+      return {
+        categories: (catRes.data || []) as { product_id: string; category_slug: string }[],
+        vibes: (vibeRes.data || []) as { product_id: string; vibe_slug: string }[],
+      };
     },
   });
 
@@ -124,6 +129,15 @@ export default function AnalyticsDashboard() {
     },
   });
 
+  const coreSlugToName = useMemo(
+    () => Object.fromEntries(coreCategories.map((c) => [c.slug, c.name])),
+    [coreCategories],
+  );
+  const vibeSlugToName = useMemo(
+    () => Object.fromEntries(vibeCategories.map((c) => [c.slug, c.name])),
+    [vibeCategories],
+  );
+
   const availableCategories = useMemo(() => {
     if (categoryType === "core") {
       return coreCategories.filter((c) => !!c.parent_slug).map((c) => c.name);
@@ -147,18 +161,23 @@ export default function AnalyticsDashboard() {
   const selectAll = () => setSelectedCategories(null);
 
   const tableData = useMemo(() => {
-    // Build product -> category mapping
+    // Build product → category-name mapping from junction tables
     const productCatMap: Record<string, string[]> = {};
-    products.forEach((p) => {
-      const field = categoryType === "core" ? p.category : p.vibe_category;
-      if (!field) {
-        if (categoryType === "vibe") {
-          productCatMap[p.id] = ["No Vibe"];
-        }
-        return;
-      }
-      productCatMap[p.id] = field.split(",").map((c: string) => c.trim()).filter(Boolean);
-    });
+    if (categoryType === "core") {
+      (junctionData?.categories || []).forEach((r) => {
+        const name = coreSlugToName[r.category_slug];
+        if (!name) return;
+        if (!productCatMap[r.product_id]) productCatMap[r.product_id] = [];
+        productCatMap[r.product_id].push(name);
+      });
+    } else {
+      (junctionData?.vibes || []).forEach((r) => {
+        const name = vibeSlugToName[r.vibe_slug];
+        if (!name) return;
+        if (!productCatMap[r.product_id]) productCatMap[r.product_id] = [];
+        productCatMap[r.product_id].push(name);
+      });
+    }
 
     // Aggregate events by category
     const catStats: Record<string, { views: number; clicks: number; productIds: Set<string> }> = {};
@@ -173,12 +192,11 @@ export default function AnalyticsDashboard() {
       });
     });
 
-    // Also count products per category (even those without events)
-    products.forEach((p) => {
-      const cats = productCatMap[p.id] || [];
+    // Count all products per category (including those without events)
+    Object.entries(productCatMap).forEach(([productId, cats]) => {
       cats.forEach((cat) => {
         if (!catStats[cat]) catStats[cat] = { views: 0, clicks: 0, productIds: new Set() };
-        catStats[cat].productIds.add(p.id);
+        catStats[cat].productIds.add(productId);
       });
     });
 
@@ -191,7 +209,6 @@ export default function AnalyticsDashboard() {
         clicks: stats.clicks,
       }));
 
-    // Sort
     rows.sort((a, b) => {
       switch (sortBy) {
         case "views-desc": return b.views - a.views;
@@ -204,7 +221,7 @@ export default function AnalyticsDashboard() {
     });
 
     return rows;
-  }, [products, events, categoryType, activeSelected, sortBy]);
+  }, [junctionData, events, categoryType, activeSelected, sortBy, coreSlugToName, vibeSlugToName]);
 
   const totals = useMemo(() => {
     return tableData.reduce((acc, r) => ({

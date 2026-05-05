@@ -79,12 +79,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch gallery images
-    const { data: images } = await supabase
-      .from("product_images")
-      .select("image_url, display_order")
-      .eq("product_id", productId)
-      .order("display_order");
+    // Fetch gallery images and vibe slugs in parallel
+    const [{ data: images }, { data: vibeJunction }] = await Promise.all([
+      supabase
+        .from("product_images")
+        .select("image_url, display_order")
+        .eq("product_id", productId)
+        .order("display_order"),
+      supabase
+        .from("product_vibes")
+        .select("vibe_slug")
+        .eq("product_id", productId)
+        .order("display_order"),
+    ]);
 
     const galleryImages = (images || []).map((i) => i.image_url);
 
@@ -100,12 +107,13 @@ Deno.serve(async (req) => {
       "#MoodAndVibes",
       "#DailyPick",
       "#ProductOfTheDay",
-      ...(product.vibe_category
-        ? product.vibe_category
-            .split(",")
-            .map((v: string) => `#${v.trim().replace(/[^a-zA-Z0-9]/g, "")}`)
-            .filter((h: string) => h.length > 1)
-        : []),
+      ...(vibeJunction || []).map((v) => {
+        const tag = v.vibe_slug
+          .split("-")
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join("");
+        return `#${tag}`;
+      }).filter((h: string) => h.length > 1),
     ];
     const hashtagsStr = hashtags.join(" ");
     const share_facebook = buildShareUrl(product.slug, "facebook");

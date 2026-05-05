@@ -62,6 +62,13 @@ export default function CategoryLanding() {
     ? [categoryName, ...childNames]
     : [categoryName];
 
+  const childSlugs = isParent
+    ? categories.filter((c) => c.parent_slug === slug).map((c) => c.slug)
+    : [];
+  const filterSlugs = slug
+    ? (isParent && childSlugs.length > 0 ? [slug, ...childSlugs] : [slug])
+    : [];
+
   const isFashionCategory = FASHION_SLUGS.includes(slug || "");
 
   useEffect(() => {
@@ -90,22 +97,30 @@ export default function CategoryLanding() {
   });
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["category-products", slug, filterNames.join(",")],
+    queryKey: ["category-products", slug, filterSlugs.join(",")],
     queryFn: async () => {
-      const orClause = filterNames
-        .map((n) => `category.ilike.*${n.replace(/[,()"]/g, "")}*`)
-        .join(",");
+      if (!filterSlugs.length) return [];
+
+      const { data: junctionRows, error: jErr } = await supabase
+        .from("product_categories")
+        .select("product_id")
+        .in("category_slug", filterSlugs);
+      if (jErr) throw jErr;
+
+      const productIds = [...new Set((junctionRows || []).map((r: any) => r.product_id))];
+      if (!productIds.length) return [];
+
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("is_active", true)
-        .or(orClause)
+        .in("id", productIds)
         .order("date_added", { ascending: false })
         .limit(300);
       if (error) throw error;
       return (data as Product[]).filter((p) => !p.page_error);
     },
-    enabled: !!categoryName,
+    enabled: !!categoryName && categories.length > 0,
   });
 
   const [filterVendor, setFilterVendor] = useState("");

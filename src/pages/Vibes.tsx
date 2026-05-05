@@ -53,7 +53,7 @@ export default function Vibes() {
                   <p className="mt-1 text-sm text-muted-foreground">{vibe.description}</p>
                 )}
               </div>
-              <Badge variant="secondary">{counts[vibe.name] ?? 0}</Badge>
+              <Badge variant="secondary">{counts[vibe.slug] ?? 0}</Badge>
             </Link>
           </motion.div>
         ))}
