@@ -573,6 +573,34 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         productId = data.id;
       }
 
+      // Explicit junction table writes — trigger also handles this, but we write
+      // directly so Phase 5 (trigger drop) requires no further app changes.
+      if (productId) {
+        const slugFor = (cats: typeof coreCategories, name: string) =>
+          cats.find((c) => c.name === name)?.slug;
+
+        const catRows = parseTaxonomyString(form.category)
+          .map((name, i) => { const s = slugFor(coreCategories, name); return s ? { product_id: productId!, category_slug: s, is_primary: i === 0, display_order: i } : null; })
+          .filter((r: any) => r !== null);
+        const vibeRows = parseTaxonomyString(form.vibe_category)
+          .map((name, i) => { const s = slugFor(vibeCategories, name); return s ? { product_id: productId!, vibe_slug: s, is_primary: i === 0, display_order: i } : null; })
+          .filter((r: any) => r !== null);
+        const moodRows = parseTaxonomyString(form.mood)
+          .map((name, i) => { const s = slugFor(moodCategories, name); return s ? { product_id: productId!, mood_slug: s, is_primary: i === 0, display_order: i } : null; })
+          .filter((r: any) => r !== null);
+
+        await Promise.all([
+          supabase.from("product_categories").delete().eq("product_id", productId),
+          supabase.from("product_vibes").delete().eq("product_id", productId),
+          supabase.from("product_moods").delete().eq("product_id", productId),
+        ]);
+        await Promise.all([
+          catRows.length > 0 ? supabase.from("product_categories").insert(catRows) : Promise.resolve(),
+          vibeRows.length > 0 ? supabase.from("product_vibes").insert(vibeRows) : Promise.resolve(),
+          moodRows.length > 0 ? supabase.from("product_moods").insert(moodRows) : Promise.resolve(),
+        ]);
+      }
+
       const validImages = form.additional_images.filter((url: string) => url.trim());
       if (validImages.length > 0 && productId) {
         const { error } = await supabase.from("product_images").insert(
