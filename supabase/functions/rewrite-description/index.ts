@@ -93,15 +93,5 @@ return new Response(JSON.stringify({ rewritten: cleaned }), {
     "Access-Control-Allow-Origin": "*",
   },
 });
-```[cite: 2]
 
-### **How to see the result**
-1.  **Deploy the change**: Run `supabase functions deploy rewrite-description` in your terminal to update the live code.
-2.  **Trigger a rewrite**: Go to your site and send a description to the function.
-3.  **View the logs**:
-    *   Open your **Supabase Dashboard**.
-    *   Go to **Edge Functions** in the sidebar.
-    *   Click on **`rewrite-description`**.
-    *   Select the **Logs** tab.
 
-If the log shows three full sentences but your website only shows one, you'll know the issue is a character limit or a "trimming" rule in your database or frontend code, rather than an issue with the AI itself[cite: 2].
