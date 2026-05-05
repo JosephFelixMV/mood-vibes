@@ -67,7 +67,7 @@ export default function ComboLanding() {
 
   const regionProducts = useMemo(() => filterByRegion(products, region), [products, region]);
 
-  const parentPath = isCoreCombo ? `/category/${primarySlug}` : `/vibe/${primarySlug}`;
+  const parentPath = isCoreCombo ? `/category/${primarySlug}` : `/vibes/${primarySlug}`;
   const parentUrl = `${SITE_URL}${parentPath}`;
   const selfPath = isCoreCombo
     ? `/category/${primarySlug}/mood/${moodSlug}`
