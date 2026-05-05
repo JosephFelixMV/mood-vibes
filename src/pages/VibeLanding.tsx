@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getCategories, getRandomProduct, filterByRegion, type Product } from "@/lib/supabase-queries";
+import { parseTaxonomyString } from "@/lib/taxonomy-utils";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -105,6 +106,20 @@ export default function VibeLanding() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [regionFiltered, brandsList]);
 
+  const moodCountMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    products.forEach((p) => {
+      parseTaxonomyString(p.mood).forEach((name) => {
+        counts[name] = (counts[name] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [products]);
+
+  const availableMoodCats = isLoading
+    ? moodCats
+    : moodCats.filter((m) => (moodCountMap[m.name] || 0) >= 3);
+
   const healthyProducts = regionFiltered.filter((p) => {
     if (filterVendor && p.vendor_id !== filterVendor) return false;
     return true;
@@ -159,20 +174,22 @@ export default function VibeLanding() {
                 ))}
               </SelectContent>
             </Select>
-            <Select
-              onValueChange={(moodSlug) => {
-                if (moodSlug && slug) navigate(`/vibe/${slug}/mood/${moodSlug}`);
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filter by Mood" />
-              </SelectTrigger>
-              <SelectContent>
-                {moodCats.map((m) => (
-                  <SelectItem key={m.id} value={m.slug}>{m.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {availableMoodCats.length > 0 && (
+              <Select
+                onValueChange={(moodSlug) => {
+                  if (moodSlug && slug) navigate(`/vibe/${slug}/mood/${moodSlug}`);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Filter by Mood" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableMoodCats.map((m) => (
+                    <SelectItem key={m.id} value={m.slug}>{m.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />

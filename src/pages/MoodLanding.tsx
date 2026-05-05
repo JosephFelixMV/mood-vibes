@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
+import { parseTaxonomyString } from "@/lib/taxonomy-utils";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -100,6 +101,34 @@ export default function MoodLanding() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [regionProducts, brandsList]);
 
+  const categoryCountMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    products.forEach((p) => {
+      parseTaxonomyString(p.category).forEach((name) => {
+        counts[name] = (counts[name] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [products]);
+
+  const vibeCountMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    products.forEach((p) => {
+      parseTaxonomyString(p.vibe_category).forEach((name) => {
+        counts[name] = (counts[name] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [products]);
+
+  const availableCoreCats = isLoading
+    ? coreCats
+    : coreCats.filter((c) => (categoryCountMap[c.name] || 0) >= 3);
+
+  const availableVibeCats = isLoading
+    ? vibeCats
+    : vibeCats.filter((v) => (vibeCountMap[v.name] || 0) >= 3);
+
   const filteredProducts = regionProducts.filter((p) => {
     if (filterVendor && p.vendor_id !== filterVendor) return false;
     return true;
@@ -163,40 +192,44 @@ export default function MoodLanding() {
               ))}
             </SelectContent>
           </Select>
-          <Select
-            value={activeFilter?.type === "core" ? activeFilter.slug : undefined}
-            onValueChange={(coreSlug) => {
-              if (!coreSlug || !slug) return;
-              setActiveFilter({ type: "core", slug: coreSlug });
-              navigate(`/category/${coreSlug}/mood/${slug}`);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Shop by Category" />
-            </SelectTrigger>
-            <SelectContent>
-              {coreCats.map((c) => (
-                <SelectItem key={c.id} value={c.slug}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={activeFilter?.type === "vibe" ? activeFilter.slug : undefined}
-            onValueChange={(vibeSlug) => {
-              if (!vibeSlug || !slug) return;
-              setActiveFilter({ type: "vibe", slug: vibeSlug });
-              navigate(`/vibe/${vibeSlug}/mood/${slug}`);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Shop by Vibe" />
-            </SelectTrigger>
-            <SelectContent>
-              {vibeCats.map((v) => (
-                <SelectItem key={v.id} value={v.slug}>{v.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {availableCoreCats.length > 0 && (
+            <Select
+              value={activeFilter?.type === "core" ? activeFilter.slug : undefined}
+              onValueChange={(coreSlug) => {
+                if (!coreSlug || !slug) return;
+                setActiveFilter({ type: "core", slug: coreSlug });
+                navigate(`/category/${coreSlug}/mood/${slug}`);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Shop by Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableCoreCats.map((c) => (
+                  <SelectItem key={c.id} value={c.slug}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {availableVibeCats.length > 0 && (
+            <Select
+              value={activeFilter?.type === "vibe" ? activeFilter.slug : undefined}
+              onValueChange={(vibeSlug) => {
+                if (!vibeSlug || !slug) return;
+                setActiveFilter({ type: "vibe", slug: vibeSlug });
+                navigate(`/vibe/${vibeSlug}/mood/${slug}`);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Shop by Vibe" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableVibeCats.map((v) => (
+                  <SelectItem key={v.id} value={v.slug}>{v.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
             <Button
               variant={sort === "newest" ? "default" : "outline"}

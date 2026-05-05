@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getCategories, getRandomProduct, filterByRegion, type Product } from "@/lib/supabase-queries";
+import { parseTaxonomyString } from "@/lib/taxonomy-utils";
 import { setDiscoveryContext } from "@/lib/discovery-context";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -138,6 +139,20 @@ export default function CategoryLanding() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [regionFiltered, brandsList]);
 
+  const moodCountMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    products.forEach((p) => {
+      parseTaxonomyString(p.mood).forEach((name) => {
+        counts[name] = (counts[name] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [products]);
+
+  const availableMoodCats = isLoading
+    ? moodCats
+    : moodCats.filter((m) => (moodCountMap[m.name] || 0) >= 3);
+
   const healthyProducts = regionFiltered.filter((p) => {
     if (filterVendor && p.vendor_id !== filterVendor) return false;
     if (filterSeason && p.fashion_season !== filterSeason) return false;
@@ -255,7 +270,7 @@ export default function CategoryLanding() {
                 ))}
               </SelectContent>
             </Select>
-            {!isParent && (
+            {!isParent && availableMoodCats.length > 0 && (
               <Select
                 onValueChange={(moodSlug) => {
                   if (moodSlug && slug) navigate(`/category/${slug}/mood/${moodSlug}`);
@@ -265,7 +280,7 @@ export default function CategoryLanding() {
                   <SelectValue placeholder="Filter by Mood" />
                 </SelectTrigger>
                 <SelectContent>
-                  {moodCats.map((m) => (
+                  {availableMoodCats.map((m) => (
                     <SelectItem key={m.id} value={m.slug}>{m.name}</SelectItem>
                   ))}
                 </SelectContent>
