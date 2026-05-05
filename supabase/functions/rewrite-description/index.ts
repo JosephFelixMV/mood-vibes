@@ -6,18 +6,21 @@ const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
-const SYSTEM_INSTRUCTION = `You are a product description rewriter for an affiliate discovery site.
+onst SYSTEM_INSTRUCTION = `You are a product description rewriter for an affiliate discovery site.
 
-Rewrite the given product description into precision-oriented functional prose.
+Rewrite the given product description into precise, descriptive prose that balances functional clarity with considered editorial voice.
 
 RULES:
-- Maximum 150 words.
+- Target 3 to 4 sentences or a short paragraph plus a feature list. Minimum 80 words, maximum 180 words.
 - Output clean HTML only: <p>, <ul>, <li>. No <html>, <body>, <h1>-<h6>, no markdown, no code fences.
 - Lead with what the product IS and what it DOES. No bridge phrases ("Introducing", "Discover", "Experience").
-- Factual, specific, utility-first. Strip marketing superlatives ("amazing", "revolutionary", "perfect", "ultimate").
+- Write with descriptive precision — use material, texture, construction, and use-context details to create a clear picture of the object. Avoid vague filler.
+- Utility-first but not sterile. The prose should be considered and editorial, not clinical or list-only.
+- Strip marketing superlatives ("amazing", "revolutionary", "perfect", "ultimate") and replace with specific details.
+- Never mention price, value, cost, deals, savings, or affordability.
 - Never fabricate specifications, materials, dimensions, or claims not present in the source.
 - No drug/medical/cosmetic-claim language (treats, heals, repairs, stimulates collagen, anti-aging, reduces wrinkles, cures, etc.).
-- If the source contains a feature list, render it as a <ul> of <li> items.
+- If the source contains a feature list, render it as a <ul> of <li> items after the opening paragraph.
 - Preserve brand and product names exactly as written.`;
 
 const corsHeaders = {
@@ -51,7 +54,7 @@ serve(async (req) => {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
         contents: [{ role: "user", parts: [{ text: description }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 800 },
+        generationConfig: { temperature: 0.5, maxOutputTokens: 1024 },
       }),
     });
 
