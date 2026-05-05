@@ -108,17 +108,17 @@ export default function VibeLanding() {
 
   const moodCountMap = useMemo(() => {
     const counts: Record<string, number> = {};
-    products.forEach((p) => {
+    regionFiltered.forEach((p) => {
       parseTaxonomyString(p.mood).forEach((name) => {
-        counts[name] = (counts[name] || 0) + 1;
+        counts[name.toLowerCase()] = (counts[name.toLowerCase()] || 0) + 1;
       });
     });
     return counts;
-  }, [products]);
+  }, [regionFiltered]);
 
   const availableMoodCats = isLoading
     ? moodCats
-    : moodCats.filter((m) => (moodCountMap[m.name] || 0) >= 3);
+    : moodCats.filter((m) => (moodCountMap[m.name.toLowerCase()] || 0) >= 3);
 
   const healthyProducts = regionFiltered.filter((p) => {
     if (filterVendor && p.vendor_id !== filterVendor) return false;

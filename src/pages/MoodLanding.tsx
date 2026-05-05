@@ -103,31 +103,31 @@ export default function MoodLanding() {
 
   const categoryCountMap = useMemo(() => {
     const counts: Record<string, number> = {};
-    products.forEach((p) => {
+    regionProducts.forEach((p) => {
       parseTaxonomyString(p.category).forEach((name) => {
-        counts[name] = (counts[name] || 0) + 1;
+        counts[name.toLowerCase()] = (counts[name.toLowerCase()] || 0) + 1;
       });
     });
     return counts;
-  }, [products]);
+  }, [regionProducts]);
 
   const vibeCountMap = useMemo(() => {
     const counts: Record<string, number> = {};
-    products.forEach((p) => {
+    regionProducts.forEach((p) => {
       parseTaxonomyString(p.vibe_category).forEach((name) => {
-        counts[name] = (counts[name] || 0) + 1;
+        counts[name.toLowerCase()] = (counts[name.toLowerCase()] || 0) + 1;
       });
     });
     return counts;
-  }, [products]);
+  }, [regionProducts]);
 
   const availableCoreCats = isLoading
     ? coreCats
-    : coreCats.filter((c) => (categoryCountMap[c.name] || 0) >= 3);
+    : coreCats.filter((c) => (categoryCountMap[c.name.toLowerCase()] || 0) >= 3);
 
   const availableVibeCats = isLoading
     ? vibeCats
-    : vibeCats.filter((v) => (vibeCountMap[v.name] || 0) >= 3);
+    : vibeCats.filter((v) => (vibeCountMap[v.name.toLowerCase()] || 0) >= 3);
 
   const filteredProducts = regionProducts.filter((p) => {
     if (filterVendor && p.vendor_id !== filterVendor) return false;

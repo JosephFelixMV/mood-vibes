@@ -533,7 +533,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         description: form.description,
         price: Number(form.price) || 0,
         image_url: form.image_url,
-        affiliate_url: form.affiliate_url,
+        ...(isAdmin ? { affiliate_url: form.affiliate_url } : {}),
         source_url: form.source_url,
         category: stringifyTaxonomyValues(parseTaxonomyString(form.category)),
         company_name: normalizeCompanyName(form.company_name || "") || null,

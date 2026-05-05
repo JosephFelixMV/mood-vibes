@@ -43,13 +43,13 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       setChecked(true);
     }
 
-    // Subscribe BEFORE getSession (per Supabase guidance) so we don't miss events.
+    // onAuthStateChange fires INITIAL_SESSION on mount, covering the initial load.
+    // Using getSession() alongside creates a race where resolveAccess runs twice
+    // concurrently and can overwrite role state — listener alone is sufficient.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (!mounted) return;
       resolveAccess(newSession);
     });
-
-    supabase.auth.getSession().then(({ data }) => resolveAccess(data.session));
 
     return () => {
       mounted = false;
