@@ -47,13 +47,13 @@ export default function ComboLanding() {
   const queryEnabled = !!primary && !!mood;
 
   const { data: result, isLoading } = useQuery({
-    queryKey: ["combo-products", primaryType, primary?.name, mood?.name, page],
+    queryKey: ["combo-products", primaryType, primarySlug, moodSlug, page],
     queryFn: () =>
       getProductsPaginated({
         ...(isCoreCombo
-          ? { category: primary!.name }
-          : { vibeCategory: primary!.name }),
-        mood: mood!.name,
+          ? { category: primarySlug }
+          : { vibeCategory: primarySlug }),
+        mood: moodSlug,
         page,
         pageSize: PAGE_SIZE,
         sort: "newest",
