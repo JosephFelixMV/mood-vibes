@@ -51,10 +51,29 @@ export default function AnalyticsLoader() {
     const cleanup = () => {
       window.removeEventListener("enzuzo:consent", handleConsent);
       window.removeEventListener("enzuzo-consent", handleConsent);
+      window.removeEventListener("enzuzo-consent-changed", handleConsent);
+      window.removeEventListener("CookiebotOnAccept", handleConsent);
+      if (pollId) window.clearInterval(pollId);
     };
 
     window.addEventListener("enzuzo:consent", handleConsent);
     window.addEventListener("enzuzo-consent", handleConsent);
+    window.addEventListener("enzuzo-consent-changed", handleConsent);
+    window.addEventListener("CookiebotOnAccept", handleConsent);
+
+    // Fallback: Enzuzo's cookiebar doesn't reliably dispatch a custom event
+    // when the visitor clicks "Allow All" — it just sets the
+    // `cookies-analytics=true` cookie. Poll briefly so we still inject scripts.
+    const pollId = window.setInterval(() => {
+      if (hasAnalyticsConsent()) {
+        injectAll();
+        cleanup();
+      }
+    }, 500);
+    // Stop polling after 5 minutes regardless
+    window.setTimeout(() => {
+      if (pollId) window.clearInterval(pollId);
+    }, 5 * 60 * 1000);
 
     return cleanup;
   }, [config]);
