@@ -17,6 +17,8 @@ import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
 import { formatPrice } from "@/lib/supabase-queries";
+import ImageUploader from "@/components/admin/ImageUploader";
+import { deleteProductImageIfOwned } from "@/lib/image-upload";
 import {
   capKeywordsPreservingGiftFor,
   dedupeTaxonomyValues,
