@@ -15,6 +15,8 @@ interface SEOProps {
   siteSchema?: boolean;
   /** Breadcrumb trail: array of {name, url} items from root to current page */
   breadcrumbs?: { name: string; url: string }[];
+  noindex?: boolean;
+  canonicalOverride?: string;
 }
 
 const SITE_DEFAULT_OG = "https://www.mood-and-vibes.com/og-default.jpg";
@@ -33,8 +35,41 @@ export function useSEO({
   collectionName,
   siteSchema,
   breadcrumbs,
+  noindex,
+  canonicalOverride,
 }: SEOProps) {
   useEffect(() => {
+    const setLink = (rel: string, href: string) => {
+      let el = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
+      if (!el) {
+        el = document.createElement("link");
+        el.setAttribute("rel", rel);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("href", href);
+    };
+
+    const canonicalUrl =
+      canonicalOverride || url || window.location.origin + window.location.pathname;
+
+    // Always update canonical and robots meta regardless of whether title/description
+    // are ready — noindex must fire on thin combo pages even during the loading window.
+    setLink("canonical", canonicalUrl);
+
+    const existingRobots = document.querySelector('meta[name="robots"]');
+    if (noindex) {
+      if (existingRobots) {
+        existingRobots.setAttribute("content", "noindex, follow");
+      } else {
+        const m = document.createElement("meta");
+        m.setAttribute("name", "robots");
+        m.setAttribute("content", "noindex, follow");
+        document.head.appendChild(m);
+      }
+    } else if (existingRobots) {
+      existingRobots.remove();
+    }
+
     if (!title && !description) return;
 
     const suffix = "Mood & Vibes";
@@ -55,20 +90,7 @@ export function useSEO({
       el.setAttribute("content", content);
     };
 
-    const setLink = (rel: string, href: string) => {
-      let el = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
-      if (!el) {
-        el = document.createElement("link");
-        el.setAttribute("rel", rel);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("href", href);
-    };
-
-    const canonicalUrl = url || window.location.origin + window.location.pathname;
     const ogImage = image || SITE_DEFAULT_OG;
-
-    setLink("canonical", canonicalUrl);
 
     if (description) {
       setMeta("name", "description", description);
@@ -188,5 +210,5 @@ export function useSEO({
       document.getElementById("seo-website-jsonld")?.remove();
       document.getElementById("seo-breadcrumb-jsonld")?.remove();
     };
-  }, [title, description, image, url, keywords, rawTitle, price, productName, ogType, collectionName, siteSchema, breadcrumbs]);
+  }, [title, description, image, url, keywords, rawTitle, price, productName, ogType, collectionName, siteSchema, breadcrumbs, noindex, canonicalOverride]);
 }

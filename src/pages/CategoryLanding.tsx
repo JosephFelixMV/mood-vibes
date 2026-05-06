@@ -1,9 +1,10 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getCategories, getRandomProduct, filterByRegion, type Product } from "@/lib/supabase-queries";
+import { parseTaxonomyString } from "@/lib/taxonomy-utils";
 import { setDiscoveryContext } from "@/lib/discovery-context";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -35,6 +36,12 @@ const WARMTH_OPTIONS = [
 export default function CategoryLanding() {
   const { region } = useRegion();
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+
+  const { data: moodCats = [] } = useQuery({
+    queryKey: ["categories", "mood"],
+    queryFn: () => getCategories("mood"),
+  });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", "core"],
@@ -54,6 +61,13 @@ export default function CategoryLanding() {
   const filterNames = isParent && childNames.length > 0
     ? [categoryName, ...childNames]
     : [categoryName];
+
+  const childSlugs = isParent
+    ? categories.filter((c) => c.parent_slug === slug).map((c) => c.slug)
+    : [];
+  const filterSlugs = slug
+    ? (isParent && childSlugs.length > 0 ? [slug, ...childSlugs] : [slug])
+    : [];
 
   const isFashionCategory = FASHION_SLUGS.includes(slug || "");
 
@@ -83,22 +97,30 @@ export default function CategoryLanding() {
   });
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["category-products", slug, filterNames.join(",")],
+    queryKey: ["category-products", slug, filterSlugs.join(",")],
     queryFn: async () => {
-      const orClause = filterNames
-        .map((n) => `category.ilike.*${n.replace(/[,()"]/g, "")}*`)
-        .join(",");
+      if (!filterSlugs.length) return [];
+
+      const { data: junctionRows, error: jErr } = await supabase
+        .from("product_categories")
+        .select("product_id")
+        .in("category_slug", filterSlugs);
+      if (jErr) throw jErr;
+
+      const productIds = [...new Set((junctionRows || []).map((r: any) => r.product_id))];
+      if (!productIds.length) return [];
+
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("is_active", true)
-        .or(orClause)
+        .in("id", productIds)
         .order("date_added", { ascending: false })
         .limit(300);
       if (error) throw error;
       return (data as Product[]).filter((p) => !p.page_error);
     },
-    enabled: !!categoryName,
+    enabled: !!categoryName && categories.length > 0,
   });
 
   const [filterVendor, setFilterVendor] = useState("");
@@ -131,6 +153,20 @@ export default function CategoryLanding() {
       .map((b: any) => ({ id: b.id, name: toTitleCase(b.name) }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [regionFiltered, brandsList]);
+
+  const moodCountMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    regionFiltered.forEach((p) => {
+      parseTaxonomyString(p.mood).forEach((name) => {
+        counts[name.toLowerCase()] = (counts[name.toLowerCase()] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [regionFiltered]);
+
+  const availableMoodCats = isLoading
+    ? moodCats
+    : moodCats.filter((m) => (moodCountMap[m.name.toLowerCase()] || 0) >= 3);
 
   const healthyProducts = regionFiltered.filter((p) => {
     if (filterVendor && p.vendor_id !== filterVendor) return false;
@@ -249,6 +285,22 @@ export default function CategoryLanding() {
                 ))}
               </SelectContent>
             </Select>
+            {!isParent && availableMoodCats.length > 0 && (
+              <Select
+                onValueChange={(moodSlug) => {
+                  if (moodSlug && slug) navigate(`/category/${slug}/mood/${moodSlug}`);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Filter by Mood" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableMoodCats.map((m) => (
+                    <SelectItem key={m.id} value={m.slug}>{m.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />

@@ -97,9 +97,26 @@ Deno.serve(async (req) => {
       from += PAGE;
     }
 
+    // Combo URLs: (core × mood) and (vibe × mood).
+    // Uses a single aggregation RPC instead of N×M individual COUNT queries
+    // to stay well within the Edge Function 150s wall-clock timeout.
+    const comboUrls: string[] = [];
+
+    const { data: combos, error: comboError } = await supabase
+      .rpc("get_sitemap_combo_counts");
+
+    if (comboError) console.error("Combo counts error:", comboError);
+
+    for (const row of combos || []) {
+      const path = row.primary_type === "core"
+        ? `/category/${row.primary_slug}/mood/${row.mood_slug}`
+        : `/vibe/${row.primary_slug}/mood/${row.mood_slug}`;
+      comboUrls.push(urlEntry(`${base}${path}`, today, "weekly", "0.6"));
+    }
+
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticUrls, ...categoryUrls, ...productUrls].join("\n")}
+${[...staticUrls, ...categoryUrls, ...comboUrls, ...productUrls].join("\n")}
 </urlset>`;
 
     return new Response(xml, {

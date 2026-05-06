@@ -11,7 +11,7 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Plus, Upload, Download, Info, ExternalLink } from "lucide-react";
+import { X, Plus, Upload, Download, Info, ExternalLink, Sparkles, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
@@ -302,6 +302,33 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   };
 
   const [suggestingCategories, setSuggestingCategories] = useState(false);
+  const [rewriting, setRewriting] = useState(false);
+
+  const handleRewriteDescription = async () => {
+    const raw = form.description?.replace(/<[^>]*>/g, "").trim();
+    if (!raw || raw.length < 20) {
+      toast.error("Add a description first before rewriting.");
+      return;
+    }
+    setRewriting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "rewrite-description",
+        { body: { description: form.description } }
+      );
+      if (error) throw error;
+      if (data?.rewritten) {
+        set("description", data.rewritten);
+        toast.success("Description rewritten.");
+      } else {
+        toast.error("No output returned. Try again.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Rewrite failed.");
+    } finally {
+      setRewriting(false);
+    }
+  };
   const [aiSuggestions, setAiSuggestions] = useState<{
     core: string[];
     vibes: string[];
@@ -506,7 +533,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         description: form.description,
         price: Number(form.price) || 0,
         image_url: form.image_url,
-        affiliate_url: form.affiliate_url,
+        ...(isAdmin ? { affiliate_url: form.affiliate_url } : {}),
         source_url: form.source_url,
         category: stringifyTaxonomyValues(parseTaxonomyString(form.category)),
         company_name: normalizeCompanyName(form.company_name || "") || null,
@@ -544,6 +571,34 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         const { data, error } = await supabase.from("products").insert([insertPayload]).select("id").single();
         if (error) throw error;
         productId = data.id;
+      }
+
+      // Explicit junction table writes — trigger also handles this, but we write
+      // directly so Phase 5 (trigger drop) requires no further app changes.
+      if (productId) {
+        const slugFor = (cats: typeof coreCategories, name: string) =>
+          cats.find((c) => c.name === name)?.slug;
+
+        const catRows = parseTaxonomyString(form.category)
+          .map((name, i) => { const s = slugFor(coreCategories, name); return s ? { product_id: productId!, category_slug: s, is_primary: i === 0, display_order: i } : null; })
+          .filter((r: any) => r !== null);
+        const vibeRows = parseTaxonomyString(form.vibe_category)
+          .map((name, i) => { const s = slugFor(vibeCategories, name); return s ? { product_id: productId!, vibe_slug: s, is_primary: i === 0, display_order: i } : null; })
+          .filter((r: any) => r !== null);
+        const moodRows = parseTaxonomyString(form.mood)
+          .map((name, i) => { const s = slugFor(moodCategories, name); return s ? { product_id: productId!, mood_slug: s, is_primary: i === 0, display_order: i } : null; })
+          .filter((r: any) => r !== null);
+
+        await Promise.all([
+          supabase.from("product_categories").delete().eq("product_id", productId),
+          supabase.from("product_vibes").delete().eq("product_id", productId),
+          supabase.from("product_moods").delete().eq("product_id", productId),
+        ]);
+        await Promise.all([
+          catRows.length > 0 ? supabase.from("product_categories").insert(catRows) : Promise.resolve(),
+          vibeRows.length > 0 ? supabase.from("product_vibes").insert(vibeRows) : Promise.resolve(),
+          moodRows.length > 0 ? supabase.from("product_moods").insert(moodRows) : Promise.resolve(),
+        ]);
       }
 
       const validImages = form.additional_images.filter((url: string) => url.trim());
@@ -833,6 +888,23 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         <div>
           <Label>Description</Label>
           <RichTextEditor value={form.description} onChange={(html) => set("description", html)} />
+          <div className="mt-2 flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleRewriteDescription}
+              disabled={rewriting}
+              className="gap-1.5 rounded-full text-xs"
+            >
+              {rewriting ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Sparkles className="h-3 w-3" />
+              )}
+              {rewriting ? "Rewriting…" : "Rewrite with AI"}
+            </Button>
+          </div>
         </div>
         <div>
           <Label>

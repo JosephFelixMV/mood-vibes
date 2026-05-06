@@ -1,9 +1,10 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
+import { parseTaxonomyString } from "@/lib/taxonomy-utils";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,10 +23,24 @@ export default function MoodLanding() {
   const { slug } = useParams<{ slug: string }>();
   const { region } = useRegion();
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
+  const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState<
+    { type: "core" | "vibe"; slug: string } | null
+  >(null);
 
   const { data: moods = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
+  });
+
+  const { data: coreCats = [] } = useQuery({
+    queryKey: ["categories", "core"],
+    queryFn: () => getCategories("core"),
+  });
+
+  const { data: vibeCats = [] } = useQuery({
+    queryKey: ["categories", "vibe"],
+    queryFn: () => getCategories("vibe"),
   });
 
   const mood = moods.find((m) => m.slug === slug);
@@ -37,14 +52,24 @@ export default function MoodLanding() {
   }, [slug, mood?.name]);
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["mood-products", mood?.name, sort],
+    queryKey: ["mood-products", mood?.slug, sort],
     queryFn: async () => {
       if (!mood) return [];
+
+      const { data: junctionRows, error: jErr } = await supabase
+        .from("product_moods")
+        .select("product_id")
+        .eq("mood_slug", mood.slug);
+      if (jErr) throw jErr;
+
+      const productIds = [...new Set((junctionRows || []).map((r: any) => r.product_id))];
+      if (!productIds.length) return [];
+
       let query = supabase
         .from("products")
         .select("*")
         .eq("is_active", true)
-        .ilike("mood", `%${mood.name}%`);
+        .in("id", productIds);
 
       query = sort === "newest"
         ? query.order("date_added", { ascending: false })
@@ -85,6 +110,34 @@ export default function MoodLanding() {
       .map((b: any) => ({ id: b.id, name: toTitleCase(b.name) }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [regionProducts, brandsList]);
+
+  const categoryCountMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    regionProducts.forEach((p) => {
+      parseTaxonomyString(p.category).forEach((name) => {
+        counts[name.toLowerCase()] = (counts[name.toLowerCase()] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [regionProducts]);
+
+  const vibeCountMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    regionProducts.forEach((p) => {
+      parseTaxonomyString(p.vibe_category).forEach((name) => {
+        counts[name.toLowerCase()] = (counts[name.toLowerCase()] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [regionProducts]);
+
+  const availableCoreCats = isLoading
+    ? coreCats
+    : coreCats.filter((c) => (categoryCountMap[c.name.toLowerCase()] || 0) >= 3);
+
+  const availableVibeCats = isLoading
+    ? vibeCats
+    : vibeCats.filter((v) => (vibeCountMap[v.name.toLowerCase()] || 0) >= 3);
 
   const filteredProducts = regionProducts.filter((p) => {
     if (filterVendor && p.vendor_id !== filterVendor) return false;
@@ -149,6 +202,44 @@ export default function MoodLanding() {
               ))}
             </SelectContent>
           </Select>
+          {availableCoreCats.length > 0 && (
+            <Select
+              value={activeFilter?.type === "core" ? activeFilter.slug : undefined}
+              onValueChange={(coreSlug) => {
+                if (!coreSlug || !slug) return;
+                setActiveFilter({ type: "core", slug: coreSlug });
+                navigate(`/category/${coreSlug}/mood/${slug}`);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Shop by Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableCoreCats.map((c) => (
+                  <SelectItem key={c.id} value={c.slug}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {availableVibeCats.length > 0 && (
+            <Select
+              value={activeFilter?.type === "vibe" ? activeFilter.slug : undefined}
+              onValueChange={(vibeSlug) => {
+                if (!vibeSlug || !slug) return;
+                setActiveFilter({ type: "vibe", slug: vibeSlug });
+                navigate(`/vibe/${vibeSlug}/mood/${slug}`);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Shop by Vibe" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableVibeCats.map((v) => (
+                  <SelectItem key={v.id} value={v.slug}>{v.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
             <Button
               variant={sort === "newest" ? "default" : "outline"}

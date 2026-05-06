@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getPublicCategories, getProductCountByCategory } from "@/lib/supabase-queries";
+import { getCategories, getProductCountByCategory, MIN_PRODUCTS_PER_CATEGORY } from "@/lib/supabase-queries";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/useSEO";
 import type { Category } from "@/lib/supabase-queries";
@@ -16,8 +16,8 @@ export default function Categories() {
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["public-categories", "core"],
-    queryFn: () => getPublicCategories("core"),
+    queryKey: ["all-categories", "core"],
+    queryFn: () => getCategories("core"),
   });
   const { data: counts = {} } = useQuery({
     queryKey: ["product-counts"],
@@ -26,7 +26,9 @@ export default function Categories() {
 
   const ORDER = ["home-living", "beauty-wellness", "everyday-goods", "jewel-box", "fashion-style"];
   const parentSlugsWithChildren = new Set(
-    categories.filter((c) => c.parent_slug).map((c) => c.parent_slug as string),
+    categories
+      .filter((c) => c.parent_slug && (counts[c.slug] ?? 0) >= MIN_PRODUCTS_PER_CATEGORY)
+      .map((c) => c.parent_slug as string),
   );
   const parents = categories
     .filter((c) => !c.parent_slug)
@@ -41,7 +43,9 @@ export default function Categories() {
       return ai - bi;
     });
   const childrenOf = (parentSlug: string) =>
-    categories.filter((c) => c.parent_slug === parentSlug);
+    categories
+      .filter((c) => c.parent_slug === parentSlug)
+      .filter((c) => (counts[c.slug] ?? 0) >= MIN_PRODUCTS_PER_CATEGORY);
 
   return (
     <div className="container py-12">
@@ -79,7 +83,7 @@ export default function Categories() {
                       <CategoryIcon category={sub} emojiClassName="text-sm" imgClassName="h-4 w-4 rounded object-cover" />
                       {sub.name}
                       <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                        {counts[sub.name] ?? 0}
+                        {counts[sub.slug] ?? 0}
                       </Badge>
                     </Link>
                   ))}

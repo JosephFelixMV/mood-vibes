@@ -54,7 +54,7 @@ Playwright e2e tests live in `e2e/`. Run with `npx playwright test`.
 
 Public: `/`, `/products`, `/product/:slug`, `/category/:slug`, `/vibes/:slug`, `/moods/:slug`, `/discover`, `/brands`, `/categories`, `/vibes`, `/moods`, `/about`, `/disclosure`, `/privacy`, `/terms`
 
-Protected: `/admin` — wrapped in `ProtectedRoute` (Supabase JWT + RLS enforced server-side)
+Protected: `/admin` — wrapped in `ProtectedRoute` (Supabase JWT + role check via `user_roles` table)
 
 ### Data Fetching
 
@@ -63,6 +63,26 @@ All Supabase queries are centralized in **`src/lib/supabase-queries.ts`** — do
 Supabase enforces a 1000-row limit; queries use pagination where needed. Region filtering (`filterByRegion()`) is applied client-side based on the product `regions` field.
 
 All Supabase queries must use **server-side filters with `.limit()` caps** — `CategoryLanding`, `VibeLanding`, `MoodLanding`, and `Index.tsx` must never do full-table fetches filtered in JavaScript.
+
+### Taxonomy Architecture
+
+Products are tagged with core categories, vibes, and moods. The canonical data lives in three **junction tables** — never filter products using the legacy CSV columns (`products.category`, `products.vibe_category`, `products.mood`):
+
+| Junction table | FK column | Links to |
+|---|---|---|
+| `product_categories` | `category_slug` | `categories.slug` where `type = 'core'` |
+| `product_vibes` | `vibe_slug` | `categories.slug` where `type = 'vibe'` |
+| `product_moods` | `mood_slug` | `categories.slug` where `type = 'mood'` |
+
+**Filtering pattern** — all landing pages and `applyProductFilters` use a two-step query:
+1. Query the junction table for matching product IDs
+2. Fetch products with `.in("id", productIds)`
+
+**Write path** — `ProductForm.tsx` writes both the legacy CSV columns (backward compat) and the junction tables explicitly. A `BEFORE INSERT OR UPDATE` trigger (`trg_sync_taxonomy_junction_tables`) also syncs junction tables automatically from the CSV columns as a safety net.
+
+**Category visibility threshold** — `MIN_PRODUCTS_PER_CATEGORY = 8` (defined in `supabase-queries.ts`). The `get_categories_with_counts()` RPC enforces `HAVING COUNT >= 8`, which gates all public-facing category lists, the sitemap, and homepage chips.
+
+**Phase 5 pending** (after regression testing): drop the trigger, drop `products.category / vibe_category / mood` columns, remove `parseTaxonomyString` / `stringifyTaxonomyValues` / `dedupeTaxonomyValues` from `taxonomy-utils.ts`, and update `ProductForm` to load taxonomy from junction tables instead of CSV.
 
 ### Analytics
 
@@ -78,8 +98,20 @@ Use the **`useSEO()` hook** (`src/hooks/useSEO.tsx`) on every page. It injects m
 
 ### Admin Panel (`/admin`)
 
+Two roles gate access — resolved from the `user_roles` table via `ProtectedRoute` → `UserRoleContext` (`src/contexts/UserRoleContext.tsx`):
+
+| Feature | admin | content |
+|---|---|---|
+| Products list + Add/Edit | ✓ | ✓ |
+| Affiliate Link field in ProductForm | ✓ | hidden |
+| Delete products (single + bulk) | ✓ | hidden |
+| Brands, Bulk Upload, Analytics, AI Discover, Flagged Links, Configuration tabs | ✓ | hidden |
+
+Any `@mood-and-vibes.com` Google Workspace user with no `user_roles` row defaults to `content`. Admin rows must be explicitly inserted in the Supabase SQL editor. Products record `created_by` and `updated_by` (user email) on every save.
+
 Full CRUD for products with a live preview pane. Key features:
 - **AI Category Suggestions** — calls the `suggest-categories` Supabase Edge Function (Anthropic Claude API), which uses brand hints from `brand_lookup` table and enforces a drug/medical-claims blocklist.
+- **AI Description Rewrite** — calls the `rewrite-description` Edge Function (Google Gemini API) to rewrite product descriptions into precision-oriented functional prose.
 - **Bulk Upload** — JSON import via `BulkUpload.tsx`.
 - **Analytics Dashboard** — charts from `product_events` table.
 
@@ -87,8 +119,9 @@ Full CRUD for products with a live preview pane. Key features:
 
 Deno/TypeScript functions:
 - `suggest-categories` — AI categorization (Anthropic API). **Must read categories dynamically from Supabase `category_vibe_manager` tables — never use hardcoded category arrays.**
-- `batch-suggest-update` — bulk AI re-categorization. **Same rule: categories must be read from DB, not hardcoded.**
 - `discover-products` — date-seeded random product pick. **Must enforce server-side rate limiting to prevent runaway Anthropic API costs.**
+- `rewrite-description` — rewrites a product description into precision-oriented functional prose using Google Gemini 2.5 Flash. Accepts `{ description: string }`, returns `{ rewritten: string }` (clean HTML). Requires `GEMINI_API_KEY` secret. Max 150 words; strips marketing superlatives; never fabricates specs.
+- `daily-pick` — returns today's daily pick product with pre-built social copy (Instagram/Facebook captions, hashtags, UTM URLs). Authenticated via `x-api-secret` header (`SOCIAL_API_SECRET` secret). Calls `get_or_create_daily_pick` RPC. Intended for social automation pipelines.
 - `validate-click` — affiliate click fraud detection
 - `check-affiliate-links` — URL reachability check
 - `sitemap` — dynamic XML sitemap for SEO
@@ -113,23 +146,28 @@ Deno/TypeScript functions:
 
 | Table | Purpose |
 |---|---|
-| `products` | Core product records |
+| `products` | Core product records — includes `created_by` (TEXT) and `updated_by` (TEXT) set on save |
 | `product_images` | Up to 4 gallery images per product |
 | `product_specifications` | Key/value spec pairs |
 | `product_events` | Analytics (view/click events) |
-| `categories` | Taxonomy (type: core/vibe/mood) |
+| `categories` | Taxonomy definitions (type: core/vibe/mood) — slug, name, icon, parent_slug |
+| `product_categories` | Junction: product ↔ core category slug. Source of truth for category filtering |
+| `product_vibes` | Junction: product ↔ vibe slug. Source of truth for vibe filtering |
+| `product_moods` | Junction: product ↔ mood slug. Source of truth for mood filtering |
 | `brand_lookup` | Brand hints for AI categorization |
 | `daily_picks` | Product of the Day (RPC-generated) |
 | `category_vibe_manager` | Source of truth for categories/vibes — Edge Functions must read from here |
+| `user_roles` | Maps `user_id UUID` → `role TEXT` (admin/content). RLS: users can only read their own row. Managed via Supabase SQL editor — not the admin UI. |
 
 ## Security Rules
 
 - **Never expose `service_role` key** in any frontend code — anon key only (`VITE_SUPABASE_PUBLISHABLE_KEY`)
 - All Supabase queries must use **server-side filters with `.limit()` caps** — no full-table fetches filtered client-side
 - Edge Functions must read categories **dynamically from Supabase** — never hardcode category arrays (silently ignores admin UI edits)
-- `/admin` route requires active **Supabase Auth session (JWT + TOTP 2FA)** — no password-only protection
+- `/admin` route requires active **Supabase Auth session** + a valid row in `user_roles` (or `@mood-and-vibes.com` domain → defaults to `content`). To grant admin: `INSERT INTO user_roles (user_id, role) SELECT id, 'admin' FROM auth.users WHERE email = '...'`
 - `AI Discover` Edge Function must enforce **server-side rate limiting** to prevent runaway Anthropic API costs
 - Supabase RLS policies must be present and complete on all tables
+- `daily-pick` Edge Function is authenticated via `x-api-secret` header — never call it without the `SOCIAL_API_SECRET` secret
 
 ## Environment Variables
 
@@ -138,7 +176,13 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
 ```
 
-The Supabase anon key is safe to expose in frontend code. Edge functions use server-side secrets (set in Supabase dashboard, not `.env`).
+The Supabase anon key is safe to expose in frontend code. Edge functions use server-side secrets (set in Supabase Dashboard → Edge Functions → Secrets, not `.env`):
+
+| Secret | Used by |
+|---|---|
+| `ANTHROPIC_API_KEY` | `suggest-categories`, `discover-products` |
+| `GEMINI_API_KEY` | `rewrite-description` |
+| `SOCIAL_API_SECRET` | `daily-pick` (bearer token for social automation callers) |
 
 ## TypeScript Config
 

@@ -114,41 +114,21 @@ export default function Index() {
     queryFn: () => getCategories("vibe"),
   });
 
-  // Single consolidated query that fetches mood + vibe_category for all active
-  // products, then derives per-mood / per-vibe counts client-side. Replaces the
-  // previous N+N pattern (one count query per mood and per vibe).
+  // Two RPC calls — returns only categories meeting the ≥15 product threshold,
+  // keyed by slug. Replaces the old paginated CSV-split loop.
   const { data: taxonomyCounts, isLoading: taxonomyLoading } = useQuery({
     queryKey: ["homepage-taxonomy-counts"],
     queryFn: async () => {
-      const PAGE_SIZE = 1000;
-      let from = 0;
-      let hasMore = true;
+      const [{ data: moodData, error: mErr }, { data: vibeData, error: vErr }] = await Promise.all([
+        supabase.rpc("get_categories_with_counts", { category_type: "mood" }),
+        supabase.rpc("get_categories_with_counts", { category_type: "vibe" }),
+      ]);
+      if (mErr) throw mErr;
+      if (vErr) throw vErr;
       const moodCounts: Record<string, number> = {};
       const vibeCounts: Record<string, number> = {};
-      while (hasMore) {
-        const { data, error } = await supabase
-          .from("products")
-          .select("mood, vibe_category")
-          .eq("is_active", true)
-          .range(from, from + PAGE_SIZE - 1);
-        if (error) throw error;
-        (data ?? []).forEach((row: { mood: string | null; vibe_category: string | null }) => {
-          if (row.mood) {
-            row.mood.split(",").forEach((m) => {
-              const k = m.trim().toLowerCase();
-              if (k) moodCounts[k] = (moodCounts[k] || 0) + 1;
-            });
-          }
-          if (row.vibe_category) {
-            row.vibe_category.split(",").forEach((v) => {
-              const k = v.trim().toLowerCase();
-              if (k) vibeCounts[k] = (vibeCounts[k] || 0) + 1;
-            });
-          }
-        });
-        hasMore = (data?.length || 0) === PAGE_SIZE;
-        from += PAGE_SIZE;
-      }
+      (moodData || []).forEach((c: any) => { moodCounts[c.slug] = c.product_count; });
+      (vibeData || []).forEach((c: any) => { vibeCounts[c.slug] = c.product_count; });
       return { moodCounts, vibeCounts };
     },
     staleTime: 1000 * 60 * 15,
@@ -160,7 +140,7 @@ export default function Index() {
   const qualifiedMoods = useMemo(
     () =>
       moods
-        .map((m) => ({ ...m, productCount: taxonomyCounts?.moodCounts[m.name.toLowerCase()] ?? 0 }))
+        .map((m) => ({ ...m, productCount: taxonomyCounts?.moodCounts[m.slug] ?? 0 }))
         .filter((m) => m.productCount > 0),
     [moods, taxonomyCounts],
   );
@@ -168,7 +148,7 @@ export default function Index() {
   const qualifiedVibes = useMemo(
     () =>
       vibes
-        .map((v) => ({ ...v, productCount: taxonomyCounts?.vibeCounts[v.name.toLowerCase()] ?? 0 }))
+        .map((v) => ({ ...v, productCount: taxonomyCounts?.vibeCounts[v.slug] ?? 0 }))
         .filter((v) => v.productCount > 0),
     [vibes, taxonomyCounts],
   );

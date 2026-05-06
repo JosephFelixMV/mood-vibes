@@ -110,30 +110,9 @@ export default function CategoryVibeManager() {
       if (data.id) {
         const { error } = await supabase.from("categories").update(payload).eq("id", data.id);
         if (error) throw error;
-
-        // If name changed, update all products referencing the old name
-        const oldName = data.oldName;
-        if (oldName && oldName !== newName) {
-          const column = data.type === "core" ? "category" : data.type === "vibe" ? "vibe_category" : "mood";
-          // Fetch products containing the old name in the relevant column
-          const { data: products } = await supabase
-            .from("products")
-            .select("id, category, vibe_category, mood")
-            .ilike(column, `%${oldName}%`);
-
-          if (products && products.length > 0) {
-            for (const product of products) {
-              const rawValue = column === "category" ? product.category : column === "vibe_category" ? product.vibe_category : product.mood;
-              if (!rawValue) continue;
-              const tags = rawValue.split(",").map((t: string) => t.trim());
-              const updated = tags.map((t: string) => (t === oldName ? newName : t)).join(", ");
-              if (updated !== rawValue) {
-                const updatePayload = column === "category" ? { category: updated } : column === "vibe_category" ? { vibe_category: updated } : { mood: updated };
-                await supabase.from("products").update(updatePayload).eq("id", product.id);
-              }
-            }
-          }
-        }
+        // Junction tables reference slugs which are stable across renames — no
+        // product cascade needed. CSV columns (dropped in Phase 5) may show the
+        // old display name until the product is next saved via ProductForm.
       } else {
         const { error } = await supabase.from("categories").insert(payload);
         if (error) throw error;
