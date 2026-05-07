@@ -36,6 +36,23 @@ function TileImage({ product }: { product: Product }) {
       ) : (
         <div className="absolute inset-0 flex items-center justify-center text-4xl text-muted-foreground">🛍️</div>
       )}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="absolute right-2 top-2 z-10 rounded-full bg-card/80 p-1 backdrop-blur-sm"
+              onClick={(e) => e.stopPropagation()}
+              aria-label="Image styling disclosure"
+            >
+              <Info className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-[220px] text-xs">
+            Some images digitally styled with AI to showcase product aesthetic. Actual product details may vary slightly from scene; please refer to retailer gallery for exact specifications.
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }
