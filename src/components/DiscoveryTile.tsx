@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { Info } from "lucide-react";
 
 import { formatPrice } from "@/lib/supabase-queries";
 import type { Product } from "@/lib/supabase-queries";
@@ -11,6 +12,7 @@ import ReportBrokenLink from "@/components/ReportBrokenLink";
 import ShareButton from "@/components/ShareButton";
 import fallbackImage from "@/assets/fallback-product.png";
 import { formatBrandName } from "@/lib/brand-utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
 
