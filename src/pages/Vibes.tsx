@@ -21,6 +21,7 @@ export default function Vibes() {
   const { data: counts = {} } = useQuery({
     queryKey: ["vibe-counts"],
     queryFn: getProductCountByVibe,
+    staleTime: 1000 * 60 * 15,
   });
 
   return (

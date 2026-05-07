@@ -35,7 +35,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
   const { data: allCategories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: () => getCategories(),
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: allBrands = [] } = useQuery({

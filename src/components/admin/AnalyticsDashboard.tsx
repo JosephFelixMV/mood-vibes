@@ -67,11 +67,13 @@ export default function AnalyticsDashboard() {
   const { data: coreCategories = [] } = useQuery({
     queryKey: ["categories", "core"],
     queryFn: () => getCategories("core"),
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: vibeCategories = [] } = useQuery({
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: junctionData } = useQuery({

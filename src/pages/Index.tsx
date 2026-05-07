@@ -108,10 +108,12 @@ export default function Index() {
   const { data: moods = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
+    staleTime: 1000 * 60 * 30,
   });
   const { data: vibes = [] } = useQuery({
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
+    staleTime: 1000 * 60 * 30,
   });
 
   // Two RPC calls — returns only categories meeting the ≥15 product threshold,

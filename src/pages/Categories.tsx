@@ -16,12 +16,14 @@ export default function Categories() {
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["all-categories", "core"],
+    queryKey: ["categories", "core"],
     queryFn: () => getCategories("core"),
+    staleTime: 1000 * 60 * 30,
   });
   const { data: counts = {} } = useQuery({
     queryKey: ["product-counts"],
     queryFn: getProductCountByCategory,
+    staleTime: 1000 * 60 * 15,
   });
 
   const ORDER = ["home-living", "beauty-wellness", "everyday-goods", "jewel-box", "fashion-style"];

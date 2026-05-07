@@ -98,16 +98,19 @@ export default function ProductList({ onEdit }: Props) {
   const { data: coreCategories = [] } = useQuery({
     queryKey: ["categories", "core"],
     queryFn: () => getCategories("core"),
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: vibeCategories = [] } = useQuery({
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: moodCategories = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
+    staleTime: 1000 * 60 * 30,
   });
   const { data: brandsList = [] } = useQuery({
     queryKey: ["brands"],

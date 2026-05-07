@@ -29,7 +29,7 @@ export function useSiteConfig() {
       return map;
     },
     // site_config rarely changes during a session; keep it cached for a while
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 60,
   });
 }
 
