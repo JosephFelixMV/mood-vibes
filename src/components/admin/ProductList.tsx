@@ -286,9 +286,9 @@ export default function ProductList({ onEdit }: Props) {
   const filtered = products.filter((p) => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      const matchName = p.name.toLowerCase().includes(q);
+      const matchName = (p.name || "").toLowerCase().includes(q);
       const matchCompany = (p.company_name || "").toLowerCase().includes(q);
-      const matchCategory = p.category.toLowerCase().includes(q);
+      const matchCategory = (p.category || "").toLowerCase().includes(q);
       const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
       if (!matchName && !matchCompany && !matchCategory && !matchVibe) return false;
     }

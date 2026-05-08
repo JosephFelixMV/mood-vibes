@@ -1,27 +1,36 @@
 ## Issue
 
-The Admin → Products list crashes with `RangeError: Invalid time value` because `format(new Date(p.date_added), …)` and `format(new Date(p.updated_at), …)` are called unconditionally inside the row map. If any product row has a null/invalid `date_added` or `updated_at`, `date-fns` throws and React unmounts the whole admin tree, so the page goes blank.
+The Admin Products list crashes (admin tree unmounts → page goes blank) as soon as the user types in the search box. The previous `safeFormat` fix handled invalid dates in the row render, but the search filter itself is unguarded and throws on the first product whose `name` or `category` is null/undefined.
 
-(The CSP `connect-src` warnings from `googleadservices.com` / `google.com/ccm` are unrelated noise — Google Ads tag trying to ping conversion endpoints not whitelisted in `public/_headers`. They do not blank the page.)
+In `src/components/admin/ProductList.tsx` (lines 286–294):
+
+```ts
+const matchName = p.name.toLowerCase().includes(q);
+const matchCompany = (p.company_name || "").toLowerCase().includes(q);
+const matchCategory = p.category.toLowerCase().includes(q);
+const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
+```
+
+`p.name` and `p.category` are dereferenced directly. When the live catalog contains any row where these are `null` (legacy/imported rows), `.toLowerCase()` throws `TypeError: Cannot read properties of null`, React unmounts the admin route, and the page disappears the instant the search query causes that row to be evaluated.
 
 ## Fix
 
-In `src/components/admin/ProductList.tsx` around lines 665 and 668, wrap each date format in a safe helper that returns `"—"` when the value is missing or `new Date(value)` produces `NaN`:
+Single-file, presentation-only change in `src/components/admin/ProductList.tsx`. Wrap every searched field with the same `(value || "")` guard already used for `company_name` and `vibe_category`:
 
 ```ts
-const safeFormat = (value: string | null | undefined, fmt: string) => {
-  if (!value) return "—";
-  const d = new Date(value);
-  return isNaN(d.getTime()) ? "—" : format(d, fmt);
-};
+if (searchQuery) {
+  const q = searchQuery.toLowerCase();
+  const matchName = (p.name || "").toLowerCase().includes(q);
+  const matchCompany = (p.company_name || "").toLowerCase().includes(q);
+  const matchCategory = (p.category || "").toLowerCase().includes(q);
+  const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
+  if (!matchName && !matchCompany && !matchCategory && !matchVibe) return false;
+}
 ```
 
-Then:
-- `Added {safeFormat(p.date_added, "MM/dd/yyyy")}`
-- `Updated {safeFormat(p.updated_at, "MM/dd/yyyy h:mm a")}`
+No other behaviour changes. Sort/render paths are already guarded (`safeFormat`, `countsMap[id] || 0`).
 
-Single-file, presentation-only change. Restores the admin dashboard immediately.
+## Out of scope
 
-## Optional follow-up (not in this plan)
-
-If the user wants the Google Ads conversion pings to actually fire, add `https://www.google.com https://www.googleadservices.com https://www.googletagmanager.com` to `connect-src` in `public/_headers`. Skipping for now since it's unrelated to the blank screen.
+- Pre-existing dual-Supabase TypeScript build errors (unrelated to this crash).
+- The CSP `connect-src` warnings from Google Ads tag.
