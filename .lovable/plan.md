@@ -1,32 +1,27 @@
-## Goal
+## Issue
 
-1. Add the "AI-styled images" disclosure info icon to the slide-out product view (`ProductDrawer.tsx`) gallery, matching the existing pattern used on `ProductCard` and `DiscoveryTile`.
-2. Fix the mobile behavior so tapping the info icon **toggles** the disclosure open/closed instead of flashing for a split second.
+The Admin → Products list crashes with `RangeError: Invalid time value` because `format(new Date(p.date_added), …)` and `format(new Date(p.updated_at), …)` are called unconditionally inside the row map. If any product row has a null/invalid `date_added` or `updated_at`, `date-fns` throws and React unmounts the whole admin tree, so the page goes blank.
 
-## Why the flash happens
-
-The current implementations wrap a `<button>` in a Radix `Tooltip`. Radix Tooltip is designed for hover/focus on desktop. On touch devices, the tap fires focus → tooltip opens → the synthetic click immediately blurs/dismisses it, so it disappears almost instantly. Tooltip is not the right primitive for tap-to-reveal.
+(The CSP `connect-src` warnings from `googleadservices.com` / `google.com/ccm` are unrelated noise — Google Ads tag trying to ping conversion endpoints not whitelisted in `public/_headers`. They do not blank the page.)
 
 ## Fix
 
-Replace the `Tooltip` wrapper around the info icon with a Radix `Popover` (already available at `@/components/ui/popover`). Popover is explicitly click/tap-driven and toggles on each tap, which:
-- Works identically on desktop (click to open, click outside or click icon again to close)
-- Works correctly on mobile (tap to open, tap again or tap outside to close — no flash)
+In `src/components/admin/ProductList.tsx` around lines 665 and 668, wrap each date format in a safe helper that returns `"—"` when the value is missing or `new Date(value)` produces `NaN`:
 
-The icon, position, and disclosure copy stay the same.
+```ts
+const safeFormat = (value: string | null | undefined, fmt: string) => {
+  if (!value) return "—";
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? "—" : format(d, fmt);
+};
+```
 
-## Changes
+Then:
+- `Added {safeFormat(p.date_added, "MM/dd/yyyy")}`
+- `Updated {safeFormat(p.updated_at, "MM/dd/yyyy h:mm a")}`
 
-### `src/components/ProductDrawer.tsx`
-- Import `Info` from `lucide-react` and `Popover`, `PopoverTrigger`, `PopoverContent` from `@/components/ui/popover`.
-- Inside the `GalleryImage` wrapper (or as a sibling absolute element inside the gallery container, alongside the nav arrows so it sits at `top-2 right-2 z-10`), add a `Popover` with an `Info` icon trigger button.
-- Trigger button: small rounded background (`bg-card/80 backdrop-blur-sm p-1`), `aria-label="Image disclosure"`, and `onClick={(e) => e.stopPropagation()}` so it doesn't interfere with gallery swipe/close handlers.
-- `PopoverContent` text: *"Some images digitally styled with AI to showcase product aesthetic. Actual product details may vary slightly from scene; please refer to retailer gallery for exact specifications."* — `className="max-w-xs text-xs"`, `side="bottom"`, `align="end"`.
+Single-file, presentation-only change. Restores the admin dashboard immediately.
 
-### `src/components/ProductCard.tsx` and `src/components/DiscoveryTile.tsx`
-- Swap the existing `Tooltip` wrapper around the disclosure `Info` icon for the same `Popover` pattern so the icon also toggles correctly on mobile across the site (this is the same flashing bug the user is reporting on tiles).
-- Keep icon position, styling, and `e.stopPropagation()` on the trigger button intact so card click-through navigation is not affected.
+## Optional follow-up (not in this plan)
 
-## Out of scope
-- No backend, schema, or business-logic changes.
-- No copy changes — disclosure text is reused verbatim.
+If the user wants the Google Ads conversion pings to actually fire, add `https://www.google.com https://www.googleadservices.com https://www.googletagmanager.com` to `connect-src` in `public/_headers`. Skipping for now since it's unrelated to the blank screen.
