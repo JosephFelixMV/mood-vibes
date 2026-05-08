@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import DOMPurify from "dompurify";
 import ExternalCTA from "@/components/ExternalCTA";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ProductVideo from "@/components/ProductVideo";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -181,6 +182,23 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
                     alt={allImages[safeIndex].alt}
                   />
                 </div>
+
+                {/* AI-styling disclosure */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label="About product images"
+                      className="absolute right-2 top-2 z-10 rounded-full bg-card/80 p-1 backdrop-blur-sm transition-colors hover:bg-card"
+                    >
+                      <Info className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" align="end" className="max-w-[260px] text-xs leading-relaxed" onClick={(e) => e.stopPropagation()}>
+                    Some images digitally styled with AI to showcase product aesthetic. Actual product details may vary slightly from scene; please refer to retailer gallery for exact specifications.
+                  </PopoverContent>
+                </Popover>
 
                 {/* Navigation arrows */}
                 {allImages.length > 1 && (

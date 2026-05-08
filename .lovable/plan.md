@@ -1,85 +1,32 @@
-## Plan: Local Image Uploads via Supabase Storage
+## Goal
 
-Enable uploading images from your local drive directly in the admin panel. Files land in a public `product-images` bucket on the live Supabase project (`fqccttthuzvltbyzmvid`) and the resulting public URL is written into `image_url` / `product_images.image_url` — same string field used today, fully compatible with the existing image-proxy and frontend.
+1. Add the "AI-styled images" disclosure info icon to the slide-out product view (`ProductDrawer.tsx`) gallery, matching the existing pattern used on `ProductCard` and `DiscoveryTile`.
+2. Fix the mobile behavior so tapping the info icon **toggles** the disclosure open/closed instead of flashing for a split second.
 
-### What you get
-- "Upload image" button (with drag/drop) next to every image URL field in **ProductForm** (main image + up to 4 gallery images).
-- "Upload image" support in **BulkUpload** — JSON files can reference local files in the same drop, OR you can leave URLs as-is.
-- Client-side resize + WebP conversion before upload (max 1600px long edge, ~85% quality) → small files, fast pages.
-- Delete-from-storage when an admin replaces or removes an image that was originally uploaded (URLs from external CDNs are left untouched).
+## Why the flash happens
 
-### SQL to run manually in `fqccttthuzvltbyzmvid` SQL Editor
-(Migration tool targets the wrong project — see dual-supabase memory.)
+The current implementations wrap a `<button>` in a Radix `Tooltip`. Radix Tooltip is designed for hover/focus on desktop. On touch devices, the tap fires focus → tooltip opens → the synthetic click immediately blurs/dismisses it, so it disappears almost instantly. Tooltip is not the right primitive for tap-to-reveal.
 
-```sql
--- 1. Create public bucket
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'product-images',
-  'product-images',
-  true,
-  5242880, -- 5 MB
-  array['image/webp','image/jpeg','image/png','image/avif']
-)
-on conflict (id) do update
-  set public = true,
-      file_size_limit = excluded.file_size_limit,
-      allowed_mime_types = excluded.allowed_mime_types;
+## Fix
 
--- 2. RLS: public read, authenticated write/update/delete
-create policy "Public read product-images"
-  on storage.objects for select
-  using (bucket_id = 'product-images');
+Replace the `Tooltip` wrapper around the info icon with a Radix `Popover` (already available at `@/components/ui/popover`). Popover is explicitly click/tap-driven and toggles on each tap, which:
+- Works identically on desktop (click to open, click outside or click icon again to close)
+- Works correctly on mobile (tap to open, tap again or tap outside to close — no flash)
 
-create policy "Authenticated upload product-images"
-  on storage.objects for insert to authenticated
-  with check (bucket_id = 'product-images');
+The icon, position, and disclosure copy stay the same.
 
-create policy "Authenticated update product-images"
-  on storage.objects for update to authenticated
-  using (bucket_id = 'product-images');
+## Changes
 
-create policy "Authenticated delete product-images"
-  on storage.objects for delete to authenticated
-  using (bucket_id = 'product-images');
-```
+### `src/components/ProductDrawer.tsx`
+- Import `Info` from `lucide-react` and `Popover`, `PopoverTrigger`, `PopoverContent` from `@/components/ui/popover`.
+- Inside the `GalleryImage` wrapper (or as a sibling absolute element inside the gallery container, alongside the nav arrows so it sits at `top-2 right-2 z-10`), add a `Popover` with an `Info` icon trigger button.
+- Trigger button: small rounded background (`bg-card/80 backdrop-blur-sm p-1`), `aria-label="Image disclosure"`, and `onClick={(e) => e.stopPropagation()}` so it doesn't interfere with gallery swipe/close handlers.
+- `PopoverContent` text: *"Some images digitally styled with AI to showcase product aesthetic. Actual product details may vary slightly from scene; please refer to retailer gallery for exact specifications."* — `className="max-w-xs text-xs"`, `side="bottom"`, `align="end"`.
 
-(I'll also run the same migration on the Lovable Cloud project so generated types stay aligned.)
+### `src/components/ProductCard.tsx` and `src/components/DiscoveryTile.tsx`
+- Swap the existing `Tooltip` wrapper around the disclosure `Info` icon for the same `Popover` pattern so the icon also toggles correctly on mobile across the site (this is the same flashing bug the user is reporting on tiles).
+- Keep icon position, styling, and `e.stopPropagation()` on the trigger button intact so card click-through navigation is not affected.
 
-### Code changes
-
-**New: `src/components/admin/ImageUploader.tsx`**
-- Reusable component: takes `value` (URL string) + `onChange(url)`.
-- Renders preview, "Upload" button, "Paste URL" fallback, drag/drop zone.
-- On file select:
-  1. Resize via `<canvas>` (longest edge ≤ 1600px).
-  2. Encode as WebP (~0.85 quality) — fallback to original if browser lacks support.
-  3. Upload to `product-images/{yyyy}/{mm}/{uuid}.webp` via `supabase.storage.from('product-images').upload()`.
-  4. Get public URL, call `onChange(publicUrl)`.
-- Shows progress + error state via `sonner`.
-
-**New: `src/lib/image-upload.ts`**
-- Pure helpers: `resizeImage(file, maxEdge)`, `uploadProductImage(file)`, `deleteProductImageIfOwned(url)` (only deletes when URL starts with the bucket public prefix).
-
-**Edit: `src/components/admin/ProductForm.tsx`**
-- Replace plain `<Input>` for `image_url` and the 4 `additional_images[i]` slots with `<ImageUploader>`.
-- Keep manual URL paste as fallback (toggle inside ImageUploader).
-- On save, if a previously-uploaded image was replaced/removed, call `deleteProductImageIfOwned` for the old URL.
-
-**Edit: `src/components/admin/BulkUpload.tsx`**
-- Accept image files alongside JSON in the same multi-select.
-- If a JSON `image_url` value matches an uploaded filename (e.g. `"./hero.jpg"` or just `"hero.jpg"`), upload the matching file first and substitute its public URL before insert. Same for `additional_images[]`.
-- Untouched if JSON only has remote URLs (current behavior preserved).
-
-**No changes needed to:** image-proxy edge function, ProductCard, ProductDetail — they already accept any URL string.
-
-### Notes / trade-offs
-- **5 MB hard cap** at the bucket level; client-side resize means most photos land well under 500 KB.
-- Files are **never deleted automatically** when a product row is deleted — only when explicitly replaced in the form. (Can add a cleanup cron later if needed.)
-- Bucket is **public read** — anyone with the URL sees the image (same posture as your current external CDN URLs). Required for the existing image proxy + frontend `<img>` tags.
-- Path scheme `{yyyy}/{mm}/{uuid}.webp` keeps directory listings small and avoids name collisions.
-
-### Out of scope (can do later)
-- Migrating the ~350 existing external images into the bucket.
-- Storage usage dashboard in admin.
-- Per-image alt text storage.
+## Out of scope
+- No backend, schema, or business-logic changes.
+- No copy changes — disclosure text is reused verbatim.
