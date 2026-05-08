@@ -15,6 +15,12 @@ import { MultiTagSelect } from "@/components/admin/MultiTagSelect";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
+
+const safeFormat = (value: string | null | undefined, fmt: string) => {
+  if (!value) return "—";
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? "—" : format(d, fmt);
+};
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
