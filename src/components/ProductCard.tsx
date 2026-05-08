@@ -7,7 +7,7 @@ import ReportBrokenLink from "@/components/ReportBrokenLink";
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import ExternalCTA from "@/components/ExternalCTA";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Info } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { trackProductClick } from "@/lib/track-click";
@@ -138,23 +138,21 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
                 🛍️
               </div>
             )}
-            <TooltipProvider delayDuration={150}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    aria-label="About product images"
-                    className="absolute right-2 top-2 z-10 rounded-full bg-card/80 p-1 backdrop-blur-sm transition-colors hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                  >
-                    <Info className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="left" className="max-w-[240px] text-xs leading-relaxed">
-                  Some images digitally styled with AI to showcase product aesthetic. Actual product details may vary slightly from scene; please refer to retailer gallery for exact specifications.
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="About product images"
+                  className="absolute right-2 top-2 z-10 rounded-full bg-card/80 p-1 backdrop-blur-sm transition-colors hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                >
+                  <Info className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="left" align="start" className="max-w-[260px] text-xs leading-relaxed" onClick={(e) => e.stopPropagation()}>
+                Some images digitally styled with AI to showcase product aesthetic. Actual product details may vary slightly from scene; please refer to retailer gallery for exact specifications.
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="absolute left-3 top-3 flex flex-wrap gap-1">
             {tagPicks.map(({ name, type }, tagIndex) => {
