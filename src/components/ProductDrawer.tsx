@@ -88,7 +88,7 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
 
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
-  const coreSet = [...new Set(product.category.split(",").map((c) => c.trim()).filter(Boolean))];
+  const coreSet = [...new Set((product.category || "").split(",").map((c) => c.trim()).filter(Boolean))];
   const vibeSet = [...new Set((product.vibe_category || "").split(",").map((v) => v.trim()).filter(Boolean))];
   const moodSet = [...new Set((product.mood || "").split(",").map((m) => m.trim()).filter(Boolean))];
 
