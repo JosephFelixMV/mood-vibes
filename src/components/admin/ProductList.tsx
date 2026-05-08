@@ -15,6 +15,12 @@ import { MultiTagSelect } from "@/components/admin/MultiTagSelect";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
+
+const safeFormat = (value: string | null | undefined, fmt: string) => {
+  if (!value) return "—";
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? "—" : format(d, fmt);
+};
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
@@ -662,10 +668,10 @@ export default function ProductList({ onEdit }: Props) {
                         <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
                       )}
                       <div className="text-[11px] text-muted-foreground">
-                        Added {format(new Date(p.date_added), "MM/dd/yyyy")}
+                        Added {safeFormat(p.date_added, "MM/dd/yyyy")}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        Updated {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
+                        Updated {safeFormat(p.updated_at, "MM/dd/yyyy h:mm a")}
                         {(p as any).updated_by && (
                           <span className="ml-1">by {(p as any).updated_by}</span>
                         )}
