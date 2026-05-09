@@ -70,6 +70,22 @@ export async function uploadProductImage(file: File): Promise<string> {
   return data.publicUrl;
 }
 
+/**
+ * Returns a Supabase Storage transformation URL for use as a small thumbnail.
+ * Only rewrites URLs that belong to our own bucket — external URLs are returned as-is.
+ * Requires Supabase Pro or higher (image transformation add-on).
+ */
+export function toStorageThumbnail(
+  url: string | null | undefined,
+  width = 80,
+  quality = 50,
+): string {
+  if (!url) return "";
+  if (!url.includes("/object/public/")) return url;
+  return url.replace("/object/public/", "/render/image/public/") +
+    `?width=${width}&quality=${quality}&resize=cover`;
+}
+
 export function isOwnedUploadUrl(url: string | null | undefined): boolean {
   if (!url) return false;
   return url.startsWith(publicUrlPrefix());

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { toStorageThumbnail } from "@/lib/image-upload";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useUserRole } from "@/contexts/UserRoleContext";
@@ -654,7 +655,7 @@ export default function ProductList({ onEdit }: Props) {
                   <div className="flex items-center gap-3">
                     {p.image_url ? (
                       <img
-                        src={p.image_url}
+                        src={toStorageThumbnail(p.image_url)}
                         alt=""
                         className="h-10 w-10 shrink-0 rounded object-cover bg-muted"
                         loading="lazy"
