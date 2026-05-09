@@ -1,30 +1,36 @@
+## Issue
 
+The Admin Products list crashes (admin tree unmounts → page goes blank) as soon as the user types in the search box. The previous `safeFormat` fix handled invalid dates in the row render, but the search filter itself is unguarded and throws on the first product whose `name` or `category` is null/undefined.
 
-## Plan: Add Automated Link Check Configuration to Site Configuration
+In `src/components/admin/ProductList.tsx` (lines 286–294):
 
-### What
-Move the automated link checker toggle and status display from the Product List page into the Configuration tab, presented as a dedicated card alongside the existing config sections.
+```ts
+const matchName = p.name.toLowerCase().includes(q);
+const matchCompany = (p.company_name || "").toLowerCase().includes(q);
+const matchCategory = p.category.toLowerCase().includes(q);
+const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
+```
 
-### Changes
+`p.name` and `p.category` are dereferenced directly. When the live catalog contains any row where these are `null` (legacy/imported rows), `.toLowerCase()` throws `TypeError: Cannot read properties of null`, React unmounts the admin route, and the page disappears the instant the search query causes that row to be evaluated.
 
-**1. Create `AutomatedLinkCheckConfig` component** (`src/components/admin/AutomatedLinkCheckConfig.tsx`)
-- A standalone Card component containing:
-  - Switch toggle for enabling/disabling the cron job (with confirmation dialog for disable)
-  - Last batch check timestamp display
-  - Frequency info (every 6 hours)
-  - Auto-deactivation threshold info (3 consecutive failures)
-- Reuses the same logic currently in ProductList (invoke `toggle-cron-job` edge function, query `cron-job-status`, query latest `last_checked_at`)
+## Fix
 
-**2. Update `SiteConfiguration.tsx`**
-- Import and render `AutomatedLinkCheckConfig` alongside CategoryVibeManager and existing config sections
+Single-file, presentation-only change in `src/components/admin/ProductList.tsx`. Wrap every searched field with the same `(value || "")` guard already used for `company_name` and `vibe_category`:
 
-**3. Update `ProductList.tsx`**
-- Remove the cron toggle Switch, confirmation dialog, and related state (`cronActive`, `togglingCron`, `showCronConfirm`, `executeCronToggle`, `handleToggleCron`, cron status query)
-- Keep the "last batch check" display as a read-only status indicator (or remove entirely since it's now in Configuration)
+```ts
+if (searchQuery) {
+  const q = searchQuery.toLowerCase();
+  const matchName = (p.name || "").toLowerCase().includes(q);
+  const matchCompany = (p.company_name || "").toLowerCase().includes(q);
+  const matchCategory = (p.category || "").toLowerCase().includes(q);
+  const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
+  if (!matchName && !matchCompany && !matchCategory && !matchVibe) return false;
+}
+```
 
-### Technical Details
-- The new component queries `toggle-cron-job` GET for current status and POST to toggle
-- Queries `products` table for `MAX(last_checked_at)` for the last run timestamp
-- Uses `AlertDialog` for disable confirmation (same pattern as current)
-- Uses `Switch` component and `@tanstack/react-query` for state management
+No other behaviour changes. Sort/render paths are already guarded (`safeFormat`, `countsMap[id] || 0`).
 
+## Out of scope
+
+- Pre-existing dual-Supabase TypeScript build errors (unrelated to this crash).
+- The CSP `connect-src` warnings from Google Ads tag.

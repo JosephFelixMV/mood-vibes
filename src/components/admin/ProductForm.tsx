@@ -17,6 +17,8 @@ import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import type { Product } from "@/lib/supabase-queries";
 import { formatPrice } from "@/lib/supabase-queries";
+import ImageUploader from "@/components/admin/ImageUploader";
+import { deleteProductImageIfOwned } from "@/lib/image-upload";
 import {
   capKeywordsPreservingGiftFor,
   dedupeTaxonomyValues,
@@ -193,6 +195,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         .order("name");
       return data || [];
     },
+    staleTime: 1000 * 60 * 30,
   });
   const { data: allKeywords = [] } = useQuery({
     queryKey: ["keywords"],
@@ -200,6 +203,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       const { data } = await supabase.from("keywords").select("*").order("term");
       return data || [];
     },
+    staleTime: 1000 * 60 * 60,
   });
 
   const [form, setForm] = useState(() => savedState?.current || empty);
@@ -794,8 +798,17 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           <p className="mt-1 text-xs text-muted-foreground">Original product page URL for link validation</p>
         </div>
         <div>
-          <Label>Main Image URL</Label>
-          <Input value={form.image_url} onChange={(e) => set("image_url", e.target.value)} placeholder="https://..." />
+          <Label>Main Image</Label>
+          <ImageUploader
+            value={form.image_url}
+            onChange={(url) => {
+              const prev = form.image_url;
+              set("image_url", url);
+              if (prev && prev !== url) {
+                deleteProductImageIfOwned(prev);
+              }
+            }}
+          />
         </div>
 
         {/* AI suggestions display - shown inline after suggest */}
@@ -838,9 +851,26 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </div>
           <div className="mt-2 space-y-2">
             {form.additional_images.map((url: string, i: number) => (
-              <div key={i} className="flex gap-2">
-                <Input value={url} onChange={(e) => updateImage(i, e.target.value)} placeholder="https://..." />
-                <Button type="button" variant="ghost" size="icon" onClick={() => removeImage(i)}>
+              <div key={i} className="flex items-start gap-2">
+                <div className="flex-1">
+                  <ImageUploader
+                    value={url}
+                    onChange={(newUrl) => {
+                      if (url && url !== newUrl) deleteProductImageIfOwned(url);
+                      updateImage(i, newUrl);
+                    }}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    if (url) deleteProductImageIfOwned(url);
+                    removeImage(i);
+                  }}
+                  aria-label="Remove image slot"
+                >
                   <X className="h-4 w-4" />
                 </Button>
               </div>

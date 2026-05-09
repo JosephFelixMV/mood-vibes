@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import DOMPurify from "dompurify";
 import ExternalCTA from "@/components/ExternalCTA";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
@@ -10,6 +10,7 @@ import ProductVideo from "@/components/ProductVideo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   getProduct,
   getRandomProduct,
@@ -171,6 +172,22 @@ export default function ProductDetail() {
           {/* Image gallery */}
           <div className="md:w-1/2">
             <div className="relative aspect-square overflow-hidden bg-[#f7f7f5]">
+              <TooltipProvider delayDuration={150}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="About product images"
+                      className="absolute right-2 top-2 z-10 rounded-full bg-card/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    >
+                      <Info className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="max-w-xs text-xs leading-relaxed">
+                    Some images digitally styled with AI to showcase product aesthetic. Actual product details may vary slightly from scene; please refer to retailer gallery for exact specifications.
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               {allImages.length > 0 ? (
                 <>
                   <img

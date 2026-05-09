@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { toStorageThumbnail } from "@/lib/image-upload";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useUserRole } from "@/contexts/UserRoleContext";
@@ -15,6 +16,12 @@ import { MultiTagSelect } from "@/components/admin/MultiTagSelect";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { format } from "date-fns";
+
+const safeFormat = (value: string | null | undefined, fmt: string) => {
+  if (!value) return "—";
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? "—" : format(d, fmt);
+};
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
@@ -98,16 +105,19 @@ export default function ProductList({ onEdit }: Props) {
   const { data: coreCategories = [] } = useQuery({
     queryKey: ["categories", "core"],
     queryFn: () => getCategories("core"),
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: vibeCategories = [] } = useQuery({
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: moodCategories = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
+    staleTime: 1000 * 60 * 30,
   });
   const { data: brandsList = [] } = useQuery({
     queryKey: ["brands"],
@@ -115,16 +125,19 @@ export default function ProductList({ onEdit }: Props) {
       const { data } = await supabase.from("brands").select("id, name").eq("is_active", true).order("name");
       return data || [];
     },
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: clickCounts = {} } = useQuery({
     queryKey: ["product-click-counts", 30],
     queryFn: () => getProductClickCounts(30),
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: viewCounts = {} } = useQuery({
     queryKey: ["product-view-counts", 30],
     queryFn: () => getProductViewCounts(30),
+    staleTime: 1000 * 60 * 5,
   });
 
   const inlineUpdateMut = useMutation({
@@ -136,6 +149,7 @@ export default function ProductList({ onEdit }: Props) {
               ? stringifyTaxonomyValues(value.split(","))
               : stringifyTaxonomyValues(value.split(",")) || null,
           };
+      (update as any).updated_at = new Date().toISOString();
       const { error } = await supabase.from("products").update(update).eq("id", id);
       if (error) throw error;
     },
@@ -155,7 +169,10 @@ export default function ProductList({ onEdit }: Props) {
           throw new Error("Cannot publish — set a price of at least $5.00 first.");
         }
       }
-      const { error } = await supabase.from("products").update({ is_active }).eq("id", id);
+      const { error } = await supabase
+        .from("products")
+        .update({ is_active, updated_at: new Date().toISOString() } as any)
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
@@ -277,9 +294,9 @@ export default function ProductList({ onEdit }: Props) {
   const filtered = products.filter((p) => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      const matchName = p.name.toLowerCase().includes(q);
+      const matchName = (p.name || "").toLowerCase().includes(q);
       const matchCompany = (p.company_name || "").toLowerCase().includes(q);
-      const matchCategory = p.category.toLowerCase().includes(q);
+      const matchCategory = (p.category || "").toLowerCase().includes(q);
       const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
       if (!matchName && !matchCompany && !matchCategory && !matchVibe) return false;
     }
@@ -638,7 +655,7 @@ export default function ProductList({ onEdit }: Props) {
                   <div className="flex items-center gap-3">
                     {p.image_url ? (
                       <img
-                        src={p.image_url}
+                        src={toStorageThumbnail(p.image_url)}
                         alt=""
                         className="h-10 w-10 shrink-0 rounded object-cover bg-muted"
                         loading="lazy"
@@ -659,10 +676,10 @@ export default function ProductList({ onEdit }: Props) {
                         <span className="ml-2 text-xs text-muted-foreground">{p.company_name}</span>
                       )}
                       <div className="text-[11px] text-muted-foreground">
-                        Added {format(new Date(p.date_added), "MM/dd/yyyy")}
+                        Added {safeFormat(p.date_added, "MM/dd/yyyy")}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        Updated {format(new Date(p.updated_at), "MM/dd/yyyy h:mm a")}
+                        Updated {safeFormat(p.updated_at, "MM/dd/yyyy h:mm a")}
                         {(p as any).updated_by && (
                           <span className="ml-1">by {(p as any).updated_by}</span>
                         )}

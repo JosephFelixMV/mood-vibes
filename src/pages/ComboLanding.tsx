@@ -35,10 +35,12 @@ export default function ComboLanding() {
   const { data: primaryCats = [] } = useQuery({
     queryKey: ["categories", primaryType],
     queryFn: () => getCategories(primaryType),
+    staleTime: 1000 * 60 * 30,
   });
   const { data: moodCats = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
+    staleTime: 1000 * 60 * 30,
   });
 
   const primary = primaryCats.find((c) => c.slug === primarySlug);

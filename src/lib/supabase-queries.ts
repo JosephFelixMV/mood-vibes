@@ -9,6 +9,9 @@ import type { VisitorRegion } from "@/hooks/useVisitorRegion";
  */
 export const MIN_PRODUCTS_PER_CATEGORY = 8;
 
+export const TILE_SELECT =
+  "id,name,price,image_url,affiliate_url,mood,vibe_category,company_name,is_active,date_added,vendor_id,slug,regions,page_error" as const;
+
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
 
@@ -80,8 +83,8 @@ function applyProductFilters(
   withCount = false,
 ) {
   let query = withCount
-    ? supabase.from("products").select("*", { count: "exact" })
-    : supabase.from("products").select("*");
+    ? supabase.from("products").select(TILE_SELECT, { count: "exact" })
+    : supabase.from("products").select(TILE_SELECT);
 
   if (options?.activeOnly !== false) {
     query = query.eq("is_active", true);
@@ -259,7 +262,7 @@ export async function getDailyPick(): Promise<Product | null> {
 
   const { data: product, error: pErr } = await supabase
     .from("products")
-    .select("*")
+    .select(TILE_SELECT)
     .eq("id", productId)
     .single();
   if (pErr) return null;
