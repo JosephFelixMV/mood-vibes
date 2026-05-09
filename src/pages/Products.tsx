@@ -4,7 +4,7 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import { setDiscoveryContext } from "@/lib/discovery-context";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getProductsPaginated, getCategories, getPublicCategories, filterByRegion } from "@/lib/supabase-queries";
+import { getProductsPaginated, getCategories, filterByRegion } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -24,26 +24,10 @@ export default function Products() {
     setDiscoveryContext({ type: "all", slug: "", name: "" });
   }, []);
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const categorySlug = searchParams.get("category") || "";
   const vibeSlug = searchParams.get("vibe") || "";
 
-  // Public dropdowns: only show categories with >= MIN_PRODUCTS_PER_CATEGORY items
-  const { data: coreCategories = [] } = useQuery({
-    queryKey: ["public-categories", "core"],
-    queryFn: () => getPublicCategories("core"),
-    staleTime: 1000 * 60 * 30,
-  });
-  const { data: vibeCategories = [] } = useQuery({
-    queryKey: ["public-categories", "vibe"],
-    queryFn: () => getPublicCategories("vibe"),
-    staleTime: 1000 * 60 * 30,
-  });
-  const { data: moodCategories = [] } = useQuery({
-    queryKey: ["public-categories", "mood"],
-    queryFn: () => getPublicCategories("mood"),
-    staleTime: 1000 * 60 * 30,
-  });
   // Unfiltered lookup: used to resolve slugs from URL params even if a
   // category falls below the public threshold (preserves direct/shared links).
   const { data: allCoreCategories = [] } = useQuery({
@@ -62,7 +46,6 @@ export default function Products() {
     staleTime: 1000 * 60 * 30,
   });
 
-  const [filterMood, setFilterMood] = useState("");
   const [filterVendor, setFilterVendor] = useState("");
   const [page, setPage] = useState(1);
 
@@ -100,7 +83,7 @@ export default function Products() {
   const [sort, setSort] = useState<"newest" | "price-low" | "price-high" | "updated-desc" | "updated-asc">("newest");
 
   const moodSlug = searchParams.get("mood") || "";
-  const moodName = allMoodCategories.find((c) => c.slug === moodSlug)?.name || filterMood;
+  const moodName = allMoodCategories.find((c) => c.slug === moodSlug)?.name || "";
 
   const { data: result, isLoading } = useQuery({
     queryKey: ["products-paginated", categoryName, vibeName, moodName, sort, page, filterVendor],
@@ -194,28 +177,6 @@ export default function Products() {
 
   const resetPage = useCallback(() => setPage(1), []);
 
-  const setCategory = (slug: string) => {
-    if (slug === "all") {
-      searchParams.delete("category");
-    } else {
-      searchParams.set("category", slug);
-    }
-    searchParams.delete("vibe");
-    setSearchParams(searchParams);
-    resetPage();
-  };
-
-  const setVibe = (slug: string) => {
-    if (slug === "all") {
-      searchParams.delete("vibe");
-    } else {
-      searchParams.set("vibe", slug);
-    }
-    searchParams.delete("category");
-    setSearchParams(searchParams);
-    resetPage();
-  };
-
   return (
     <div className="container py-12">
       <h1 className="mb-2 font-heading text-3xl font-bold tracking-tight md:text-4xl">
@@ -229,64 +190,6 @@ export default function Products() {
 
       {/* Filters */}
       <div className="mb-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
-        <Select value={categorySlug || "all"} onValueChange={setCategory}>
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {coreCategories.map((c) => (
-              <SelectItem key={c.id} value={c.slug}>
-                {c.icon} {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={vibeSlug || "all"} onValueChange={setVibe}>
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Vibe" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Vibes</SelectItem>
-            {vibeCategories.map((c) => (
-              <SelectItem key={c.id} value={c.slug}>
-                {c.icon} {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={moodSlug || filterMood || "all"}
-          onValueChange={(v) => {
-            if (v === "all") {
-              searchParams.delete("mood");
-              setFilterMood("");
-            } else {
-              const cat = moodCategories.find((c) => c.slug === v);
-              if (cat) {
-                searchParams.set("mood", v);
-                setFilterMood(cat.name);
-              }
-            }
-            setSearchParams(searchParams);
-            resetPage();
-          }}
-        >
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Mood" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Moods</SelectItem>
-            {moodCategories.map((c) => (
-              <SelectItem key={c.id} value={c.slug}>
-                {c.icon} {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <Select
           value={filterVendor || "all"}
           onValueChange={(v) => {
