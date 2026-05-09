@@ -91,6 +91,7 @@ export default function MoodLanding() {
       const { data } = await supabase.from("brands").select("id, name").eq("is_active", true).order("name");
       return data || [];
     },
+    staleTime: 1000 * 60 * 30,
   });
 
   const regionProducts = filterByRegion(products, region);

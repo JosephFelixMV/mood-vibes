@@ -88,6 +88,7 @@ export default function AnalyticsDashboard() {
         vibes: (vibeRes.data || []) as { product_id: string; vibe_slug: string }[],
       };
     },
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: events = [], isLoading } = useQuery({
@@ -129,6 +130,7 @@ export default function AnalyticsDashboard() {
 
       return merged;
     },
+    staleTime: 1000 * 60 * 5,
   });
 
   const coreSlugToName = useMemo(

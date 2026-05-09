@@ -195,6 +195,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
         .order("name");
       return data || [];
     },
+    staleTime: 1000 * 60 * 30,
   });
   const { data: allKeywords = [] } = useQuery({
     queryKey: ["keywords"],
@@ -202,6 +203,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       const { data } = await supabase.from("keywords").select("*").order("term");
       return data || [];
     },
+    staleTime: 1000 * 60 * 60,
   });
 
   const [form, setForm] = useState(() => savedState?.current || empty);

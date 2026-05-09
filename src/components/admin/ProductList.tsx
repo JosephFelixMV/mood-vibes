@@ -124,16 +124,19 @@ export default function ProductList({ onEdit }: Props) {
       const { data } = await supabase.from("brands").select("id, name").eq("is_active", true).order("name");
       return data || [];
     },
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: clickCounts = {} } = useQuery({
     queryKey: ["product-click-counts", 30],
     queryFn: () => getProductClickCounts(30),
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: viewCounts = {} } = useQuery({
     queryKey: ["product-view-counts", 30],
     queryFn: () => getProductViewCounts(30),
+    staleTime: 1000 * 60 * 5,
   });
 
   const inlineUpdateMut = useMutation({

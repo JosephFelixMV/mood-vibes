@@ -32,28 +32,34 @@ export default function Products() {
   const { data: coreCategories = [] } = useQuery({
     queryKey: ["public-categories", "core"],
     queryFn: () => getPublicCategories("core"),
+    staleTime: 1000 * 60 * 30,
   });
   const { data: vibeCategories = [] } = useQuery({
     queryKey: ["public-categories", "vibe"],
     queryFn: () => getPublicCategories("vibe"),
+    staleTime: 1000 * 60 * 30,
   });
   const { data: moodCategories = [] } = useQuery({
     queryKey: ["public-categories", "mood"],
     queryFn: () => getPublicCategories("mood"),
+    staleTime: 1000 * 60 * 30,
   });
   // Unfiltered lookup: used to resolve slugs from URL params even if a
   // category falls below the public threshold (preserves direct/shared links).
   const { data: allCoreCategories = [] } = useQuery({
     queryKey: ["categories", "core"],
     queryFn: () => getCategories("core"),
+    staleTime: 1000 * 60 * 30,
   });
   const { data: allVibeCategories = [] } = useQuery({
     queryKey: ["categories", "vibe"],
     queryFn: () => getCategories("vibe"),
+    staleTime: 1000 * 60 * 30,
   });
   const { data: allMoodCategories = [] } = useQuery({
     queryKey: ["categories", "mood"],
     queryFn: () => getCategories("mood"),
+    staleTime: 1000 * 60 * 30,
   });
 
   const [filterMood, setFilterMood] = useState("");
@@ -66,33 +72,24 @@ export default function Products() {
       const { data } = await supabase.from("brands").select("id, name").eq("is_active", true).order("name");
       return data || [];
     },
+    staleTime: 1000 * 60 * 30,
   });
 
   const { data: vendorCounts = {} } = useQuery({
     queryKey: ["vendor-product-counts"],
     queryFn: async () => {
-      const PAGE_SIZE = 1000;
-      let allData: any[] = [];
-      let from = 0;
-      let hasMore = true;
-      while (hasMore) {
-        const { data, error } = await supabase
-          .from("products")
-          .select("vendor_id")
-          .eq("is_active", true)
-          .not("vendor_id", "is", null)
-          .range(from, from + PAGE_SIZE - 1);
-        if (error) throw error;
-        allData = allData.concat(data || []);
-        hasMore = (data?.length || 0) === PAGE_SIZE;
-        from += PAGE_SIZE;
-      }
-      const counts: Record<string, number> = {};
-      allData.forEach((row) => {
-        counts[row.vendor_id] = (counts[row.vendor_id] || 0) + 1;
-      });
-      return counts;
+      const { data, error } = await supabase
+        .from("products")
+        .select("vendor_id")
+        .eq("is_active", true)
+        .not("vendor_id", "is", null);
+      if (error) throw error;
+      return (data || []).reduce<Record<string, number>>((acc, row) => {
+        acc[row.vendor_id!] = (acc[row.vendor_id!] ?? 0) + 1;
+        return acc;
+      }, {});
     },
+    staleTime: 1000 * 60 * 15,
   });
 
   // Resolve names from the unfiltered list so direct URLs to thin

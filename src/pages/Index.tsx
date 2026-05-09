@@ -27,7 +27,7 @@ function InstagramGradientIcon({ className }: { className?: string }) {
 import { Link } from "react-router-dom";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductCard from "@/components/ProductCard";
-import { getDailyPick, getRandomProduct, filterByRegion, getCategories, type Product, type Category } from "@/lib/supabase-queries";
+import { getDailyPick, getRandomProduct, filterByRegion, getCategories, TILE_SELECT, type Product, type Category } from "@/lib/supabase-queries";
 import { supabase } from "@/lib/supabase";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
@@ -86,7 +86,7 @@ export default function Index() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select(TILE_SELECT)
         .eq("is_active", true)
         .eq("page_error", false)
         .order("date_added", { ascending: false })
@@ -94,6 +94,7 @@ export default function Index() {
       if (error) throw error;
       return data as Product[];
     },
+    staleTime: 1000 * 60 * 5,
   });
 
   const countdown = useCountdownToMidnightUTC();

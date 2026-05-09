@@ -42,7 +42,14 @@ function RedirectToCoreCategory() {
   return <Navigate to={`/category/${coreSlug}`} replace />;
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const ENZUZO_CONSENT_COOKIES = ["cookies-analytics", "cookies-marketing", "cookies-preferences"];
 const ENZUZO_CONSENT_STORAGE_KEYS = [
