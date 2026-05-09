@@ -148,6 +148,7 @@ export default function ProductList({ onEdit }: Props) {
               ? stringifyTaxonomyValues(value.split(","))
               : stringifyTaxonomyValues(value.split(",")) || null,
           };
+      (update as any).updated_at = new Date().toISOString();
       const { error } = await supabase.from("products").update(update).eq("id", id);
       if (error) throw error;
     },
@@ -167,7 +168,10 @@ export default function ProductList({ onEdit }: Props) {
           throw new Error("Cannot publish — set a price of at least $5.00 first.");
         }
       }
-      const { error } = await supabase.from("products").update({ is_active }).eq("id", id);
+      const { error } = await supabase
+        .from("products")
+        .update({ is_active, updated_at: new Date().toISOString() } as any)
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
