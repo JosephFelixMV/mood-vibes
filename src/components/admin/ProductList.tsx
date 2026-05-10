@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { toStorageThumbnail } from "@/lib/image-upload";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useUserRole } from "@/contexts/UserRoleContext";
-import { getProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts } from "@/lib/supabase-queries";
+import { getAdminProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts, getAdminProductCategories } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -99,7 +99,7 @@ export default function ProductList({ onEdit }: Props) {
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-products"],
-    queryFn: () => getProducts({ activeOnly: false }),
+    queryFn: getAdminProducts,
   });
 
   const { data: coreCategories = [] } = useQuery({
@@ -119,6 +119,23 @@ export default function ProductList({ onEdit }: Props) {
     queryFn: () => getCategories("mood"),
     staleTime: 1000 * 60 * 30,
   });
+  const { data: productCategoryRows = [] } = useQuery({
+    queryKey: ["admin-product-categories"],
+    queryFn: getAdminProductCategories,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const productCategoryMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const row of productCategoryRows) {
+      const cat = coreCategories.find((c) => c.slug === row.category_slug);
+      if (!cat) continue;
+      if (!map[row.product_id]) map[row.product_id] = [];
+      map[row.product_id].push(cat.name);
+    }
+    return map;
+  }, [productCategoryRows, coreCategories]);
+
   const { data: brandsList = [] } = useQuery({
     queryKey: ["brands"],
     queryFn: async () => {
@@ -155,6 +172,7 @@ export default function ProductList({ onEdit }: Props) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-products"] });
+      qc.invalidateQueries({ queryKey: ["admin-product-categories"] });
       toast.success("Updated");
     },
   });
@@ -304,7 +322,7 @@ export default function ProductList({ onEdit }: Props) {
       if ((p as any).vendor_id !== filterVendor) return false;
     }
     if (filterCategory !== "all") {
-      const cats = parseTaxonomyString(p.category);
+      const cats = productCategoryMap[p.id] ?? parseTaxonomyString(p.category);
       if (!cats.includes(filterCategory)) return false;
     }
     if (filterVibe !== "all") {
@@ -434,7 +452,7 @@ export default function ProductList({ onEdit }: Props) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {coreCategories.filter((c) => !!c.parent_slug).map((c) => (
+            {coreCategories.map((c) => (
               <SelectItem key={c.id} value={c.name}>{c.icon} {c.name}</SelectItem>
             ))}
           </SelectContent>
@@ -689,8 +707,8 @@ export default function ProductList({ onEdit }: Props) {
                 </td>
                 <td className="px-4 py-3">
                   <MultiTagSelect
-                    value={p.category}
-                    options={coreCategories.filter((c) => !!c.parent_slug).map((c) => ({ name: c.name, icon: c.icon }))}
+                    value={stringifyTaxonomyValues(productCategoryMap[p.id] ?? parseTaxonomyString(p.category))}
+                    options={coreCategories.map((c) => ({ name: c.name, icon: c.icon }))}
                     onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "category", value: v })}
                   />
                 </td>

@@ -78,12 +78,13 @@ export async function uploadProductImage(file: File): Promise<string> {
 export function toStorageThumbnail(
   url: string | null | undefined,
   width = 80,
+  height = 80,
   quality = 50,
 ): string {
   if (!url) return "";
   if (!url.includes("/object/public/")) return url;
   return url.replace("/object/public/", "/render/image/public/") +
-    `?width=${width}&quality=${quality}&resize=cover`;
+    `?width=${width}&height=${height}&quality=${quality}&resize=cover`;
 }
 
 export function isOwnedUploadUrl(url: string | null | undefined): boolean {
