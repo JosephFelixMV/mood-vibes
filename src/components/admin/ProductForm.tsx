@@ -945,7 +945,6 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
           </Label>
           <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
             {coreCategories
-              .filter((c) => !!c.parent_slug)
               .map((c) => {
                 const selected = parseTaxonomyString(form.category);
                 const isChecked = selected.includes(c.name);

@@ -212,6 +212,14 @@ export async function getCategories(type?: "core" | "vibe" | "mood") {
   return data;
 }
 
+export async function getAdminProductCategories(): Promise<{ product_id: string; category_slug: string }[]> {
+  const { data, error } = await supabase
+    .from("product_categories")
+    .select("product_id, category_slug");
+  if (error) throw error;
+  return data || [];
+}
+
 /**
  * Public-facing category fetch — returns only categories with at least
  * MIN_PRODUCTS_PER_CATEGORY active products. Backed by the
