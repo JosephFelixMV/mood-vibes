@@ -3,7 +3,7 @@ import { toStorageThumbnail } from "@/lib/image-upload";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useUserRole } from "@/contexts/UserRoleContext";
-import { getProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts, getAdminProductCategories } from "@/lib/supabase-queries";
+import { getAdminProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts, getAdminProductCategories } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -99,7 +99,7 @@ export default function ProductList({ onEdit }: Props) {
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-products"],
-    queryFn: () => getProducts({ activeOnly: false }),
+    queryFn: getAdminProducts,
   });
 
   const { data: coreCategories = [] } = useQuery({

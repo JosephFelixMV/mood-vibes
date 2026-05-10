@@ -136,6 +136,29 @@ export async function getProductsPaginated(
   return { data: data || [], count: count ?? 0 };
 }
 
+export const ADMIN_PRODUCT_SELECT =
+  "id,name,price,image_url,affiliate_url,category,mood,vibe_category,company_name,is_active,date_added,updated_at,vendor_id,slug,regions,page_error,page_error_detail,source_url,created_by,updated_by" as const;
+
+/** Admin-only: fetches all products with audit/tracking fields not included in TILE_SELECT. */
+export async function getAdminProducts(): Promise<Product[]> {
+  const PAGE_SIZE = 1000;
+  let allData: Product[] = [];
+  let from = 0;
+  let hasMore = true;
+  while (hasMore) {
+    const { data: page, error } = await supabase
+      .from("products")
+      .select(ADMIN_PRODUCT_SELECT)
+      .order("date_added", { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    allData = allData.concat((page || []) as Product[]);
+    hasMore = (page?.length || 0) === PAGE_SIZE;
+    from += PAGE_SIZE;
+  }
+  return allData;
+}
+
 /** Fetch ALL products (paginating internally past the 1000-row cap). Returns Product[]. */
 export async function getProducts(options?: ProductQueryOptions): Promise<Product[]> {
   const PAGE_SIZE = 1000;
