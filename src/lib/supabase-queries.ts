@@ -10,7 +10,7 @@ import type { VisitorRegion } from "@/hooks/useVisitorRegion";
 export const MIN_PRODUCTS_PER_CATEGORY = 8;
 
 export const TILE_SELECT =
-  "id,name,price,image_url,affiliate_url,category,mood,vibe_category,company_name,is_active,date_added,vendor_id,slug,regions,page_error" as const;
+  "id,name,price,image_url,affiliate_url,category,mood,vibe_category,video_url,company_name,is_active,date_added,vendor_id,slug,regions,page_error" as const;
 
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
