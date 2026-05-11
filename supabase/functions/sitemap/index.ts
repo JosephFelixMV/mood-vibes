@@ -53,8 +53,7 @@ Deno.serve(async (req) => {
       urlEntry(`${base}/categories`, today, "weekly", "0.8"),
       urlEntry(`${base}/vibes`, today, "weekly", "0.8"),
       urlEntry(`${base}/moods`, today, "weekly", "0.8"),
-      urlEntry(`${base}/brands`, today, "weekly", "0.7"),
-      urlEntry(`${base}/disclosure`, today, "yearly", "0.3"),
+urlEntry(`${base}/disclosure`, today, "yearly", "0.3"),
       urlEntry(`${base}/privacy`, today, "yearly", "0.3"),
       urlEntry(`${base}/terms`, today, "yearly", "0.3"),
     ];
