@@ -97,16 +97,10 @@ export default function Brands() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
             >
-              <a
-                href={brand.affiliate_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Visit ${formatBrandName(brand.name)}`}
-                className="group flex flex-col gap-1 rounded-2xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md"
-              >
+              <div className="flex flex-col gap-1 rounded-2xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-heading text-lg font-semibold group-hover:text-primary transition-colors">
+                    <span className="font-heading text-lg font-semibold">
                       {formatBrandName(brand.name)}
                     </span>
                     {(vendorCounts[brand.id] || 0) > 0 && (
@@ -115,17 +109,13 @@ export default function Brands() {
                       </span>
                     )}
                   </div>
-                  <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
-{brand.description && (
+                {brand.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {formatBrandDescription(brand.description)}
                   </p>
                 )}
-                <p className="mt-2 text-[10px] italic text-muted-foreground">
-                  *We may earn a commission on purchases made through this link.
-                </p>
-              </a>
+              </div>
             </motion.div>
           ))}
         </div>
