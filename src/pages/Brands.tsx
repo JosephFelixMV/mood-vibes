@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRegion } from "@/contexts/RegionContext";
 import { useSEO } from "@/hooks/useSEO";
