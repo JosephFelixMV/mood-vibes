@@ -75,7 +75,7 @@ export default function Brands() {
         🏷️ Our Brands
       </h1>
       <p className="mb-10 text-muted-foreground">
-        Curated brands we partner with — click to visit their site
+        Curated brands we partner with
       </p>
 
       {isLoading ? (
