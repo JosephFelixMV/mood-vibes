@@ -318,7 +318,30 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
     try {
       const { data, error } = await supabase.functions.invoke(
         "rewrite-description",
-        { body: { description: form.description } }
+        {
+          body: {
+            description: form.description,
+            product: {
+              name: form.name || undefined,
+              company_name: form.company_name || undefined,
+              category: parseTaxonomyString(form.category).length
+                ? parseTaxonomyString(form.category)
+                : undefined,
+              moods: parseTaxonomyString(form.mood).length
+                ? parseTaxonomyString(form.mood)
+                : undefined,
+              vibes: parseTaxonomyString(form.vibe_category).length
+                ? parseTaxonomyString(form.vibe_category)
+                : undefined,
+              keywords: form.keywords?.length ? form.keywords : undefined,
+              fashion_season: form.fashion_season || undefined,
+              fashion_warmth: form.fashion_warmth || undefined,
+              fashion_occasions: form.fashion_occasions?.length
+                ? form.fashion_occasions
+                : undefined,
+            },
+          },
+        }
       );
       if (error) throw error;
       if (data?.rewritten) {
