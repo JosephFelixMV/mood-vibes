@@ -82,7 +82,9 @@ function buildSystemInstruction(
   }
 
   lines.push(`OUTPUT STRUCTURE — write exactly three beats:`);
-  lines.push(`1. Moment or recognition line — place the reader in a context, no sales framing`);
+  lines.push(
+    `1. Opening hook — one sharp, specific image or observation that earns attention. Start mid-thought or mid-scene. Avoid generic setup lines ("You're settling in", "You're getting ready", "Whether you're", "It's that time", "Picture this", "Imagine"). The hook should feel like something a friend texted you, not a lifestyle caption.`,
+  );
   lines.push(
     `2. The product plainly stated + one sensory or construction detail pulled directly from the source description (never invented)`,
   );
