@@ -14,6 +14,8 @@ import AIDashboard from "./AIDashboard";
 import SiteConfiguration from "./SiteConfiguration";
 import BrandManager from "./BrandManager";
 import FlaggedProductsDashboard from "./FlaggedProductsDashboard";
+import BlogPostList from "./BlogPostList";
+import BlogPostForm from "./BlogPostForm";
 
 export default function AdminDashboard() {
   const role = useUserRole();
@@ -23,10 +25,12 @@ export default function AdminDashboard() {
   const formStateRef = useRef<Record<string, any> | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const navigate = useNavigate();
+  const [blogTab, setBlogTab] = useState<"list" | "form">("list");
+  const [blogEditId, setBlogEditId] = useState<string | null>(null);
 
   // Reset to a visible tab if the current tab is not accessible for this role
   useEffect(() => {
-    const adminOnlyTabs = ["brands", "bulk", "analytics", "ai", "flagged", "config"];
+    const adminOnlyTabs = ["brands", "bulk", "analytics", "ai", "flagged", "config", "blog"];
     if (!isAdmin && adminOnlyTabs.includes(tab)) {
       setTab("list");
     }
@@ -84,6 +88,7 @@ export default function AdminDashboard() {
           {isAdmin && <TabsTrigger value="ai">AI Discover</TabsTrigger>}
           {isAdmin && <TabsTrigger value="flagged">Flagged Links</TabsTrigger>}
           {isAdmin && <TabsTrigger value="config">Configuration</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="blog">Blog Posts</TabsTrigger>}
         </TabsList>
         <TabsContent value="list" forceMount className={tab !== "list" ? "hidden" : ""}>
           <ProductList onEdit={handleEdit} />
@@ -108,6 +113,19 @@ export default function AdminDashboard() {
         </TabsContent>
         <TabsContent value="config" forceMount className={tab !== "config" ? "hidden" : ""}>
           <SiteConfiguration />
+        </TabsContent>
+        <TabsContent value="blog" forceMount className={tab !== "blog" ? "hidden" : ""}>
+          {blogTab === "list" ? (
+            <BlogPostList
+              onEdit={(id) => { setBlogEditId(id); setBlogTab("form"); }}
+              onNew={() => { setBlogEditId(null); setBlogTab("form"); }}
+            />
+          ) : (
+            <BlogPostForm
+              editId={blogEditId}
+              onClose={() => { setBlogEditId(null); setBlogTab("list"); }}
+            />
+          )}
         </TabsContent>
       </Tabs>
     </div>

@@ -2,6 +2,27 @@ import { supabase } from "@/lib/supabase";
 import type { Database } from "@/integrations/supabase/types";
 import type { VisitorRegion } from "@/hooks/useVisitorRegion";
 
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  subtitle: string | null;
+  content: string | null;
+  cover_image_url: string | null;
+  vibe_category: string | null;
+  category: string | null;
+  tags: string[];
+  cta_label: string;
+  cta_url: string | null;
+  author: string;
+  read_time: string | null;
+  has_affiliate_links: boolean;
+  is_active: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Minimum number of active products a category/vibe/mood must have
  * to be shown to public visitors. Admin pages bypass this filter.
@@ -378,4 +399,64 @@ export async function getProductViewCounts(sinceDays: number | null = 30): Promi
     counts[row.product_id] = (counts[row.product_id] || 0) + 1;
   });
   return counts;
+}
+
+// ── Blog Posts ────────────────────────────────────────────────────────────────
+
+/** Public: only published (is_active = true) posts, newest first. */
+export async function getBlogPosts(): Promise<BlogPost[]> {
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("is_active", true)
+    .order("published_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Public: single published post by slug. Returns null if not found or draft. */
+export async function getBlogPost(slug: string): Promise<BlogPost | null> {
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+/** Admin: all posts including drafts, newest updated_at first. */
+export async function getAllBlogPosts(): Promise<BlogPost[]> {
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Fetch products linked to a post via blog_post_products join table. */
+export async function getBlogPostProducts(postId: string): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from("blog_post_products")
+    .select("product_id, display_order")
+    .eq("post_id", postId)
+    .order("display_order");
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
+
+  const ids = data.map((r: any) => r.product_id as string);
+  const { data: products, error: pErr } = await supabase
+    .from("products")
+    .select(TILE_SELECT)
+    .in("id", ids)
+    .eq("is_active", true);
+  if (pErr) throw pErr;
+
+  // Preserve display_order from the join table
+  const ordered = ids
+    .map((id) => (products || []).find((p: any) => p.id === id))
+    .filter(Boolean) as Product[];
+  return ordered;
 }

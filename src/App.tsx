@@ -31,6 +31,8 @@ import Brands from "./pages/Brands";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
 import DailyPicks from "./pages/DailyPicks";
+import BlogIndex from "./pages/BlogIndex";
+import BlogPostPage from "./pages/BlogPostPage";
 import AffiliateDisclosureBanner from "@/components/AffiliateDisclosureBanner";
 import LaunchWelcomeModal from "@/components/LaunchWelcomeModal";
 import AnalyticsLoader from "@/components/AnalyticsLoader";
@@ -209,6 +211,8 @@ function AppShell() {
             <Route path="/discover" element={<Discover />} />
             <Route path="/brands" element={<Brands />} />
             <Route path="/daily-picks" element={<DailyPicks />} />
+            <Route path="/blog" element={<BlogIndex />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/login" element={<Login />} />
             <Route
               path="/admin"
