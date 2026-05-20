@@ -1,8 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
+const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
 const BANNED_PHRASES = [
   "Introducing", "Meet the", "Discover", "Experience", "Elevate your",
@@ -81,12 +80,12 @@ function buildSystemInstruction(
     lines.push(``);
   }
 
-  lines.push(`OUTPUT STRUCTURE — write exactly three beats:`);
+  lines.push(`OUTPUT STRUCTURE — write exactly three beats, all colored by the mood/vibe cues above:`);
   lines.push(
-    `1. Opening hook — one sharp, specific image or observation that earns attention. Start mid-thought or mid-scene. Avoid generic setup lines ("You're settling in", "You're getting ready", "Whether you're", "It's that time", "Picture this", "Imagine"). The hook should feel like something a friend texted you, not a lifestyle caption.`,
+    `1. Opening hook — a grounded observation about when or how this product fits into the reader's life, drawn from its real use case and category. Start mid-thought or mid-scene. Avoid generic setup lines ("You're settling in", "You're getting ready", "Whether you're", "It's that time", "Picture this", "Imagine"). Never invent delivery stories, anecdotes, or timelines not in the source. The hook must feel earned by what the product actually is — let the mood/vibe cues shape its register and energy.`,
   );
   lines.push(
-    `2. The product plainly stated + one sensory or construction detail pulled directly from the source description (never invented)`,
+    `2. The product plainly stated + one sensory or construction detail pulled directly from the source description (never invented). Let the mood/vibe cues shape how the detail is phrased.`,
   );
   lines.push(
     `3. One unexpected note — a contrast, secondary use case, or non-obvious detail from the source`,
@@ -100,6 +99,9 @@ function buildSystemInstruction(
   );
   lines.push(
     `- Never invent specs, materials, origins, dimensions, or social proof not present in the source description`,
+  );
+  lines.push(
+    `- Never invent scenarios, delivery timelines, anecdotes, or user situations — the hook must be grounded in what the product actually does, not a fictional story around it`,
   );
   lines.push(`- Skip any beat where the source data is genuinely empty`);
   lines.push(`- No CTA. No summary close. No "Find your mood. Shop the vibe."`);
@@ -201,32 +203,37 @@ Deno.serve(async (req) => {
     const systemInstruction = buildSystemInstruction(product, moodCues, vibeCues);
     const userMessage = buildUserMessage(description, product);
 
-    const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(ANTHROPIC_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-        contents: [{ role: "user", parts: [{ text: userMessage }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1024, thinkingConfig: { thinkingBudget: 0 } },
+        model: "claude-haiku-4-5",
+        max_tokens: 1024,
+        temperature: 0.7,
+        system: systemInstruction,
+        messages: [{ role: "user", content: userMessage }],
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("Gemini API error:", response.status, errText);
+      console.error("Anthropic API error:", response.status, errText);
       return new Response(
-        JSON.stringify({ error: `Gemini error ${response.status}: ${errText.slice(0, 200)}` }),
+        JSON.stringify({ error: `Anthropic error ${response.status}: ${errText.slice(0, 200)}` }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     const data = await response.json();
-    const candidate = data?.candidates?.[0];
-    const finishReason = candidate?.finishReason ?? "unknown";
-    if (finishReason !== "STOP") {
-      console.warn("Gemini finishReason:", finishReason, JSON.stringify(candidate?.safetyRatings ?? []));
+    const stopReason = data?.stop_reason ?? "unknown";
+    if (stopReason !== "end_turn") {
+      console.warn("Anthropic stop_reason:", stopReason);
     }
-    const raw = candidate?.content?.parts?.[0]?.text?.toString() ?? "";
+    const raw = data?.content?.[0]?.text?.toString() ?? "";
 
     const cleaned = raw
       .replace(/^```(?:html)?\s*/i, "")
