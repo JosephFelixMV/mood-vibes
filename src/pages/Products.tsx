@@ -67,11 +67,10 @@ export default function Products() {
         .eq("is_active", true)
         .not("vendor_id", "is", null);
       if (error) throw error;
-      const counts: Record<string, number> = {};
-      (data || []).forEach((row: any) => {
-        if (row.vendor_id) counts[row.vendor_id] = (counts[row.vendor_id] ?? 0) + 1;
-      });
-      return counts;
+      return (data || []).reduce<Record<string, number>>((acc, row) => {
+        acc[row.vendor_id!] = (acc[row.vendor_id!] ?? 0) + 1;
+        return acc;
+      }, {});
     },
     staleTime: 1000 * 60 * 15,
   });
