@@ -24,7 +24,7 @@ import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 import { getDiscoveryContext } from "@/lib/discovery-context";
 import { stripHtml, truncateToMeta, formatBrandName } from "@/lib/brand-utils";
-import { toStorageImage, toStorageThumbnail } from "@/lib/image-upload";
+import { toStorageThumbnail } from "@/lib/image-upload";
 import fallbackImage from "@/assets/fallback-product.png";
 
 export default function ProductDetail() {
@@ -100,7 +100,9 @@ export default function ProductDetail() {
   const rawVendorName = product?.vendor_id ? allBrands.find((b: any) => b.id === product.vendor_id)?.name : null;
   const vendorName = rawVendorName ? formatBrandName(rawVendorName) : null;
 
-  const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
+  const categorySlugMap: Record<string, { slug: string; type: string }> = Object.fromEntries(
+    allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]),
+  );
 
   const primaryCategory = product?.category?.split(",")[0]?.trim() || "";
   const primaryVibe = product?.vibe_category?.split(",")[0]?.trim() || "";
@@ -192,10 +194,10 @@ export default function ProductDetail() {
               {allImages.length > 0 ? (
                 <>
                   <img
-                    src={toStorageImage(allImages[currentImage], 900, 85)}
+                    src={allImages[currentImage]}
                     sizes="(min-width: 768px) 50vw, 100vw"
                     alt={imageAlt}
-                    className="sharp-image h-full w-full object-contain"
+                    className="sharp-image absolute inset-0 m-auto h-auto max-h-full w-auto max-w-full"
                     decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = fallbackImage;
@@ -259,7 +261,7 @@ export default function ProductDetail() {
             {/* Category / vibe / mood badges */}
             <div className="flex flex-wrap gap-2">
               {[
-                ...new Set(
+                ...new Set<string>(
                   product.category
                     .split(",")
                     .map((c) => c.trim())
@@ -276,7 +278,7 @@ export default function ProductDetail() {
               })}
               {product.vibe_category &&
                 [
-                  ...new Set(
+                  ...new Set<string>(
                     product.vibe_category
                       .split(",")
                       .map((v) => v.trim())
@@ -295,7 +297,7 @@ export default function ProductDetail() {
                 })}
               {product.mood &&
                 [
-                  ...new Set(
+                  ...new Set<string>(
                     product.mood
                       .split(",")
                       .map((m) => m.trim())
