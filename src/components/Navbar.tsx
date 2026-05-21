@@ -1,8 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import RegionIndicator from "@/components/RegionIndicator";
-import { useRegion } from "@/contexts/RegionContext";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 const allNavLinks = [
@@ -19,7 +17,6 @@ const allNavLinks = [
 export default function Navbar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
-  const { region, detected, isOverridden, setRegion, clearOverride } = useRegion();
   const { enabled: discoverEnabled } = useFeatureFlag("feature_ai_discover");
   const navLinks = allNavLinks.filter((l) => l.to !== "/discover" || discoverEnabled);
 
@@ -43,15 +40,6 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          <div className="ml-2 border-l pl-2">
-            <RegionIndicator
-              region={region}
-              detected={detected}
-              isOverridden={isOverridden}
-              onSelect={setRegion}
-              onReset={clearOverride}
-            />
-          </div>
         </div>
 
         {/* Mobile toggle */}
@@ -80,17 +68,9 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          <div className="mt-2 border-t pt-2">
-            <RegionIndicator
-              region={region}
-              detected={detected}
-              isOverridden={isOverridden}
-              onSelect={setRegion}
-              onReset={clearOverride}
-            />
-          </div>
         </div>
       )}
     </nav>
   );
 }
+
