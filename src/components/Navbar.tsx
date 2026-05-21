@@ -11,9 +11,9 @@ const allNavLinks = [
   { to: "/categories", label: "Categories" },
   { to: "/vibes", label: "Vibes" },
   { to: "/moods", label: "Moods" },
-  { to: "/brands", label: "Brands" },
-  { to: "/products", label: "Products" },
   { to: "/blogs", label: "The Edit" },
+  { to: "/products", label: "Products" },
+  { to: "/brands", label: "Brands" },
 ];
 
 export default function Navbar() {
