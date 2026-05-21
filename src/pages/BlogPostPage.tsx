@@ -124,7 +124,7 @@ export default function BlogPostPage() {
 
           {/* Subtitle */}
           {post.subtitle && (
-            <p className="mx-auto max-w-xl text-lg leading-relaxed text-muted-foreground">
+            <p className="text-lg leading-relaxed text-muted-foreground">
               {post.subtitle}
             </p>
           )}
@@ -148,7 +148,7 @@ export default function BlogPostPage() {
 
           {/* Affiliate disclosure */}
           {post.has_affiliate_links && (
-            <div className="mx-auto flex max-w-xl gap-3 rounded-md border border-border bg-card px-4 py-3 text-left">
+            <div className="flex gap-3 rounded-md border border-border bg-card px-4 py-3 text-left">
               <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
                 This post contains affiliate links. If you click and make a
