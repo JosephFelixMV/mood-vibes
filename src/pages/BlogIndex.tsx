@@ -45,9 +45,9 @@ export default function BlogIndex() {
                 {post.cover_image_url && (
                   <div className="relative w-full overflow-hidden bg-[#f7f7f5]" style={{ paddingTop: "75%" }}>
                     <img
-                      src={toStorageImage(post.cover_image_url, 800, 80)}
+                      src={post.cover_image_url}
                       alt={post.title}
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      className="absolute inset-0 m-auto h-auto max-h-full w-auto max-w-full transition-transform duration-500 group-hover:scale-[1.03]"
                       loading="lazy"
                       decoding="async"
                     />
