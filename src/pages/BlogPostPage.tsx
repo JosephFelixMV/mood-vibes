@@ -88,7 +88,7 @@ export default function BlogPostPage() {
   return (
     <div>
       {/* ── Region 1: Hero ── */}
-      <header className="border-b border-border bg-[#F0E6CC] py-12">
+      <header className="border-b border-border bg-[#F7F1E3] py-12">
         <div className="container max-w-3xl space-y-5 text-center">
           {/* Back link */}
           <div className="flex justify-start">
