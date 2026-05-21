@@ -43,11 +43,11 @@ export default function BlogIndex() {
             <Link key={post.id} to={`/blogs/${post.slug}`} className="group block">
               <Card className="h-full overflow-hidden border-border transition-shadow hover:shadow-md">
                 {post.cover_image_url && (
-                  <div className="relative w-full bg-[#f7f7f5]" style={{ paddingTop: "100%" }}>
+                  <div className="relative w-full overflow-hidden bg-[#f7f7f5]" style={{ paddingTop: "125%" }}>
                     <img
-                      src={toStorageImage(post.cover_image_url, 600, 80)}
+                      src={toStorageImage(post.cover_image_url, 800, 80)}
                       alt={post.title}
-                      className="absolute inset-0 h-full w-full object-contain p-3"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       loading="lazy"
                       decoding="async"
                     />
