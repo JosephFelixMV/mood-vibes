@@ -195,7 +195,7 @@ export default function ProductDetail() {
                     src={toStorageImage(allImages[currentImage], 900, 85)}
                     sizes="(min-width: 768px) 50vw, 100vw"
                     alt={imageAlt}
-                    className="sharp-image h-full w-full object-cover"
+                    className="sharp-image h-full w-full object-contain"
                     decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = fallbackImage;
