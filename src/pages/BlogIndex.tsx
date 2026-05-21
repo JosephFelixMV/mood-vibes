@@ -43,7 +43,7 @@ export default function BlogIndex() {
             <Link key={post.id} to={`/blogs/${post.slug}`} className="group block">
               <Card className="h-full overflow-hidden border-border transition-shadow hover:shadow-md">
                 {post.cover_image_url && (
-                  <div className="relative w-full overflow-hidden bg-[#f7f7f5]" style={{ paddingTop: "125%" }}>
+                  <div className="relative w-full overflow-hidden bg-[#f7f7f5]" style={{ paddingTop: "75%" }}>
                     <img
                       src={toStorageImage(post.cover_image_url, 800, 80)}
                       alt={post.title}
