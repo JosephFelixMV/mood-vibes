@@ -151,12 +151,12 @@ export default function AnalyticsDashboard() {
 
   // When category type changes or categories load, select all
   const activeSelected = useMemo(() => {
-    if (selectedCategories === null) return new Set(availableCategories);
+    if (selectedCategories === null) return new Set<string>(availableCategories);
     return selectedCategories;
   }, [selectedCategories, availableCategories]);
 
   const toggleCategory = (cat: string) => {
-    const next = new Set(activeSelected);
+    const next = new Set<string>(activeSelected);
     if (next.has(cat)) next.delete(cat);
     else next.add(cat);
     setSelectedCategories(next);
