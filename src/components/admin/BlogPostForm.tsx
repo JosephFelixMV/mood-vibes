@@ -305,7 +305,7 @@ export default function BlogPostForm({ editId, onClose }: Props) {
   };
 
   const copyEmbedCode = (id: string) => {
-    navigator.clipboard.writeText(`<!-- product-embed: ${id} -->`);
+    navigator.clipboard.writeText(`[product-embed: ${id}]`);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
@@ -509,7 +509,7 @@ export default function BlogPostForm({ editId, onClose }: Props) {
         <div>
           <Label>Inline Product Tiles</Label>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Add products here, copy their embed code, and paste it into the content where you want the tile to appear.
+            Add products here, copy their embed code, and paste it on its own line in the content editor where you want the tile to appear.
           </p>
         </div>
         {inlineProducts.length > 0 && (

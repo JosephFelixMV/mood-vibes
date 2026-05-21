@@ -6,7 +6,10 @@ interface Props {
   inlineProducts: Product[];
 }
 
-const EMBED_RE = /<!--\s*product-embed:\s*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s*-->/gi;
+// TipTap strips HTML comments, so markers are stored as plain text inside <p> tags.
+// Format the author pastes: [product-embed: uuid] on its own line.
+// TipTap serialises it as: <p>[product-embed: uuid]</p>
+const EMBED_RE = /<p>\s*\[product-embed:\s*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s*\]\s*<\/p>/gi;
 
 const PROSE_CLASSES =
   "prose prose-lg max-w-none " +
