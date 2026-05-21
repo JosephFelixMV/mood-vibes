@@ -21,6 +21,13 @@ interface Props {
 const toSlug = (title: string) =>
   title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+const computeReadTime = (html: string): string => {
+  const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const words = text ? text.split(" ").length : 0;
+  const minutes = Math.max(1, Math.ceil(words / 200));
+  return `${minutes} min read`;
+};
+
 const emptyForm = {
   title: "",
   slug: "",
@@ -29,6 +36,7 @@ const emptyForm = {
   vibe_category: "",
   category: "",
   content: "",
+  read_time: "",
   cta_label: "Explore the Vibe",
   cta_url: "",
   tags: "",
@@ -95,6 +103,7 @@ export default function BlogPostForm({ editId, onClose }: Props) {
 
   useEffect(() => {
     if (existingPost) {
+      const content = existingPost.content ?? "";
       setForm({
         title: existingPost.title,
         slug: existingPost.slug,
@@ -102,7 +111,8 @@ export default function BlogPostForm({ editId, onClose }: Props) {
         cover_image_url: existingPost.cover_image_url ?? "",
         vibe_category: existingPost.vibe_category ?? "",
         category: existingPost.category ?? "",
-        content: existingPost.content ?? "",
+        content,
+        read_time: existingPost.read_time ?? computeReadTime(content),
         cta_label: existingPost.cta_label,
         cta_url: existingPost.cta_url ?? "",
         tags: existingPost.tags?.join(", ") ?? "",
@@ -157,6 +167,7 @@ export default function BlogPostForm({ editId, onClose }: Props) {
         vibe_category: form.vibe_category || null,
         category: form.category || null,
         content: form.content || null,
+        read_time: form.content ? computeReadTime(form.content) : null,
         cta_label: form.cta_label.trim() || "Explore the Vibe",
         cta_url: form.cta_url.trim() || null,
         tags,
@@ -414,11 +425,18 @@ export default function BlogPostForm({ editId, onClose }: Props) {
 
       {/* Content Editor */}
       <div className="space-y-1.5">
-        <Label>Content</Label>
+        <div className="flex items-center justify-between">
+          <Label>Content</Label>
+          {form.content && (
+            <span className="text-xs text-muted-foreground">
+              {computeReadTime(form.content)}
+            </span>
+          )}
+        </div>
         <div className="rounded-md border border-input">
           <RichTextEditor
             value={form.content}
-            onChange={(html) => setForm((f) => ({ ...f, content: html }))}
+            onChange={(html) => setForm((f) => ({ ...f, content: html, read_time: computeReadTime(html) }))}
           />
         </div>
       </div>
