@@ -306,8 +306,8 @@ export default function BlogPostForm({ editId, onClose }: Props) {
 
   const insertBlock = (type: "pull-quote" | "science-box" | "ornament") => {
     const snippets: Record<string, string> = {
-      "pull-quote": `<div class="pull-quote"><p>Enter your pull quote here — the line you most want readers to remember.</p></div>`,
-      "science-box": `<div class="science-box"><div class="science-label">🔬 What the research shows</div><p>Summarise the key research finding here in plain language.</p></div>`,
+      "pull-quote": `<blockquote><p>Enter your pull quote here — the line you most want readers to remember.</p></blockquote>`,
+      "science-box": `<div class="science-box"><p>Summarise the key research finding here in plain language.</p></div>`,
       "ornament": `<div class="ornament">· · ·</div>`,
     };
     setForm((f) => ({ ...f, content: (f.content ?? "") + snippets[type] }));

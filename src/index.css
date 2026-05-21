@@ -407,17 +407,19 @@ body::after {
 .blog-prose em,
 .blog-content-body em { font-style: italic; }
 
-/* ── Pull quote ── */
-.blog-prose .pull-quote,
-.blog-content-body .pull-quote {
+/* ── Pull quote — native <blockquote>, overrides Tailwind prose left-border ── */
+.blog-prose blockquote,
+.blog-content-body blockquote {
+  border-left: none !important;
   border-top: 2px solid hsl(var(--primary));
   border-bottom: 2px solid hsl(var(--primary));
-  margin: 2.5rem 0;
+  margin: 2.5rem 0 !important;
   padding: 1.5rem 1rem;
   text-align: center;
+  font-style: normal;
 }
-.blog-prose .pull-quote p,
-.blog-content-body .pull-quote p {
+.blog-prose blockquote p,
+.blog-content-body blockquote p {
   font-family: var(--font-heading) !important;
   font-size: 1.25rem !important;
   font-style: italic;
@@ -434,15 +436,18 @@ body::after {
   border-radius: var(--radius);
   padding: 1.5rem;
   margin: 1.75rem 0;
+  position: relative;
 }
-.blog-prose .science-box .science-label,
-.blog-content-body .science-box .science-label {
+.blog-prose .science-box::before,
+.blog-content-body .science-box::before {
+  content: '🔬  What the research shows';
+  display: block;
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: hsl(var(--muted-foreground));
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.75rem;
 }
 .blog-prose .science-box p,
 .blog-content-body .science-box p {
