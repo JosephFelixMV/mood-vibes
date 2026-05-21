@@ -436,12 +436,13 @@ export async function getAllBlogPosts(): Promise<BlogPost[]> {
   return data ?? [];
 }
 
-/** Fetch products linked to a post via blog_post_products join table. */
+/** Fetch footer-placement products linked to a post (rendered as a grid below the article). */
 export async function getBlogPostProducts(postId: string): Promise<Product[]> {
   const { data, error } = await supabase
     .from("blog_post_products")
     .select("product_id, display_order")
     .eq("post_id", postId)
+    .eq("placement", "footer")
     .order("display_order");
   if (error) throw error;
   if (!data || data.length === 0) return [];
@@ -454,9 +455,31 @@ export async function getBlogPostProducts(postId: string): Promise<Product[]> {
     .eq("is_active", true);
   if (pErr) throw pErr;
 
-  // Preserve display_order from the join table
-  const ordered = ids
+  return ids
     .map((id) => (products || []).find((p: any) => p.id === id))
     .filter(Boolean) as Product[];
-  return ordered;
+}
+
+/** Fetch inline-placement products for a post (embedded mid-article via product-embed markers). */
+export async function getBlogInlineProducts(postId: string): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from("blog_post_products")
+    .select("product_id, display_order")
+    .eq("post_id", postId)
+    .eq("placement", "inline")
+    .order("display_order");
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
+
+  const ids = data.map((r: any) => r.product_id as string);
+  const { data: products, error: pErr } = await supabase
+    .from("products")
+    .select(TILE_SELECT)
+    .in("id", ids)
+    .eq("is_active", true);
+  if (pErr) throw pErr;
+
+  return ids
+    .map((id) => (products || []).find((p: any) => p.id === id))
+    .filter(Boolean) as Product[];
 }

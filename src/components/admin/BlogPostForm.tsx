@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, ExternalLink, Loader2 } from "lucide-react";
+import { X, ExternalLink, Loader2, Clipboard, Check } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { toast } from "sonner";
 
@@ -50,6 +50,9 @@ export default function BlogPostForm({ editId, onClose }: Props) {
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [linkedProductIds, setLinkedProductIds] = useState<string[]>([]);
   const [productSearch, setProductSearch] = useState("");
+  const [inlineProductIds, setInlineProductIds] = useState<string[]>([]);
+  const [inlineProductSearch, setInlineProductSearch] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const { data: vibes = [] } = useQuery({
     queryKey: ["categories", "vibe"],
@@ -93,6 +96,24 @@ export default function BlogPostForm({ editId, onClose }: Props) {
         .from("blog_post_products")
         .select("product_id, display_order")
         .eq("post_id", editId)
+        .eq("placement", "footer")
+        .order("display_order");
+      if (error) throw error;
+      return (data || []).map((r: any) => r.product_id as string);
+    },
+    enabled: !!editId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const { data: existingInline = [] } = useQuery<string[]>({
+    queryKey: ["blog-inline-products-admin", editId],
+    queryFn: async () => {
+      if (!editId) return [];
+      const { data, error } = await supabase
+        .from("blog_post_products")
+        .select("product_id, display_order")
+        .eq("post_id", editId)
+        .eq("placement", "inline")
         .order("display_order");
       if (error) throw error;
       return (data || []).map((r: any) => r.product_id as string);
@@ -128,6 +149,12 @@ export default function BlogPostForm({ editId, onClose }: Props) {
       setLinkedProductIds(existingLinked);
     }
   }, [existingLinked]);
+
+  useEffect(() => {
+    if (existingInline.length > 0) {
+      setInlineProductIds(existingInline);
+    }
+  }, [existingInline]);
 
   const handleTitleChange = (title: string) => {
     setForm((f) => ({
@@ -202,12 +229,21 @@ export default function BlogPostForm({ editId, onClose }: Props) {
         .eq("post_id", postId);
       if (delErr) throw delErr;
 
-      if (linkedProductIds.length > 0) {
-        const rows = linkedProductIds.map((product_id, idx) => ({
+      const rows = [
+        ...linkedProductIds.map((product_id, idx) => ({
           post_id: postId,
           product_id,
           display_order: idx,
-        }));
+          placement: "footer",
+        })),
+        ...inlineProductIds.map((product_id, idx) => ({
+          post_id: postId,
+          product_id,
+          display_order: idx,
+          placement: "inline",
+        })),
+      ];
+      if (rows.length > 0) {
         const { error: insErr } = await supabase
           .from("blog_post_products")
           .insert(rows);
@@ -221,6 +257,8 @@ export default function BlogPostForm({ editId, onClose }: Props) {
       qc.invalidateQueries({ queryKey: ["blog-posts"] });
       qc.invalidateQueries({ queryKey: ["blog-post-admin", editId] });
       qc.invalidateQueries({ queryKey: ["blog-post-products-admin", editId] });
+      qc.invalidateQueries({ queryKey: ["blog-inline-products-admin", editId] });
+      qc.invalidateQueries({ queryKey: ["blog-inline-products"] });
       toast.success(editId ? "Post updated." : "Post created.");
       if (!editId) {
         // Redirect to edit so user can continue editing the new post
@@ -246,6 +284,31 @@ export default function BlogPostForm({ editId, onClose }: Props) {
   const linkedProducts = linkedProductIds
     .map((id) => allProducts.find((p) => p.id === id))
     .filter(Boolean) as Product[];
+
+  const inlineProducts = inlineProductIds
+    .map((id) => allProducts.find((p) => p.id === id))
+    .filter(Boolean) as Product[];
+
+  const filteredInlineProducts = allProducts
+    .filter(
+      (p) =>
+        !inlineProductIds.includes(p.id) &&
+        (p.name.toLowerCase().includes(inlineProductSearch.toLowerCase()) ||
+          (p.company_name ?? "").toLowerCase().includes(inlineProductSearch.toLowerCase()))
+    )
+    .slice(0, 30);
+
+  const toggleInlineProduct = (id: string) => {
+    setInlineProductIds((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+    );
+  };
+
+  const copyEmbedCode = (id: string) => {
+    navigator.clipboard.writeText(`<!-- product-embed: ${id} -->`);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   return (
     <div className="space-y-6 py-4">
@@ -441,9 +504,93 @@ export default function BlogPostForm({ editId, onClose }: Props) {
         </div>
       </div>
 
-      {/* Linked Products */}
+      {/* Inline Product Tiles */}
       <div className="space-y-2">
-        <Label>Linked Products</Label>
+        <div>
+          <Label>Inline Product Tiles</Label>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Add products here, copy their embed code, and paste it into the content where you want the tile to appear.
+          </p>
+        </div>
+        {inlineProducts.length > 0 && (
+          <div className="space-y-1.5">
+            {inlineProducts.map((p) => (
+              <div
+                key={p.id}
+                className="flex items-center justify-between rounded-md border border-input px-3 py-2 text-xs"
+              >
+                <div className="min-w-0">
+                  <span className="font-medium">{p.name}</span>
+                  {p.company_name && (
+                    <span className="ml-1.5 text-muted-foreground">· {p.company_name}</span>
+                  )}
+                </div>
+                <div className="ml-3 flex flex-shrink-0 items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => copyEmbedCode(p.id)}
+                    className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium bg-secondary hover:bg-secondary/80 transition-colors"
+                  >
+                    {copiedId === p.id ? (
+                      <>
+                        <Check className="h-3 w-3 text-accent" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Clipboard className="h-3 w-3" />
+                        Copy code
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleInlineProduct(p.id)}
+                    className="hover:text-destructive"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <Input
+          placeholder="Search products to embed inline…"
+          value={inlineProductSearch}
+          onChange={(e) => setInlineProductSearch(e.target.value)}
+        />
+        {inlineProductSearch && (
+          <div className="max-h-48 overflow-y-auto rounded-md border border-input bg-popover p-1 shadow-sm">
+            {filteredInlineProducts.length === 0 ? (
+              <p className="px-2 py-2 text-xs text-muted-foreground">No products found.</p>
+            ) : (
+              filteredInlineProducts.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => { toggleInlineProduct(p.id); setInlineProductSearch(""); }}
+                  className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-left hover:bg-accent hover:text-accent-foreground"
+                >
+                  <span>{p.name}</span>
+                  {p.company_name && (
+                    <span className="text-muted-foreground">· {p.company_name}</span>
+                  )}
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Footer Product Grid */}
+      <div className="space-y-2">
+        <div>
+          <Label>Footer Product Grid</Label>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            These products appear as a grid at the bottom of the post.
+          </p>
+        </div>
         {linkedProducts.length > 0 && (
           <div className="flex flex-wrap gap-2 pb-1">
             {linkedProducts.map((p) => (

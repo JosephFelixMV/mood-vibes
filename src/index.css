@@ -371,6 +371,7 @@ body::after {
 .blog-prose em { font-style: italic; }
 
 /* Pull quote */
+.blog-content-body .pull-quote,
 .blog-prose .pull-quote {
   font-family: var(--font-heading);
   font-style: italic;
@@ -385,6 +386,7 @@ body::after {
 }
 
 /* Science / callout box */
+.blog-content-body .science-box,
 .blog-prose .science-box {
   background: hsl(var(--muted));
   border: 1px solid hsl(var(--border));
@@ -394,6 +396,7 @@ body::after {
   font-size: 0.9375rem;
 }
 
+.blog-content-body .science-box::before,
 .blog-prose .science-box::before {
   content: "THE SCIENCE";
   display: block;

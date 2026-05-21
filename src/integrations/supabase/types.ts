@@ -54,18 +54,21 @@ export type Database = {
         Row: {
           display_order: number
           id: string
+          placement: string
           post_id: string
           product_id: string
         }
         Insert: {
           display_order?: number
           id?: string
+          placement?: string
           post_id: string
           product_id: string
         }
         Update: {
           display_order?: number
           id?: string
+          placement?: string
           post_id?: string
           product_id?: string
         }
