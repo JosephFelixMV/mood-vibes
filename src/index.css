@@ -382,6 +382,14 @@ body::after {
   font-size: 0.8rem;
   color: hsl(var(--primary));
 }
+/* Tiptap wraps list item text in <p> tags — reset paragraph styles inside li */
+.blog-prose ul li p,
+.blog-content-body ul li p {
+  margin: 0 !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+}
 
 .blog-prose ol,
 .blog-content-body ol {
