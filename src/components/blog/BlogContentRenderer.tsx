@@ -20,44 +20,92 @@ const PROSE_CLASSES =
   "prose-strong:font-semibold " +
   "prose-a:text-accent prose-a:no-underline hover:prose-a:underline";
 
-export default function BlogContentRenderer({ html, inlineProducts }: Props) {
-  if (!html) return null;
+type HtmlPart = { type: "html"; content: string };
+type ProductPart = { type: "product"; id: string };
+type GroupPart = { type: "product-group"; ids: string[] };
+type Part = HtmlPart | ProductPart;
+type GroupedPart = HtmlPart | GroupPart;
 
-  // Split html into alternating [htmlSegment, uuid, htmlSegment, uuid, ...]
-  const parts: string[] = [];
+function parseContent(html: string): Part[] {
+  const parts: Part[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
   EMBED_RE.lastIndex = 0;
   while ((match = EMBED_RE.exec(html)) !== null) {
-    parts.push(html.slice(lastIndex, match.index)); // html before marker
-    parts.push(match[1]);                            // uuid
+    if (match.index > lastIndex) {
+      parts.push({ type: "html", content: html.slice(lastIndex, match.index) });
+    }
+    parts.push({ type: "product", id: match[1] });
     lastIndex = match.index + match[0].length;
   }
-  parts.push(html.slice(lastIndex)); // remaining html after last marker
+  if (lastIndex < html.length) {
+    parts.push({ type: "html", content: html.slice(lastIndex) });
+  }
+  return parts;
+}
 
+function groupConsecutiveProducts(parts: Part[]): GroupedPart[] {
+  const result: GroupedPart[] = [];
+  let i = 0;
+  while (i < parts.length) {
+    if (parts[i].type === "product") {
+      const ids: string[] = [];
+      while (i < parts.length && parts[i].type === "product") {
+        ids.push((parts[i] as ProductPart).id);
+        i++;
+      }
+      result.push({ type: "product-group", ids });
+    } else {
+      result.push(parts[i] as HtmlPart);
+      i++;
+    }
+  }
+  return result;
+}
+
+export default function BlogContentRenderer({ html, inlineProducts }: Props) {
+  if (!html) return null;
+
+  const grouped = groupConsecutiveProducts(parseContent(html));
   const productMap = new Map(inlineProducts.map((p) => [p.id, p]));
 
   return (
     <div className="blog-content-body">
-      {parts.map((part, i) => {
-        if (i % 2 === 0) {
-          // HTML segment
-          if (!part.trim()) return null;
+      {grouped.map((part, i) => {
+        if (part.type === "html") {
+          if (!part.content.trim()) return null;
           return (
             <div
               key={i}
               className={PROSE_CLASSES}
-              dangerouslySetInnerHTML={{ __html: part }}
+              dangerouslySetInnerHTML={{ __html: part.content }}
             />
           );
         }
-        // Product UUID
-        const product = productMap.get(part);
-        if (!product) return null;
+
+        const products = part.ids
+          .map((id) => productMap.get(id))
+          .filter((p): p is Product => p !== undefined);
+
+        if (products.length === 0) return null;
+
+        if (products.length === 1) {
+          return (
+            <div key={i} className="not-prose my-8 max-w-sm">
+              <ProductCard product={products[0]} />
+            </div>
+          );
+        }
+
         return (
-          <div key={i} className="my-8 not-prose max-w-xs">
-            <ProductCard product={product} />
+          <div
+            key={i}
+            className="not-prose my-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {products.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         );
       })}
