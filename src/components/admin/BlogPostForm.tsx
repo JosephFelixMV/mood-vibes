@@ -49,9 +49,9 @@ export default function BlogPostForm({ editId, onClose }: Props) {
     staleTime: 1000 * 60 * 2,
   });
 
-  const { data: coreCategories = [] } = useQuery({
-    queryKey: ["categories", "core"],
-    queryFn: () => getCategories("core"),
+  const { data: moodCategories = [] } = useQuery({
+    queryKey: ["categories", "mood"],
+    queryFn: () => getCategories("mood"),
     staleTime: 1000 * 60 * 2,
   });
 
@@ -348,7 +348,7 @@ export default function BlogPostForm({ editId, onClose }: Props) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">— None —</SelectItem>
-              {coreCategories.map((c) => (
+              {moodCategories.map((c) => (
                 <SelectItem key={c.slug} value={c.slug}>
                   {c.icon} {c.name}
                 </SelectItem>
