@@ -72,7 +72,7 @@ export default function BlogPostPage() {
 
       {/* ── Region 1: Hero ── */}
       <header className="mb-10 space-y-4">
-        {post.vibe_category && (
+        {(post.vibe_category || post.category) && (
           <span
             className="inline-block rounded-full px-3 py-1 text-xs font-medium"
             style={{
@@ -81,7 +81,7 @@ export default function BlogPostPage() {
               border: "1px solid hsl(var(--badge-vibe-border))",
             }}
           >
-            {post.vibe_category}
+            {[post.vibe_category, post.category].filter(Boolean).join(" | ")}
           </span>
         )}
 
@@ -101,12 +101,6 @@ export default function BlogPostPage() {
             <>
               <span aria-hidden>·</span>
               <span>{post.read_time}</span>
-            </>
-          )}
-          {post.category && (
-            <>
-              <span aria-hidden>·</span>
-              <span>{post.category}</span>
             </>
           )}
         </div>

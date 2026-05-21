@@ -338,7 +338,7 @@ export default function BlogPostForm({ editId, onClose }: Props) {
 
         {/* Core Category */}
         <div className="space-y-1.5">
-          <Label>Category</Label>
+          <Label>Mood Category</Label>
           <Select
             value={form.category || "none"}
             onValueChange={(v) => setForm((f) => ({ ...f, category: v === "none" ? "" : v }))}

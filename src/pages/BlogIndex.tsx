@@ -52,7 +52,7 @@ export default function BlogIndex() {
                   </div>
                 )}
                 <CardContent className="p-5 space-y-3">
-                  {post.vibe_category && (
+                  {(post.vibe_category || post.category) && (
                     <span
                       className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"
                       style={{
@@ -61,7 +61,7 @@ export default function BlogIndex() {
                         border: "1px solid hsl(var(--badge-vibe-border))",
                       }}
                     >
-                      {post.vibe_category}
+                      {[post.vibe_category, post.category].filter(Boolean).join(" | ")}
                     </span>
                   )}
 
