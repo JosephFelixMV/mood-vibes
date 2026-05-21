@@ -30,7 +30,7 @@ function TileImage({ product }: { product: Product }) {
           src={product.image_url}
           alt={product.name}
           className="absolute inset-0 h-full w-full object-contain object-center p-2"
-          loading="eager"
+          loading="lazy"
           onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
         />
       ) : (

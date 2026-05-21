@@ -238,6 +238,8 @@ function FeaturedPick({ pick }: { pick: DailyPickRow }) {
               src={product.image_url}
               alt={product.name}
               className="absolute inset-0 h-full w-full object-contain p-4"
+              loading="lazy"
+              decoding="async"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = fallbackImage;
               }}

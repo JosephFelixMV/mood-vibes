@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getBlogPosts } from "@/lib/supabase-queries";
 import { useSEO } from "@/hooks/useSEO";
+import { toStorageImage } from "@/lib/image-upload";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 
@@ -44,10 +45,11 @@ export default function BlogIndex() {
                 {post.cover_image_url && (
                   <div className="aspect-[16/9] overflow-hidden bg-muted">
                     <img
-                      src={post.cover_image_url}
+                      src={toStorageImage(post.cover_image_url, 800, 80)}
                       alt={post.title}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 )}

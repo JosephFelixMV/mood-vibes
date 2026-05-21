@@ -71,6 +71,24 @@ export async function uploadProductImage(file: File): Promise<string> {
 }
 
 /**
+ * Returns a Supabase Storage transformation URL optimised for display.
+ * Preserves aspect ratio (width-only constraint), converts to WebP.
+ * Only rewrites URLs that pass through Supabase Storage (/object/public/).
+ * External / hotlinked URLs are returned unchanged.
+ * Requires Supabase image transformation (Pro plan or higher).
+ */
+export function toStorageImage(
+  url: string | null | undefined,
+  width = 800,
+  quality = 80,
+): string {
+  if (!url) return "";
+  if (!url.includes("/object/public/")) return url;
+  return url.replace("/object/public/", "/render/image/public/") +
+    `?width=${width}&quality=${quality}&format=webp`;
+}
+
+/**
  * Returns a Supabase Storage transformation URL for use as a small thumbnail.
  * Only rewrites URLs that belong to our own bucket — external URLs are returned as-is.
  * Requires Supabase Pro or higher (image transformation add-on).

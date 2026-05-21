@@ -24,6 +24,7 @@ import { trackProductClick } from "@/lib/track-click";
 import { useSEO } from "@/hooks/useSEO";
 import { getDiscoveryContext } from "@/lib/discovery-context";
 import { stripHtml, truncateToMeta, formatBrandName } from "@/lib/brand-utils";
+import { toStorageImage, toStorageThumbnail } from "@/lib/image-upload";
 import fallbackImage from "@/assets/fallback-product.png";
 
 export default function ProductDetail() {
@@ -191,10 +192,11 @@ export default function ProductDetail() {
               {allImages.length > 0 ? (
                 <>
                   <img
-                    src={allImages[currentImage]}
+                    src={toStorageImage(allImages[currentImage], 900, 85)}
                     sizes="(min-width: 768px) 50vw, 100vw"
                     alt={imageAlt}
                     className="sharp-image h-full w-full object-contain"
+                    decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = fallbackImage;
                     }}
@@ -237,9 +239,11 @@ export default function ProductDetail() {
                     }`}
                   >
                     <img
-                      src={url}
+                      src={toStorageThumbnail(url, 128, 128, 60)}
                       alt={`${product.name} image ${i + 1}`}
                       className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = fallbackImage;
                       }}
