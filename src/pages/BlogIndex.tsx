@@ -24,7 +24,7 @@ export default function BlogIndex() {
       {/* Page header */}
       <header className="mb-10">
         <h1 className="font-heading text-4xl font-bold mb-3">The Edit</h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-xs">
           Your Premium Discovery Feed. Unfiltered reviews, expert roundups, and unexpected finds engineered to elevate your daily routine and capture the perfect mood. We map out the distinct vibes of the modern aesthetic, exploring everything from the tangible wellness benefits of weighted blankets to curated top-five lists spanning health, beauty, and global adventure. Stop searching and start discovering the intentional products that define your space and energy.
         </p>
       </header>
