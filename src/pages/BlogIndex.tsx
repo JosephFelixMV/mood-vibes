@@ -38,16 +38,16 @@ export default function BlogIndex() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
             <Link key={post.id} to={`/blogs/${post.slug}`} className="group block">
               <Card className="h-full overflow-hidden border-border transition-shadow hover:shadow-md">
                 {post.cover_image_url && (
-                  <div className="aspect-[16/9] overflow-hidden bg-muted">
+                  <div className="relative aspect-square overflow-hidden bg-[#f7f7f5]">
                     <img
-                      src={toStorageImage(post.cover_image_url, 800, 80)}
+                      src={toStorageImage(post.cover_image_url, 600, 80)}
                       alt={post.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="absolute inset-0 h-full w-full object-contain p-3"
                       loading="lazy"
                       decoding="async"
                     />
