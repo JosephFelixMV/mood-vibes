@@ -88,7 +88,7 @@ export default function BlogPostPage() {
   return (
     <div>
       {/* ── Region 1: Hero ── */}
-      <header className="border-b border-border bg-muted/40 py-12">
+      <header className="border-b border-border bg-card py-12">
         <div className="container max-w-3xl space-y-5 text-center">
           {/* Back link */}
           <div className="flex justify-start">
@@ -101,19 +101,18 @@ export default function BlogPostPage() {
             </Link>
           </div>
 
-          {/* Vibe + Mood pill */}
+          {/* Vibe + Mood pills */}
           {(post.vibe_category || post.category) && (
-            <div>
-              <span
-                className="inline-block rounded-full px-3 py-1 text-xs font-medium"
-                style={{
-                  backgroundColor: "hsl(var(--badge-vibe))",
-                  color: "hsl(var(--badge-vibe-foreground))",
-                  border: "1px solid hsl(var(--badge-vibe-border))",
-                }}
-              >
-                {[post.vibe_category, post.category].filter(Boolean).join(" | ")}
-              </span>
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-5">
+              {[post.vibe_category, post.category].filter(Boolean).map((label) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary"
+                >
+                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary/40" />
+                  {label}
+                </span>
+              ))}
             </div>
           )}
 
