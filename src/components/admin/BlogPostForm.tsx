@@ -247,7 +247,7 @@ export default function BlogPostForm({ editId, onClose }: Props) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open(`/blog/${form.slug}`, "_blank")}
+              onClick={() => window.open(`/blogs/${form.slug}`, "_blank")}
             >
               <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
               Preview

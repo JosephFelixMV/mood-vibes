@@ -15,7 +15,7 @@ export default function BlogIndex() {
   useSEO({
     title: "The Edit",
     description: "Stories, guides, and finds from the Mood & Vibes team.",
-    breadcrumbs: [{ name: "The Edit", url: "/blog" }],
+    breadcrumbs: [{ name: "The Edit", url: "/blogs" }],
   });
 
   return (
@@ -39,7 +39,7 @@ export default function BlogIndex() {
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {posts.map((post) => (
-            <Link key={post.id} to={`/blog/${post.slug}`} className="group block">
+            <Link key={post.id} to={`/blogs/${post.slug}`} className="group block">
               <Card className="h-full overflow-hidden border-border transition-shadow hover:shadow-md">
                 {post.cover_image_url && (
                   <div className="aspect-[16/9] overflow-hidden bg-muted">

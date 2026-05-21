@@ -13,6 +13,7 @@ const allNavLinks = [
   { to: "/moods", label: "Moods" },
   { to: "/brands", label: "Brands" },
   { to: "/products", label: "Products" },
+  { to: "/blogs", label: "The Edit" },
 ];
 
 export default function Navbar() {

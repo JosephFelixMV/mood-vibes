@@ -211,8 +211,8 @@ function AppShell() {
             <Route path="/discover" element={<Discover />} />
             <Route path="/brands" element={<Brands />} />
             <Route path="/daily-picks" element={<DailyPicks />} />
-            <Route path="/blog" element={<BlogIndex />} />
-            <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/blogs" element={<BlogIndex />} />
+            <Route path="/blogs/:slug" element={<BlogPostPage />} />
             <Route path="/login" element={<Login />} />
             <Route
               path="/admin"

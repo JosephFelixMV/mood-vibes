@@ -28,11 +28,11 @@ export default function BlogPostPage() {
     title: post?.title ?? "The Edit",
     description: post?.subtitle ?? undefined,
     image: post?.cover_image_url ?? undefined,
-    url: slug ? `/blog/${slug}` : "/blog",
+    url: slug ? `/blogs/${slug}` : "/blogs",
     breadcrumbs: post
       ? [
-          { name: "The Edit", url: "/blog" },
-          { name: post.title, url: `/blog/${post.slug}` },
+          { name: "The Edit", url: "/blogs" },
+          { name: post.title, url: `/blogs/${post.slug}` },
         ]
       : undefined,
   });
@@ -50,7 +50,7 @@ export default function BlogPostPage() {
       <div className="container py-16 text-center">
         <p className="text-muted-foreground mb-4">Post not found.</p>
         <Button asChild variant="outline" size="sm">
-          <Link to="/blog">
+          <Link to="/blogs">
             <ChevronLeft className="mr-1.5 h-3.5 w-3.5" />
             Back to The Edit
           </Link>
@@ -63,7 +63,7 @@ export default function BlogPostPage() {
     <article className="container max-w-3xl py-12">
       {/* Back link */}
       <Link
-        to="/blog"
+        to="/blogs"
         className="mb-8 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
