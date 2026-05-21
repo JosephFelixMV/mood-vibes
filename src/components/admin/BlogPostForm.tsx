@@ -304,6 +304,15 @@ export default function BlogPostForm({ editId, onClose }: Props) {
     );
   };
 
+  const insertBlock = (type: "pull-quote" | "science-box" | "ornament") => {
+    const snippets: Record<string, string> = {
+      "pull-quote": `<div class="pull-quote"><p>Enter your pull quote here — the line you most want readers to remember.</p></div>`,
+      "science-box": `<div class="science-box"><div class="science-label">🔬 What the research shows</div><p>Summarise the key research finding here in plain language.</p></div>`,
+      "ornament": `<div class="ornament">· · ·</div>`,
+    };
+    setForm((f) => ({ ...f, content: (f.content ?? "") + snippets[type] }));
+  };
+
   const copyEmbedCode = (id: string) => {
     navigator.clipboard.writeText(`[product-embed: ${id}]`);
     setCopiedId(id);
@@ -496,6 +505,22 @@ export default function BlogPostForm({ editId, onClose }: Props) {
             </span>
           )}
         </div>
+        {/* Insert Block toolbar */}
+        <div className="flex flex-wrap items-center gap-2 pb-1">
+          <span className="text-xs text-muted-foreground">Insert:</span>
+          <Button type="button" variant="outline" size="sm" onClick={() => insertBlock("pull-quote")}>
+            " Pull Quote
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => insertBlock("science-box")}>
+            🔬 Research Box
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => insertBlock("ornament")}>
+            · · · Divider
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground -mt-0.5">
+          Appended to end of content — reposition using the editor.
+        </p>
         <div className="rounded-md border border-input">
           <RichTextEditor
             value={form.content}

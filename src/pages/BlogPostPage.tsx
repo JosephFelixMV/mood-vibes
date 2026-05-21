@@ -162,7 +162,7 @@ export default function BlogPostPage() {
 
       {/* ── Region 2: Article Body ── */}
       {post.content && (
-        <div className="container max-w-3xl py-10 mb-4">
+        <div className="blog-prose container max-w-3xl py-10 mb-4">
           <BlogContentRenderer html={post.content} inlineProducts={inlineProducts} />
         </div>
       )}
