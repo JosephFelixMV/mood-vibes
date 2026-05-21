@@ -172,7 +172,7 @@ export default function ProductDetail() {
         <div className="flex flex-col md:flex-row">
           {/* Image gallery */}
           <div className="md:w-1/2">
-            <div className="relative aspect-square overflow-hidden bg-[#f7f7f5]">
+            <div className="relative w-full overflow-hidden bg-[#f7f7f5]">
               <TooltipProvider delayDuration={150}>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -195,7 +195,7 @@ export default function ProductDetail() {
                     src={toStorageImage(allImages[currentImage], 900, 85)}
                     sizes="(min-width: 768px) 50vw, 100vw"
                     alt={imageAlt}
-                    className="sharp-image h-full w-full object-contain"
+                    className="sharp-image block h-auto w-full object-contain"
                     decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = fallbackImage;
