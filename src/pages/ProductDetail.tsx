@@ -261,7 +261,7 @@ export default function ProductDetail() {
             {/* Category / vibe / mood badges */}
             <div className="flex flex-wrap gap-2">
               {[
-                ...new Set(
+                ...new Set<string>(
                   product.category
                     .split(",")
                     .map((c) => c.trim())
@@ -278,7 +278,7 @@ export default function ProductDetail() {
               })}
               {product.vibe_category &&
                 [
-                  ...new Set(
+                  ...new Set<string>(
                     product.vibe_category
                       .split(",")
                       .map((v) => v.trim())
@@ -297,7 +297,7 @@ export default function ProductDetail() {
                 })}
               {product.mood &&
                 [
-                  ...new Set(
+                  ...new Set<string>(
                     product.mood
                       .split(",")
                       .map((m) => m.trim())
