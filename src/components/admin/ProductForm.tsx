@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, MutableRefObject } from "react";
+import type { ShopifyProduct } from "./ShopifyImport";
 import { useUserRole } from "@/contexts/UserRoleContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -32,6 +33,7 @@ interface Props {
   editId: string | null;
   onDone: () => void;
   savedState?: MutableRefObject<Record<string, any> | null>;
+  prefill?: ShopifyProduct;
 }
 
 interface SpecRow {
@@ -164,7 +166,7 @@ function normalizeCompanyName(input: string): string {
   return trimmed;
 }
 
-export default function ProductForm({ editId, onDone, savedState }: Props) {
+export default function ProductForm({ editId, onDone, savedState, prefill }: Props) {
   const role = useUserRole();
   const isAdmin = role === "admin";
   const qc = useQueryClient();
@@ -207,6 +209,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
   });
 
   const [form, setForm] = useState(() => savedState?.current || empty);
+  const shopifyMetaRef = useRef<{ source: string; external_id: string; external_url: string } | null>(null);
   const [keywordInput, setKeywordInput] = useState("");
   const [showKeywordSuggestions, setShowKeywordSuggestions] = useState(false);
   const keywordRef = useRef<HTMLDivElement>(null);
@@ -270,6 +273,27 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       setForm(empty);
     }
   }, [existing, editId]);
+
+  useEffect(() => {
+    if (!prefill || editId) return;
+    setForm((prev: any) => ({
+      ...prev,
+      name: prefill.name,
+      company_name: prefill.company_name,
+      description: prefill.description,
+      price: prefill.price,
+      image_url: prefill.image_url ?? "",
+      affiliate_url: prefill.external_url,
+      source_url: prefill.external_url,
+      is_active: false,
+      additional_images: prefill.additional_images,
+    }));
+    shopifyMetaRef.current = {
+      source: "shopify",
+      external_id: prefill.external_id,
+      external_url: prefill.external_url,
+    };
+  }, [prefill, editId]);
 
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
@@ -593,6 +617,7 @@ export default function ProductForm({ editId, onDone, savedState }: Props) {
       } else {
         const insertPayload = {
           ...payload,
+          ...(shopifyMetaRef.current ?? {}),
           ...(userEmail ? { created_by: userEmail, updated_by: userEmail } : {}),
         };
         const { data, error } = await supabase.from("products").insert([insertPayload]).select("id").single();

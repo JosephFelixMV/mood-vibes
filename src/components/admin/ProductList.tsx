@@ -82,6 +82,7 @@ export default function ProductList({ onEdit }: Props) {
   const [filterVendor, setFilterVendor] = useState("all");
   const [filterMood, setFilterMood] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterSource, setFilterSource] = useState("all");
   const [filterError, setFilterError] = useState("all");
   const [filterCreator, setFilterCreator] = useState("all");
   const [pageSize, setPageSize] = useState(50);
@@ -338,6 +339,7 @@ export default function ProductList({ onEdit }: Props) {
     if (filterError === "error" && !p.page_error) return false;
     if (filterError === "ok" && p.page_error) return false;
     if (filterCreator !== "all" && (p as any).created_by !== filterCreator) return false;
+    if (filterSource !== "all" && (p as any).source !== filterSource) return false;
     if (dateFrom) {
       const added = new Date(p.date_added);
       if (added < dateFrom) return false;
@@ -443,6 +445,17 @@ export default function ProductList({ onEdit }: Props) {
                   <SelectItem key={b.id} value={b.id}>{b.name} ({vendorCounts[b.id] || 0})</SelectItem>
                 ));
             })()}
+          </SelectContent>
+        </Select>
+
+        <Select value={filterSource} onValueChange={handleFilterChange(setFilterSource)}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="All Sources" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sources</SelectItem>
+            <SelectItem value="shopify">Shopify</SelectItem>
+            <SelectItem value="manual">Manual</SelectItem>
           </SelectContent>
         </Select>
 
@@ -561,7 +574,7 @@ export default function ProductList({ onEdit }: Props) {
             Clear dates
           </Button>
         )}
-        {(filterCategory !== "all" || filterVibe !== "all" || filterMood !== "all" || filterVendor !== "all" || filterStatus !== "all" || filterError !== "all" || filterCreator !== "all" || dateFrom || dateTo) && (
+        {(filterCategory !== "all" || filterVibe !== "all" || filterMood !== "all" || filterVendor !== "all" || filterStatus !== "all" || filterSource !== "all" || filterError !== "all" || filterCreator !== "all" || dateFrom || dateTo) && (
           <Button
             variant="outline"
             size="sm"
@@ -573,6 +586,7 @@ export default function ProductList({ onEdit }: Props) {
               setFilterMood("all");
               setFilterVendor("all");
               setFilterStatus("all");
+              setFilterSource("all");
               setFilterError("all");
               setFilterCreator("all");
               setDateFrom(undefined);

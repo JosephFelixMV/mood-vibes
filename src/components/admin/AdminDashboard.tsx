@@ -16,6 +16,7 @@ import BrandManager from "./BrandManager";
 import FlaggedProductsDashboard from "./FlaggedProductsDashboard";
 import BlogPostList from "./BlogPostList";
 import BlogPostForm from "./BlogPostForm";
+import ShopifyImport from "./ShopifyImport";
 
 export default function AdminDashboard() {
   const role = useUserRole();
@@ -100,7 +101,10 @@ export default function AdminDashboard() {
           <BrandManager />
         </TabsContent>
         <TabsContent value="bulk" forceMount className={tab !== "bulk" ? "hidden" : ""}>
-          <BulkUpload />
+          <div className="space-y-8">
+            <BulkUpload />
+            <ShopifyImport />
+          </div>
         </TabsContent>
         <TabsContent value="analytics" forceMount className={tab !== "analytics" ? "hidden" : ""}>
           <AnalyticsDashboard />
