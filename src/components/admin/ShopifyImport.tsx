@@ -48,7 +48,10 @@ export default function ShopifyImport() {
         supabase.from("products").select("external_id").not("external_id", "is", null),
       ]);
 
-      if (invokeResult.error) throw invokeResult.error;
+      if (invokeResult.error) {
+        const detail = invokeResult.data?.error || invokeResult.error.message;
+        throw new Error(detail);
+      }
 
       const importedIds = new Set(
         (existingResult.data ?? []).map((r: any) => r.external_id).filter(Boolean)
