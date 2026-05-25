@@ -49,7 +49,11 @@ export default function ShopifyImport() {
       ]);
 
       if (invokeResult.error) {
-        const detail = invokeResult.data?.error || invokeResult.error.message;
+        let detail = invokeResult.error.message;
+        try {
+          const body = await (invokeResult.error as any).context?.json?.();
+          if (body?.error) detail = body.error;
+        } catch { /* ignore parse failure */ }
         throw new Error(detail);
       }
 
