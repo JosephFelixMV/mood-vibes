@@ -42,12 +42,13 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const shopifyToken = Deno.env.get("SHOPIFY_ADMIN_TOKEN")!;
+    const shopifyClientId = Deno.env.get("SHOPIFY_CLIENT_ID")!;
+    const shopifyClientSecret = Deno.env.get("SHOPIFY_CLIENT_SECRET")!;
     const shopifyStoreUrl = Deno.env.get("SHOPIFY_STORE_URL")!;
 
-    if (!shopifyToken || !shopifyStoreUrl) {
+    if (!shopifyClientId || !shopifyClientSecret || !shopifyStoreUrl) {
       return new Response(
-        JSON.stringify({ error: "SHOPIFY_ADMIN_TOKEN and SHOPIFY_STORE_URL secrets are required" }),
+        JSON.stringify({ error: "SHOPIFY_CLIENT_ID, SHOPIFY_CLIENT_SECRET, and SHOPIFY_STORE_URL secrets are required" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -59,6 +60,27 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Exchange client credentials for an Admin API access token
+    const tokenResp = await fetch(`https://${shopifyStoreUrl}/admin/oauth/access_token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: shopifyClientId,
+        client_secret: shopifyClientSecret,
+        grant_type: "client_credentials",
+      }),
+    });
+    if (!tokenResp.ok) {
+      const body = await tokenResp.text();
+      console.log("Token exchange error:", tokenResp.status, body);
+      throw new Error(`Shopify token exchange failed: ${tokenResp.status} ${tokenResp.statusText} — ${body}`);
+    }
+    const tokenData = await tokenResp.json();
+    const shopifyToken = tokenData.access_token;
+    console.log("Token exchange succeeded, scopes:", tokenData.scope);
+
+    const shopifyUrl = `https://${shopifyStoreUrl}/admin/api/2026-01/graphql.json`;
 
     const allProducts: ShopifyProduct[] = [];
     let cursor: string | null = null;
@@ -94,19 +116,18 @@ serve(async (req) => {
         }
       }`;
 
-      const resp = await fetch(
-        `https://${shopifyStoreUrl}/admin/api/2025-01/graphql.json`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Shopify-Access-Token": shopifyToken,
-          },
-          body: JSON.stringify({ query }),
-        }
-      );
+      const resp = await fetch(shopifyUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": shopifyToken,
+        },
+        body: JSON.stringify({ query }),
+      });
 
       if (!resp.ok) {
+        const body = await resp.text();
+        console.log("GraphQL error body:", body);
         throw new Error(`Shopify API error: ${resp.status} ${resp.statusText}`);
       }
 
