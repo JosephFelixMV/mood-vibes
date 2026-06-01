@@ -175,7 +175,7 @@ export default function VibeLanding() {
       </div>
 
       {!isLoading && healthyProducts.length > 0 && (
-        <DiscoveryTile products={healthyProducts} getRandomProduct={getRandomProduct} ctaLabel="Vibe with It" />
+        <DiscoveryTile products={healthyProducts} getRandomProduct={getRandomProduct} ctaLabel="Vibe with It" relatedArticlesMap={relatedArticlesMap} />
       )}
 
       {!isLoading && products.length > 0 && (

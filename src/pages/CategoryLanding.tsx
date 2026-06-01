@@ -274,7 +274,7 @@ export default function CategoryLanding() {
 
       {/* Discovery tile */}
       {!isLoading && healthyProducts.length > 0 && (
-        <DiscoveryTile products={healthyProducts} getRandomProduct={getRandomProduct} ctaLabel="Discover Brand" />
+        <DiscoveryTile products={healthyProducts} getRandomProduct={getRandomProduct} ctaLabel="Discover Brand" relatedArticlesMap={relatedArticlesMap} />
       )}
 
       {/* Sort + Product grid */}

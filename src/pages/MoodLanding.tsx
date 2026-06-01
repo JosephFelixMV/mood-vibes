@@ -192,7 +192,7 @@ export default function MoodLanding() {
 
       {/* Discovery tile */}
       {filteredProducts.length > 0 && (
-        <DiscoveryTile products={filteredProducts} getRandomProduct={getRandomProduct} ctaLabel="Lock in Mood" />
+        <DiscoveryTile products={filteredProducts} getRandomProduct={getRandomProduct} ctaLabel="Lock in Mood" relatedArticlesMap={relatedArticlesMap} />
       )}
 
       {/* Sort + Vendor filter */}

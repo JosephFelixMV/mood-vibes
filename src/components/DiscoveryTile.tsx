@@ -2,10 +2,10 @@ import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { Info } from "lucide-react";
+import { Info, BookOpen } from "lucide-react";
 
 import { formatPrice } from "@/lib/supabase-queries";
-import type { Product } from "@/lib/supabase-queries";
+import type { Product, RelatedArticle } from "@/lib/supabase-queries";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductDrawer from "@/components/ProductDrawer";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
@@ -20,6 +20,7 @@ interface DiscoveryTileProps {
   products: Product[];
   getRandomProduct: (pool: Product[], excludeId?: string) => Product | null;
   ctaLabel?: string;
+  relatedArticlesMap?: Record<string, RelatedArticle>;
 }
 
 function TileImage({ product }: { product: Product }) {
@@ -55,7 +56,7 @@ function TileImage({ product }: { product: Product }) {
   );
 }
 
-export default function DiscoveryTile({ products, getRandomProduct: getRandom, ctaLabel }: DiscoveryTileProps) {
+export default function DiscoveryTile({ products, getRandomProduct: getRandom, ctaLabel, relatedArticlesMap = {} }: DiscoveryTileProps) {
   const [pick, setPick] = useState<Product | null>(() =>
     products.length > 0 ? getRandom(products) : null
   );
@@ -76,6 +77,7 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
     ? allBrands.find((b: any) => b.id === pick.vendor_id)?.name
     : null;
   const vendorName = rawVendorName ? formatBrandName(rawVendorName) : null;
+  const relatedArticle = pick ? (relatedArticlesMap[pick.id] ?? null) : null;
 
   // Sync pick if products load after mount
   if (products.length > 0 && !pick) {
@@ -120,6 +122,18 @@ export default function DiscoveryTile({ products, getRandomProduct: getRandom, c
         </div>
 
         <div className="p-4">
+          {relatedArticle && (
+            <a
+              href={`/blogs/${relatedArticle.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-[0.08em] text-primary font-medium hover:underline w-fit"
+            >
+              <BookOpen className="h-2.5 w-2.5 flex-shrink-0" aria-hidden="true" />
+              Read Article
+            </a>
+          )}
           <h3 className="font-heading text-base font-semibold leading-tight">{pick.name}</h3>
           {pick.company_name && (
             <p className="mt-0.5 text-[10px] uppercase tracking-[0.08em] text-muted-foreground font-medium">{pick.company_name}</p>

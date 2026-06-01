@@ -187,11 +187,10 @@ export default function Index() {
 
   const displayedProduct = dailyPick;
 
-  const featuredProductIds = [displayedProduct?.id, surprise?.id].filter((id): id is string => !!id);
   const { data: relatedArticlesMap = {} } = useQuery({
-    queryKey: ["related-articles", featuredProductIds],
-    queryFn: () => getRelatedArticlesForProducts(featuredProductIds),
-    enabled: featuredProductIds.length > 0,
+    queryKey: ["related-articles", products.map((p) => p.id)],
+    queryFn: () => getRelatedArticlesForProducts(products.map((p) => p.id)),
+    enabled: products.length > 0,
     staleTime: 1000 * 60 * 10,
   });
 
