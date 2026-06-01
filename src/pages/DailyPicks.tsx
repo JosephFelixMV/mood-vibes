@@ -3,8 +3,8 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { formatPrice } from "@/lib/supabase-queries";
-import type { Product } from "@/lib/supabase-queries";
+import { formatPrice, getRelatedArticlesForProducts } from "@/lib/supabase-queries";
+import type { Product, RelatedArticle } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
 import ExternalCTA from "@/components/ExternalCTA";
 import { Button } from "@/components/ui/button";
@@ -116,6 +116,14 @@ export default function DailyPicks() {
   const totalPages = Math.max(1, Math.ceil(totalPast / PAGE_SIZE));
   const isLoading = todayLoading;
 
+  const pastProductIds = pastPicks.map((r) => r.product.id);
+  const { data: relatedArticlesMap = {} } = useQuery({
+    queryKey: ["related-articles", pastProductIds],
+    queryFn: () => getRelatedArticlesForProducts(pastProductIds),
+    enabled: pastProductIds.length > 0,
+    staleTime: 1000 * 60 * 10,
+  });
+
   return (
     <div className="container py-12 md:py-16">
       <header className="mb-10 text-center">
@@ -163,7 +171,7 @@ export default function DailyPicks() {
               ) : (
                 <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:gap-8 lg:grid-cols-4">
                   {pastPicks.map((p) => (
-                    <PastPickCard key={p.pick_date} pick={p} />
+                    <PastPickCard key={p.pick_date} pick={p} relatedArticle={relatedArticlesMap[p.product.id] ?? null} />
                   ))}
                 </div>
               )}
@@ -287,13 +295,13 @@ function FeaturedPick({ pick }: { pick: DailyPickRow }) {
   );
 }
 
-function PastPickCard({ pick }: { pick: DailyPickRow }) {
+function PastPickCard({ pick, relatedArticle }: { pick: DailyPickRow; relatedArticle?: RelatedArticle | null }) {
   return (
     <div className="flex flex-col">
       <div className="mb-2 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
         {formatPickDate(pick.pick_date)}
       </div>
-      <ProductCard product={pick.product} />
+      <ProductCard product={pick.product} relatedArticle={relatedArticle} />
     </div>
   );
 }

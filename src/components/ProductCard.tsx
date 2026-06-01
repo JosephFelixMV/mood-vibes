@@ -8,13 +8,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import ExternalCTA from "@/components/ExternalCTA";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Info } from "lucide-react";
+import { Info, BookOpen } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { trackProductClick } from "@/lib/track-click";
 import { trackEvent } from "@/lib/track-event";
 import { supabase } from "@/lib/supabase";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
-import type { Product } from "@/lib/supabase-queries";
+import type { Product, RelatedArticle } from "@/lib/supabase-queries";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProductDrawer from "@/components/ProductDrawer";
@@ -25,9 +25,10 @@ interface ProductCardProps {
   product: Product;
   featured?: boolean;
   ctaLabel?: string;
+  relatedArticle?: RelatedArticle | null;
 }
 
-export default function ProductCard({ product, featured, ctaLabel = "Buy" }: ProductCardProps) {
+export default function ProductCard({ product, featured, ctaLabel = "Buy", relatedArticle }: ProductCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const proxiedImage = product.image_url;
   const isMobile = useIsMobile();
@@ -262,6 +263,18 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy" }: Pro
 
         {/* Content */}
         <div className={`flex flex-col gap-2 p-4 ${featured ? "md:w-1/2 md:justify-center md:p-8" : ""}`}>
+          {relatedArticle && (
+            <a
+              href={`/blogs/${relatedArticle.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1 text-[10px] uppercase tracking-[0.08em] text-primary font-medium hover:underline w-fit"
+            >
+              <BookOpen className="h-2.5 w-2.5 flex-shrink-0" aria-hidden="true" />
+              Read Article
+            </a>
+          )}
           <span className="font-heading text-sm font-semibold leading-snug transition-colors hover:text-primary">
             {product.name}
           </span>

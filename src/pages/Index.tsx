@@ -27,7 +27,7 @@ function InstagramGradientIcon({ className }: { className?: string }) {
 import { Link } from "react-router-dom";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductCard from "@/components/ProductCard";
-import { getDailyPick, getRandomProduct, filterByRegion, getCategories, TILE_SELECT, type Product, type Category } from "@/lib/supabase-queries";
+import { getDailyPick, getRandomProduct, filterByRegion, getCategories, getRelatedArticlesForProducts, TILE_SELECT, type Product, type Category } from "@/lib/supabase-queries";
 import { supabase } from "@/lib/supabase";
 import { useRateLimitedAction } from "@/hooks/useRateLimitedAction";
 import { useRegion } from "@/contexts/RegionContext";
@@ -186,6 +186,14 @@ export default function Index() {
   const { trigger, cooldown } = useRateLimitedAction(2000);
 
   const displayedProduct = dailyPick;
+
+  const featuredProductIds = [displayedProduct?.id, surprise?.id].filter((id): id is string => !!id);
+  const { data: relatedArticlesMap = {} } = useQuery({
+    queryKey: ["related-articles", featuredProductIds],
+    queryFn: () => getRelatedArticlesForProducts(featuredProductIds),
+    enabled: featuredProductIds.length > 0,
+    staleTime: 1000 * 60 * 10,
+  });
 
   const healthyProducts = filterByRegion(
     products.filter((p) => !p.page_error),
@@ -415,7 +423,7 @@ export default function Index() {
           </div>
         ) : displayedProduct ? (
           <div className="mx-auto max-w-3xl">
-            <ProductCard product={displayedProduct} featured ctaLabel="Discover Brand" />
+            <ProductCard product={displayedProduct} featured ctaLabel="Discover Brand" relatedArticle={relatedArticlesMap[displayedProduct.id] ?? null} />
           </div>
         ) : (
           <p className="text-center text-muted-foreground">No products yet. Add some in the admin panel!</p>
@@ -446,7 +454,7 @@ export default function Index() {
                 <p className="mb-4 text-xs font-medium uppercase tracking-widest text-muted-foreground text-center">
                   Your surprise pick
                 </p>
-                <ProductCard product={surprise} featured ctaLabel="Discover Brand" />
+                <ProductCard product={surprise} featured ctaLabel="Discover Brand" relatedArticle={relatedArticlesMap[surprise.id] ?? null} />
               </motion.div>
             )}
           </AnimatePresence>

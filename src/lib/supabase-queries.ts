@@ -23,6 +23,15 @@ export interface BlogPost {
   updated_at: string;
 }
 
+export interface RelatedArticle {
+  post_id: string;
+  title: string;
+  slug: string;
+  subtitle: string | null;
+  cover_image_url: string | null;
+  published_at: string | null;
+}
+
 /**
  * Minimum number of active products a category/vibe/mood must have
  * to be shown to public visitors. Admin pages bypass this filter.
@@ -482,4 +491,79 @@ export async function getBlogInlineProducts(postId: string): Promise<Product[]> 
   return ids
     .map((id) => (products || []).find((p: any) => p.id === id))
     .filter(Boolean) as Product[];
+}
+
+// ── Related Articles ──────────────────────────────────────────────────────────
+
+/** Returns the most recently published blog post featuring the given product. */
+export async function getProductRelatedArticle(
+  productId: string,
+): Promise<RelatedArticle | null> {
+  const { data: junctionRows, error: jErr } = await supabase
+    .from("blog_post_products")
+    .select("post_id")
+    .eq("product_id", productId);
+  if (jErr || !junctionRows || junctionRows.length === 0) return null;
+
+  const postIds = junctionRows.map((r: any) => r.post_id as string);
+  const { data: posts, error: pErr } = await supabase
+    .from("blog_posts")
+    .select("id, title, slug, subtitle, cover_image_url, published_at")
+    .in("id", postIds)
+    .eq("is_active", true)
+    .order("published_at", { ascending: false })
+    .limit(1);
+  if (pErr || !posts || posts.length === 0) return null;
+
+  const post = posts[0] as any;
+  return {
+    post_id: post.id,
+    title: post.title,
+    slug: post.slug,
+    subtitle: post.subtitle ?? null,
+    cover_image_url: post.cover_image_url ?? null,
+    published_at: post.published_at ?? null,
+  };
+}
+
+/** Returns a map of { productId: RelatedArticle } for a set of product IDs.
+ *  Uses two queries to avoid N+1 — call once per grid page. */
+export async function getRelatedArticlesForProducts(
+  productIds: string[],
+): Promise<Record<string, RelatedArticle>> {
+  if (productIds.length === 0) return {};
+
+  const { data: junctionRows, error: jErr } = await supabase
+    .from("blog_post_products")
+    .select("product_id, post_id")
+    .in("product_id", productIds);
+  if (jErr || !junctionRows || junctionRows.length === 0) return {};
+
+  const postIds = Array.from(new Set(junctionRows.map((r: any) => r.post_id as string)));
+  const { data: posts, error: pErr } = await supabase
+    .from("blog_posts")
+    .select("id, title, slug, subtitle, cover_image_url, published_at")
+    .in("id", postIds)
+    .eq("is_active", true)
+    .order("published_at", { ascending: false });
+  if (pErr || !posts) return {};
+
+  const postMap = new Map<string, any>();
+  (posts as any[]).forEach((p) => postMap.set(p.id, p));
+
+  const map: Record<string, RelatedArticle> = {};
+  for (const row of junctionRows as any[]) {
+    if (map[row.product_id]) continue;
+    const post = postMap.get(row.post_id);
+    if (!post) continue;
+    map[row.product_id] = {
+      post_id: post.id,
+      title: post.title,
+      slug: post.slug,
+      subtitle: post.subtitle ?? null,
+      cover_image_url: post.cover_image_url ?? null,
+      published_at: post.published_at ?? null,
+    };
+  }
+  return map;
 }

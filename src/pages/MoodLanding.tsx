@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getCategories, getRandomProduct, filterByRegion } from "@/lib/supabase-queries";
+import { getCategories, getRandomProduct, filterByRegion, getRelatedArticlesForProducts } from "@/lib/supabase-queries";
 import { parseTaxonomyString } from "@/lib/taxonomy-utils";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -92,6 +92,13 @@ export default function MoodLanding() {
       return data || [];
     },
     staleTime: 1000 * 60 * 30,
+  });
+
+  const { data: relatedArticlesMap = {} } = useQuery({
+    queryKey: ["related-articles", products.map((p) => p.id)],
+    queryFn: () => getRelatedArticlesForProducts(products.map((p) => p.id)),
+    enabled: products.length > 0,
+    staleTime: 1000 * 60 * 10,
   });
 
   const regionProducts = filterByRegion(products, region);
@@ -272,7 +279,7 @@ export default function MoodLanding() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map((p, i) => (
             <motion.div key={p.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <ProductCard product={p} ctaLabel="Lock in Mood" />
+              <ProductCard product={p} ctaLabel="Lock in Mood" relatedArticle={relatedArticlesMap[p.id] ?? null} />
             </motion.div>
           ))}
         </div>

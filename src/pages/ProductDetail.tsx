@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, ExternalLink } from "lucide-react";
 import DOMPurify from "dompurify";
 import ExternalCTA from "@/components/ExternalCTA";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
@@ -16,6 +16,7 @@ import {
   getRandomProduct,
   getProductImages,
   getProductSpecifications,
+  getProductRelatedArticle,
   getCategories,
   formatPrice,
 } from "@/lib/supabase-queries";
@@ -48,6 +49,13 @@ export default function ProductDetail() {
     queryKey: ["product-specifications", product?.id],
     queryFn: () => getProductSpecifications(product!.id),
     enabled: !!product?.id,
+  });
+
+  const { data: relatedArticle } = useQuery({
+    queryKey: ["product-related-article", product?.id],
+    queryFn: () => getProductRelatedArticle(product!.id),
+    enabled: !!product?.id,
+    staleTime: 1000 * 60 * 10,
   });
 
   const { data: productKeywords = [] } = useQuery({
@@ -366,6 +374,40 @@ export default function ProductDetail() {
               className="prose prose-sm max-w-none text-muted-foreground leading-relaxed [&_p]:my-3 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:my-1"
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
             />
+          </div>
+        )}
+
+        {/* Featured In */}
+        {relatedArticle && (
+          <div className="border-t px-8 py-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground mb-3">
+              Featured In
+            </p>
+            <a
+              href={`/blogs/${relatedArticle.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-start gap-3 rounded-lg border border-border p-3 hover:border-primary/40 hover:bg-muted/30 transition-colors"
+            >
+              {relatedArticle.cover_image_url && (
+                <img
+                  src={relatedArticle.cover_image_url}
+                  alt={relatedArticle.title}
+                  className="h-14 w-14 rounded-md object-cover flex-shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                  {relatedArticle.title}
+                </p>
+                {relatedArticle.subtitle && (
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                    {relatedArticle.subtitle}
+                  </p>
+                )}
+              </div>
+              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0 mt-0.5 group-hover:text-primary transition-colors" />
+            </a>
           </div>
         )}
 

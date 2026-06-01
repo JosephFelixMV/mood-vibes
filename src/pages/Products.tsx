@@ -4,7 +4,7 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import { setDiscoveryContext } from "@/lib/discovery-context";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getProductsPaginated, getCategories, filterByRegion } from "@/lib/supabase-queries";
+import { getProductsPaginated, getCategories, filterByRegion, getRelatedArticlesForProducts } from "@/lib/supabase-queries";
 import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -105,6 +105,13 @@ export default function Products() {
   const products = result?.data ?? [];
   const totalCount = result?.count ?? 0;
   const regionProducts = filterByRegion(products, region);
+
+  const { data: relatedArticlesMap = {} } = useQuery({
+    queryKey: ["related-articles", products.map((p) => p.id)],
+    queryFn: () => getRelatedArticlesForProducts(products.map((p) => p.id)),
+    enabled: products.length > 0,
+    staleTime: 1000 * 60 * 10,
+  });
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   // Build canonical URL — strip pagination params, preserve active filters
@@ -248,7 +255,7 @@ export default function Products() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
               >
-                <ProductCard product={p} ctaLabel="Discover Brand" />
+                <ProductCard product={p} ctaLabel="Discover Brand" relatedArticle={relatedArticlesMap[p.id] ?? null} />
               </motion.div>
             ))}
           </div>

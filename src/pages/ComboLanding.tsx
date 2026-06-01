@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import { getCategories, getProductsPaginated, filterByRegion } from "@/lib/supabase-queries";
+import { getCategories, getProductsPaginated, filterByRegion, getRelatedArticlesForProducts } from "@/lib/supabase-queries";
 import { useRegion } from "@/contexts/RegionContext";
 import { useSEO } from "@/hooks/useSEO";
 import ProductCard from "@/components/ProductCard";
@@ -68,6 +68,13 @@ export default function ComboLanding() {
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const regionProducts = useMemo(() => filterByRegion(products, region), [products, region]);
+
+  const { data: relatedArticlesMap = {} } = useQuery({
+    queryKey: ["related-articles", products.map((p) => p.id)],
+    queryFn: () => getRelatedArticlesForProducts(products.map((p) => p.id)),
+    enabled: products.length > 0,
+    staleTime: 1000 * 60 * 10,
+  });
 
   const parentPath = isCoreCombo ? `/category/${primarySlug}` : `/vibes/${primarySlug}`;
   const parentUrl = `${SITE_URL}${parentPath}`;
@@ -175,7 +182,7 @@ export default function ComboLanding() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
               >
-                <ProductCard product={p} />
+                <ProductCard product={p} relatedArticle={relatedArticlesMap[p.id] ?? null} />
               </motion.div>
             ))}
           </div>

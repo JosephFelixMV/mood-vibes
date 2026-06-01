@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getCategories, getRandomProduct, filterByRegion, type Product } from "@/lib/supabase-queries";
+import { getCategories, getRandomProduct, filterByRegion, getRelatedArticlesForProducts, type Product } from "@/lib/supabase-queries";
 import { parseTaxonomyString } from "@/lib/taxonomy-utils";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -98,6 +98,13 @@ export default function VibeLanding() {
       return data || [];
     },
     staleTime: 1000 * 60 * 30,
+  });
+
+  const { data: relatedArticlesMap = {} } = useQuery({
+    queryKey: ["related-articles", products.map((p) => p.id)],
+    queryFn: () => getRelatedArticlesForProducts(products.map((p) => p.id)),
+    enabled: products.length > 0,
+    staleTime: 1000 * 60 * 10,
   });
 
   const regionFiltered = filterByRegion(products.filter((p) => !p.page_error), region);
@@ -229,7 +236,7 @@ export default function VibeLanding() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
-              <ProductCard product={p} ctaLabel="Vibe with It" />
+              <ProductCard product={p} ctaLabel="Vibe with It" relatedArticle={relatedArticlesMap[p.id] ?? null} />
             </motion.div>
           ))}
         </div>
