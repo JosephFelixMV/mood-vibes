@@ -101,7 +101,7 @@ export default function BlogPostPage() {
     <div>
       {/* ── Region 1: Hero ── */}
       <header className="border-b border-border bg-[#F7F2EC] py-12">
-        <div className="container max-w-3xl space-y-5 text-center">
+        <div className="container max-w-[70rem] space-y-5 text-center">
           {/* Back link */}
           <div className="flex justify-start">
             <Link
@@ -197,14 +197,14 @@ export default function BlogPostPage() {
 
       {/* ── Region 2: Article Body ── */}
       {post.content && (
-        <div className="blog-prose container max-w-3xl py-10 mb-4">
+        <div className="blog-prose container max-w-[70rem] py-10 mb-4">
           <BlogContentRenderer html={post.content} inlineProducts={inlineProducts} />
         </div>
       )}
 
       {/* ── Region 3: Footer Product Grid ── */}
       {linkedProducts.length > 0 && (
-        <section className="container max-w-3xl mb-12">
+        <section className="container max-w-[70rem] mb-12">
           <h2 className="font-heading text-xl font-semibold mb-4">
             Featured Products
           </h2>
@@ -218,7 +218,7 @@ export default function BlogPostPage() {
 
       {/* ── Region 4: CTA Block ── */}
       {post.cta_url && (
-        <section className="container max-w-3xl mb-12">
+        <section className="container max-w-[70rem] mb-12">
           <div className="relative overflow-hidden rounded-xl bg-primary px-8 py-10 text-center text-primary-foreground">
             <span
               className="pointer-events-none absolute -right-4 -top-4 select-none text-[8rem] opacity-10"
@@ -243,7 +243,7 @@ export default function BlogPostPage() {
 
       {/* ── Region 5: SEO Tag Footer ── */}
       {post.tags && post.tags.length > 0 && (
-        <footer className="container max-w-3xl mt-10 border-t border-border pt-6 pb-12">
+        <footer className="container max-w-[70rem] mt-10 border-t border-border pt-6 pb-12">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-muted-foreground">Tags:</span>
             {post.tags.map((tag) => (
