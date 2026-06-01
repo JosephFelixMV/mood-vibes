@@ -116,15 +116,39 @@ export default function BlogPostPage() {
           {/* Vibe + Mood pills */}
           {(post.vibe_category || post.category) && (
             <div className="flex flex-wrap items-center justify-center gap-2 mb-5">
-              {[post.vibe_category, post.category].filter(Boolean).map((label) => (
+              {post.vibe_category && (
                 <span
-                  key={label}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary"
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
+                  style={{
+                    background: "linear-gradient(135deg, #F5D061 0%, #D9732B 100%)",
+                    color: "#1C1209",
+                  }}
                 >
-                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary/40" />
-                  {label}
+                  {vibes.find((v) => v.slug === post.vibe_category)?.icon && (
+                    <span aria-hidden>
+                      {vibes.find((v) => v.slug === post.vibe_category)!.icon}
+                    </span>
+                  )}
+                  {vibes.find((v) => v.slug === post.vibe_category)?.name ?? post.vibe_category}
                 </span>
-              ))}
+              )}
+              {post.category && (
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
+                  style={{
+                    background: "linear-gradient(135deg, #121212 0%, #3F3F46 100%)",
+                    color: "#FFFFFF",
+                    border: "1.5px solid #D9732B",
+                  }}
+                >
+                  {moods.find((m) => m.slug === post.category)?.icon && (
+                    <span aria-hidden>
+                      {moods.find((m) => m.slug === post.category)!.icon}
+                    </span>
+                  )}
+                  {moods.find((m) => m.slug === post.category)?.name ?? post.category}
+                </span>
+              )}
             </div>
           )}
 
