@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getBlogPost, getBlogPostProducts, getBlogInlineProducts } from "@/lib/supabase-queries";
+import { getBlogPost, getBlogPostProducts, getBlogInlineProducts, getCategories } from "@/lib/supabase-queries";
 import { useSEO } from "@/hooks/useSEO";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
