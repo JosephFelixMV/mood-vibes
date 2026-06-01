@@ -1,9 +1,15 @@
-Widen all blog page sections from `max-w-3xl` (~48rem) to `max-w-[70rem]` (~1120px).
+In `src/components/blog/BlogContentRenderer.tsx`, the single-product embed branch renders:
 
-## Scope
-- `src/pages/BlogPostPage.tsx` — hero, article body, featured products, CTA, footer tags, and any other constrained sections
-- `src/pages/BlogIndex.tsx` — grid/list container if currently capped at `max-w-3xl`
-- Check for any other blog-related pages or components using `max-w-3xl`
+```tsx
+<div className="not-prose my-8 max-w-sm">
+  <ProductCard product={products[0]} />
+</div>
+```
 
-## Technical Detail
-Replace Tailwind class `max-w-3xl` with `max-w-[70rem]` (custom 1120px) on every blog layout container. Ensure padding and responsiveness remain intact. No schema or backend changes.
+Add `mx-auto` so it centers within the article column:
+
+```tsx
+<div className="not-prose my-8 max-w-sm mx-auto">
+```
+
+No other changes.
