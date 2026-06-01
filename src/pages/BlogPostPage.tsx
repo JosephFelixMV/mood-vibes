@@ -41,6 +41,18 @@ export default function BlogPostPage() {
     staleTime: 1000 * 60 * 5,
   });
 
+  const { data: vibes = [] } = useQuery({
+    queryKey: ["categories", "vibe"],
+    queryFn: () => getCategories("vibe"),
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const { data: moods = [] } = useQuery({
+    queryKey: ["categories", "mood"],
+    queryFn: () => getCategories("mood"),
+    staleTime: 1000 * 60 * 30,
+  });
+
   useSEO({
     title: post?.title ?? "The Edit",
     description: post?.subtitle ?? undefined,
