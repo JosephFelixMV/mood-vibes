@@ -92,7 +92,7 @@ export default function BlogContentRenderer({ html, inlineProducts }: Props) {
 
         if (products.length === 1) {
           return (
-            <div key={i} className="not-prose my-8 max-w-sm">
+            <div key={i} className="not-prose my-8 max-w-sm mx-auto">
               <ProductCard product={products[0]} />
             </div>
           );
