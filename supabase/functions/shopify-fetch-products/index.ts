@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SHOPIFY_ADMIN_URL = "https://mood-and-vibes.myshopify.com/admin/api/2025-01/graphql.json";
+const SHOPIFY_ADMIN_URL = "https://m-v-10015.myshopify.com/admin/api/2025-01/graphql.json";
 
 interface ShopifyProduct {
   external_id: string;
