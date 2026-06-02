@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const SHOPIFY_ADMIN_URL = "https://mood-and-vibes.myshopify.com/admin/api/2025-01/graphql.json";
+
 interface ShopifyProduct {
   external_id: string;
   name: string;
@@ -42,13 +44,11 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const shopifyClientId = Deno.env.get("SHOPIFY_CLIENT_ID")!;
-    const shopifyClientSecret = Deno.env.get("SHOPIFY_CLIENT_SECRET")!;
-    const shopifyStoreUrl = Deno.env.get("SHOPIFY_STORE_URL")!;
+    const shopifyAdminToken = Deno.env.get("SHOPIFY_ADMIN_TOKEN");
 
-    if (!shopifyClientId || !shopifyClientSecret || !shopifyStoreUrl) {
+    if (!shopifyAdminToken) {
       return new Response(
-        JSON.stringify({ error: "SHOPIFY_CLIENT_ID, SHOPIFY_CLIENT_SECRET, and SHOPIFY_STORE_URL secrets are required" }),
+        JSON.stringify({ error: "SHOPIFY_ADMIN_TOKEN secret is not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -60,27 +60,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    // Exchange client credentials for an Admin API access token
-    const tokenResp = await fetch(`https://${shopifyStoreUrl}/admin/oauth/access_token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        client_id: shopifyClientId,
-        client_secret: shopifyClientSecret,
-        grant_type: "client_credentials",
-      }),
-    });
-    if (!tokenResp.ok) {
-      const body = await tokenResp.text();
-      console.log("Token exchange error:", tokenResp.status, body);
-      throw new Error(`Shopify token exchange failed: ${tokenResp.status} ${tokenResp.statusText} — ${body}`);
-    }
-    const tokenData = await tokenResp.json();
-    const shopifyToken = tokenData.access_token;
-    console.log("Token exchange succeeded, scopes:", tokenData.scope);
-
-    const shopifyUrl = `https://${shopifyStoreUrl}/admin/api/2026-01/graphql.json`;
 
     const allProducts: ShopifyProduct[] = [];
     let cursor: string | null = null;
@@ -116,24 +95,25 @@ serve(async (req) => {
         }
       }`;
 
-      const resp = await fetch(shopifyUrl, {
+      const resp = await fetch(SHOPIFY_ADMIN_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Shopify-Access-Token": shopifyToken,
+          "X-Shopify-Access-Token": shopifyAdminToken,
         },
         body: JSON.stringify({ query }),
       });
 
       if (!resp.ok) {
         const body = await resp.text();
-        console.log("GraphQL error body:", body);
+        console.error("Shopify GraphQL HTTP error:", resp.status, body);
         throw new Error(`Shopify API error: ${resp.status} ${resp.statusText}`);
       }
 
       const json = await resp.json();
 
       if (json.errors) {
+        console.error("Shopify GraphQL errors:", JSON.stringify(json.errors));
         throw new Error(`Shopify GraphQL error: ${json.errors[0]?.message ?? "Unknown error"}`);
       }
 
@@ -157,7 +137,7 @@ serve(async (req) => {
           price: parseFloat(node.variants?.edges?.[0]?.node?.price ?? "0") || 0,
           image_url: mediaImages[0] ?? null,
           additional_images: mediaImages.slice(1, 5),
-          external_url: node.onlineStoreUrl ?? "",
+          external_url: node.onlineStoreUrl ?? `https://shop.mood-and-vibes.com/products/${node.handle}`,
           company_name: "",
         });
       }
@@ -170,6 +150,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
+    console.error("shopify-fetch-products error:", err);
     return new Response(
       JSON.stringify({ error: err.message || "Internal error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
