@@ -205,7 +205,7 @@ RESPONSE FORMAT
 Return ONLY raw JSON. No markdown, no explanation, no code fences.
 
 {
-  "core": ["subcategory-slug"],
+  "core": ["category name"],
   "vibes": ["vibe name"],
   "moods": ["mood name"],
   "keywords": ["long-tail keyword phrase"],
