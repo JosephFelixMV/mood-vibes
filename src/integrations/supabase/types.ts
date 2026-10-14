@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -47,6 +47,108 @@ export type Database = {
           prompt_hash?: string
           prompt_text?: string
           result_count?: number
+        }
+        Relationships: []
+      }
+      blog_post_products: {
+        Row: {
+          display_order: number | null
+          id: string
+          placement: string
+          post_id: string
+          product_id: string
+        }
+        Insert: {
+          display_order?: number | null
+          id?: string
+          placement?: string
+          post_id: string
+          product_id: string
+        }
+        Update: {
+          display_order?: number | null
+          id?: string
+          placement?: string
+          post_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_post_products_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_post_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          author: string | null
+          category: string | null
+          content: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          cta_label: string | null
+          cta_url: string | null
+          has_affiliate_links: boolean | null
+          id: string
+          is_active: boolean | null
+          published_at: string | null
+          read_time: string | null
+          slug: string
+          subtitle: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          vibe_category: string | null
+        }
+        Insert: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          has_affiliate_links?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          published_at?: string | null
+          read_time?: string | null
+          slug: string
+          subtitle?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          vibe_category?: string | null
+        }
+        Update: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          has_affiliate_links?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          published_at?: string | null
+          read_time?: string | null
+          slug?: string
+          subtitle?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          vibe_category?: string | null
         }
         Relationships: []
       }
@@ -200,6 +302,45 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: {
+          category_slug: string
+          created_at: string
+          display_order: number
+          is_primary: boolean
+          product_id: string
+        }
+        Insert: {
+          category_slug: string
+          created_at?: string
+          display_order?: number
+          is_primary?: boolean
+          product_id: string
+        }
+        Update: {
+          category_slug?: string
+          created_at?: string
+          display_order?: number
+          is_primary?: boolean
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_categories_category_slug_fkey"
+            columns: ["category_slug"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "product_categories_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_clicks: {
         Row: {
           clicked_at: string
@@ -323,6 +464,45 @@ export type Database = {
           },
         ]
       }
+      product_moods: {
+        Row: {
+          created_at: string
+          display_order: number
+          is_primary: boolean
+          mood_slug: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          is_primary?: boolean
+          mood_slug: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          is_primary?: boolean
+          mood_slug?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_moods_mood_slug_fkey"
+            columns: ["mood_slug"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "product_moods_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_reports: {
         Row: {
           honeypot_triggered: boolean
@@ -393,15 +573,56 @@ export type Database = {
           },
         ]
       }
+      product_vibes: {
+        Row: {
+          created_at: string
+          display_order: number
+          is_primary: boolean
+          product_id: string
+          vibe_slug: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          is_primary?: boolean
+          product_id: string
+          vibe_slug: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          is_primary?: boolean
+          product_id?: string
+          vibe_slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_vibes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_vibes_vibe_slug_fkey"
+            columns: ["vibe_slug"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       products: {
         Row: {
           affiliate_url: string
-          category: string
           check_failure_count: number
           company_name: string | null
           created_at: string
+          created_by: string | null
           date_added: string
           description: string | null
+          external_id: string | null
+          external_url: string | null
           fashion_occasions: string[] | null
           fashion_season: string | null
           fashion_warmth: string | null
@@ -412,7 +633,6 @@ export type Database = {
           last_click_at: string | null
           last_status_code: number | null
           last_verified_at: string | null
-          mood: string | null
           name: string
           page_error: boolean
           page_error_detail: string | null
@@ -421,21 +641,24 @@ export type Database = {
           regions: string[]
           report_count: number
           slug: string
+          source: string
           source_url: string
           status: string
           updated_at: string
+          updated_by: string | null
           vendor_id: string | null
-          vibe_category: string | null
           video_url: string | null
         }
         Insert: {
           affiliate_url: string
-          category: string
           check_failure_count?: number
           company_name?: string | null
           created_at?: string
+          created_by?: string | null
           date_added?: string
           description?: string | null
+          external_id?: string | null
+          external_url?: string | null
           fashion_occasions?: string[] | null
           fashion_season?: string | null
           fashion_warmth?: string | null
@@ -446,7 +669,6 @@ export type Database = {
           last_click_at?: string | null
           last_status_code?: number | null
           last_verified_at?: string | null
-          mood?: string | null
           name: string
           page_error?: boolean
           page_error_detail?: string | null
@@ -455,21 +677,24 @@ export type Database = {
           regions?: string[]
           report_count?: number
           slug: string
+          source?: string
           source_url?: string
           status?: string
           updated_at?: string
+          updated_by?: string | null
           vendor_id?: string | null
-          vibe_category?: string | null
           video_url?: string | null
         }
         Update: {
           affiliate_url?: string
-          category?: string
           check_failure_count?: number
           company_name?: string | null
           created_at?: string
+          created_by?: string | null
           date_added?: string
           description?: string | null
+          external_id?: string | null
+          external_url?: string | null
           fashion_occasions?: string[] | null
           fashion_season?: string | null
           fashion_warmth?: string | null
@@ -480,7 +705,6 @@ export type Database = {
           last_click_at?: string | null
           last_status_code?: number | null
           last_verified_at?: string | null
-          mood?: string | null
           name?: string
           page_error?: boolean
           page_error_detail?: string | null
@@ -489,11 +713,12 @@ export type Database = {
           regions?: string[]
           report_count?: number
           slug?: string
+          source?: string
           source_url?: string
           status?: string
           updated_at?: string
+          updated_by?: string | null
           vendor_id?: string | null
-          vibe_category?: string | null
           video_url?: string | null
         }
         Relationships: [
@@ -505,6 +730,117 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      products_snapshot_phase1: {
+        Row: {
+          affiliate_url: string | null
+          category: string | null
+          check_failure_count: number | null
+          company_name: string | null
+          created_at: string | null
+          created_by: string | null
+          date_added: string | null
+          description: string | null
+          fashion_occasions: string[] | null
+          fashion_season: string | null
+          fashion_warmth: string | null
+          id: string | null
+          image_url: string | null
+          is_active: boolean | null
+          last_checked_at: string | null
+          last_click_at: string | null
+          last_status_code: number | null
+          last_verified_at: string | null
+          mood: string | null
+          name: string | null
+          page_error: boolean | null
+          page_error_detail: string | null
+          price: number | null
+          price_below_msrp: boolean | null
+          regions: string[] | null
+          report_count: number | null
+          slug: string | null
+          source_url: string | null
+          status: string | null
+          updated_at: string | null
+          updated_by: string | null
+          vendor_id: string | null
+          vibe_category: string | null
+          video_url: string | null
+        }
+        Insert: {
+          affiliate_url?: string | null
+          category?: string | null
+          check_failure_count?: number | null
+          company_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_added?: string | null
+          description?: string | null
+          fashion_occasions?: string[] | null
+          fashion_season?: string | null
+          fashion_warmth?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          last_checked_at?: string | null
+          last_click_at?: string | null
+          last_status_code?: number | null
+          last_verified_at?: string | null
+          mood?: string | null
+          name?: string | null
+          page_error?: boolean | null
+          page_error_detail?: string | null
+          price?: number | null
+          price_below_msrp?: boolean | null
+          regions?: string[] | null
+          report_count?: number | null
+          slug?: string | null
+          source_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          vendor_id?: string | null
+          vibe_category?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          affiliate_url?: string | null
+          category?: string | null
+          check_failure_count?: number | null
+          company_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_added?: string | null
+          description?: string | null
+          fashion_occasions?: string[] | null
+          fashion_season?: string | null
+          fashion_warmth?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          last_checked_at?: string | null
+          last_click_at?: string | null
+          last_status_code?: number | null
+          last_verified_at?: string | null
+          mood?: string | null
+          name?: string | null
+          page_error?: boolean | null
+          page_error_detail?: string | null
+          price?: number | null
+          price_below_msrp?: boolean | null
+          regions?: string[] | null
+          report_count?: number | null
+          slug?: string | null
+          source_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          vendor_id?: string | null
+          vibe_category?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
       }
       site_config: {
         Row: {
@@ -521,7 +857,7 @@ export type Database = {
           key: string
           label?: string
           updated_at?: string
-          value?: string
+          value: string
         }
         Update: {
           created_at?: string
@@ -530,6 +866,27 @@ export type Database = {
           label?: string
           updated_at?: string
           value?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -556,6 +913,16 @@ export type Database = {
       }
       get_cron_job_status: { Args: never; Returns: boolean }
       get_or_create_daily_pick: { Args: never; Returns: string }
+      get_sitemap_combo_counts: {
+        Args: never
+        Returns: {
+          cnt: number
+          mood_slug: string
+          primary_slug: string
+          primary_type: string
+        }[]
+      }
+      has_role: { Args: { _role: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
@@ -574,12 +941,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -603,11 +970,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -628,11 +995,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -653,11 +1020,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -670,11 +1037,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
