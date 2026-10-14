@@ -78,7 +78,7 @@ export default function ProductDetail() {
       if (!product) return [];
       const { data, error } = await supabase
         .from("products")
-        .select("id, slug, category, vibe_category, mood")
+        .select("id, slug")
         .eq("is_active", true)
         .neq("id", product.id)
         .order("date_added", { ascending: false })
@@ -112,8 +112,8 @@ export default function ProductDetail() {
     allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]),
   );
 
-  const primaryCategory = product?.category?.split(",")[0]?.trim() || "";
-  const primaryVibe = product?.vibe_category?.split(",")[0]?.trim() || "";
+  const primaryCategory = product?.categoryNames?.[0] || "";
+  const primaryVibe = product?.vibeNames?.[0] || "";
 
   // Descriptive alt text for SEO and accessibility
   const imageAlt = product
@@ -268,14 +268,7 @@ export default function ProductDetail() {
           <div className="flex flex-col justify-center gap-4 p-8 md:w-1/2">
             {/* Category / vibe / mood badges */}
             <div className="flex flex-wrap gap-2">
-              {[
-                ...new Set<string>(
-                  product.category
-                    .split(",")
-                    .map((c) => c.trim())
-                    .filter(Boolean),
-                ),
-              ].map((trimmed) => {
+              {[...new Set(product.categoryNames ?? [])].map((trimmed) => {
                 const cat = categorySlugMap[trimmed];
                 const to = cat ? (cat.type === "vibe" ? `/vibes/${cat.slug}` : `/category/${cat.slug}`) : "#";
                 return (
@@ -284,44 +277,28 @@ export default function ProductDetail() {
                   </Link>
                 );
               })}
-              {product.vibe_category &&
-                [
-                  ...new Set<string>(
-                    product.vibe_category
-                      .split(",")
-                      .map((v) => v.trim())
-                      .filter(Boolean),
-                  ),
-                ].map((trimmed) => {
-                  const cat = categorySlugMap[trimmed];
-                  const to = cat ? `/vibes/${cat.slug}` : "#";
-                  return (
-                    <Link key={`vibe-${trimmed}`} to={to}>
-                      <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">
-                        {trimmed}
-                      </Badge>
-                    </Link>
-                  );
-                })}
-              {product.mood &&
-                [
-                  ...new Set<string>(
-                    product.mood
-                      .split(",")
-                      .map((m) => m.trim())
-                      .filter(Boolean),
-                  ),
-                ].map((trimmed) => {
-                  const cat = categorySlugMap[trimmed];
-                  const to = cat ? `/moods/${cat.slug}` : "#";
-                  return (
-                    <Link key={`mood-${trimmed}`} to={to}>
-                      <Badge variant="outline" className="cursor-pointer hover:bg-muted">
-                        {trimmed}
-                      </Badge>
-                    </Link>
-                  );
-                })}
+              {[...new Set(product.vibeNames ?? [])].map((trimmed) => {
+                const cat = categorySlugMap[trimmed];
+                const to = cat ? `/vibes/${cat.slug}` : "#";
+                return (
+                  <Link key={`vibe-${trimmed}`} to={to}>
+                    <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">
+                      {trimmed}
+                    </Badge>
+                  </Link>
+                );
+              })}
+              {[...new Set(product.moodNames ?? [])].map((trimmed) => {
+                const cat = categorySlugMap[trimmed];
+                const to = cat ? `/moods/${cat.slug}` : "#";
+                return (
+                  <Link key={`mood-${trimmed}`} to={to}>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-muted">
+                      {trimmed}
+                    </Badge>
+                  </Link>
+                );
+              })}
             </div>
 
             <h1 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">{product.name}</h1>

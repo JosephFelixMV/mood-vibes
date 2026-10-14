@@ -1,4 +1,4 @@
-import type { Product } from "@/lib/supabase-queries";
+import type { ProductWithTaxonomy } from "@/lib/supabase-queries";
 
 const VIBE_COPY: Record<string, string> = {
   "Bloom & Glow": "Found something beautiful you might love 🌸",
@@ -21,21 +21,16 @@ const VIBE_COPY: Record<string, string> = {
 
 const DEFAULT_COPY = "Check out this amazing find! 🛍️";
 
-export function getShareCopy(product: Product): string {
-  if (product.vibe_category) {
-    const vibes = product.vibe_category.split(",").map((v) => v.trim());
-    for (const vibe of vibes) {
-      if (VIBE_COPY[vibe]) return VIBE_COPY[vibe];
-    }
+export function getShareCopy(product: ProductWithTaxonomy): string {
+  for (const vibe of product.vibeNames ?? []) {
+    if (VIBE_COPY[vibe]) return VIBE_COPY[vibe];
   }
   return DEFAULT_COPY;
 }
 
-export function getProductShareUrl(product: Product, platform: string): string {
+export function getProductShareUrl(product: ProductWithTaxonomy, platform: string): string {
   const baseUrl = `${window.location.origin}/product/${(product as any).slug || product.id}`;
-  const vibeSlug = product.vibe_category
-    ? product.vibe_category.split(",")[0].trim().toLowerCase().replace(/\s+/g, "-")
-    : "general";
+  const vibeSlug = product.vibeSlugs?.[0] ?? "general";
 
   const params = new URLSearchParams({
     utm_source: platform,
@@ -49,10 +44,8 @@ export function getProductShareUrl(product: Product, platform: string): string {
 
 export type SharePlatform = "pinterest" | "whatsapp" | "instagram" | "facebook" | "email" | "copy";
 
-export function fireShareEvent(product: Product, method: SharePlatform) {
-  const vibeSlug = product.vibe_category
-    ? product.vibe_category.split(",")[0].trim().toLowerCase().replace(/\s+/g, "-")
-    : "general";
+export function fireShareEvent(product: ProductWithTaxonomy, method: SharePlatform) {
+  const vibeSlug = product.vibeSlugs?.[0] ?? "general";
 
   // Enzuzo auto-blocks gtag.js until consent is granted, so a simple existence check is enough.
   if (typeof window !== "undefined" && (window as any).gtag) {
@@ -67,7 +60,7 @@ export function fireShareEvent(product: Product, method: SharePlatform) {
 
 export function buildShareLink(
   platform: SharePlatform,
-  product: Product
+  product: ProductWithTaxonomy
 ): string | null {
   const url = getProductShareUrl(product, platform);
   const text = getShareCopy(product);

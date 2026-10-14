@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getPublicCategories } from "@/lib/supabase-queries";
-import { supabase } from "@/lib/supabase";
+import { getPublicCategories, getProductCountByMood } from "@/lib/supabase-queries";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/useSEO";
@@ -22,24 +21,7 @@ export default function Moods() {
 
   const { data: counts = {} } = useQuery({
     queryKey: ["mood-counts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("mood")
-        .eq("is_active", true)
-        .not("mood", "is", null);
-      if (error) throw error;
-      const c: Record<string, number> = {};
-      data.forEach((p) => {
-        if (p.mood) {
-          p.mood.split(",").forEach((m) => {
-            const trimmed = m.trim();
-            if (trimmed) c[trimmed] = (c[trimmed] || 0) + 1;
-          });
-        }
-      });
-      return c;
-    },
+    queryFn: getProductCountByMood,
   });
 
   return (
@@ -72,7 +54,7 @@ export default function Moods() {
                   <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{mood.description}</p>
                 )}
               </div>
-              <Badge variant="secondary">{counts[mood.name] ?? 0}</Badge>
+              <Badge variant="secondary">{counts[mood.slug] ?? 0}</Badge>
             </Link>
           </motion.div>
         ))}

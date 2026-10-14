@@ -12,13 +12,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
-import type { Product } from "@/lib/supabase-queries";
+import type { ProductWithTaxonomy } from "@/lib/supabase-queries";
 import { Link } from "react-router-dom";
 import fallbackImage from "@/assets/fallback-product.png";
 import { formatBrandName } from "@/lib/brand-utils";
 
 interface ProductDrawerProps {
-  product: Product;
+  product: ProductWithTaxonomy;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   ctaLabel?: string;
@@ -89,9 +89,9 @@ export default function ProductDrawer({ product, open, onOpenChange, ctaLabel = 
 
   const categorySlugMap = Object.fromEntries(allCategories.map((c) => [c.name, { slug: c.slug, type: c.type }]));
 
-  const coreSet = [...new Set((product.category || "").split(",").map((c) => c.trim()).filter(Boolean))];
-  const vibeSet = [...new Set((product.vibe_category || "").split(",").map((v) => v.trim()).filter(Boolean))];
-  const moodSet = [...new Set((product.mood || "").split(",").map((m) => m.trim()).filter(Boolean))];
+  const coreSet = [...new Set(product.categoryNames ?? [])];
+  const vibeSet = [...new Set(product.vibeNames ?? [])];
+  const moodSet = [...new Set(product.moodNames ?? [])];
 
   // Build gallery: hero image + extra images
   const allImages: { src: string; alt: string }[] = [];

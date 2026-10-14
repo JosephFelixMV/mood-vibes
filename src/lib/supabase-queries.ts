@@ -40,13 +40,61 @@ export interface RelatedArticle {
 export const MIN_PRODUCTS_PER_CATEGORY = 8;
 
 export const TILE_SELECT =
-  "id,name,price,image_url,affiliate_url,category,mood,vibe_category,video_url,company_name,is_active,date_added,vendor_id,slug,regions,page_error" as const;
+  "id,name,price,image_url,affiliate_url,video_url,company_name,is_active,date_added,vendor_id,slug,regions,page_error" as const;
 
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
 
 export interface PublicCategory extends Category {
   product_count: number;
+}
+
+export interface ProductTaxonomy {
+  categorySlugs: string[];
+  categoryNames: string[];
+  vibeSlugs: string[];
+  vibeNames: string[];
+  moodSlugs: string[];
+  moodNames: string[];
+}
+
+export type ProductWithTaxonomy = Product & ProductTaxonomy;
+
+function emptyTaxonomy(): ProductTaxonomy {
+  return { categorySlugs: [], categoryNames: [], vibeSlugs: [], vibeNames: [], moodSlugs: [], moodNames: [] };
+}
+
+/**
+ * Batch-attaches category/vibe/mood display names + slugs (sourced from the
+ * junction tables, joined to `categories` via the Phase 5 FK) to a page of
+ * products in 3 queries total — not per-card — to avoid an N+1 pattern
+ * across a grid of 30-60 cards.
+ */
+export async function attachTaxonomy<T extends { id: string }>(rows: T[]): Promise<(T & ProductTaxonomy)[]> {
+  if (rows.length === 0) return [];
+  const ids = rows.map((r) => r.id);
+  const [{ data: cats }, { data: vibes }, { data: moods }] = await Promise.all([
+    supabase.from("product_categories").select("product_id, category_slug, categories(name)").in("product_id", ids).order("display_order"),
+    supabase.from("product_vibes").select("product_id, vibe_slug, categories(name)").in("product_id", ids).order("display_order"),
+    supabase.from("product_moods").select("product_id, mood_slug, categories(name)").in("product_id", ids).order("display_order"),
+  ]);
+
+  const map: Record<string, ProductTaxonomy> = {};
+  for (const id of ids) map[id] = emptyTaxonomy();
+  (cats || []).forEach((r: any) => {
+    map[r.product_id].categorySlugs.push(r.category_slug);
+    map[r.product_id].categoryNames.push(r.categories?.name ?? r.category_slug);
+  });
+  (vibes || []).forEach((r: any) => {
+    map[r.product_id].vibeSlugs.push(r.vibe_slug);
+    map[r.product_id].vibeNames.push(r.categories?.name ?? r.vibe_slug);
+  });
+  (moods || []).forEach((r: any) => {
+    map[r.product_id].moodSlugs.push(r.mood_slug);
+    map[r.product_id].moodNames.push(r.categories?.name ?? r.mood_slug);
+  });
+
+  return rows.map((r) => ({ ...r, ...map[r.id] }));
 }
 
 /** Helper: filter products client-side by region availability */
@@ -150,7 +198,7 @@ function applyProductFilters(
 /** Server-side paginated product fetch — returns one page + total count */
 export async function getProductsPaginated(
   options?: ProductQueryOptions & { page?: number; pageSize?: number },
-): Promise<PaginatedResult<Product>> {
+): Promise<PaginatedResult<ProductWithTaxonomy>> {
   const pageSize = options?.pageSize ?? 30;
   const page = options?.page ?? 1;
   const from = (page - 1) * pageSize;
@@ -163,11 +211,11 @@ export async function getProductsPaginated(
 
   const { data, error, count } = await query.range(from, from + pageSize - 1);
   if (error) throw error;
-  return { data: data || [], count: count ?? 0 };
+  return { data: await attachTaxonomy((data || []) as Product[]), count: count ?? 0 };
 }
 
 export const ADMIN_PRODUCT_SELECT =
-  "id,name,price,image_url,affiliate_url,category,mood,vibe_category,company_name,is_active,date_added,updated_at,vendor_id,slug,regions,page_error,page_error_detail,source_url,created_by,updated_by" as const;
+  "id,name,price,image_url,affiliate_url,company_name,is_active,date_added,updated_at,vendor_id,slug,regions,page_error,page_error_detail,source_url,created_by,updated_by" as const;
 
 /** Admin-only: fetches all products with audit/tracking fields not included in TILE_SELECT. */
 export async function getAdminProducts(): Promise<Product[]> {
@@ -189,8 +237,8 @@ export async function getAdminProducts(): Promise<Product[]> {
   return allData;
 }
 
-/** Fetch ALL products (paginating internally past the 1000-row cap). Returns Product[]. */
-export async function getProducts(options?: ProductQueryOptions): Promise<Product[]> {
+/** Fetch ALL products (paginating internally past the 1000-row cap). Returns ProductWithTaxonomy[]. */
+export async function getProducts(options?: ProductQueryOptions): Promise<ProductWithTaxonomy[]> {
   const PAGE_SIZE = 1000;
 
   const taxonomyIds = await getProductIdsForTaxonomy(options);
@@ -208,7 +256,7 @@ export async function getProducts(options?: ProductQueryOptions): Promise<Produc
     hasMore = (page?.length || 0) === PAGE_SIZE;
     from += PAGE_SIZE;
   }
-  return allData;
+  return attachTaxonomy(allData);
 }
 
 /** Fetch all distinct brand names for filter dropdowns */
@@ -232,7 +280,7 @@ export async function getActiveBrands(): Promise<string[]> {
   return Array.from(new Set(allData.map((p) => p.company_name).filter(Boolean) as string[])).sort();
 }
 
-export async function getProduct(idOrSlug: string) {
+export async function getProduct(idOrSlug: string): Promise<ProductWithTaxonomy> {
   // Try slug first, fall back to id (UUID) for backwards compat
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
   const column = isUuid ? "id" : "slug";
@@ -242,7 +290,7 @@ export async function getProduct(idOrSlug: string) {
     .eq(column, idOrSlug)
     .single();
   if (error) throw error;
-  return data;
+  return (await attachTaxonomy([data]))[0];
 }
 
 export async function getProductImages(productId: string) {
@@ -269,6 +317,22 @@ export async function getAdminProductCategories(): Promise<{ product_id: string;
   const { data, error } = await supabase
     .from("product_categories")
     .select("product_id, category_slug");
+  if (error) throw error;
+  return data || [];
+}
+
+export async function getAdminProductVibes(): Promise<{ product_id: string; vibe_slug: string }[]> {
+  const { data, error } = await supabase
+    .from("product_vibes")
+    .select("product_id, vibe_slug");
+  if (error) throw error;
+  return data || [];
+}
+
+export async function getAdminProductMoods(): Promise<{ product_id: string; mood_slug: string }[]> {
+  const { data, error } = await supabase
+    .from("product_moods")
+    .select("product_id, mood_slug");
   if (error) throw error;
   return data || [];
 }
@@ -313,11 +377,21 @@ export async function getProductCountByVibe(): Promise<Record<string, number>> {
   return counts;
 }
 
+export async function getProductCountByMood(): Promise<Record<string, number>> {
+  const { data, error } = await supabase.rpc("get_categories_with_counts", {
+    category_type: "mood",
+  });
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  (data || []).forEach((c: any) => { counts[c.slug] = c.product_count; });
+  return counts;
+}
+
 /**
  * Server-side Product of the Day — same product for all visitors.
  * Calls a DB function that creates/returns today's pick.
  */
-export async function getDailyPick(): Promise<Product | null> {
+export async function getDailyPick(): Promise<ProductWithTaxonomy | null> {
   const { data: productId, error } = await supabase.rpc("get_or_create_daily_pick");
   if (error || !productId) return null;
 
@@ -327,7 +401,7 @@ export async function getDailyPick(): Promise<Product | null> {
     .eq("id", productId)
     .single();
   if (pErr) return null;
-  return product;
+  return (await attachTaxonomy([product as Product]))[0];
 }
 
 export function formatPrice(price: number | string): string {

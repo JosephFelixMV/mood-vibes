@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     const { data: product, error: pErr } = await supabase
       .from("products")
       .select(
-        "id, name, slug, description, price, image_url, video_url, category, vibe_category, mood, company_name, regions",
+        "id, name, slug, description, price, image_url, video_url, company_name, regions",
       )
       .eq("id", productId)
       .single();
@@ -79,19 +79,33 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch gallery images and vibe slugs in parallel
-    const [{ data: images }, { data: vibeJunction }] = await Promise.all([
+    // Fetch gallery images + taxonomy display names in parallel
+    const [{ data: images }, { data: catJunction }, { data: vibeJunction }, { data: moodJunction }] = await Promise.all([
       supabase
         .from("product_images")
         .select("image_url, display_order")
         .eq("product_id", productId)
         .order("display_order"),
       supabase
+        .from("product_categories")
+        .select("categories(name)")
+        .eq("product_id", productId)
+        .order("display_order"),
+      supabase
         .from("product_vibes")
-        .select("vibe_slug")
+        .select("vibe_slug, categories(name)")
+        .eq("product_id", productId)
+        .order("display_order"),
+      supabase
+        .from("product_moods")
+        .select("categories(name)")
         .eq("product_id", productId)
         .order("display_order"),
     ]);
+
+    const categoryNames = (catJunction || []).map((r: any) => r.categories?.name).filter(Boolean);
+    const moodNames = (moodJunction || []).map((r: any) => r.categories?.name).filter(Boolean);
+    const vibeNames = (vibeJunction || []).map((r: any) => r.categories?.name).filter(Boolean);
 
     const galleryImages = (images || []).map((i) => i.image_url);
 
@@ -131,9 +145,9 @@ Deno.serve(async (req) => {
         price: product.price,
         price_formatted,
         brand: product.company_name,
-        category: product.category,
-        vibe: product.vibe_category,
-        mood: product.mood,
+        category: categoryNames.join(", "),
+        vibe: vibeNames.join(", "),
+        mood: moodNames.join(", "),
         regions: product.regions,
         image_url: product.image_url,
         video_url: product.video_url,

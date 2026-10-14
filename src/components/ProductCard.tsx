@@ -14,7 +14,7 @@ import { trackProductClick } from "@/lib/track-click";
 import { trackEvent } from "@/lib/track-event";
 import { supabase } from "@/lib/supabase";
 import { formatPrice, getCategories } from "@/lib/supabase-queries";
-import type { Product, RelatedArticle } from "@/lib/supabase-queries";
+import type { ProductWithTaxonomy, RelatedArticle } from "@/lib/supabase-queries";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProductDrawer from "@/components/ProductDrawer";
@@ -22,7 +22,7 @@ import fallbackImage from "@/assets/fallback-product.png";
 import { formatBrandName } from "@/lib/brand-utils";
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductWithTaxonomy;
   featured?: boolean;
   ctaLabel?: string;
   relatedArticle?: RelatedArticle | null;
@@ -59,8 +59,8 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy", relat
   // Pick one random tag per taxonomy type, stable across re-renders
   const tagPicks = useMemo(() => {
     const pickRandom = (arr: string[]) => arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
-    const vibeSet = [...new Set((product.vibe_category || "").split(",").map(v => v.trim()).filter(Boolean))];
-    const moodSet = [...new Set((product.mood || "").split(",").map(m => m.trim()).filter(Boolean))];
+    const vibeSet = [...new Set(product.vibeNames ?? [])];
+    const moodSet = [...new Set(product.moodNames ?? [])];
     const picks: { name: string; type: string }[] = [];
     const mood = pickRandom(moodSet);
     if (mood) picks.push({ name: mood, type: "mood" });

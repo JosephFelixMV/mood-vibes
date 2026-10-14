@@ -6,7 +6,8 @@ import { Upload, FileUp, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { generateSlug } from "@/lib/slug-utils";
 import { stripHtml } from "@/lib/brand-utils";
-import { stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
+import { parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
+import { getCategories } from "@/lib/supabase-queries";
 
 interface UploadResult {
   fileName: string;
@@ -112,6 +113,7 @@ export default function BulkUpload() {
             company_name: data.company_name || null,
             is_active: false, // Draft
             vibe_category: stringifyTaxonomyValues((data.vibe_category || "").split(",")) || null,
+            mood: stringifyTaxonomyValues((data.mood || "").split(",")) || null,
             video_url: data.video_url || null,
             slug: generateSlug(data.name.trim()),
             vendor_id: vendorId,
@@ -123,6 +125,33 @@ export default function BulkUpload() {
 
         // AI category suggestion is intentionally NOT auto-run on bulk upload.
         // Run it manually per product from the admin panel before publishing.
+
+        // Write taxonomy junction tables directly (mirrors ProductForm.tsx —
+        // needed so junction tables stay in sync without relying on the
+        // legacy-column sync trigger).
+        if (inserted) {
+          const [coreCats, vibeCats, moodCats] = await Promise.all([
+            getCategories("core"),
+            getCategories("vibe"),
+            getCategories("mood"),
+          ]);
+          const buildRows = (names: string[], cats: typeof coreCats, slugCol: "category_slug" | "vibe_slug" | "mood_slug") =>
+            names
+              .map((name, i) => {
+                const slug = cats.find((c) => c.name === name)?.slug;
+                return slug ? { product_id: inserted.id, [slugCol]: slug, is_primary: i === 0, display_order: i } : null;
+              })
+              .filter((r): r is NonNullable<typeof r> => r !== null);
+          const catRows = buildRows(parseTaxonomyString(data.category), coreCats, "category_slug");
+          const vibeRows = buildRows(parseTaxonomyString(data.vibe_category), vibeCats, "vibe_slug");
+          const moodRows = buildRows(parseTaxonomyString(data.mood), moodCats, "mood_slug");
+          const [catRes, vibeRes, moodRes] = await Promise.all([
+            catRows.length > 0 ? supabase.from("product_categories").insert(catRows as any) : Promise.resolve({ error: null }),
+            vibeRows.length > 0 ? supabase.from("product_vibes").insert(vibeRows as any) : Promise.resolve({ error: null }),
+            moodRows.length > 0 ? supabase.from("product_moods").insert(moodRows as any) : Promise.resolve({ error: null }),
+          ]);
+          if (catRes.error || vibeRes.error || moodRes.error) throw (catRes.error || vibeRes.error || moodRes.error);
+        }
 
         // Insert additional images
         const images = Array.isArray(data.additional_images)

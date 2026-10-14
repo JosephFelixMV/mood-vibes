@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { buildShareLink, fireShareEvent, getProductShareUrl, getShareCopy } from "@/lib/share-utils";
 import type { SharePlatform } from "@/lib/share-utils";
-import type { Product } from "@/lib/supabase-queries";
+import type { ProductWithTaxonomy } from "@/lib/supabase-queries";
 
 const platforms: { key: SharePlatform; label: string; icon: string }[] = [
   { key: "pinterest", label: "Pinterest", icon: "📌" },
@@ -17,7 +17,7 @@ const platforms: { key: SharePlatform; label: string; icon: string }[] = [
 ];
 
 interface ShareButtonProps {
-  product: Product;
+  product: ProductWithTaxonomy;
   variant?: "icon" | "full";
 }
 

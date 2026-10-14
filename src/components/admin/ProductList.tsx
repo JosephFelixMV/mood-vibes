@@ -3,7 +3,7 @@ import { toStorageThumbnail } from "@/lib/image-upload";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useUserRole } from "@/contexts/UserRoleContext";
-import { getAdminProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts, getAdminProductCategories } from "@/lib/supabase-queries";
+import { getAdminProducts, getCategories, formatPrice, getProductClickCounts, getProductViewCounts, getAdminProductCategories, getAdminProductVibes, getAdminProductMoods } from "@/lib/supabase-queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -69,6 +69,12 @@ function InlineEdit({ value, onSave, type = "text", className }: { value: string
   );
 }
 
+const TAXONOMY_TABLE: Record<"category" | "vibe_category" | "mood", { table: "product_categories" | "product_vibes" | "product_moods"; slugCol: "category_slug" | "vibe_slug" | "mood_slug" }> = {
+  category: { table: "product_categories", slugCol: "category_slug" },
+  vibe_category: { table: "product_vibes", slugCol: "vibe_slug" },
+  mood: { table: "product_moods", slugCol: "mood_slug" },
+};
+
 interface Props {
   onEdit: (id: string) => void;
 }
@@ -126,6 +132,18 @@ export default function ProductList({ onEdit }: Props) {
     staleTime: 1000 * 60 * 5,
   });
 
+  const { data: productVibeRows = [] } = useQuery({
+    queryKey: ["admin-product-vibes"],
+    queryFn: getAdminProductVibes,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: productMoodRows = [] } = useQuery({
+    queryKey: ["admin-product-moods"],
+    queryFn: getAdminProductMoods,
+    staleTime: 1000 * 60 * 5,
+  });
+
   const productCategoryMap = useMemo(() => {
     const map: Record<string, string[]> = {};
     for (const row of productCategoryRows) {
@@ -136,6 +154,28 @@ export default function ProductList({ onEdit }: Props) {
     }
     return map;
   }, [productCategoryRows, coreCategories]);
+
+  const productVibeMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const row of productVibeRows) {
+      const cat = vibeCategories.find((c) => c.slug === row.vibe_slug);
+      if (!cat) continue;
+      if (!map[row.product_id]) map[row.product_id] = [];
+      map[row.product_id].push(cat.name);
+    }
+    return map;
+  }, [productVibeRows, vibeCategories]);
+
+  const productMoodMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const row of productMoodRows) {
+      const cat = moodCategories.find((c) => c.slug === row.mood_slug);
+      if (!cat) continue;
+      if (!map[row.product_id]) map[row.product_id] = [];
+      map[row.product_id].push(cat.name);
+    }
+    return map;
+  }, [productMoodRows, moodCategories]);
 
   const { data: brandsList = [] } = useQuery({
     queryKey: ["brands"],
@@ -170,12 +210,34 @@ export default function ProductList({ onEdit }: Props) {
       (update as any).updated_at = new Date().toISOString();
       const { error } = await supabase.from("products").update(update).eq("id", id);
       if (error) throw error;
+
+      if (field === "category" || field === "vibe_category" || field === "mood") {
+        const { table, slugCol } = TAXONOMY_TABLE[field];
+        const catList = field === "category" ? coreCategories : field === "vibe_category" ? vibeCategories : moodCategories;
+        const names = parseTaxonomyString(value);
+        const rows = names
+          .map((name, i) => {
+            const slug = catList.find((c) => c.name === name)?.slug;
+            return slug ? { product_id: id, [slugCol]: slug, is_primary: i === 0, display_order: i } : null;
+          })
+          .filter((r): r is NonNullable<typeof r> => r !== null);
+
+        const { error: delErr } = await supabase.from(table).delete().eq("product_id", id);
+        if (delErr) throw delErr;
+        if (rows.length > 0) {
+          const { error: insErr } = await supabase.from(table).insert(rows as any);
+          if (insErr) throw insErr;
+        }
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-products"] });
       qc.invalidateQueries({ queryKey: ["admin-product-categories"] });
+      qc.invalidateQueries({ queryKey: ["admin-product-vibes"] });
+      qc.invalidateQueries({ queryKey: ["admin-product-moods"] });
       toast.success("Updated");
     },
+    onError: (err: any) => toast.error(err.message || "Failed to update taxonomy"),
   });
 
   const toggleMut = useMutation({
@@ -315,23 +377,23 @@ export default function ProductList({ onEdit }: Props) {
       const q = searchQuery.toLowerCase();
       const matchName = (p.name || "").toLowerCase().includes(q);
       const matchCompany = (p.company_name || "").toLowerCase().includes(q);
-      const matchCategory = (p.category || "").toLowerCase().includes(q);
-      const matchVibe = (p.vibe_category || "").toLowerCase().includes(q);
+      const matchCategory = (productCategoryMap[p.id] ?? []).some((c) => c.toLowerCase().includes(q));
+      const matchVibe = (productVibeMap[p.id] ?? []).some((v) => v.toLowerCase().includes(q));
       if (!matchName && !matchCompany && !matchCategory && !matchVibe) return false;
     }
     if (filterVendor !== "all") {
       if ((p as any).vendor_id !== filterVendor) return false;
     }
     if (filterCategory !== "all") {
-      const cats = productCategoryMap[p.id] ?? parseTaxonomyString(p.category);
+      const cats = productCategoryMap[p.id] ?? [];
       if (!cats.includes(filterCategory)) return false;
     }
     if (filterVibe !== "all") {
-      const vibes = parseTaxonomyString(p.vibe_category || "");
+      const vibes = productVibeMap[p.id] ?? [];
       if (!vibes.includes(filterVibe)) return false;
     }
     if (filterMood !== "all") {
-      const moods = parseTaxonomyString(p.mood || "");
+      const moods = productMoodMap[p.id] ?? [];
       if (!moods.includes(filterMood)) return false;
     }
     if (filterStatus === "active" && !p.is_active) return false;
@@ -721,21 +783,21 @@ export default function ProductList({ onEdit }: Props) {
                 </td>
                 <td className="px-4 py-3">
                   <MultiTagSelect
-                    value={stringifyTaxonomyValues(productCategoryMap[p.id] ?? parseTaxonomyString(p.category))}
+                    value={stringifyTaxonomyValues(productCategoryMap[p.id] ?? [])}
                     options={coreCategories.map((c) => ({ name: c.name, icon: c.icon }))}
                     onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "category", value: v })}
                   />
                 </td>
                 <td className="px-4 py-3">
                   <MultiTagSelect
-                    value={p.vibe_category || ""}
+                    value={stringifyTaxonomyValues(productVibeMap[p.id] ?? [])}
                     options={vibeCategories.map((c) => ({ name: c.name, icon: c.icon }))}
                     onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "vibe_category", value: v })}
                   />
                 </td>
                 <td className="px-4 py-3">
                   <MultiTagSelect
-                    value={p.mood || ""}
+                    value={stringifyTaxonomyValues(productMoodMap[p.id] ?? [])}
                     options={moodCategories.map((c) => ({ name: c.name, icon: c.icon }))}
                     onSave={(v) => inlineUpdateMut.mutate({ id: p.id, field: "mood", value: v })}
                   />

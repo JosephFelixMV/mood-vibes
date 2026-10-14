@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Info, BookOpen } from "lucide-react";
 
 import { formatPrice } from "@/lib/supabase-queries";
-import type { Product, RelatedArticle } from "@/lib/supabase-queries";
+import type { ProductWithTaxonomy, RelatedArticle } from "@/lib/supabase-queries";
 import ExternalCTA from "@/components/ExternalCTA";
 import ProductDrawer from "@/components/ProductDrawer";
 import ReportBrokenLink from "@/components/ReportBrokenLink";
@@ -17,13 +17,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 const SLIDE_EASING = [0.19, 1, 0.22, 1] as const;
 
 interface DiscoveryTileProps {
-  products: Product[];
-  getRandomProduct: (pool: Product[], excludeId?: string) => Product | null;
+  products: ProductWithTaxonomy[];
+  getRandomProduct: (pool: ProductWithTaxonomy[], excludeId?: string) => ProductWithTaxonomy | null;
   ctaLabel?: string;
   relatedArticlesMap?: Record<string, RelatedArticle>;
 }
 
-function TileImage({ product }: { product: Product }) {
+function TileImage({ product }: { product: ProductWithTaxonomy }) {
   return (
     <div className="relative w-full overflow-hidden bg-[#f7f7f5]" style={{ paddingTop: 'min(100%, 320px)' }}>
       {product.image_url ? (
@@ -57,7 +57,7 @@ function TileImage({ product }: { product: Product }) {
 }
 
 export default function DiscoveryTile({ products, getRandomProduct: getRandom, ctaLabel, relatedArticlesMap = {} }: DiscoveryTileProps) {
-  const [pick, setPick] = useState<Product | null>(() =>
+  const [pick, setPick] = useState<ProductWithTaxonomy | null>(() =>
     products.length > 0 ? getRandom(products) : null
   );
   const [animKey, setAnimKey] = useState(0);

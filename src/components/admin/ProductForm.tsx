@@ -16,7 +16,7 @@ import { X, Plus, Upload, Download, Info, ExternalLink, Sparkles, Loader2 } from
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
-import type { Product } from "@/lib/supabase-queries";
+import type { ProductWithTaxonomy } from "@/lib/supabase-queries";
 import { formatPrice } from "@/lib/supabase-queries";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { deleteProductImageIfOwned } from "@/lib/image-upload";
@@ -248,9 +248,9 @@ export default function ProductForm({ editId, onDone, savedState, prefill }: Pro
           image_url: existing.image_url || "",
           affiliate_url: existing.affiliate_url,
           source_url: existing.source_url || "",
-          category: stringifyTaxonomyValues(parseTaxonomyString(existing.category)),
-          vibe_category: stringifyTaxonomyValues(parseTaxonomyString(existing.vibe_category || "")),
-          mood: stringifyTaxonomyValues(parseTaxonomyString(existing.mood || "")),
+          category: stringifyTaxonomyValues(existing.categoryNames),
+          vibe_category: stringifyTaxonomyValues(existing.vibeNames),
+          mood: stringifyTaxonomyValues(existing.moodNames),
           company_name: existing.company_name || "",
           video_url: existing.video_url || "",
           is_active: existing.is_active,
@@ -641,16 +641,18 @@ export default function ProductForm({ editId, onDone, savedState, prefill }: Pro
           .map((name, i) => { const s = slugFor(moodCategories, name); return s ? { product_id: productId!, mood_slug: s, is_primary: i === 0, display_order: i } : null; })
           .filter((r: any) => r !== null);
 
-        await Promise.all([
+        const [delCat, delVibe, delMood] = await Promise.all([
           supabase.from("product_categories").delete().eq("product_id", productId),
           supabase.from("product_vibes").delete().eq("product_id", productId),
           supabase.from("product_moods").delete().eq("product_id", productId),
         ]);
-        await Promise.all([
-          catRows.length > 0 ? supabase.from("product_categories").insert(catRows) : Promise.resolve(),
-          vibeRows.length > 0 ? supabase.from("product_vibes").insert(vibeRows) : Promise.resolve(),
-          moodRows.length > 0 ? supabase.from("product_moods").insert(moodRows) : Promise.resolve(),
+        if (delCat.error || delVibe.error || delMood.error) throw (delCat.error || delVibe.error || delMood.error);
+        const [insCat, insVibe, insMood] = await Promise.all([
+          catRows.length > 0 ? supabase.from("product_categories").insert(catRows) : Promise.resolve({ error: null }),
+          vibeRows.length > 0 ? supabase.from("product_vibes").insert(vibeRows) : Promise.resolve({ error: null }),
+          moodRows.length > 0 ? supabase.from("product_moods").insert(moodRows) : Promise.resolve({ error: null }),
         ]);
+        if (insCat.error || insVibe.error || insMood.error) throw (insCat.error || insVibe.error || insMood.error);
       }
 
       const validImages = form.additional_images.filter((url: string) => url.trim());
@@ -680,13 +682,17 @@ export default function ProductForm({ editId, onDone, savedState, prefill }: Pro
 
       if (form.keywords.length > 0 && productId) {
         for (const term of form.keywords) {
-          let { data: kw } = await supabase.from("keywords").select("id").eq("term", term).single();
+          const { data: kwData, error: selErr } = await supabase.from("keywords").select("id").eq("term", term).single();
+          if (selErr && selErr.code !== "PGRST116") throw selErr; // PGRST116 = no rows, expected on first use
+          let kw = kwData;
           if (!kw) {
-            const { data: newKw } = await supabase.from("keywords").insert({ term }).select("id").single();
+            const { data: newKw, error: insKwErr } = await supabase.from("keywords").insert({ term }).select("id").single();
+            if (insKwErr) throw insKwErr;
             kw = newKw;
           }
           if (kw) {
-            await supabase.from("product_keywords").insert({ product_id: productId!, keyword_id: kw.id });
+            const { error: pkErr } = await supabase.from("product_keywords").insert({ product_id: productId!, keyword_id: kw.id });
+            if (pkErr) throw pkErr;
           }
         }
       }
@@ -708,7 +714,7 @@ export default function ProductForm({ editId, onDone, savedState, prefill }: Pro
     form.category?.toLowerCase().includes(sub.toLowerCase()),
   );
 
-  const preview: Product = {
+  const preview: ProductWithTaxonomy = {
     id: "preview",
     name: form.name || "Product Name",
     description: form.description || "Product description will appear here",
@@ -719,6 +725,12 @@ export default function ProductForm({ editId, onDone, savedState, prefill }: Pro
     category: form.category || "Category",
     vibe_category: form.vibe_category || null,
     mood: form.mood || null,
+    categorySlugs: [],
+    categoryNames: parseTaxonomyString(form.category),
+    vibeSlugs: [],
+    vibeNames: parseTaxonomyString(form.vibe_category),
+    moodSlugs: [],
+    moodNames: parseTaxonomyString(form.mood),
     company_name: form.company_name || null,
     is_active: form.is_active,
     video_url: form.video_url || null,

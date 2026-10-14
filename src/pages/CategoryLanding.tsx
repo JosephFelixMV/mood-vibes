@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getCategories, getRandomProduct, filterByRegion, getRelatedArticlesForProducts, type Product } from "@/lib/supabase-queries";
-import { parseTaxonomyString } from "@/lib/taxonomy-utils";
+import { getCategories, getRandomProduct, filterByRegion, getRelatedArticlesForProducts, attachTaxonomy, type Product } from "@/lib/supabase-queries";
 import { setDiscoveryContext } from "@/lib/discovery-context";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -118,7 +117,7 @@ export default function CategoryLanding() {
         .order("date_added", { ascending: false })
         .limit(300);
       if (error) throw error;
-      return (data as Product[]).filter((p) => !p.page_error);
+      return attachTaxonomy((data as Product[]).filter((p) => !p.page_error));
     },
     enabled: !!categoryName && categories.length > 0,
   });
@@ -165,7 +164,7 @@ export default function CategoryLanding() {
   const moodCountMap = useMemo(() => {
     const counts: Record<string, number> = {};
     regionFiltered.forEach((p) => {
-      parseTaxonomyString(p.mood).forEach((name) => {
+      (p.moodNames ?? []).forEach((name) => {
         counts[name.toLowerCase()] = (counts[name.toLowerCase()] || 0) + 1;
       });
     });

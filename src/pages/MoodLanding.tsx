@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { getCategories, getRandomProduct, filterByRegion, getRelatedArticlesForProducts } from "@/lib/supabase-queries";
-import { parseTaxonomyString } from "@/lib/taxonomy-utils";
+import { getCategories, getRandomProduct, filterByRegion, getRelatedArticlesForProducts, attachTaxonomy } from "@/lib/supabase-queries";
 import DiscoveryTile from "@/components/DiscoveryTile";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -78,7 +77,7 @@ export default function MoodLanding() {
       query = query.limit(300);
       const { data, error } = await query;
       if (error) throw error;
-      return data as Product[];
+      return attachTaxonomy(data as Product[]);
     },
     enabled: !!mood,
   });
@@ -122,7 +121,7 @@ export default function MoodLanding() {
   const categoryCountMap = useMemo(() => {
     const counts: Record<string, number> = {};
     regionProducts.forEach((p) => {
-      parseTaxonomyString(p.category).forEach((name) => {
+      (p.categoryNames ?? []).forEach((name) => {
         counts[name.toLowerCase()] = (counts[name.toLowerCase()] || 0) + 1;
       });
     });
@@ -132,7 +131,7 @@ export default function MoodLanding() {
   const vibeCountMap = useMemo(() => {
     const counts: Record<string, number> = {};
     regionProducts.forEach((p) => {
-      parseTaxonomyString(p.vibe_category).forEach((name) => {
+      (p.vibeNames ?? []).forEach((name) => {
         counts[name.toLowerCase()] = (counts[name.toLowerCase()] || 0) + 1;
       });
     });
