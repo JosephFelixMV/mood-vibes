@@ -195,7 +195,7 @@ export default function ProductDetail() {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="max-w-xs text-xs leading-relaxed">
-                    Some images digitally styled with AI to showcase product aesthetic. Actual product details may vary slightly from scene; please refer to retailer gallery for exact specifications.
+                    Some images AI-styled for inspiration. Not a depiction of the actual product. See retailer for real photos and specifications.
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

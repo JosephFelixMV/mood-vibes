@@ -151,7 +151,7 @@ export default function ProductCard({ product, featured, ctaLabel = "Buy", relat
                 </button>
               </PopoverTrigger>
               <PopoverContent side="left" align="start" className="max-w-[260px] text-xs leading-relaxed" onClick={(e) => e.stopPropagation()}>
-                Some images digitally styled with AI to showcase product aesthetic. Actual product details may vary slightly from scene; please refer to retailer gallery for exact specifications.
+                Some images AI-styled for inspiration. Not a depiction of the actual product. See retailer for real photos and specifications.
               </PopoverContent>
             </Popover>
           </div>
