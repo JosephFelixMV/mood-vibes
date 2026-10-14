@@ -6,7 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronDown, ChevronRight, Loader2, Store, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { generateSlug } from "@/lib/slug-utils";
-import { stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
 import { formatPrice } from "@/lib/supabase-queries";
 
 export interface ShopifyProduct {
@@ -110,7 +109,6 @@ export default function ShopifyImport() {
             external_url: p.external_url,
             external_id: p.external_id,
             source: "shopify",
-            category: stringifyTaxonomyValues([]),
             company_name: p.company_name || null,
             is_active: false,
             regions: ["US"],

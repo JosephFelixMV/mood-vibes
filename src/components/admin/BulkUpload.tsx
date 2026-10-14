@@ -6,7 +6,7 @@ import { Upload, FileUp, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { generateSlug } from "@/lib/slug-utils";
 import { stripHtml } from "@/lib/brand-utils";
-import { parseTaxonomyString, stringifyTaxonomyValues } from "@/lib/taxonomy-utils";
+import { parseTaxonomyString } from "@/lib/taxonomy-utils";
 import { getCategories } from "@/lib/supabase-queries";
 
 interface UploadResult {
@@ -109,11 +109,8 @@ export default function BulkUpload() {
             image_url: data.image_url || null,
             affiliate_url: data.affiliate_url.trim(),
             source_url: data.source_url || "",
-            category: stringifyTaxonomyValues((data.category || "").split(",")),
             company_name: data.company_name || null,
             is_active: false, // Draft
-            vibe_category: stringifyTaxonomyValues((data.vibe_category || "").split(",")) || null,
-            mood: stringifyTaxonomyValues((data.mood || "").split(",")) || null,
             video_url: data.video_url || null,
             slug: generateSlug(data.name.trim()),
             vendor_id: vendorId,

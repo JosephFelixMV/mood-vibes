@@ -200,18 +200,14 @@ export default function ProductList({ onEdit }: Props) {
 
   const inlineUpdateMut = useMutation({
     mutationFn: async ({ id, field, value }: { id: string; field: "name" | "price" | "category" | "vibe_category" | "mood"; value: string }) => {
-      const update = field === "price"
-        ? { price: Number(value) }
-        : {
-            [field]: field === "category"
-              ? stringifyTaxonomyValues(value.split(","))
-              : stringifyTaxonomyValues(value.split(",")) || null,
-          };
-      (update as any).updated_at = new Date().toISOString();
+      const isTaxonomy = field === "category" || field === "vibe_category" || field === "mood";
+      const update: Record<string, unknown> = isTaxonomy
+        ? { updated_at: new Date().toISOString() }
+        : { [field]: field === "price" ? Number(value) : value, updated_at: new Date().toISOString() };
       const { error } = await supabase.from("products").update(update).eq("id", id);
       if (error) throw error;
 
-      if (field === "category" || field === "vibe_category" || field === "mood") {
+      if (isTaxonomy) {
         const { table, slugCol } = TAXONOMY_TABLE[field];
         const catList = field === "category" ? coreCategories : field === "vibe_category" ? vibeCategories : moodCategories;
         const names = parseTaxonomyString(value);
